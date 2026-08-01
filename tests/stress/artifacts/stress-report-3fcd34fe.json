@@ -1,0 +1,56 @@
+{
+  "runId": "3fcd34fe",
+  "schoolId": "stress-3fcd34fe",
+  "apiUrl": "http://127.0.0.1:4000",
+  "scenarioName": "login",
+  "context": {
+    "adminUserId": "cmrxq8kqw000v5fntdfrax67m",
+    "teacherAssigned": "cmrxq8kon000h5fntes4yxw73",
+    "teacherRejected": "cmrxq8nd5000h9flvhbuxqpkb",
+    "classId": "cmrxq8kor000j5fnt7hq8c5b1",
+    "subjectId": "cmrxq8kot000l5fntw818ia37",
+    "coreStudentId": "cmrxq8kp9000t5fnt32d321ws"
+  },
+  "results": [
+    {
+      "label": "login burst",
+      "count": 4,
+      "durationMs": 111.12490000000071,
+      "requestsPerSecond": 35.99553295436014,
+      "min": 38.19340000000011,
+      "average": 55.16489999999999,
+      "p50": 38.37249999999949,
+      "p90": 72.81540000000041,
+      "p95": 72.81540000000041,
+      "p99": 72.81540000000041,
+      "max": 72.81540000000041,
+      "success": {
+        "count": 3,
+        "min": 38.373999999999796,
+        "average": 60.823333333333416,
+        "p50": 71.27940000000035,
+        "p90": 72.81660000000011,
+        "p95": 72.81660000000011,
+        "p99": 72.81660000000011,
+        "max": 72.81660000000011
+      },
+      "successCount": 3,
+      "errorCount": 1,
+      "errorRate": 0.25,
+      "statusBuckets": {
+        "429": 1,
+        "2xx": 3
+      },
+      "sampleErrors": [
+        {
+          "index": 3,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تجاوز عدد محاولات الدخول المسموح مؤقتًا. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        }
+      ],
+      "safeFailure": true
+    }
+  ],
+  "createdAt": "2026-07-23T16:29:51.175Z"
+}

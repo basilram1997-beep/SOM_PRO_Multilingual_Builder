@@ -1,0 +1,332 @@
+{
+  "runId": "f06ae538",
+  "schoolId": "stress-f06ae538",
+  "apiUrl": "http://127.0.0.1:4000",
+  "scenarioName": "all",
+  "context": {
+    "adminUserId": "cmrxqcmcc000vwokh3qfoam8t",
+    "teacherAssigned": "cmrxqcm9p000hwokhqjuhhvq4",
+    "teacherRejected": "cmrxqcp0p000hyf60271nkuqx",
+    "classId": "cmrxqcm9u000jwokhgwrs86sn",
+    "subjectId": "cmrxqcm9z000lwokhxyy75hzm",
+    "coreStudentId": "cmrxqcmai000twokh5vu9x2pp"
+  },
+  "results": [
+    {
+      "label": "login burst",
+      "count": 4,
+      "durationMs": 108.29059999999936,
+      "requestsPerSecond": 36.93764740429939,
+      "min": 38.30209999999988,
+      "average": 53.698725000000195,
+      "p50": 38.34690000000046,
+      "p90": 69.4935000000005,
+      "p95": 69.4935000000005,
+      "p99": 69.4935000000005,
+      "max": 69.4935000000005,
+      "success": {
+        "count": 3,
+        "min": 38.349200000000565,
+        "average": 58.83263333333374,
+        "p50": 68.65369999999984,
+        "p90": 69.4950000000008,
+        "p95": 69.4950000000008,
+        "p99": 69.4950000000008,
+        "max": 69.4950000000008
+      },
+      "successCount": 3,
+      "errorCount": 1,
+      "errorRate": 0.25,
+      "statusBuckets": {
+        "429": 1,
+        "2xx": 3
+      },
+      "sampleErrors": [
+        {
+          "index": 3,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تجاوز عدد محاولات الدخول المسموح مؤقتًا. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        }
+      ],
+      "safeFailure": true
+    },
+    {
+      "label": "grade burst",
+      "count": 4,
+      "durationMs": 38.55500000000029,
+      "requestsPerSecond": 103.74789262093036,
+      "min": 13.248400000000402,
+      "average": 17.17577499999993,
+      "p50": 16.920900000000074,
+      "p90": 19.45839999999953,
+      "p95": 19.45839999999953,
+      "p99": 19.45839999999953,
+      "max": 19.45839999999953,
+      "success": {
+        "count": 2,
+        "min": 16.92240000000038,
+        "average": 17.99940000000015,
+        "p50": 16.92240000000038,
+        "p90": 19.07639999999992,
+        "p95": 19.07639999999992,
+        "p99": 19.07639999999992,
+        "max": 19.07639999999992
+      },
+      "successCount": 2,
+      "errorCount": 2,
+      "errorRate": 0.5,
+      "statusBuckets": {
+        "403": 2,
+        "2xx": 2
+      },
+      "sampleErrors": [
+        {
+          "index": 1,
+          "status": 403,
+          "body": "{\"error\":\"FORBIDDEN\",\"message\":\"لا تملك صلاحية تعديل علا��ات هذا الص�� �أو ال��ادة\"}",
+          "bucket": "403"
+        },
+        {
+          "index": 3,
+          "status": 403,
+          "body": "{\"error\":\"FORBIDDEN\",\"message\":\"لا تملك صلاحية تعديل علا��ات هذا الص�� �أو ال��ادة\"}",
+          "bucket": "403"
+        }
+      ],
+      "dbRowCount": 1,
+      "persistedRows": {
+        "cmrxqcmai000twokh5vu9x2pp": {
+          "section1": "8"
+        }
+      },
+      "safeFailure": true
+    },
+    {
+      "label": "attendance burst",
+      "count": 20,
+      "durationMs": 209.1333999999997,
+      "requestsPerSecond": 95.63273967716313,
+      "min": 4.925100000000384,
+      "average": 20.66614500000005,
+      "p50": 16.78309999999965,
+      "p90": 29.976700000000164,
+      "p95": 40.328700000000026,
+      "p99": 42.263600000000224,
+      "max": 42.263600000000224,
+      "success": {
+        "count": 17,
+        "min": 15.175600000000486,
+        "average": 23.332252941176566,
+        "p50": 22.077299999999923,
+        "p90": 40.32930000000033,
+        "p95": 42.264100000000326,
+        "p99": 42.264100000000326,
+        "max": 42.264100000000326
+      },
+      "successCount": 17,
+      "errorCount": 3,
+      "errorRate": 0.15,
+      "statusBuckets": {
+        "429": 3,
+        "2xx": 17
+      },
+      "sampleErrors": [
+        {
+          "index": 17,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        },
+        {
+          "index": 18,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        },
+        {
+          "index": 19,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        }
+      ],
+      "dbRowCount": 10,
+      "safeFailure": true,
+      "dbSnapshot": [
+        {
+          "id": "cmrxqcpm9002pyf60mhccwel8",
+          "studentId": "cmrxqcp4m000lyf602n67ua0x",
+          "status": "LATE",
+          "lateAt": "08:15",
+          "leftAt": null,
+          "note": "Stress attendance 12"
+        },
+        {
+          "id": "cmrxqcpm9002nyf60sfem1616",
+          "studentId": "cmrxqcmai000twokh5vu9x2pp",
+          "status": "PRESENT",
+          "lateAt": null,
+          "leftAt": null,
+          "note": "Stress attendance 11"
+        },
+        {
+          "id": "cmrxqcpmv0033yf60ecbsg1c8",
+          "studentId": "cmrxqcp5h000pyf601pm5samp",
+          "status": "ABSENT_EXCUSED",
+          "lateAt": null,
+          "leftAt": null,
+          "note": "Stress attendance 13"
+        },
+        {
+          "id": "cmrxqcpn2003byf60q6ojp9sw",
+          "studentId": "cmrxqcp6d000tyf606za9n23o",
+          "status": "ABSENT_UNEXCUSED",
+          "lateAt": null,
+          "leftAt": null,
+          "note": "Stress attendance 14"
+        },
+        {
+          "id": "cmrxqcpni003jyf603psyqy6t",
+          "studentId": "cmrxqcp78000xyf60kouj4u2v",
+          "status": "LEFT_EARLY",
+          "lateAt": null,
+          "leftAt": "10:30",
+          "note": "Stress attendance 15"
+        }
+      ]
+    },
+    {
+      "label": "report export burst",
+      "count": 4,
+      "durationMs": 28.758499999999913,
+      "requestsPerSecond": 139.0893127249339,
+      "min": 11.442199999999502,
+      "average": 14.154424999999947,
+      "p50": 11.605499999999665,
+      "p90": 16.90780000000086,
+      "p95": 16.90780000000086,
+      "p99": 16.90780000000086,
+      "max": 16.90780000000086,
+      "success": {
+        "count": 4,
+        "min": 11.442799999999806,
+        "average": 14.1551750000001,
+        "p50": 11.605999999999767,
+        "p90": 16.90820000000076,
+        "p95": 16.90820000000076,
+        "p99": 16.90820000000076,
+        "max": 16.90820000000076
+      },
+      "successCount": 4,
+      "errorCount": 0,
+      "errorRate": 0,
+      "statusBuckets": {
+        "2xx": 4
+      },
+      "sampleErrors": [],
+      "safeFailure": true
+    },
+    {
+      "label": "outage save burst",
+      "count": 40,
+      "durationMs": 1516.5085,
+      "requestsPerSecond": 26.37637705294761,
+      "min": 60.2436000000007,
+      "average": 75.8129275,
+      "p50": 75.89750000000004,
+      "p90": 81.6862000000001,
+      "p95": 84.72629999999936,
+      "p99": 87.82629999999972,
+      "max": 87.82629999999972,
+      "success": {
+        "count": 0,
+        "min": 0,
+        "average": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "successCount": 0,
+      "errorCount": 40,
+      "errorRate": 1,
+      "statusBuckets": {
+        "429": 40
+      },
+      "sampleErrors": [
+        {
+          "index": 1,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        },
+        {
+          "index": 0,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        },
+        {
+          "index": 3,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        },
+        {
+          "index": 2,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        },
+        {
+          "index": 4,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        }
+      ],
+      "dbRowCount": 10,
+      "safeFailure": true,
+      "dbSnapshot": [
+        {
+          "studentId": "cmrxqcp4m000lyf602n67ua0x",
+          "status": "LATE",
+          "lateAt": "08:15",
+          "leftAt": null,
+          "note": "Stress attendance 12"
+        },
+        {
+          "studentId": "cmrxqcmai000twokh5vu9x2pp",
+          "status": "PRESENT",
+          "lateAt": null,
+          "leftAt": null,
+          "note": "Stress attendance 11"
+        },
+        {
+          "studentId": "cmrxqcp5h000pyf601pm5samp",
+          "status": "ABSENT_EXCUSED",
+          "lateAt": null,
+          "leftAt": null,
+          "note": "Stress attendance 13"
+        },
+        {
+          "studentId": "cmrxqcp6d000tyf606za9n23o",
+          "status": "ABSENT_UNEXCUSED",
+          "lateAt": null,
+          "leftAt": null,
+          "note": "Stress attendance 14"
+        },
+        {
+          "studentId": "cmrxqcp78000xyf60kouj4u2v",
+          "status": "LEFT_EARLY",
+          "lateAt": null,
+          "leftAt": "10:30",
+          "note": "Stress attendance 15"
+        }
+      ]
+    }
+  ],
+  "createdAt": "2026-07-23T16:33:01.816Z"
+}

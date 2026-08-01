@@ -1,0 +1,119 @@
+{
+  "runId": "94245408",
+  "schoolId": "stress-94245408",
+  "apiUrl": "http://127.0.0.1:4000",
+  "scenarioName": "outage",
+  "context": {
+    "adminUserId": "cmrxq9xlm000vw5gwm30gnvk0",
+    "teacherAssigned": "cmrxq9xj9000hw5gw0w7tnrc7",
+    "teacherRejected": "cmrxqa08a000huku94zwh7onl",
+    "classId": "cmrxq9xjd000jw5gwrvpee57x",
+    "subjectId": "cmrxq9xjg000lw5gw6ok23elq",
+    "coreStudentId": "cmrxq9xjx000tw5gw1wetmigk"
+  },
+  "results": [
+    {
+      "label": "outage save burst",
+      "count": 40,
+      "durationMs": 1617.2256000000002,
+      "requestsPerSecond": 24.733716804878675,
+      "min": 60.318599999999606,
+      "average": 80.69095750000004,
+      "p50": 79.30289999999968,
+      "p90": 93.3126000000002,
+      "p95": 93.9038999999998,
+      "p99": 98.13379999999961,
+      "max": 98.13379999999961,
+      "success": {
+        "count": 10,
+        "min": 76.42410000000064,
+        "average": 90.33407000000003,
+        "p50": 93.3088000000007,
+        "p90": 96.46709999999985,
+        "p95": 98.13450000000012,
+        "p99": 98.13450000000012,
+        "max": 98.13450000000012
+      },
+      "successCount": 10,
+      "errorCount": 30,
+      "errorRate": 0.75,
+      "statusBuckets": {
+        "429": 19,
+        "2xx": 10,
+        "4xx": 11
+      },
+      "sampleErrors": [
+        {
+          "index": 11,
+          "status": 400,
+          "body": "{\"error\":\"VALIDATION_ERROR\",\"details\":{\"formErrors\":[],\"fieldErrors\":{\"studentId\":[\"Required\"],\"date\":[\"Required\"],\"day\":[\"Required\"],\"status\":[\"Required\"]}}}",
+          "bucket": "4xx"
+        },
+        {
+          "index": 10,
+          "status": 400,
+          "body": "{\"error\":\"VALIDATION_ERROR\",\"details\":{\"formErrors\":[],\"fieldErrors\":{\"studentId\":[\"Required\"],\"date\":[\"Required\"],\"day\":[\"Required\"],\"status\":[\"Required\"]}}}",
+          "bucket": "4xx"
+        },
+        {
+          "index": 12,
+          "status": 400,
+          "body": "{\"error\":\"VALIDATION_ERROR\",\"details\":{\"formErrors\":[],\"fieldErrors\":{\"studentId\":[\"Required\"],\"date\":[\"Required\"],\"day\":[\"Required\"],\"status\":[\"Required\"]}}}",
+          "bucket": "4xx"
+        },
+        {
+          "index": 13,
+          "status": 400,
+          "body": "{\"error\":\"VALIDATION_ERROR\",\"details\":{\"formErrors\":[],\"fieldErrors\":{\"studentId\":[\"Required\"],\"date\":[\"Required\"],\"day\":[\"Required\"],\"status\":[\"Required\"]}}}",
+          "bucket": "4xx"
+        },
+        {
+          "index": 15,
+          "status": 400,
+          "body": "{\"error\":\"VALIDATION_ERROR\",\"details\":{\"formErrors\":[],\"fieldErrors\":{\"studentId\":[\"Required\"],\"date\":[\"Required\"],\"day\":[\"Required\"],\"status\":[\"Required\"]}}}",
+          "bucket": "4xx"
+        }
+      ],
+      "dbRowCount": 10,
+      "safeFailure": true,
+      "dbSnapshot": [
+        {
+          "studentId": "cmrxq9xjx000tw5gw1wetmigk",
+          "status": "PRESENT",
+          "lateAt": null,
+          "leftAt": null,
+          "note": "Outage simulation 1"
+        },
+        {
+          "studentId": "cmrxqa0c2000luku95hiq13ab",
+          "status": "LATE",
+          "lateAt": "08:20",
+          "leftAt": null,
+          "note": "Outage simulation 2"
+        },
+        {
+          "studentId": "cmrxqa0cz000tuku9wpilhspt",
+          "status": "PRESENT",
+          "lateAt": null,
+          "leftAt": null,
+          "note": "Outage simulation 4"
+        },
+        {
+          "studentId": "cmrxqa0cg000puku9v0e57rvy",
+          "status": "LEFT_EARLY",
+          "lateAt": null,
+          "leftAt": "10:10",
+          "note": "Outage simulation 3"
+        },
+        {
+          "studentId": "cmrxqa0dt0011uku9cgppm7wa",
+          "status": "LEFT_EARLY",
+          "lateAt": null,
+          "leftAt": "10:10",
+          "note": "Outage simulation 6"
+        }
+      ]
+    }
+  ],
+  "createdAt": "2026-07-23T16:30:55.753Z"
+}

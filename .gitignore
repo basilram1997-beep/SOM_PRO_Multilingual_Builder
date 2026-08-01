@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+build/
+coverage/
+.electron-builder-cache/
+test-results/
+tmp/
+
+# Desktop installers and generated release artifacts
+apps/desktop/release/
+release/*.exe
+release/*.blockmap
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.bak
+*.old
+*.orig
+*~
+
+# Runtime data and local databases
+apps/license-server/data/
+*.sqlite
+*.sqlite3
+
+# Local environment files with real secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+apps/*/.env
+apps/*/.env.*
+!apps/*/.env.example
+!apps/*/.env.*.example
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOM PRO | School Operations Manager</title>
+    <style>
+      :root {
+        --blue: #0f3269;
+        --primary: #2563eb;
+        --gold: #f59e0b;
+        --bg: #f6f7fb;
+        --ink: #0f172a;
+        --muted: #64748b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Tahoma, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      .language-switcher {
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 99;
+        display: flex;
+        gap: 6px;
+        background: #ffffffee;
+        border: 1px solid #d9dee8;
+        border-radius: 999px;
+        padding: 6px;
+        box-shadow: 0 10px 30px #0002;
+        direction: ltr;
+      }
+      .language-switcher button {
+        border: 1px solid #d9dee8;
+        background: #f8fafc;
+        color: #0f172a;
+        border-radius: 999px;
+        padding: 8px 11px;
+        font-weight: 900;
+        cursor: pointer;
+      }
+      .language-switcher button.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+      header {
+        background: linear-gradient(135deg, var(--blue), #1d4ed8);
+        color: white;
+        padding: 28px 8vw;
+      }
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 900;
+        font-size: 28px;
+      }
+      .brand img {
+        width: 54px;
+        height: 54px;
+        border-radius: 14px;
+      }
+      .pro {
+        color: var(--gold);
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 36px;
+        align-items: center;
+        padding: 70px 8vw;
+        background: linear-gradient(135deg, #0f3269, #2563eb);
+        color: white;
+      }
+      .hero h1 {
+        font-size: 52px;
+        margin: 0 0 14px;
+        line-height: 1.25;
+      }
+      .hero p {
+        font-size: 21px;
+        line-height: 1.9;
+        color: #dbeafe;
+      }
+      .panel {
+        background: white;
+        color: var(--ink);
+        border-radius: 28px;
+        padding: 28px;
+        box-shadow: 0 24px 80px #0002;
+      }
+      .panel ul {
+        line-height: 2.2;
+        margin: 0;
+        padding-inline-start: 22px;
+      }
+      section {
+        padding: 56px 8vw;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 18px;
+      }
+      .card {
+        background: white;
+        border: 1px solid #d9dee8;
+        border-radius: 22px;
+        padding: 24px;
+        box-shadow: 0 12px 30px #0000000a;
+      }
+      .card h3 {
+        margin-top: 0;
+        color: var(--primary);
+      }
+      .muted {
+        color: var(--muted);
+        line-height: 1.9;
+      }
+      .cta {
+        background: #0f172a;
+        color: white;
+        text-align: center;
+      }
+      .cta h2 {
+        font-size: 36px;
+      }
+      .button {
+        display: inline-block;
+        background: var(--gold);
+        color: #111827;
+        text-decoration: none;
+        padding: 14px 24px;
+        border-radius: 14px;
+        font-weight: 900;
+      }
+      footer {
+        padding: 24px 8vw;
+        text-align: center;
+        color: var(--muted);
+      }
+      @media (max-width: 850px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+        .hero h1 {
+          font-size: 38px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="language-switcher" aria-label="Language">
+      <button data-lang="ar" class="active">AR</button>
+      <button data-lang="en">EN</button>
+      <button data-lang="he">HE</button>
+    </div>
+    <header>
+      <nav>
+        <div class="brand">
+          <img src="../assets/brand/som-pro-icon.png" alt="SOM PRO" />SOM <span class="pro">PRO</span>
+        </div>
+        <div data-i18n="subtitle">School Operations Manager</div>
+      </nav>
+    </header>
+    <main>
+      <section class="hero">
+        <div>
+          <h1 data-i18n="heroTitle">نظام تشغيل يومي للمدرسة عند الغياب والتأخر والفعاليات</h1>
+          <p data-i18n="heroText">
+            SOM PRO يحوّل البرنامج المدرسي اليومي إلى نظام منظم: غياب، بدائل، أرشيف، تقارير، وبرامج يومية خاصة للمعلمين.
+          </p>
+        </div>
+        <div class="panel">
+          <h2 data-i18n="solvesTitle">ما الذي يحله النظام؟</h2>
+          <ul>
+            <li data-i18n="solve1">توليد بدائل المعلمين حسب التفرغ والتخصص.</li>
+            <li data-i18n="solve2">دعم مدارس بأيام دوام وحصص مختلفة.</li>
+            <li data-i18n="solve3">برنامج يومي واضح قابل للإرسال للمعلمين.</li>
+            <li data-i18n="solve4">برنامج خاص لكل معلم بضغطة زر.</li>
+            <li data-i18n="solve5">أرشيف وتقارير إدارية.</li>
+          </ul>
+        </div>
+      </section>
+      <section>
+        <h2 data-i18n="featuresTitle">مزايا SOM PRO</h2>
+        <div class="grid">
+          <div class="card">
+            <h3 data-i18n="f1Title">مرونة المدرسة</h3>
+            <p class="muted" data-i18n="f1Text">5 أو 6 أيام دوام، 5 إلى 12 حصة، وأوقات حصص قابلة للتخصيص.</p>
+          </div>
+          <div class="card">
+            <h3 data-i18n="f2Title">محرك بدائل</h3>
+            <p class="muted" data-i18n="f2Text">اختيار البديل حسب الصف، المادة، الطبقة، والتفرغ الفعلي.</p>
+          </div>
+          <div class="card">
+            <h3 data-i18n="f3Title">برامج المعلمين</h3>
+            <p class="muted" data-i18n="f3Text">كل معلم يرى حصصه الأصلية والاستبدالات المكلف بها.</p>
+          </div>
+          <div class="card">
+            <h3 data-i18n="f4Title">هجين Desktop + Web</h3>
+            <p class="muted" data-i18n="f4Text">
+              تجربة محلية كتطبيق سطح مكتب، ثم انتقال تدريجي إلى منصة Web لعدة مدارس.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section class="cta">
+        <h2 data-i18n="ctaTitle">SOM PRO جاهز للتجربة المدرسية</h2>
+        <p data-i18n="ctaText">ابدأ كتطبيق سطح مكتب، ثم وسّعه كمنصة ويب.</p>
+        <a class="button" href="#" data-i18n="ctaButton">طلب تجربة</a>
+      </section>
+    </main>
+    <footer>© SOM PRO - School Operations Manager</footer>
+    <script>
+      const dict = {
+        ar: {
+          dir: "rtl",
+          subtitle: "مدير تشغيل المدرسة",
+          heroTitle: "نظام تشغيل يومي للمدرسة عند الغياب والتأخر والفعاليات",
+          heroText:
+            "SOM PRO يحوّل البرنامج المدرسي اليومي إلى نظام منظم: غياب، بدائل، أرشيف، تقارير، وبرامج يومية خاصة للمعلمين.",
+          solvesTitle: "ما الذي يحله النظام؟",
+          solve1: "توليد بدائل المعلمين حسب التفرغ والتخصص.",
+          solve2: "دعم مدارس بأيام دوام وحصص مختلفة.",
+          solve3: "برنامج يومي واضح قابل للإرسال للمعلمين.",
+          solve4: "برنامج خاص لكل معلم بضغطة زر.",
+          solve5: "أرشيف وتقارير إدارية.",
+          featuresTitle: "مزايا SOM PRO",
+          f1Title: "مرونة المدرسة",
+          f1Text: "5 أو 6 أيام دوام، 5 إلى 12 حصة، وأوقات حصص قابلة للتخصيص.",
+          f2Title: "محرك بدائل",
+          f2Text: "اختيار البديل حسب الصف، المادة، الطبقة، والتفرغ الفعلي.",
+          f3Title: "برامج المعلمين",
+          f3Text: "كل معلم يرى حصصه الأصلية والاستبدالات المكلف بها.",
+          f4Title: "هجين Desktop + Web",
+          f4Text: "تجربة محلية كتطبيق سطح مكتب، ثم انتقال تدريجي إلى منصة Web لعدة مدارس.",
+          ctaTitle: "SOM PRO جاهز للتجربة المدرسية",
+          ctaText: "ابدأ كتطبيق سطح مكتب، ثم وسّعه كمنصة ويب.",
+          ctaButton: "طلب تجربة"
+        },
+        en: {
+          dir: "ltr",
+          subtitle: "School Operations Manager",
+          heroTitle: "Daily school operations for absences, lateness, and activities",
+          heroText:
+            "SOM PRO turns the daily school schedule into an organized system: absences, substitutions, archive, reports, and daily programs for each teacher.",
+          solvesTitle: "What does it solve?",
+          solve1: "Generates teacher substitutions based on availability and specialty.",
+          solve2: "Supports schools with different working days and period counts.",
+          solve3: "Creates a clear daily schedule ready to send to teachers.",
+          solve4: "Generates a private program for each teacher with one click.",
+          solve5: "Provides archive and administrative reports.",
+          featuresTitle: "SOM PRO Features",
+          f1Title: "Flexible School Setup",
+          f1Text: "5 or 6 working days, 5 to 12 periods, and customizable period times.",
+          f2Title: "Substitution Engine",
+          f2Text: "Selects substitutes by class, subject, grade level, and actual availability.",
+          f3Title: "Teacher Programs",
+          f3Text: "Each teacher sees original lessons and assigned substitutions.",
+          f4Title: "Hybrid Desktop + Web",
+          f4Text: "Start locally as a desktop app, then move gradually to a web platform for many schools.",
+          ctaTitle: "SOM PRO is ready for school testing",
+          ctaText: "Start as a desktop app, then expand it as a web platform.",
+          ctaButton: "Request a demo"
+        },
+        he: {
+          dir: "rtl",
+          subtitle: "ניהול תפעול בית ספר",
+          heroTitle: "ניהול יומי לבית הספר בזמן היעדרויות, איחורים ופעילויות",
+          heroText:
+            "SOM PRO הופך את המערכת היומית למערכת מסודרת: היעדרויות, החלפות, ארכיון, דוחות ומערכות יומיות לכל מורה.",
+          solvesTitle: "מה המערכת פותרת?",
+          solve1: "הפקת החלפות לפי זמינות והתמחות.",
+          solve2: "תמיכה בבתי ספר עם ימי עבודה ומספר שיעורים שונים.",
+          solve3: "מערכת יומית ברורה שניתן לשלוח למורים.",
+          solve4: "מערכת אישית לכל מורה בלחיצת כפתור.",
+          solve5: "ארכיון ודוחות ניהוליים.",
+          featuresTitle: "יתרונות SOM PRO",
+          f1Title: "גמישות בית ספרית",
+          f1Text: "5 או 6 ימי עבודה, 5 עד 12 שיעורים וזמני שיעורים מותאמים.",
+          f2Title: "מנוע החלפות",
+          f2Text: "בחירת מחליף לפי כיתה, מקצוע, שכבה וזמינות בפועל.",
+          f3Title: "מערכות למורים",
+          f3Text: "כל מורה רואה שיעורים מקוריים והחלפות שהוקצו לו.",
+          f4Title: "היברידי Desktop + Web",
+          f4Text: "מתחילים מקומית כאפליקציית שולחן עבודה ואז עוברים בהדרגה לפלטפורמת Web למספר בתי ספר.",
+          ctaTitle: "SOM PRO מוכן לניסוי בבית הספר",
+          ctaText: "התחל כאפליקציית שולחן עבודה ואז הרחב לפלטפורמת Web.",
+          ctaButton: "בקשת ניסיון"
+        }
+      };
+      function getStoredLang() {
+        try {
+          return localStorage.getItem("som-pro-web-lang");
+        } catch {
+          return null;
+        }
+      }
+      function setStoredLang(lang) {
+        try {
+          localStorage.setItem("som-pro-web-lang", lang);
+        } catch {}
+      }
+      function setLang(lang) {
+        const d = dict[lang] || dict.ar;
+        document.documentElement.lang = lang;
+        document.documentElement.dir = d.dir;
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          el.textContent = d[el.dataset.i18n] || el.textContent;
+        });
+        document
+          .querySelectorAll(".language-switcher button")
+          .forEach((b) => b.classList.toggle("active", b.dataset.lang === lang));
+        setStoredLang(lang);
+      }
+      document
+        .querySelectorAll(".language-switcher button")
+        .forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
+      setLang(getStoredLang() || "ar");
+    </script>
+  </body>
+</html>

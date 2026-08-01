@@ -1,0 +1,163 @@
+﻿<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOM PRO</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Tahoma, Arial, sans-serif;
+        background: #f6f7fb;
+        color: #0f172a;
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+      }
+      .card {
+        width: min(820px, 92vw);
+        background: white;
+        border: 1px solid #d9dee8;
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 22px 70px #0001;
+        text-align: center;
+      }
+      img {
+        width: 110px;
+        height: 110px;
+        border-radius: 24px;
+      }
+      h1 {
+        font-size: 42px;
+        margin: 12px 0 4px;
+      }
+      .tag {
+        color: #2563eb;
+        font-weight: 900;
+      }
+      .muted {
+        color: #64748b;
+        line-height: 1.9;
+        font-size: 17px;
+      }
+      .steps {
+        background: #f8fafc;
+        text-align: right;
+        border: 1px solid #dbe3ef;
+        border-radius: 16px;
+        padding: 18px;
+        margin-top: 18px;
+        line-height: 2;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+      }
+      button {
+        border: 0;
+        border-radius: 10px;
+        background: #2563eb;
+        color: white;
+        font-weight: 900;
+        padding: 11px 18px;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.65;
+        cursor: wait;
+      }
+      .secondary {
+        background: #64748b;
+      }
+      code {
+        background: #e2e8f0;
+        padding: 4px 8px;
+        border-radius: 8px;
+        direction: ltr;
+        display: inline-block;
+      }
+      #status {
+        min-height: 28px;
+        margin-top: 14px;
+        font-weight: 900;
+        color: #1e3a8a;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <img src="icon.ico" alt="SOM PRO" />
+      <h1>SOM <span class="tag">PRO</span></h1>
+      <p class="muted">التطبيق جاهز، لكن الخادم المحلي لم يصبح متاحًا بعد.</p>
+      <div class="steps">
+        <strong>ما الذي يحدث؟</strong><br />
+        يحاول SOM PRO تشغيل قاعدة البيانات، خادم الترخيص، والباك إند تلقائيًا. إذا استمرت هذه الشاشة، افحص أن Docker
+        Desktop يعمل وأن المنافذ التالية مفتوحة: <code>4000</code> و <code>4100</code> و <code>5432</code> و
+        <code>6379</code>.<br />
+        <strong>ملفات التشخيص:</strong> داخل مجلد <code>logs</code> في المشروع.<br />
+        سيعاود البرنامج محاولة الإصلاح تلقائيًا حتى يعود الاتصال.
+      </div>
+      <div class="actions">
+        <button id="repairButton">إصلاح الاتصال وإعادة المحاولة</button>
+        <button class="secondary" id="diagnoseButton">طريقة التشخيص</button>
+      </div>
+      <div id="status"></div>
+    </main>
+    <script>
+      const repairButton = document.getElementById("repairButton");
+      const diagnoseButton = document.getElementById("diagnoseButton");
+      const statusBox = document.getElementById("status");
+      let autoRepairActive = true;
+      let autoRepairTimer = null;
+
+      async function repairConnection(silent = false) {
+        if (repairButton.disabled && !silent) return;
+        repairButton.disabled = true;
+        if (!silent) {
+          statusBox.textContent = "جاري تشغيل الخوادم المحلية...";
+        }
+        try {
+          const result = await window.somDesktop?.repairConnection?.();
+          if (result?.ok) {
+            autoRepairActive = false;
+            statusBox.textContent = "تم إصلاح الاتصال. جاري فتح البرنامج...";
+            return;
+          }
+          if (!silent) {
+            statusBox.textContent = "لم تكتمل المحاولة بعد. سنعيدها تلقائيًا.";
+          }
+        } catch {
+          if (!silent) {
+            statusBox.textContent = "تعذرت المحاولة الآن. سنعيدها تلقائيًا.";
+          }
+        } finally {
+          repairButton.disabled = false;
+        }
+      }
+
+      repairButton.addEventListener("click", async () => {
+        await repairConnection(false);
+      });
+
+      diagnoseButton.addEventListener("click", () => {
+        alert("افتح ملف DIAGNOSE_SOM_PRO_LOCAL_WINDOWS.cmd من مجلد المشروع، أو افحص logs/sompro-services.log");
+      });
+
+      autoRepairTimer = setInterval(() => {
+        if (!autoRepairActive) {
+          clearInterval(autoRepairTimer);
+          return;
+        }
+        repairConnection(true);
+      }, 10000);
+
+      setTimeout(() => {
+        repairConnection(true);
+      }, 2000);
+    </script>
+  </body>
+</html>

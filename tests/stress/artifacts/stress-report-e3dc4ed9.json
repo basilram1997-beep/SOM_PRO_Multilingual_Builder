@@ -1,0 +1,48 @@
+{
+  "runId": "e3dc4ed9",
+  "schoolId": "stress-e3dc4ed9",
+  "apiUrl": "http://127.0.0.1:4000",
+  "scenarioName": "reports",
+  "context": {
+    "adminUserId": "cmrxqaz3j000vd0pyobzs9d2x",
+    "teacherAssigned": "cmrxqaz14000hd0pyt2sx0009",
+    "teacherRejected": "cmrxqb1qw000h6aqymeotodp3",
+    "classId": "cmrxqaz18000jd0py2g4glj9z",
+    "subjectId": "cmrxqaz1b000ld0pyub6i9ebx",
+    "coreStudentId": "cmrxqaz1r000td0pyj4vbkvmb"
+  },
+  "results": [
+    {
+      "label": "report export burst",
+      "count": 4,
+      "durationMs": 30.32210000000032,
+      "requestsPerSecond": 131.9169846415637,
+      "min": 9.701300000000174,
+      "average": 13.097100000000069,
+      "p50": 12.461900000000242,
+      "p90": 16.85699999999997,
+      "p95": 16.85699999999997,
+      "p99": 16.85699999999997,
+      "max": 16.85699999999997,
+      "success": {
+        "count": 4,
+        "min": 9.703199999999924,
+        "average": 13.09839999999997,
+        "p50": 12.463400000000092,
+        "p90": 16.858200000000124,
+        "p95": 16.858200000000124,
+        "p99": 16.858200000000124,
+        "max": 16.858200000000124
+      },
+      "successCount": 4,
+      "errorCount": 0,
+      "errorRate": 0,
+      "statusBuckets": {
+        "2xx": 4
+      },
+      "sampleErrors": [],
+      "safeFailure": true
+    }
+  ],
+  "createdAt": "2026-07-23T16:31:42.772Z"
+}

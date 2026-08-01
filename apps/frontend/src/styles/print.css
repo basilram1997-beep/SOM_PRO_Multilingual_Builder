@@ -1,0 +1,109 @@
+@media print {
+  body {
+    background: #fff;
+  }
+  .language-switcher {
+    display: none !important;
+  }
+  .sidebar,
+  .no-print,
+  .daily-page > h2,
+  .daily-page > .card:not(:last-child),
+  .card-header button,
+  .teacher-program-controls {
+    display: none !important;
+  }
+  .student-certificates-page > h2,
+  .student-certificates-page > .card:first-of-type,
+  .student-certificates-page > .card:last-of-type,
+  .certificate-controls-column,
+  .certificate-top-actions,
+  .certificate-approval-row,
+  .certificate-table button {
+    display: none !important;
+  }
+  .student-certificates-page {
+    display: block;
+  }
+  .certificate-layout {
+    display: block;
+  }
+  .certificate-preview-column {
+    display: block;
+    width: 100%;
+  }
+  .certificate-preview {
+    width: 100%;
+    box-shadow: none;
+    border: 1px solid #cbd5e1;
+  }
+  .certificate-preview-header {
+    break-inside: avoid;
+  }
+  .shell {
+    display: block;
+  }
+  .content {
+    padding: 0;
+  }
+  .card {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+  .card-header {
+    display: block;
+    margin-bottom: 8px;
+  }
+  .card-header h2 {
+    text-align: center;
+    font-size: 18px;
+  }
+  .teacher-programs-print-area {
+    display: block;
+  }
+  .teacher-program-card {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .teacher-program-header h3 {
+    font-size: 16px;
+  }
+  .teacher-program-summary span {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+  .compact-table th,
+  .compact-table td {
+    padding: 4px;
+    font-size: 10px;
+    min-width: auto;
+  }
+}
+
+@media print {
+  .sidebar,
+  .language-switcher,
+  .no-print,
+  .actions,
+  button,
+  input,
+  select,
+  .card-header > div {
+    display: none !important;
+  }
+  .shell {
+    display: block;
+  }
+  .content {
+    padding: 0;
+  }
+  .card {
+    box-shadow: none;
+    border: none;
+  }
+  .teacher-program-card {
+    break-inside: avoid;
+  }
+}

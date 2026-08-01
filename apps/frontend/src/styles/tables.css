@@ -1,0 +1,25 @@
+.table-wrap {
+  overflow: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  table-layout: auto;
+}
+th,
+td {
+  border: 1px solid var(--line);
+  padding: 10px;
+  text-align: center;
+  white-space: normal;
+  word-break: break-word;
+}
+th {
+  background: #eef4ff;
+}
+tr.selected {
+  background: #dbeafe;
+}

@@ -1,0 +1,118 @@
+{
+  "runId": "a7a6f0d0",
+  "schoolId": "stress-a7a6f0d0",
+  "apiUrl": "http://127.0.0.1:4000",
+  "scenarioName": "outage",
+  "context": {
+    "adminUserId": "cmrxqama8000vjrrreq5on6gq",
+    "teacherAssigned": "cmrxqam7l000hjrrr2wo6lpo9",
+    "teacherRejected": "cmrxqaoxh000hekd6l9axewoa",
+    "classId": "cmrxqam7q000jjrrrpyaxa7fc",
+    "subjectId": "cmrxqam7u000ljrrro6yq99yg",
+    "coreStudentId": "cmrxqam8c000tjrrrzj3yst50"
+  },
+  "results": [
+    {
+      "label": "outage save burst",
+      "count": 40,
+      "durationMs": 1711.3219999999997,
+      "requestsPerSecond": 23.373742638731933,
+      "min": 66.11500000000069,
+      "average": 85.54749250000005,
+      "p50": 80.84130000000005,
+      "p90": 95.95809999999983,
+      "p95": 96.92460000000028,
+      "p99": 117.41750000000047,
+      "max": 117.41750000000047,
+      "success": {
+        "count": 21,
+        "min": 78.0908000000004,
+        "average": 91.90157619047618,
+        "p50": 92.73030000000017,
+        "p90": 96.92510000000038,
+        "p95": 106.89879999999994,
+        "p99": 117.41870000000017,
+        "max": 117.41870000000017
+      },
+      "successCount": 21,
+      "errorCount": 19,
+      "errorRate": 0.475,
+      "statusBuckets": {
+        "429": 19,
+        "2xx": 21
+      },
+      "sampleErrors": [
+        {
+          "index": 21,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        },
+        {
+          "index": 22,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        },
+        {
+          "index": 23,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        },
+        {
+          "index": 24,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        },
+        {
+          "index": 25,
+          "status": 429,
+          "body": "{\"error\":\"RATE_LIMITED\",\"message\":\"تم تكرار عمليات الطلاب بسرعة زائدة. حاول مرة أخرى بعد قليل.\"}",
+          "bucket": "429"
+        }
+      ],
+      "dbRowCount": 10,
+      "safeFailure": true,
+      "dbSnapshot": [
+        {
+          "studentId": "cmrxqap12000lekd6b0vrwjbk",
+          "status": "LATE",
+          "lateAt": "08:20",
+          "leftAt": null,
+          "note": "Outage simulation 2"
+        },
+        {
+          "studentId": "cmrxqam8c000tjrrrzj3yst50",
+          "status": "PRESENT",
+          "lateAt": null,
+          "leftAt": null,
+          "note": "Outage simulation 1"
+        },
+        {
+          "studentId": "cmrxqap1j000pekd6li7hhba7",
+          "status": "LEFT_EARLY",
+          "lateAt": null,
+          "leftAt": "10:10",
+          "note": "Outage simulation 3"
+        },
+        {
+          "studentId": "cmrxqap1z000tekd6vpv41o7n",
+          "status": "PRESENT",
+          "lateAt": null,
+          "leftAt": null,
+          "note": "Outage simulation 4"
+        },
+        {
+          "studentId": "cmrxqap2e000xekd6dtt3zyai",
+          "status": "LATE",
+          "lateAt": "08:20",
+          "leftAt": null,
+          "note": "Outage simulation 5"
+        }
+      ]
+    }
+  ],
+  "createdAt": "2026-07-23T16:31:27.858Z"
+}

@@ -1,0 +1,11 @@
+ALTER TABLE "School" ADD COLUMN IF NOT EXISTS "isActive" BOOLEAN;
+
+UPDATE "School"
+SET "isActive" = TRUE
+WHERE "isActive" IS NULL;
+
+ALTER TABLE "School"
+  ALTER COLUMN "isActive" SET DEFAULT TRUE;
+
+ALTER TABLE "School"
+  ALTER COLUMN "isActive" SET NOT NULL;

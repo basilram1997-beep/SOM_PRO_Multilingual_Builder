@@ -1,0 +1,490 @@
+﻿<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SOM PRO owner portal for license management and school activation." />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>لوحة مالك SOM PRO</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --card: #fff;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --line: #cbd5e1;
+        --blue: #2563eb;
+        --green: #16a34a;
+        --red: #dc2626;
+        --gray: #64748b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Tahoma, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      .wrap {
+        max-width: 1220px;
+        margin: auto;
+        padding: 24px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .brand {
+        color: var(--blue);
+      }
+      h1 {
+        margin: 0;
+        font-size: 32px;
+      }
+      h2 {
+        margin: 0 0 14px;
+      }
+      .panel,
+      .license {
+        background: var(--card);
+        border: 1.5px solid var(--line);
+        border-radius: 12px;
+        padding: 18px;
+        box-shadow: 0 10px 28px #0f172a12;
+        margin-bottom: 16px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+        gap: 10px;
+      }
+      input,
+      select {
+        width: 100%;
+        border: 1.5px solid var(--line);
+        border-radius: 8px;
+        padding: 11px;
+        font: inherit;
+        background: #fff;
+      }
+      button {
+        border: 0;
+        border-radius: 8px;
+        background: var(--blue);
+        color: #fff;
+        padding: 10px 14px;
+        font-weight: 900;
+        cursor: pointer;
+      }
+      button.gray {
+        background: var(--gray);
+      }
+      button.danger {
+        background: var(--red);
+      }
+      button.ok {
+        background: var(--green);
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .hidden {
+        display: none;
+      }
+      .login {
+        max-width: 560px;
+        margin: 80px auto;
+      }
+      .login input {
+        direction: ltr;
+        margin: 10px 0;
+      }
+      .error {
+        color: var(--red);
+        font-weight: 900;
+      }
+      .success {
+        color: #166534;
+        font-weight: 900;
+      }
+      .top-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .licenses {
+        display: grid;
+        gap: 12px;
+      }
+      .badge {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-weight: 900;
+      }
+      .ACTIVE {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .TRIAL {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+      .READ_ONLY {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .SUSPENDED,
+      .EXPIRED,
+      .CANCELLED {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .key,
+      .account-box {
+        direction: ltr;
+        text-align: left;
+        background: #f8fafc;
+        border: 1.5px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 8px;
+        font-size: 17px;
+        line-height: 1.7;
+        font-weight: 900;
+        white-space: pre-wrap;
+      }
+      .account-box {
+        direction: rtl;
+        text-align: right;
+        background: linear-gradient(135deg, #ffffff, #eef6ff);
+        border: 1.5px solid #bfd0e6;
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 12px 28px #0f172a14;
+      }
+      .account-box:before {
+        content: "SOM PRO";
+        display: inline-block;
+        margin-bottom: 10px;
+        background: #0f172a;
+        color: #fff;
+        border-radius: 10px;
+        padding: 7px 10px;
+        font-weight: 900;
+        letter-spacing: 0;
+      }
+      .account-box b {
+        direction: ltr;
+        display: inline-block;
+        background: #f8fafc;
+        border: 1px solid #dbe3ef;
+        border-radius: 8px;
+        padding: 4px 8px;
+        margin: 2px 0;
+      }
+      .license-output {
+        background: linear-gradient(135deg, #f8fbff, #eef6ff);
+        border: 1.5px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+        margin-top: 12px;
+        box-shadow: 0 14px 34px #0f172a14;
+      }
+      .license-meta {
+        display: grid;
+        gap: 4px;
+        margin-top: 8px;
+      }
+      .section-label {
+        margin: 14px 0 8px;
+        font-weight: 900;
+      }
+      .copy-line {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .copy-line .key {
+        flex: 1;
+        margin: 0;
+      }
+      .admin-fields {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px dashed var(--line);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>لوحة مالك <span class="brand">SOM PRO</span></h1>
+        <div class="top-actions">
+          <button id="refreshBtn" class="hidden" onclick="loadLicenses()">تحديث</button
+          ><button id="logoutBtn" class="gray hidden" onclick="logout()">خروج</button>
+        </div>
+      </header>
+
+      <section id="loginPanel" class="panel login">
+        <h2>دخول المالك</h2>
+        <p class="muted">أدخل رمز المالك. هذه الصفحة لك فقط وليست للمدرسة.</p>
+        <input id="token" type="password" placeholder="رمز المالك" />
+        <button onclick="login()">دخول</button>
+        <p id="loginError" class="error"></p>
+      </section>
+
+      <main id="adminPanel" class="hidden">
+        <section class="panel">
+          <h2>إصدار ترخيص</h2>
+          <p class="muted">أدخل بيانات المدرسة. سيتم توليد كود ترخيص وحساب مدير خاص بهذه المدرسة.</p>
+          <div class="grid">
+            <input id="schoolName" placeholder="اسم المدرسة" />
+            <input id="institutionCode" placeholder="رقم المؤسسة" />
+            <input id="days" type="number" value="30" placeholder="الأيام" />
+            <input id="maxDevices" type="number" value="1" placeholder="عدد الأجهزة" />
+            <select id="plan">
+              <option>TRIAL</option>
+              <option>PAID</option>
+            </select>
+          </div>
+          <div class="grid admin-fields">
+            <input id="adminName" placeholder="اسم المدير" value="مدير المدرسة" />
+            <input id="adminEmail" dir="ltr" placeholder="اسم مستخدم المدير - يترك فارغًا للتوليد" />
+            <input id="adminPassword" dir="ltr" placeholder="كلمة مرور أولية - تترك فارغة للتوليد" />
+          </div>
+          <p class="row">
+            <button id="createBtn" onclick="createLicense()">إصدار ترخيص</button
+            ><button id="copyKeyBtn" class="gray hidden" onclick="copyNewKey()">نسخ الكود</button>
+          </p>
+          <div id="newKeyBox" class="license-output hidden">
+            <strong>تم إصدار الترخيص بنجاح.</strong>
+            <div class="copy-line" style="margin-top: 10px">
+              <div>
+                <span class="muted">كود الترخيص:</span>
+                <div id="newKey" class="key"></div>
+              </div>
+            </div>
+            <p class="muted">تفاصيل حساب المدير تظهر أيضًا في قائمة التراخيص بالأسفل.</p>
+          </div>
+          <p id="createMessage"></p>
+        </section>
+        <section class="panel">
+          <h2>التراخيص</h2>
+          <div id="licenses" class="licenses"></div>
+        </section>
+      </main>
+    </div>
+    <script>
+      const api = location.origin;
+      const tokenInput = document.getElementById("token");
+      let ownerToken = "";
+      function headers() {
+        return { "Content-Type": "application/json", Authorization: "Bearer " + ownerToken };
+      }
+      async function request(path, options) {
+        options = options || {};
+        const res = await fetch(api + path, { ...options, headers: { ...headers(), ...(options.headers || {}) } });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(body.message || body.error || "فشل الطلب");
+        return body;
+      }
+      function showAdmin() {
+        loginPanel.classList.add("hidden");
+        adminPanel.classList.remove("hidden");
+        refreshBtn.classList.remove("hidden");
+        logoutBtn.classList.remove("hidden");
+      }
+      function showLogin() {
+        loginPanel.classList.remove("hidden");
+        adminPanel.classList.add("hidden");
+        refreshBtn.classList.add("hidden");
+        logoutBtn.classList.add("hidden");
+      }
+      async function login() {
+        ownerToken = tokenInput.value.trim();
+        loginError.textContent = "";
+        try {
+          await loadLicenses();
+          showAdmin();
+        } catch (e) {
+          ownerToken = "";
+          loginError.textContent = "رمز المالك غير صحيح";
+          showLogin();
+        }
+      }
+      function logout() {
+        ownerToken = "";
+        tokenInput.value = "";
+        showLogin();
+      }
+      function setCreateMessage(text, ok) {
+        createMessage.textContent = text || "";
+        createMessage.className = ok ? "success" : "error";
+      }
+      function esc(v) {
+        return String(v == null ? "" : v).replace(
+          /[&<>"']/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[c]
+        );
+      }
+      function accountText(account) {
+        if (!account) return "لا يوجد حساب";
+        return (
+          "الاسم: " +
+          (account.name || "-") +
+          "\nاسم المستخدم: " +
+          (account.email || "-") +
+          "\nكلمة المرور: " +
+          (account.password || "-") +
+          "\nالصلاحية: " +
+          (account.role || "ADMIN")
+        );
+      }
+      async function createLicense() {
+        setCreateMessage("", false);
+        newKeyBox.classList.add("hidden");
+        copyKeyBtn.classList.add("hidden");
+        const body = {
+          schoolName: schoolName.value.trim(),
+          institutionCode: institutionCode.value.trim(),
+          days: Number(days.value || 30),
+          maxDevices: Number(maxDevices.value || 1),
+          plan: plan.value,
+          adminName: adminName.value.trim(),
+          adminEmail: adminEmail.value.trim(),
+          adminPassword: adminPassword.value.trim()
+        };
+        if (!body.schoolName || !body.institutionCode) {
+          setCreateMessage("أدخل اسم المدرسة ورقم المؤسسة أولًا", false);
+          return;
+        }
+        createBtn.disabled = true;
+        createBtn.textContent = "جاري الإصدار...";
+        try {
+          const res = await request("/api/admin/licenses", { method: "POST", body: JSON.stringify(body) });
+          newKey.textContent = res.data.licenseCode || res.data.licenseKey || "";
+          newKeyBox.classList.remove("hidden");
+          copyKeyBtn.classList.remove("hidden");
+          setCreateMessage("تم إصدار الترخيص والحساب بنجاح", true);
+          await loadLicenses();
+        } catch (e) {
+          setCreateMessage(e.message || "تعذر إصدار الترخيص", false);
+        } finally {
+          createBtn.disabled = false;
+          createBtn.textContent = "إصدار ترخيص";
+        }
+      }
+      async function copyNewKey() {
+        try {
+          await navigator.clipboard.writeText(newKey.textContent.trim());
+          copyKeyBtn.textContent = "تم النسخ";
+          setTimeout(() => (copyKeyBtn.textContent = "نسخ الكود"), 1400);
+        } catch (e) {
+          setCreateMessage("انسخ الكود يدويًا من الصندوق.", false);
+        }
+      }
+      async function patch(id, body) {
+        await request("/api/admin/licenses/" + id, { method: "PATCH", body: JSON.stringify(body) });
+        loadLicenses();
+      }
+      async function resetAdminPassword(id) {
+        await patch(id, { resetAdminPassword: true });
+      }
+      async function disableDevice(id, fp) {
+        await request("/api/admin/licenses/" + id + "/devices/" + encodeURIComponent(fp) + "/disable", {
+          method: "POST"
+        });
+        loadLicenses();
+      }
+      async function deleteLicense(id, school) {
+        if (!confirm("هل تريد حذف ترخيص " + (school || "هذه المدرسة") + " نهائيًا؟")) return;
+        await request("/api/admin/licenses/" + id, { method: "DELETE" });
+        loadLicenses();
+      }
+      function render(item) {
+        const account = item.adminAccount || {};
+        const deviceRows =
+          (item.devices || [])
+            .map(
+              (d) =>
+                '<div class="muted">' +
+                (d.disabled ? "معطل" : "نشط") +
+                " - " +
+                esc(d.fingerprint) +
+                ' <button class="danger" onclick="disableDevice(\'' +
+                item.id +
+                "','" +
+                d.fingerprint +
+                "')\">تعطيل الجهاز</button></div>"
+            )
+            .join("") || '<div class="muted">لا توجد أجهزة بعد</div>';
+        return (
+          '<div class="license"><div class="row"><strong>' +
+          esc(item.schoolName || "-") +
+          '</strong><span class="badge ' +
+          esc(item.status) +
+          '">' +
+          esc(item.status) +
+          '</span><span class="muted">ينتهي: ' +
+          new Date(item.expiresAt).toLocaleDateString("ar") +
+          '</span></div><div class="license-meta muted"><span>رقم المؤسسة: ' +
+          esc(item.institutionCode || "-") +
+          "</span><span>الأجهزة: " +
+          (item.devices || []).length +
+          "/" +
+          esc(item.maxDevices) +
+          " | مرات التثبيت: " +
+          (item.installations || []).length +
+          '</span></div><div class="section-label">كود الترخيص</div><div class="key">' +
+          esc(item.licenseCode || "-") +
+          '</div><div class="section-label">حساب مدير المدرسة</div><div class="account-box">الاسم: ' +
+          esc(account.name || "-") +
+          "<br>اسم المستخدم: <b>" +
+          esc(account.email || "-") +
+          "</b><br>كلمة المرور: <b>" +
+          esc(account.password || "-") +
+          "</b><br>الصلاحية: " +
+          esc(account.role || "ADMIN") +
+          '</div><div class="row" style="margin-top:10px"><button class="ok" onclick="patch(\'' +
+          item.id +
+          "',{status:'ACTIVE'})\">تفعيل</button><button class=\"gray\" onclick=\"patch('" +
+          item.id +
+          "',{status:'READ_ONLY'})\">قراءة فقط</button><button class=\"danger\" onclick=\"patch('" +
+          item.id +
+          "',{status:'SUSPENDED'})\">إيقاف</button><button class=\"danger\" onclick=\"deleteLicense('" +
+          item.id +
+          "','" +
+          esc(item.schoolName || "-") +
+          "')\">حذف</button><button onclick=\"patch('" +
+          item.id +
+          '\',{extendDays:30})">تمديد 30 يوم</button><button class="gray" onclick="resetAdminPassword(\'' +
+          item.id +
+          '\')">توليد كلمة مرور</button></div><div style="margin-top:10px">' +
+          deviceRows +
+          "</div></div>"
+        );
+      }
+      async function loadLicenses() {
+        const res = await request("/api/admin/licenses");
+        licenses.innerHTML = res.data.map(render).join("") || '<p class="muted">لا توجد تراخيص</p>';
+      }
+      showLogin();
+    </script>
+  </body>
+</html>

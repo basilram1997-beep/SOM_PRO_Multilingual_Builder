@@ -1,0 +1,2 @@
+ALTER TABLE "StudentCertificate"
+ADD COLUMN IF NOT EXISTS "earlyExitDays" INTEGER NOT NULL DEFAULT 0;

@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sompro_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: som
+      POSTGRES_USER: som_user
+      POSTGRES_PASSWORD: som_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - sompro_pg_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: sompro_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  sompro_pg_data:

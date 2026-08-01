@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  schedule:
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Dependency scan
+        run: npm run security:deps
+
+      - name: SAST
+        run: npm run security:sast
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm run test
+
+      - name: Contract and E2E tests
+        run: npm run test:all
+
+      - name: Desktop checks
+        run: npm run desktop:check
+
+      - name: Desktop SaaS checks
+        run: npm run desktop:check:saas
+
+      - name: Production check
+        run: npm run production:check
+
+      - name: Release readiness check
+        run: npm run release:check
+
+      - name: Security audit
+        run: npm run security:deps
+
+      - name: Full check
+        run: npm run check
+
+  browser_smoke:
+    needs: validate
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npm run test:e2e:browser:install
+
+      - name: Run browser smoke
+        run: npm run test:e2e:browser

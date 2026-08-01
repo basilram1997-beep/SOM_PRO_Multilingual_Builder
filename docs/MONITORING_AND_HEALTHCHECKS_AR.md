@@ -1,0 +1,80 @@
+﻿# المراقبة و Health Checks في SOM PRO
+
+## ما الذي يجب مراقبته؟
+
+- Backend API.
+- License Server.
+- PostgreSQL.
+- Redis.
+- Nginx/reverse proxy.
+- مساحة القرص.
+- استهلاك الذاكرة والمعالج.
+- نجاح النسخ الاحتياطي.
+- أخطاء تسجيل الدخول والترخيص.
+
+## كيف أعرف أن الخادم يعمل؟
+
+افحص:
+
+```bash
+curl https://api.your-domain.com/health
+curl https://license.your-domain.com/health
+```
+
+النتيجة المتوقعة تحتوي `ok: true`.
+
+## كيف أفحص قاعدة البيانات؟
+
+```bash
+docker compose -f docker-compose.production.yml exec postgres pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+```
+
+ولفحص الحجم:
+
+```bash
+docker compose -f docker-compose.production.yml exec postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT pg_size_pretty(pg_database_size(current_database()));"
+```
+
+## كيف أفحص الترخيص؟
+
+- افتح `https://license.your-domain.com/health`.
+- افتح لوحة المالك.
+- تحقق من وجود التراخيص والأجهزة.
+- جرّب تفعيل جهاز اختبار.
+
+## ماذا أفعل إذا توقف backend؟
+
+1. افحص logs:
+
+```bash
+docker compose -f docker-compose.production.yml logs backend --tail=200
+```
+
+2. افحص قاعدة البيانات و Redis.
+3. أعد تشغيل backend فقط:
+
+```bash
+docker compose -f docker-compose.production.yml restart backend
+```
+
+## لوحة السجلات والتصدير
+
+- تعرض لوحة الإدارة في قسم التقارير مخرجات Audit Log وملفات التصدير والنسخ الاحتياطية بدل الاعتماد على فحص الملفات اليدوي فقط.
+- يجب أن يكون التصدير من هذه اللوحة محميًا ومقيدًا بالصلاحيات ومُسجلًا في Audit Log.
+- أي حدث مراقبة مهم يجب أن يبقى قابلًا للتصفية حسب المدرسة والمستخدم والنوع والفترة الزمنية.
+
+## ماذا أفعل إذا امتلأت قاعدة البيانات أو القرص؟
+
+1. لا تحذف ملفات عشوائيًا.
+2. خذ backup فوري.
+3. افحص أكبر الجداول.
+4. انقل backups القديمة إلى تخزين خارجي.
+5. استخدم `rotate-backups.sh` فقط بعد التأكد:
+
+```bash
+CONFIRM_ROTATE=yes KEEP_DAYS=30 deploy/scripts/rotate-backups.sh
+```
+
+## تنبيه
+
+المراقبة التجارية تحتاج لاحقًا خدمة خارجية مثل Uptime Kuma أو Grafana/Prometheus أو خدمة مراقبة من شركة الاستضافة.

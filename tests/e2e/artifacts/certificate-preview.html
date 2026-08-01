@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>الشهادات</title>
+    <style>
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+      body {
+        margin: 0;
+        font-family: "Arial", sans-serif;
+        color: #0f172a;
+        background: #f8fafc;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      .certificate-print-sheet {
+        width: 100%;
+        min-height: calc(297mm - 20mm);
+        background: #fff;
+        border: 2px solid #8597ac;
+        border-radius: 16px;
+        padding: 20px 22px 18px;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+        display: grid;
+        gap: 14px;
+      }
+      .certificate-print-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 1.15fr) minmax(0, 1fr);
+        gap: 14px;
+        align-items: stretch;
+        border-bottom: 2px solid #dbe4f0;
+        padding-bottom: 14px;
+      }
+      .certificate-print-center {
+        text-align: center;
+        padding: 4px 10px 0;
+        display: grid;
+        align-content: center;
+      }
+      .certificate-print-center h1 {
+        margin: 0;
+        font-size: 31px;
+        line-height: 1.2;
+        color: #0f172a;
+        letter-spacing: 0.3px;
+      }
+      .certificate-print-center p {
+        margin: 8px 0 0;
+        font-size: 15px;
+        color: #334155;
+        font-weight: 800;
+        letter-spacing: 0.15px;
+      }
+      .certificate-print-side {
+        border: 1.5px solid #94a3b8;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #ffffff, #f8fbff);
+        padding: 13px 14px;
+        display: grid;
+        gap: 10px;
+        align-self: stretch;
+        min-height: 100%;
+      }
+      .certificate-print-side div {
+        display: grid;
+        gap: 4px;
+      }
+      .certificate-print-side span,
+      .certificate-print-meta span,
+      .certificate-print-summary span,
+      .certificate-print-attendance th,
+      .certificate-print-signatures span,
+      .certificate-print-note strong {
+        color: #1e3a8a;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .certificate-print-side strong,
+      .certificate-print-meta strong,
+      .certificate-print-summary strong,
+      .certificate-print-attendance td,
+      .certificate-print-signatures strong,
+      .certificate-print-note p {
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .certificate-print-meta,
+      .certificate-print-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+      }
+      .certificate-print-meta span,
+      .certificate-print-summary div,
+      .certificate-print-attendance,
+      .certificate-print-note {
+        border: 1.5px solid #cbd5e1;
+        border-radius: 14px;
+        background: #f8fafc;
+        padding: 10px 12px;
+      }
+      .certificate-print-summary div {
+        min-height: 64px;
+        align-content: center;
+      }
+      .certificate-print-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+      .certificate-print-table th,
+      .certificate-print-table td {
+        border: 1.5px solid #cbd5e1;
+        padding: 9px 10px;
+        text-align: start;
+        vertical-align: top;
+        word-break: break-word;
+        font-size: 12px;
+      }
+      .certificate-print-table th {
+        background: #eaf2ff;
+        color: #0f172a;
+        font-weight: 900;
+        letter-spacing: 0.1px;
+      }
+      .certificate-print-table td:nth-child(2),
+      .certificate-print-table td:nth-child(3),
+      .certificate-print-table td:nth-child(4) {
+        text-align: center;
+        font-weight: 800;
+      }
+      .certificate-print-table tbody tr:nth-child(even),
+      .certificate-print-attendance tbody tr:nth-child(even) {
+        background: #f8fafc;
+      }
+      .certificate-print-notes {
+        display: grid;
+        gap: 10px;
+      }
+      .certificate-print-note {
+        display: grid;
+        gap: 6px;
+      }
+      .certificate-print-attendance {
+        width: 100%;
+        border-collapse: collapse;
+        padding: 0;
+        overflow: hidden;
+      }
+      .certificate-print-attendance th,
+      .certificate-print-attendance td {
+        border: 1.5px solid #cbd5e1;
+        padding: 8px 10px;
+        text-align: center;
+        font-size: 12px;
+      }
+      .certificate-print-attendance th {
+        background: #eff6ff;
+      }
+      .certificate-print-signatures {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        margin-top: 6px;
+      }
+      .certificate-print-signatures div {
+        border-top: 2px solid #1e3a8a;
+        padding-top: 8px;
+        display: grid;
+        gap: 4px;
+        min-height: 72px;
+        align-content: end;
+      }
+      .certificate-print-signatures strong {
+        color: #1e3a8a;
+        font-size: 15px;
+      }
+      @media print {
+        body {
+          background: #fff;
+        }
+        .certificate-print-sheet {
+          box-shadow: none;
+          border-radius: 0;
+          min-height: auto;
+        }
+        .certificate-print-header,
+        .certificate-print-table,
+        .certificate-print-summary,
+        .certificate-print-attendance,
+        .certificate-print-notes,
+        .certificate-print-signatures {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="certificate-print-sheet" dir="rtl">
+      <header class="certificate-print-header">
+        <div class="certificate-print-side certificate-print-side-right">
+          <div><span>الطالب الاسم</span><strong>طالب اللقطة mrw1fh4j</strong></div>
+          <div><span>رقم الهوية</span><strong>392052467</strong></div>
+        </div>
+        <div class="certificate-print-center">
+          <h1>مدرسة الاختبار</h1>
+          <p>شهادة الشهرين للفصل الأول</p>
+        </div>
+        <div class="certificate-print-side certificate-print-side-left">
+          <div><span>الصف</span><strong>الثاني عشر أ / نافز</strong></div>
+          <div><span>القسم</span><strong>أ</strong></div>
+        </div>
+      </header>
+
+      <table class="certificate-print-table">
+        <thead>
+          <tr>
+            <th>المادة</th>
+            <th>علامة</th>
+            <th>تقييم كلامي</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="3">لا توجد مواد بعد</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="certificate-print-summary">
+        <div><span>معدل الطالب</span><strong>-</strong></div>
+        <div><span>النتيجة</span><strong>غير ناجح</strong></div>
+      </div>
+
+      <table class="certificate-print-attendance">
+        <thead>
+          <tr>
+            <th>أيام الحضور</th>
+            <th>متأخر الأيام</th>
+            <th>غائب الأيام</th>
+            <th>مغادرة مبكرة الأيام</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="certificate-print-signatures">
+        <div><span>توقيع مربي/ة الصف</span><strong>غير محدد</strong></div>
+        <div><span>توقيع مدير/ة المدرسة</span><strong>E2E Admin</strong></div>
+      </div>
+    </section>
+  </body>
+</html>

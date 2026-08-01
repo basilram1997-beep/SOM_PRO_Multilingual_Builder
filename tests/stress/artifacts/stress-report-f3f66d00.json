@@ -1,0 +1,68 @@
+{
+  "runId": "f3f66d00",
+  "schoolId": "stress-f3f66d00",
+  "apiUrl": "http://127.0.0.1:4000",
+  "scenarioName": "grades",
+  "context": {
+    "adminUserId": "cmrxq91af000v24vml7j5lpn0",
+    "teacherAssigned": "cmrxq9186000h24vmv0f7621b",
+    "teacherRejected": "cmrxq93xx000hy8miy7aixlo6",
+    "classId": "cmrxq9189000j24vmbcucp3xq",
+    "subjectId": "cmrxq918c000l24vmortynnkr",
+    "coreStudentId": "cmrxq918r000t24vmr2i1jn69"
+  },
+  "results": [
+    {
+      "label": "grade burst",
+      "count": 4,
+      "durationMs": 39.30760000000009,
+      "requestsPerSecond": 101.76149141641795,
+      "min": 13.60129999999981,
+      "average": 17.24212499999976,
+      "p50": 16.154299999999694,
+      "p90": 21.636999999999716,
+      "p95": 21.636999999999716,
+      "p99": 21.636999999999716,
+      "max": 21.636999999999716,
+      "success": {
+        "count": 2,
+        "min": 16.155499999999847,
+        "average": 18.896749999999884,
+        "p50": 16.155499999999847,
+        "p90": 21.63799999999992,
+        "p95": 21.63799999999992,
+        "p99": 21.63799999999992,
+        "max": 21.63799999999992
+      },
+      "successCount": 2,
+      "errorCount": 2,
+      "errorRate": 0.5,
+      "statusBuckets": {
+        "403": 2,
+        "2xx": 2
+      },
+      "sampleErrors": [
+        {
+          "index": 1,
+          "status": 403,
+          "body": "{\"error\":\"FORBIDDEN\",\"message\":\"لا تملك صلاحية تعديل علا��ات هذا الص�� �أو ال��ادة\"}",
+          "bucket": "403"
+        },
+        {
+          "index": 3,
+          "status": 403,
+          "body": "{\"error\":\"FORBIDDEN\",\"message\":\"لا تملك صلاحية تعديل علا��ات هذا الص�� �أو ال��ادة\"}",
+          "bucket": "403"
+        }
+      ],
+      "dbRowCount": 1,
+      "persistedRows": {
+        "cmrxq918r000t24vmr2i1jn69": {
+          "section1": "8"
+        }
+      },
+      "safeFailure": true
+    }
+  ],
+  "createdAt": "2026-07-23T16:30:12.385Z"
+}
