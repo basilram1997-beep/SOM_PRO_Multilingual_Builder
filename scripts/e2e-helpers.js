@@ -48,6 +48,9 @@ function createE2EEnv(overrides = {}) {
     SOM_PRO_REQUIRE_CENTRAL_LICENSE: "false",
     SOM_PRO_LICENSE_SECRET: process.env.SOM_PRO_LICENSE_SECRET || "change-this-secret-before-selling",
     SOM_PRO_AUTH_SECRET: process.env.SOM_PRO_AUTH_SECRET || "change-this-auth-secret-before-selling",
+    SOM_E2E_DISABLE_RATE_LIMIT: process.env.SOM_E2E_DISABLE_RATE_LIMIT || "true",
+    DATABASE_URL: process.env.DATABASE_URL || "postgresql://som_user:som_password@localhost:5432/som?schema=public",
+    REDIS_URL: process.env.REDIS_URL || "redis://127.0.0.1:6379",
     CORS_ORIGIN: "http://localhost:4188,http://127.0.0.1:4188",
     SOM_E2E_LICENSE_CODE: e2eLicenseCode,
     SOM_E2E_ADMIN_EMAIL: process.env.SOM_E2E_ADMIN_EMAIL || "admin@som-e2e.local",
@@ -59,7 +62,13 @@ function createE2EEnv(overrides = {}) {
     SOM_E2E_CLASS_NAME: process.env.SOM_E2E_CLASS_NAME || "SOM E2E Class A",
     SOM_E2E_SUBJECT_NAME: process.env.SOM_E2E_SUBJECT_NAME || "SOM E2E Subject",
     SOM_E2E_TEACHER_NAME: process.env.SOM_E2E_TEACHER_NAME || "SOM E2E Teacher",
+    SOM_E2E_TEACHER_EMAIL: process.env.SOM_E2E_TEACHER_EMAIL || "teacher@som-e2e.local",
+    SOM_E2E_TEACHER_PASSWORD: process.env.SOM_E2E_TEACHER_PASSWORD || "SOM-E2E-Teacher-123!",
     SOM_E2E_STUDENT_NAME: process.env.SOM_E2E_STUDENT_NAME || "SOM E2E Student",
+    SOM_E2E_STUDENT_EMAIL: process.env.SOM_E2E_STUDENT_EMAIL || "student@som-e2e.local",
+    SOM_E2E_STUDENT_PASSWORD: process.env.SOM_E2E_STUDENT_PASSWORD || "SOM-E2E-Student-123!",
+    SOM_E2E_PARENT_EMAIL: process.env.SOM_E2E_PARENT_EMAIL || "parent@som-e2e.local",
+    SOM_E2E_PARENT_PASSWORD: process.env.SOM_E2E_PARENT_PASSWORD || "SOM-E2E-Parent-123!",
     ...overrides
   });
 }
@@ -169,6 +178,33 @@ async function assertLocalService({ name, host, port, timeoutMs, hint }) {
   }
 }
 
+async function assertTcpPortFree({ name, host, port }) {
+  await new Promise((resolve, reject) => {
+    const server = net.createServer();
+
+    const cleanup = () => {
+      server.removeAllListeners();
+      server.close(() => null);
+    };
+
+    server.once("error", (failure) => {
+      cleanup();
+      if (failure?.code === "EADDRINUSE") {
+        reject(new Error(`${name} port ${host}:${port} is already in use. Stop the old E2E service before retrying.`));
+        return;
+      }
+      reject(failure);
+    });
+
+    server.once("listening", () => {
+      cleanup();
+      resolve();
+    });
+
+    server.listen(port, host);
+  });
+}
+
 function createProcessManager() {
   const childProcesses = [];
   let cleanupCompleted = false;
@@ -220,6 +256,7 @@ function waitForShutdownSignal() {
 
 module.exports = {
   assertLocalService,
+  assertTcpPortFree,
   createE2EEnv,
   createProcessManager,
   normalizeWindowsEnv,

@@ -2,6 +2,7 @@ const path = require("node:path");
 const { error, log, success } = require("./cli-output");
 const {
   assertLocalService,
+  assertTcpPortFree,
   createE2EEnv,
   createProcessManager,
   runShell,
@@ -92,6 +93,9 @@ async function main() {
     process.exitCode = bootstrap.status || 1;
     return;
   }
+
+  await assertTcpPortFree({ name: "Backend", host: "127.0.0.1", port: 4000 });
+  await assertTcpPortFree({ name: "Frontend", host: "127.0.0.1", port: 4188 });
 
   startBackend(env);
   await waitForUrl(`${apiUrl.replace(/\/$/, "")}/health`, totalTimeoutMs);

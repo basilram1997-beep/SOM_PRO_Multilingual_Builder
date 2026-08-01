@@ -13,10 +13,16 @@ const adminName = process.env.SOM_E2E_ADMIN_NAME || "SOM E2E Admin";
 const adminEmail = process.env.SOM_E2E_ADMIN_EMAIL || "admin@som-e2e.local";
 const adminPassword = process.env.SOM_E2E_ADMIN_PASSWORD || "SOM-E2E-Admin-123!";
 const teacherName = process.env.SOM_E2E_TEACHER_NAME || "SOM E2E Teacher";
+const teacherEmail = process.env.SOM_E2E_TEACHER_EMAIL || "teacher@som-e2e.local";
+const teacherPassword = process.env.SOM_E2E_TEACHER_PASSWORD || "SOM-E2E-Teacher-123!";
 const substituteTeacherName = process.env.SOM_E2E_SUBSTITUTE_TEACHER_NAME || "SOM E2E Substitute Teacher";
 const className = process.env.SOM_E2E_CLASS_NAME || "SOM E2E Class A";
 const subjectName = process.env.SOM_E2E_SUBJECT_NAME || "SOM E2E Subject";
 const studentName = process.env.SOM_E2E_STUDENT_NAME || "SOM E2E Student";
+const studentEmail = process.env.SOM_E2E_STUDENT_EMAIL || "student@som-e2e.local";
+const studentPassword = process.env.SOM_E2E_STUDENT_PASSWORD || "SOM-E2E-Student-123!";
+const parentEmail = process.env.SOM_E2E_PARENT_EMAIL || "parent@som-e2e.local";
+const parentPassword = process.env.SOM_E2E_PARENT_PASSWORD || "SOM-E2E-Parent-123!";
 const dailyDate = process.env.SOM_E2E_DATE || new Date().toISOString().slice(0, 10);
 
 const workingDays = ["السبت", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس"];
@@ -280,6 +286,70 @@ async function upsertAdminUser() {
   });
 }
 
+async function upsertTeacherUser(teacherId) {
+  const user = await prisma.user.upsert({
+    where: { email: teacherEmail.trim().toLowerCase() },
+    update: {
+      schoolId,
+      name: teacherName,
+      password: hashPassword(teacherPassword),
+      role: "TEACHER"
+    },
+    create: {
+      schoolId,
+      name: teacherName,
+      email: teacherEmail.trim().toLowerCase(),
+      password: hashPassword(teacherPassword),
+      role: "TEACHER"
+    }
+  });
+
+  await prisma.teacher.update({
+    where: { id: teacherId },
+    data: { userId: user.id }
+  });
+}
+
+async function upsertStudentAreaUsers(studentId) {
+  await prisma.user.upsert({
+    where: { email: studentEmail.trim().toLowerCase() },
+    update: {
+      schoolId,
+      studentId,
+      name: studentName,
+      password: hashPassword(studentPassword),
+      role: "STUDENT"
+    },
+    create: {
+      schoolId,
+      studentId,
+      name: studentName,
+      email: studentEmail.trim().toLowerCase(),
+      password: hashPassword(studentPassword),
+      role: "STUDENT"
+    }
+  });
+
+  await prisma.user.upsert({
+    where: { email: parentEmail.trim().toLowerCase() },
+    update: {
+      schoolId,
+      studentId,
+      name: `${studentName} Parent`,
+      password: hashPassword(parentPassword),
+      role: "PARENT"
+    },
+    create: {
+      schoolId,
+      studentId,
+      name: `${studentName} Parent`,
+      email: parentEmail.trim().toLowerCase(),
+      password: hashPassword(parentPassword),
+      role: "PARENT"
+    }
+  });
+}
+
 async function upsertStudent(classId) {
   const existing = await prisma.student.findFirst({
     where: {
@@ -290,7 +360,7 @@ async function upsertStudent(classId) {
   });
 
   if (existing) {
-    await prisma.student.update({
+    return prisma.student.update({
       where: { id: existing.id },
       data: {
         nationalId: "318535679",
@@ -304,10 +374,9 @@ async function upsertStudent(classId) {
         studentPhone: "0500000000"
       }
     });
-    return;
   }
 
-  await prisma.student.create({
+  return prisma.student.create({
     data: {
       schoolId,
       classId,
@@ -337,8 +406,10 @@ async function main() {
   await upsertAssignment(teacher.id, schoolClass.id, subject.id);
   await upsertHomeroom(teacher.id, schoolClass.id);
   await upsertBaseSlot(teacher.id, schoolClass.id, subject.id);
-  await upsertStudent(schoolClass.id);
+  const student = await upsertStudent(schoolClass.id);
   await upsertAdminUser();
+  await upsertTeacherUser(teacher.id);
+  await upsertStudentAreaUsers(student.id);
 
   success(`E2E bootstrap جاهز لـ ${adminEmail.trim().toLowerCase()} على ${schoolName} (${schoolId})`);
 }

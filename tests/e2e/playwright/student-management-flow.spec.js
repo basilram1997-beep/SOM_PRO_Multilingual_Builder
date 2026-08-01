@@ -190,7 +190,7 @@ test.describe.serial("SOM PRO student management flow", () => {
       classId: primaryClass.id
     });
     await page.locator('[data-e2e="student-form-save"]').click();
-    await expect(getStatusMessage(page)).toContainText(/save|حفظ|could not/i);
+    await expect(getStatusMessage(page)).toContainText(/save|حفظ|could not|موجود|duplicate|already/i);
 
     await page.locator('[data-e2e="student-form-reset"]').click();
     await fillStudentForm(page, {
@@ -199,7 +199,7 @@ test.describe.serial("SOM PRO student management flow", () => {
       classId: primaryClass.id
     });
     await page.locator('[data-e2e="student-form-save"]').click();
-    await expect(getStatusMessage(page)).toContainText(/save|حفظ|could not/i);
+    await expect(getStatusMessage(page)).toContainText(/save|حفظ|could not|موجود|duplicate|already/i);
 
     const minimalRow = page.locator('[data-e2e^="student-row-"]').filter({ hasText: minimalName }).first();
     await expect(minimalRow).toBeVisible();

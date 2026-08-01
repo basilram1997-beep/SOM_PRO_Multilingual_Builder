@@ -17,9 +17,9 @@ const MANAGER_NAME = process.env.SOM_E2E_MANAGER_NAME || "مدير المدرس�
 const SCHEDULER_EMAIL = process.env.SOM_E2E_SCHEDULER_EMAIL || "scheduler662452";
 const SCHEDULER_PASSWORD = process.env.SOM_E2E_SCHEDULER_PASSWORD || "SchedulerE2E-123!";
 const SCHEDULER_NAME = process.env.SOM_E2E_SCHEDULER_NAME || "المنسق";
-const TEACHER_A_EMAIL = process.env.SOM_E2E_TEACHER_EMAIL || "teacher-a662452";
-const TEACHER_A_PASSWORD = process.env.SOM_E2E_TEACHER_PASSWORD || "TeacherA-E2E-123!";
-const TEACHER_A_NAME = process.env.SOM_E2E_TEACHER_NAME || "المعلم الأول";
+const TEACHER_A_EMAIL = process.env.SOM_E2E_PERMISSIONS_TEACHER_A_EMAIL || "teacher-a662452";
+const TEACHER_A_PASSWORD = process.env.SOM_E2E_PERMISSIONS_TEACHER_A_PASSWORD || "TeacherA-E2E-123!";
+const TEACHER_A_NAME = process.env.SOM_E2E_PERMISSIONS_TEACHER_A_NAME || "المعلم الأول";
 const TEACHER_B_EMAIL = process.env.SOM_E2E_OTHER_TEACHER_EMAIL || "teacher-b662452";
 const TEACHER_B_PASSWORD = process.env.SOM_E2E_OTHER_TEACHER_PASSWORD || "TeacherB-E2E-123!";
 const TEACHER_B_NAME = process.env.SOM_E2E_OTHER_TEACHER_NAME || "المعلم الثاني";
@@ -285,6 +285,13 @@ async function ensureCoreFixtures() {
     where: { schoolId_name: { schoolId: SCHOOL_ID, name: SUBJECT_B_NAME } },
     update: { isHomeroom: false, status: "ACTIVE" },
     create: { schoolId: SCHOOL_ID, name: SUBJECT_B_NAME, isHomeroom: false, status: "ACTIVE" }
+  });
+
+  await prisma.teacher.updateMany({
+    where: {
+      userId: { in: [fixtureState.teacherA.id, fixtureState.teacherB.id] }
+    },
+    data: { userId: null }
   });
 
   fixtureState.teacherARecord = await prisma.teacher.upsert({

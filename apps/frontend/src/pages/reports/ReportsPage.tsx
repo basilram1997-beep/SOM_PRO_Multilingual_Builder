@@ -779,6 +779,7 @@ export function ReportsPage() {
             <label>
               <span>{t("reports.summaryDimensionLabel")}</span>
               <select
+                data-e2e="summary-dimension-filter"
                 value={summaryDimension}
                 onChange={(e) => setSummaryDimension(e.target.value as SummaryDimension)}
               >
@@ -791,15 +792,29 @@ export function ReportsPage() {
             </label>
             <label>
               <span>{t("reports.from")}</span>
-              <input type="date" value={summaryFrom} onChange={(e) => setSummaryFrom(e.target.value)} />
+              <input
+                data-e2e="summary-from-filter"
+                type="date"
+                value={summaryFrom}
+                onChange={(e) => setSummaryFrom(e.target.value)}
+              />
             </label>
             <label>
               <span>{t("reports.to")}</span>
-              <input type="date" value={summaryTo} onChange={(e) => setSummaryTo(e.target.value)} />
+              <input
+                data-e2e="summary-to-filter"
+                type="date"
+                value={summaryTo}
+                onChange={(e) => setSummaryTo(e.target.value)}
+              />
             </label>
             <label>
               <span>{t("reports.summaryClass")}</span>
-              <select value={summaryClassId} onChange={(e) => setSummaryClassId(e.target.value)}>
+              <select
+                data-e2e="summary-class-filter"
+                value={summaryClassId}
+                onChange={(e) => setSummaryClassId(e.target.value)}
+              >
                 <option value="">{t("common.all")}</option>
                 {classes.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -810,7 +825,11 @@ export function ReportsPage() {
             </label>
             <label>
               <span>{t("reports.summaryTeacher")}</span>
-              <select value={summaryTeacherId} onChange={(e) => setSummaryTeacherId(e.target.value)}>
+              <select
+                data-e2e="summary-teacher-filter"
+                value={summaryTeacherId}
+                onChange={(e) => setSummaryTeacherId(e.target.value)}
+              >
                 <option value="">{t("common.all")}</option>
                 {teachers.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -821,7 +840,11 @@ export function ReportsPage() {
             </label>
             <label>
               <span>{t("reports.summarySubject")}</span>
-              <select value={summarySubjectId} onChange={(e) => setSummarySubjectId(e.target.value)}>
+              <select
+                data-e2e="summary-subject-filter"
+                value={summarySubjectId}
+                onChange={(e) => setSummarySubjectId(e.target.value)}
+              >
                 <option value="">{t("common.all")}</option>
                 {subjects.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -830,13 +853,13 @@ export function ReportsPage() {
                 ))}
               </select>
             </label>
-            <button type="button" onClick={() => void loadSummary()} disabled={summaryLoading}>
+            <button data-e2e="summary-show" type="button" onClick={() => void loadSummary()} disabled={summaryLoading}>
               {summaryLoading ? t("reports.loading") : t("reports.show")}
             </button>
           </div>
           {summaryError ? <p className="muted">{summaryError}</p> : null}
           {summaryData && (
-            <div className="report-stack">
+            <div className="report-stack" data-e2e="summary-report-print">
               <div className="teacher-kpis">
                 {Object.entries(summaryData.totals).map(([key, value]) => (
                   <div key={key}>{metric(value, t(summaryTotalLabelMap[key] || key))}</div>
@@ -896,11 +919,12 @@ export function ReportsPage() {
               type="number"
               min={1}
               max={30}
+              data-e2e="security-days-filter"
               value={security.days}
               onChange={(event) => security.setDays(Math.max(1, Math.min(30, Number(event.target.value) || 7)))}
               aria-label={t("reports.securityDays")}
             />
-            <button type="button" onClick={() => void security.load()}>
+            <button data-e2e="security-show" type="button" onClick={() => void security.load()}>
               {t("reports.show")}
             </button>
           </div>

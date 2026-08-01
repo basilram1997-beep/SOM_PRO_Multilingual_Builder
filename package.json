@@ -60,6 +60,7 @@
     "test:e2e:browser:smoke:students": "node scripts/run-e2e-browser.js tests/e2e/playwright/attendance-flow.spec.js tests/e2e/playwright/grade-entry-flow.spec.js tests/e2e/playwright/certificate-flow.spec.js",
     "test:e2e:browser:smoke:daily": "node scripts/run-e2e-browser.js tests/e2e/playwright/daily-substitutions-flow.spec.js tests/e2e/playwright/reports-and-archive-flow.spec.js",
     "test:e2e:browser:smoke": "npm run test:e2e:browser:smoke:core && npm run test:e2e:browser:smoke:students && npm run test:e2e:browser:smoke:daily",
+    "test:e2e:browser:deep": "node scripts/run-e2e-browser.js tests/e2e/playwright/deep-reports-and-roles.spec.js tests/e2e/playwright/student-management-flow.spec.js tests/e2e/playwright/permissions-access.spec.js",
     "test:e2e:browser:certificate-visual": "node scripts/run-e2e-browser.js tests/e2e/playwright/certificate-preview-visual.spec.js",
     "test:e2e:browser:permissions": "node scripts/run-e2e-browser.js tests/e2e/playwright/permissions-access.spec.js",
     "test:e2e:browser:install": "playwright install chromium",

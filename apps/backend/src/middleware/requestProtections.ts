@@ -333,6 +333,11 @@ export function rejectUserContextOverride(req: Request, res: Response, next: Nex
 
 export function createRateLimitMiddleware(options: RateLimitOptions) {
   return (req: Request, res: Response, next: NextFunction) => {
+    if (process.env.SOM_E2E_DISABLE_RATE_LIMIT === "true") {
+      next();
+      return;
+    }
+
     const bucketKey = getClientKey(req, options.key);
 
     void (async () => {
