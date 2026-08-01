@@ -4,6 +4,7 @@ const { generateE2ELicenseCode } = require("./e2e-license");
 
 const baseUrl = process.env.SOM_E2E_BASE_URL || "http://127.0.0.1:4188";
 const apiUrl = process.env.SOM_E2E_API_BASE_URL || "http://127.0.0.1:4000";
+const totalTimeoutMs = Number(process.env.SOM_E2E_TIMEOUT_MS || 120_000);
 const e2eLicenseCode =
   process.env.SOM_E2E_LICENSE_CODE ||
   generateE2ELicenseCode({
@@ -327,25 +328,49 @@ async function dumpActiveHandles() {
 async function main() {
   let exitCode = 1;
   const cleanupGuardTimer = setTimeout(() => {}, 15000);
+  let totalTimeoutTimer = null;
 
   try {
-    log("Starting Playwright browser smoke path");
-    startServer();
-    await waitForServer(baseUrl);
-    await waitForApiHealth(apiUrl);
-    success("Local services are ready");
-
-    const result = await runPlaywright();
-    if (result.kind === "exit" || result.kind === "close" || result.kind === "already-exited") {
-      exitCode = result.code || 0;
-      if (result.signal && exitCode === 0) {
-        exitCode = 1;
-      }
+    if (!Number.isFinite(totalTimeoutMs) || totalTimeoutMs < 10_000) {
+      throw new Error("SOM_E2E_TIMEOUT_MS must be at least 10000 milliseconds");
     }
+
+    await Promise.race([
+      (async () => {
+        log(`Starting Playwright browser smoke path with ${Math.round(totalTimeoutMs / 1000)}s timeout`);
+        startServer();
+        await waitForServer(baseUrl);
+        await waitForApiHealth(apiUrl);
+        success("Local services are ready");
+
+        const result = await runPlaywright();
+        if (result.kind === "exit" || result.kind === "close" || result.kind === "already-exited") {
+          exitCode = result.code || 0;
+          if (result.signal && exitCode === 0) {
+            exitCode = 1;
+          }
+        }
+      })(),
+      new Promise((_, reject) => {
+        totalTimeoutTimer = setTimeout(() => {
+          reject(new Error(`Browser smoke path exceeded ${Math.round(totalTimeoutMs / 1000)} seconds and was stopped`));
+        }, totalTimeoutMs);
+        totalTimeoutTimer.unref?.();
+      })
+    ]);
   } catch (failure) {
-    error("Browser smoke path failed:", failure instanceof Error ? failure.message : failure);
+    const message = failure instanceof Error ? failure.message : failure;
+    if (String(message).includes("exceeded")) {
+      warn(message);
+    } else {
+      error("Browser smoke path failed:", message);
+    }
     exitCode = 1;
   } finally {
+    if (totalTimeoutTimer) {
+      clearTimeout(totalTimeoutTimer);
+      totalTimeoutTimer = null;
+    }
     trace("entering finally");
     for (const timer of lifecycleTimers) {
       clearTimeout(timer);
