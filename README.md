@@ -214,6 +214,13 @@ Use these when you want a quick, ordered browser verification before handoff:
 - `npm run test:e2e:browser:smoke:daily` - daily program, substitutions, reports, archive
 - `npm run test:e2e:browser:smoke` - runs the three groups in sequence
 
+Browser E2E expects the local database stack to be reachable before it starts:
+
+- PostgreSQL on `localhost:5432`
+- Redis when the local stack requires it
+
+The browser runner applies Prisma migrations, seeds the E2E school, starts temporary Backend and Frontend processes, waits for `4000/health` and `4188/`, runs Playwright, then stops the temporary services.
+
 ### Acceptance matrix
 
 The acceptance matrix below is shared across `README.md`, `HANDOFF.md`, and `SALE_READINESS_REPORT.md`.

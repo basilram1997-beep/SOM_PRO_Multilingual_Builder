@@ -148,11 +148,14 @@ export async function ensureTrialLicense(schoolId: string) {
 
   const expiresAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
   const deviceId = fallbackDeviceId();
+  const licenseKeyHash = hash(`trial:${schoolId}:${deviceId}`);
 
-  return prisma.licenseActivation.create({
-    data: {
+  return prisma.licenseActivation.upsert({
+    where: { licenseKeyHash },
+    update: {},
+    create: {
       schoolId,
-      licenseKeyHash: hash(`trial:${schoolId}:${deviceId}`),
+      licenseKeyHash,
       plan: "TRIAL",
       status: "TRIAL",
       expiresAt,
