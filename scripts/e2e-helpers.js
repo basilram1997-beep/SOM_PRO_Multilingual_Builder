@@ -1,35 +1,16 @@
-const { spawn, spawnSync } = require("node:child_process");
-const net = require("node:net");
 const { generateE2ELicenseCode } = require("./e2e-license");
-
-function timestamp() {
-  return new Date().toISOString();
-}
-
-function trace(message, details) {
-  if (details === undefined) {
-    console.log(`[${timestamp()}] ${message}`);
-    return;
-  }
-  console.log(`[${timestamp()}] ${message}`, details);
-}
-
-function normalizeWindowsEnv(env) {
-  if (process.platform !== "win32") {
-    return env;
-  }
-
-  const normalized = {};
-  for (const [key, value] of Object.entries(env)) {
-    const existingKey = Object.keys(normalized).find((candidate) => candidate.toLowerCase() === key.toLowerCase());
-    if (existingKey) {
-      delete normalized[existingKey];
-    }
-    normalized[key] = value;
-  }
-
-  return normalized;
-}
+const { assertLocalService, assertTcpPortFree, waitForTcp } = require("./runtime/ports");
+const {
+  createProcessManager,
+  normalizeWindowsEnv,
+  runShell,
+  shellCommand,
+  startProcess,
+  startShell,
+  trace,
+  waitForShutdownSignal,
+  waitForUrl
+} = require("./runtime/services");
 
 function createE2EEnv(overrides = {}) {
   const e2eLicenseCode =
@@ -70,187 +51,6 @@ function createE2EEnv(overrides = {}) {
     SOM_E2E_PARENT_EMAIL: process.env.SOM_E2E_PARENT_EMAIL || "parent@som-e2e.local",
     SOM_E2E_PARENT_PASSWORD: process.env.SOM_E2E_PARENT_PASSWORD || "SOM-E2E-Parent-123!",
     ...overrides
-  });
-}
-
-function shellCommand(commandLine) {
-  return process.platform === "win32"
-    ? { command: "cmd.exe", args: ["/d", "/s", "/c", commandLine] }
-    : { command: "sh", args: ["-c", commandLine] };
-}
-
-function runShell(commandLine, env, options = {}) {
-  const shell = shellCommand(commandLine);
-  return spawnSync(shell.command, shell.args, {
-    stdio: options.stdio || "inherit",
-    windowsHide: true,
-    env,
-    timeout: options.timeoutMs,
-    shell: false
-  });
-}
-
-function startProcess(command, args, options) {
-  const child = spawn(command, args, {
-    cwd: options.cwd,
-    stdio: options.stdio || "inherit",
-    windowsHide: true,
-    env: options.env,
-    shell: false
-  });
-
-  trace(`${options.label} spawned`, { pid: child.pid });
-  child.once("exit", (code, signal) => {
-    trace(`${options.label} exit`, { pid: child.pid, code, signal });
-  });
-  child.once("error", (failure) => {
-    trace(`${options.label} error`, { pid: child.pid, message: failure.message });
-  });
-
-  return child;
-}
-
-function startShell(commandLine, env, label) {
-  const shell = shellCommand(commandLine);
-  return startProcess(shell.command, shell.args, { env, label });
-}
-
-async function waitForUrl(url, timeoutMs) {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    try {
-      const response = await fetch(url, { method: "GET" });
-      if (response.ok || response.status === 304) {
-        trace("health check passed", { url, status: response.status });
-        return;
-      }
-    } catch {
-      // Keep waiting for the service to finish booting.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-
-  throw new Error(`Timed out waiting for ${url}`);
-}
-
-function waitForTcp(host, port, timeoutMs) {
-  const startedAt = Date.now();
-
-  return new Promise((resolve, reject) => {
-    const tryConnect = () => {
-      const socket = net.createConnection({ host, port });
-      socket.setTimeout(2000);
-
-      const cleanup = () => {
-        socket.removeAllListeners();
-        socket.destroy();
-      };
-
-      socket.once("connect", () => {
-        cleanup();
-        trace("tcp check passed", { host, port });
-        resolve();
-      });
-
-      const retry = () => {
-        cleanup();
-        if (Date.now() - startedAt >= timeoutMs) {
-          reject(new Error(`Timed out waiting for ${host}:${port}`));
-          return;
-        }
-        setTimeout(tryConnect, 1000);
-      };
-
-      socket.once("error", retry);
-      socket.once("timeout", retry);
-    };
-
-    tryConnect();
-  });
-}
-
-async function assertLocalService({ name, host, port, timeoutMs, hint }) {
-  try {
-    await waitForTcp(host, port, timeoutMs);
-  } catch (failure) {
-    const suffix = hint ? ` ${hint}` : "";
-    throw new Error(`${name} is not reachable at ${host}:${port}.${suffix}`, { cause: failure });
-  }
-}
-
-async function assertTcpPortFree({ name, host, port }) {
-  await new Promise((resolve, reject) => {
-    const server = net.createServer();
-
-    const cleanup = () => {
-      server.removeAllListeners();
-      server.close(() => null);
-    };
-
-    server.once("error", (failure) => {
-      cleanup();
-      if (failure?.code === "EADDRINUSE") {
-        reject(new Error(`${name} port ${host}:${port} is already in use. Stop the old E2E service before retrying.`));
-        return;
-      }
-      reject(failure);
-    });
-
-    server.once("listening", () => {
-      cleanup();
-      resolve();
-    });
-
-    server.listen(port, host);
-  });
-}
-
-function createProcessManager() {
-  const childProcesses = [];
-  let cleanupCompleted = false;
-
-  return {
-    add(child) {
-      childProcesses.push(child);
-      return child;
-    },
-    stopAll() {
-      if (cleanupCompleted) {
-        return;
-      }
-      cleanupCompleted = true;
-
-      for (const child of childProcesses.reverse()) {
-        if (!child?.pid || child.exitCode !== null) {
-          continue;
-        }
-
-        trace("terminating child process", { pid: child.pid });
-        if (process.platform === "win32") {
-          spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
-            stdio: "ignore",
-            timeout: 5000
-          });
-          continue;
-        }
-
-        child.kill("SIGTERM");
-        spawnSync(process.execPath, ["-e", "setTimeout(() => process.exit(0), 500)"], {
-          stdio: "ignore",
-          timeout: 1000
-        });
-        if (child.exitCode === null) {
-          child.kill("SIGKILL");
-        }
-      }
-    }
-  };
-}
-
-function waitForShutdownSignal() {
-  return new Promise((resolve) => {
-    process.once("SIGINT", resolve);
-    process.once("SIGTERM", resolve);
   });
 }
 

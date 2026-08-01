@@ -59,6 +59,35 @@ web-page/
 
 ## Getting Started
 
+## أوامر التشغيل الرسمية
+
+لتقليل الالتباس بين السكربتات القديمة والجديدة، استخدم هذه الأوامر كمرجع أساسي:
+
+```bash
+npm run clean
+npm run dev:all
+npm run check:quick
+npm run check:release
+npm run e2e:clean
+npm run release:doctor
+npm run release:prepare
+```
+
+- `clean`: حذف مخرجات البناء والاختبارات والإصدارات القديمة.
+- `dev:all`: تشغيل خادم الترخيص والـ Backend والـ Frontend معاً.
+- `check:quick`: فحص سريع للكود والتنسيق والأنواع.
+- `check:release`: فحص إصدار كامل مع اختبارات المتصفح الأساسية والعميقة.
+- `e2e:clean`: إيقاف بقايا تشغيل E2E والخوادم القديمة التابعة للمشروع.
+- `release:doctor`: تقرير جاهزية التسليم.
+- `release:prepare`: تنظيف ثم تقرير جاهزية.
+
+راجع أيضاً:
+
+- `docs/USER_INSTALL_CHECKLIST_AR.md`
+- `docs/ADMIN_BACKUP_RESTORE_AR.md`
+- `docs/RELEASE_PROCESS_AR.md`
+- `docs/TROUBLESHOOTING_AR.md`
+
 ### المتطلبات
 
 - Node.js 20+
