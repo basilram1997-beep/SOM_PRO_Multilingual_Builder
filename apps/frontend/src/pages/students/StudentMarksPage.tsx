@@ -46,6 +46,7 @@ export function StudentMarksPage({ currentUser }: Props) {
   const [pageMessage, setPageMessage] = useState("");
   const [savingGradeEntries, setSavingGradeEntries] = useState(false);
   const loadedGradeEntryKeyRef = useRef("");
+  const dirtyGradeEntryKeyRef = useRef("");
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const isAdmin = currentUser.role === "ADMIN";
   const canUseImport = isAdmin || import.meta.env.DEV;
@@ -133,6 +134,8 @@ export function StudentMarksPage({ currentUser }: Props) {
         gradeEntry.sections
       );
       setDraftRows(normalized.rows);
+      loadedGradeEntryKeyRef.current = draftKey;
+      dirtyGradeEntryKeyRef.current = "";
       if (draftKey) {
         saveGradeEntryDraft(draftKey, normalized);
       }
@@ -212,6 +215,7 @@ export function StudentMarksPage({ currentUser }: Props) {
     ) {
       setDraftRows({});
       loadedGradeEntryKeyRef.current = "";
+      dirtyGradeEntryKeyRef.current = "";
       return;
     }
 
@@ -220,6 +224,7 @@ export function StudentMarksPage({ currentUser }: Props) {
       .get(gradeEntry.classId, gradeEntry.subjectId, gradeEntry.certificateType)
       .then((response) => {
         if (!active) return;
+        if (dirtyGradeEntryKeyRef.current === draftKey) return;
         const normalized = normalizeGradeEntryDraft(
           response.data
             ? { rows: response.data.rows || {}, updatedAt: String(response.data.updatedAt || new Date().toISOString()) }
@@ -233,6 +238,7 @@ export function StudentMarksPage({ currentUser }: Props) {
       })
       .catch(() => {
         if (!active) return;
+        if (dirtyGradeEntryKeyRef.current === draftKey) return;
         const stored = loadGradeEntryDraft(draftKey);
         const normalized = normalizeGradeEntryDraft(stored, studentIds, gradeEntry.sections);
         setDraftRows(normalized.rows);
@@ -274,6 +280,9 @@ export function StudentMarksPage({ currentUser }: Props) {
   ]);
 
   function updateMark(studentId: string, sectionId: string, value: string) {
+    if (draftKey) {
+      dirtyGradeEntryKeyRef.current = draftKey;
+    }
     setDraftRows((previous) => ({
       ...previous,
       [studentId]: {
@@ -354,7 +363,11 @@ export function StudentMarksPage({ currentUser }: Props) {
         <div className="attendance-controls lesson-controls lesson-subject-filter">
           <label className="lesson-subject-filter-label">
             {t("common.subject")}
-            <select value={gradeEntry.subjectId} onChange={(event) => gradeEntry.setSubjectId(event.target.value)}>
+            <select
+              data-e2e="grade-entry-subject-select"
+              value={gradeEntry.subjectId}
+              onChange={(event) => gradeEntry.setSubjectId(event.target.value)}
+            >
               <option value="">{t("gradeEntry.selectSubject")}</option>
               {gradeEntry.subjects.map((item) => (
                 <option key={item.id} value={item.id}>

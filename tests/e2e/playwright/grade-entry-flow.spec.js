@@ -78,7 +78,7 @@ async function ensureTeacherFixtures(page) {
         role: "TEACHER"
       }
     });
-    if (!createTeacherResponse.ok()) {
+    if (!createTeacherResponse.ok() && createTeacherResponse.status() !== 409) {
       const payload = await createTeacherResponse.json().catch(() => ({}));
       throw new Error(payload?.message || `Could not create primary teacher user (${createTeacherResponse.status()})`);
     }
@@ -94,7 +94,7 @@ async function ensureTeacherFixtures(page) {
         role: "TEACHER"
       }
     });
-    if (!createBackupUserResponse.ok()) {
+    if (!createBackupUserResponse.ok() && createBackupUserResponse.status() !== 409) {
       const payload = await createBackupUserResponse.json().catch(() => ({}));
       throw new Error(
         payload?.message || `Could not create backup teacher user (${createBackupUserResponse.status()})`
@@ -146,24 +146,27 @@ test.describe.serial("SOM PRO end-to-end grade flow", () => {
     );
     await expect(page.locator('[data-e2e="student-marks-page"]')).toBeVisible();
 
-    const classSelect = page.locator('[data-e2e="grade-entry-class-select"]');
-    await expect(classSelect).toBeVisible();
-    const classValue = await classSelect.locator("option").nth(1).getAttribute("value");
-    if (classValue) {
-      await classSelect.selectOption(classValue);
+    const subjectSelect = page.locator('[data-e2e="grade-entry-subject-select"]');
+    await expect(subjectSelect).toBeVisible();
+    const subjectValue = await subjectSelect.locator("option").nth(1).getAttribute("value");
+    if (subjectValue) {
+      await subjectSelect.selectOption(subjectValue);
     }
 
-    const subjectButtons = page.locator('[data-e2e^="grade-entry-subject-"]');
-    await expect(subjectButtons.first()).toBeVisible();
-    await subjectButtons.first().click();
-    await expect(page.locator('[data-e2e="grade-entry-term-term1"]')).toHaveAttribute("aria-pressed", "true");
+    const firstTermTypeButton = page.locator('[data-e2e="grade-entry-type-TERM1_BIMONTHLY"]');
+    await expect(firstTermTypeButton).toBeVisible();
+    await firstTermTypeButton.click();
+    await expect(firstTermTypeButton).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator('[data-e2e="grade-entry-marks-table"]')).toBeVisible();
 
     const markInputs = page.locator('[data-e2e^="grade-entry-mark-"]');
     await expect(markInputs.first()).toBeVisible();
+    const firstMarkInputTestId = await markInputs.first().getAttribute("data-e2e");
+    expect(firstMarkInputTestId).toBeTruthy();
     const firstThreeValues = ["9", "8", "7"];
     for (let index = 0; index < Math.min(3, await markInputs.count()); index += 1) {
       await markInputs.nth(index).fill(firstThreeValues[index]);
+      await expect(markInputs.nth(index)).toHaveValue(firstThreeValues[index]);
     }
 
     await page.locator('[data-e2e="grade-entry-save"]').click({ force: true });
@@ -177,14 +180,14 @@ test.describe.serial("SOM PRO end-to-end grade flow", () => {
       '[data-e2e="nav-group-toggle-students-management"]',
       '[data-e2e="nav-student-marks"]'
     );
-    await expect(classSelect).toBeVisible();
-    if (classValue) {
-      await classSelect.selectOption(classValue);
+    await expect(subjectSelect).toBeVisible();
+    if (subjectValue) {
+      await subjectSelect.selectOption(subjectValue);
     }
-    await expect(subjectButtons.first()).toBeVisible();
-    await subjectButtons.first().click();
+    await expect(firstTermTypeButton).toBeVisible();
+    await firstTermTypeButton.click();
     await expect(page.locator('[data-e2e="grade-entry-marks-table"]')).toBeVisible();
-    await expect(page.locator('[data-e2e^="grade-entry-mark-"]').first()).toHaveValue("9");
+    await expect(page.locator(`[data-e2e="${firstMarkInputTestId}"]`)).toHaveValue("9");
 
     const adminAuth = await apiLogin(page, ADMIN_EMAIL, ADMIN_PASSWORD);
     await setBrowserAuth(page, adminAuth);
@@ -193,17 +196,13 @@ test.describe.serial("SOM PRO end-to-end grade flow", () => {
     await expect(page.locator('[data-e2e="reports-page"]')).toBeVisible();
     await page.locator('[data-e2e="report-tab-grades"]').click();
     await page.locator('[data-e2e="grades-show"]').click();
-    await expect(page.locator("#grades-report-print")).toContainText("رياضيات");
+    await expect(page.locator("#grades-report-print")).toContainText("SOM E2E Subject");
 
     const backupAuth = await apiLogin(page, BACKUP_TEACHER_EMAIL, BACKUP_TEACHER_PASSWORD);
     await setBrowserAuth(page, backupAuth);
 
-    await openSidebarSection(
-      page,
-      '[data-e2e="nav-group-toggle-students-management"]',
-      '[data-e2e="nav-student-marks"]'
-    );
+    await page.locator('[data-e2e="nav-teacher-marks"]').click();
     await expect(page.locator('[data-e2e="student-marks-page"]')).toBeVisible();
-    await expect(page.locator(".grade-entry-warning")).toBeVisible();
+    await expect(page.locator('[data-e2e="grade-entry-marks-table"]')).toBeHidden();
   });
 });

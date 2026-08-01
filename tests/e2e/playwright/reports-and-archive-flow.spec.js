@@ -5,6 +5,7 @@ const ADMIN_EMAIL = process.env.SOM_E2E_ADMIN_EMAIL || "admin662452";
 const ADMIN_PASSWORD = process.env.SOM_E2E_ADMIN_PASSWORD || "E2E-Playwright-123!";
 const LICENSE_CODE = getE2ELicenseCode();
 const E2E_API_BASE_URL = process.env.SOM_E2E_API_BASE_URL || "http://127.0.0.1:4000";
+const E2E_TEACHER_NAME = process.env.SOM_E2E_TEACHER_NAME || "SOM E2E Teacher";
 
 let bootstrapPromise;
 
@@ -66,12 +67,12 @@ test.describe.serial("SOM PRO end-to-end reports and archive flow", () => {
 
     const teacherSelect = page.locator('[data-e2e="daily-status-teacher"]');
     await expect.poll(async () => teacherSelect.evaluate((select) => select.options.length)).toBeGreaterThan(1);
-    const teacherName = await teacherSelect.evaluate((select) => {
-      const option = select.options[1];
-      return option?.textContent?.trim() || option?.value || "";
-    });
-    await teacherSelect.selectOption({ index: 1 });
-    expect(teacherName).toBeTruthy();
+    const teacherValue = await teacherSelect.evaluate((select, expectedName) => {
+      const option = Array.from(select.options).find((item) => item.textContent?.trim() === expectedName);
+      return option?.value || "";
+    }, E2E_TEACHER_NAME);
+    expect(teacherValue).toBeTruthy();
+    await teacherSelect.selectOption(teacherValue);
 
     await page.locator('[data-e2e="daily-status-type"]').selectOption("ABSENT");
     await page.locator('[data-e2e="daily-status-reason"]').fill("E2E administrative archive review");

@@ -13,9 +13,11 @@ const adminName = process.env.SOM_E2E_ADMIN_NAME || "SOM E2E Admin";
 const adminEmail = process.env.SOM_E2E_ADMIN_EMAIL || "admin@som-e2e.local";
 const adminPassword = process.env.SOM_E2E_ADMIN_PASSWORD || "SOM-E2E-Admin-123!";
 const teacherName = process.env.SOM_E2E_TEACHER_NAME || "SOM E2E Teacher";
+const substituteTeacherName = process.env.SOM_E2E_SUBSTITUTE_TEACHER_NAME || "SOM E2E Substitute Teacher";
 const className = process.env.SOM_E2E_CLASS_NAME || "SOM E2E Class A";
 const subjectName = process.env.SOM_E2E_SUBJECT_NAME || "SOM E2E Subject";
 const studentName = process.env.SOM_E2E_STUDENT_NAME || "SOM E2E Student";
+const dailyDate = process.env.SOM_E2E_DATE || new Date().toISOString().slice(0, 10);
 
 const workingDays = ["السبت", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس"];
 const offDays = ["الأحد", "الجمعة"];
@@ -71,6 +73,15 @@ async function upsertSettings() {
   });
 }
 
+async function resetDailyState() {
+  await prisma.dailySchedule.deleteMany({
+    where: {
+      schoolId,
+      date: dailyDate
+    }
+  });
+}
+
 async function upsertPeriods() {
   for (const period of defaultPeriods) {
     await prisma.periodDefinition.upsert({
@@ -121,6 +132,38 @@ async function upsertTeacher() {
       preferredDays: ["السبت", "الاثنين"],
       preferredClasses: [className],
       preferredPeriods: [1, 2]
+    }
+  });
+}
+
+async function upsertSubstituteTeacher() {
+  return prisma.teacher.upsert({
+    where: { schoolId_name: { schoolId, name: substituteTeacherName } },
+    update: {
+      specialty: subjectName,
+      adminRole: "",
+      employmentRatio: 100,
+      releaseHours: 0,
+      targetLoad: 25,
+      notes: "Free substitute teacher for repeatable Playwright daily schedule tests",
+      workDays: workingDays,
+      preferredDays: ["Ø§Ù„Ø³Ø¨Øª"],
+      preferredClasses: [],
+      preferredPeriods: []
+    },
+    create: {
+      schoolId,
+      name: substituteTeacherName,
+      specialty: subjectName,
+      adminRole: "",
+      employmentRatio: 100,
+      releaseHours: 0,
+      targetLoad: 25,
+      notes: "Free substitute teacher for repeatable Playwright daily schedule tests",
+      workDays: workingDays,
+      preferredDays: ["Ø§Ù„Ø³Ø¨Øª"],
+      preferredClasses: [],
+      preferredPeriods: []
     }
   });
 }
@@ -285,8 +328,10 @@ async function upsertStudent(classId) {
 async function main() {
   await upsertSchool();
   await upsertSettings();
+  await resetDailyState();
   await upsertPeriods();
   const teacher = await upsertTeacher();
+  await upsertSubstituteTeacher();
   const schoolClass = await upsertClass();
   const subject = await upsertSubject();
   await upsertAssignment(teacher.id, schoolClass.id, subject.id);

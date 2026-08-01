@@ -1,6 +1,13 @@
 const path = require("node:path");
 const { error, log, success } = require("./cli-output");
-const { createE2EEnv, createProcessManager, runShell, startProcess, waitForUrl } = require("./e2e-helpers");
+const {
+  assertLocalService,
+  createE2EEnv,
+  createProcessManager,
+  runShell,
+  startProcess,
+  waitForUrl
+} = require("./e2e-helpers");
 
 const projectRoot = path.resolve(__dirname, "..");
 const backendRoot = path.join(projectRoot, "apps", "backend");
@@ -65,6 +72,14 @@ async function main() {
 
   const env = createE2EEnv({ PLAYWRIGHT_SKIP_WEB_SERVER: "1" });
   log(`Starting Playwright browser smoke path with ${Math.round(totalTimeoutMs / 1000)}s timeout`);
+
+  await assertLocalService({
+    name: "PostgreSQL",
+    host: process.env.SOM_E2E_POSTGRES_HOST || "127.0.0.1",
+    port: Number(process.env.SOM_E2E_POSTGRES_PORT || 5432),
+    timeoutMs: Math.min(totalTimeoutMs, 30_000),
+    hint: "Start it with `docker compose up -d postgres redis` before running browser E2E."
+  });
 
   const migrate = runShell("npm run prisma:migrate:deploy -w apps/backend", env, { timeoutMs: totalTimeoutMs });
   if ((migrate.status || 0) !== 0) {

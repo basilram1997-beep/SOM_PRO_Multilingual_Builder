@@ -154,6 +154,7 @@ export function GradeEntrySelectionPanel({
                 <button
                   key={option.type}
                   type="button"
+                  data-e2e={`grade-entry-type-${option.type}`}
                   className={gradeEntry.certificateType === option.type ? "active" : ""}
                   aria-pressed={gradeEntry.certificateType === option.type}
                   onClick={() => chooseType(option.type)}

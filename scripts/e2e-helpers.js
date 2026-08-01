@@ -1,4 +1,5 @@
 const { spawn, spawnSync } = require("node:child_process");
+const net = require("node:net");
 const { generateE2ELicenseCode } = require("./e2e-license");
 
 function timestamp() {
@@ -123,6 +124,51 @@ async function waitForUrl(url, timeoutMs) {
   throw new Error(`Timed out waiting for ${url}`);
 }
 
+function waitForTcp(host, port, timeoutMs) {
+  const startedAt = Date.now();
+
+  return new Promise((resolve, reject) => {
+    const tryConnect = () => {
+      const socket = net.createConnection({ host, port });
+      socket.setTimeout(2000);
+
+      const cleanup = () => {
+        socket.removeAllListeners();
+        socket.destroy();
+      };
+
+      socket.once("connect", () => {
+        cleanup();
+        trace("tcp check passed", { host, port });
+        resolve();
+      });
+
+      const retry = () => {
+        cleanup();
+        if (Date.now() - startedAt >= timeoutMs) {
+          reject(new Error(`Timed out waiting for ${host}:${port}`));
+          return;
+        }
+        setTimeout(tryConnect, 1000);
+      };
+
+      socket.once("error", retry);
+      socket.once("timeout", retry);
+    };
+
+    tryConnect();
+  });
+}
+
+async function assertLocalService({ name, host, port, timeoutMs, hint }) {
+  try {
+    await waitForTcp(host, port, timeoutMs);
+  } catch (failure) {
+    const suffix = hint ? ` ${hint}` : "";
+    throw new Error(`${name} is not reachable at ${host}:${port}.${suffix}`, { cause: failure });
+  }
+}
+
 function createProcessManager() {
   const childProcesses = [];
   let cleanupCompleted = false;
@@ -173,6 +219,7 @@ function waitForShutdownSignal() {
 }
 
 module.exports = {
+  assertLocalService,
   createE2EEnv,
   createProcessManager,
   normalizeWindowsEnv,
@@ -182,5 +229,6 @@ module.exports = {
   startShell,
   trace,
   waitForShutdownSignal,
+  waitForTcp,
   waitForUrl
 };

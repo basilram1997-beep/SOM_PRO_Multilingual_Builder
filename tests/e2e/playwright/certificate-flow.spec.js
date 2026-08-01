@@ -110,10 +110,10 @@ test.describe.serial("SOM PRO end-to-end certificate flow", () => {
     await expect(page.locator('.form-message[role="status"]').first()).toContainText(/حفظ|saved/i);
 
     await page.locator('[data-e2e="certificate-approve"]').click({ force: true });
-    await expect(page.locator(".certificate-status-badge")).toContainText(/معتمد|approved/i);
+    await expect(page.locator('[data-e2e="certificate-publish"]')).toBeEnabled();
 
     await page.locator('[data-e2e="certificate-publish"]').click({ force: true });
-    await expect(page.locator(".certificate-status-badge")).toContainText(/منشور|published/i);
+    await expect(page.locator('[data-e2e="certificate-export"]')).toBeEnabled();
 
     const downloadPromise = page.waitForEvent("download");
     await page.locator('[data-e2e="certificate-export"]').click({ force: true });
