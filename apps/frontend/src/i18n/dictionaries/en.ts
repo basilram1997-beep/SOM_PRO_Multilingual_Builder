@@ -20,6 +20,7 @@
   "nav.archive": "Archive",
   "nav.reports": "Reports",
   "nav.securityMonitoring": "Security Monitoring",
+  "nav.operatorHealth": "Operator Health",
   "nav.settings": "School Settings",
   "nav.license": "License",
   "nav.programsGroup": "Programs & Schedules",

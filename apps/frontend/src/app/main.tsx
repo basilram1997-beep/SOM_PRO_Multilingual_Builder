@@ -41,6 +41,9 @@ const SecurityMonitoringPage = lazy(() =>
 const OperationsPage = lazy(() =>
   import("../pages/settings/OperationsPage").then((module) => ({ default: module.OperationsPage }))
 );
+const OperatorHealthPage = lazy(() =>
+  import("../pages/settings/OperatorHealthPage").then((module) => ({ default: module.OperatorHealthPage }))
+);
 const SettingsPage = lazy(() =>
   import("../pages/settings/SettingsPage").then((module) => ({ default: module.SettingsPage }))
 );
@@ -121,6 +124,7 @@ export type PageKey =
   | "reports"
   | "operations"
   | "securityMonitoring"
+  | "operatorHealth"
   | "settings"
   | "schoolNotifications"
   | "users"
@@ -136,6 +140,8 @@ function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [checkingSession, setCheckingSession] = useState(Boolean(getAuthToken()));
   const [homeroomCertificateAccess, setHomeroomCertificateAccess] = useState(false);
+  const showOperatorHealth =
+    import.meta.env.DEV || String(import.meta.env.VITE_SOM_SHOW_OPERATOR_HEALTH || "").toLowerCase() === "true";
 
   useEffect(() => {
     let active = true;
@@ -224,11 +230,13 @@ function App() {
   useEffect(() => {
     if (!user) return;
     const internalToolPage = page === "operations" || page === "securityMonitoring";
+    const operatorHealthPage = page === "operatorHealth";
     const allowed =
       (!internalToolPage || import.meta.env.DEV) &&
+      (!operatorHealthPage || showOperatorHealth) &&
       (canAccessPage(user.role, page) || (page === "studentCertificates" && homeroomCertificateAccess));
     if (!allowed) setPage(fallbackPageForRole(user.role));
-  }, [homeroomCertificateAccess, page, user]);
+  }, [homeroomCertificateAccess, page, showOperatorHealth, user]);
 
   useEffect(() => {
     const mainContent = document.getElementById("main-content");
@@ -283,6 +291,7 @@ function App() {
     reports: <ReportsPage />,
     operations: <OperationsPage />,
     securityMonitoring: <SecurityMonitoringPage />,
+    operatorHealth: <OperatorHealthPage />,
     settings: <SettingsPage />,
     schoolNotifications: <SchoolNotificationsPage />,
     users: <UsersPage />,
@@ -291,9 +300,11 @@ function App() {
 
   function navigate(nextPage: PageKey, nextDailySection?: DailySectionKey) {
     const internalToolPage = nextPage === "operations" || nextPage === "securityMonitoring";
+    const operatorHealthPage = nextPage === "operatorHealth";
     if (
       !user ||
       ((!internalToolPage || import.meta.env.DEV) &&
+        (!operatorHealthPage || showOperatorHealth) &&
         (canAccessPage(user.role, nextPage) || (nextPage === "studentCertificates" && homeroomCertificateAccess)))
     ) {
       setPage(nextPage);

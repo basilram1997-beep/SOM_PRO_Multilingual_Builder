@@ -1,8 +1,11 @@
 import { Prisma, type UserRole } from "@prisma/client";
 import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import { Router } from "express";
 import { z } from "zod";
 import { SchoolInfoSchema } from "@som/shared";
+import { env } from "../../config/env";
 import { prisma } from "../../db/prisma";
 import { rejectMultipartContent } from "../../middleware/requestProtections";
 import { validateBody } from "../../middleware/validate";
@@ -12,6 +15,8 @@ import { getRequestSchoolId } from "../../services/schoolContext";
 import { ensureSchoolSettings } from "../../services/schoolSettings";
 import { recordAuditLog } from "../../services/auditLog";
 import { createBackupJobRecord, createReportExportRecord } from "../../services/artifactRecords";
+import { getLicenseState } from "../../services/licenseService";
+import { getRequestDeviceInfo } from "../../services/deviceContext";
 
 export const schoolsRouter = Router();
 schoolsRouter.use(rejectMultipartContent);
@@ -30,6 +35,58 @@ function canAccessSchool(reqSchoolId: string, targetSchoolId: string) {
 
 function canManageSchoolOperations(role: UserRole | undefined) {
   return Boolean(role && canRole(role, "manageSettings"));
+}
+
+function canUseOperatorHealth() {
+  return env.appEnv !== "production" || process.env.SOM_ENABLE_OPERATOR_HEALTH === "true";
+}
+
+async function checkDatabaseHealth() {
+  const startedAt = Date.now();
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return {
+      ok: true,
+      latencyMs: Date.now() - startedAt,
+      message: "reachable"
+    };
+  } catch (error) {
+    logSafeError("schools.operatorHealth.database", error);
+    return {
+      ok: false,
+      latencyMs: Date.now() - startedAt,
+      message: "unreachable"
+    };
+  }
+}
+
+function readStorageHealth() {
+  const targetPath = path.resolve(process.env.SOM_STORAGE_PATH || process.cwd());
+  try {
+    const stats = fs.statfsSync(targetPath);
+    const totalBytes = Number(stats.blocks) * Number(stats.bsize);
+    const availableBytes = Number(stats.bavail) * Number(stats.bsize);
+    const usedBytes = Math.max(totalBytes - availableBytes, 0);
+    const usedPercent = totalBytes > 0 ? Math.round((usedBytes / totalBytes) * 1000) / 10 : null;
+    return {
+      ok: true,
+      path: targetPath,
+      totalBytes,
+      availableBytes,
+      usedPercent,
+      message: "available"
+    };
+  } catch (error) {
+    logSafeError("schools.operatorHealth.storage", error);
+    return {
+      ok: false,
+      path: targetPath,
+      totalBytes: null,
+      availableBytes: null,
+      usedPercent: null,
+      message: "unavailable"
+    };
+  }
 }
 
 async function buildSchoolDashboard(schoolId: string) {
@@ -257,6 +314,82 @@ schoolsRouter.get("/operations", async (req, res) => {
   } catch (error) {
     logSafeError("schools.operations", error);
     res.status(500).json({ error: "OPERATIONS_LOAD_FAILED", message: "تعذر تحميل لوحة العمليات" });
+  }
+});
+
+schoolsRouter.get("/operator-health", async (req, res) => {
+  const schoolId = await getRequestSchoolId(req);
+  if (!canManageSchoolOperations(req.user?.role)) {
+    return res.status(403).json({ error: "FORBIDDEN", message: "ليس لديك صلاحية عرض صحة التشغيل" });
+  }
+
+  if (!canUseOperatorHealth()) {
+    return res.status(404).json({ error: "NOT_FOUND", message: "صفحة صحة التشغيل غير مفعلة في هذه النسخة" });
+  }
+
+  try {
+    const [database, license, lastBackup] = await Promise.all([
+      checkDatabaseHealth(),
+      getLicenseState(schoolId, getRequestDeviceInfo(req)),
+      prisma.backupJob.findFirst({
+        where: { schoolId },
+        orderBy: [{ startedAt: "desc" }],
+        select: {
+          id: true,
+          backupType: true,
+          status: true,
+          encrypted: true,
+          filePath: true,
+          startedAt: true,
+          finishedAt: true
+        }
+      })
+    ]);
+
+    const generatedAt = new Date().toISOString();
+    res.json({
+      data: {
+        generatedAt,
+        database,
+        license: {
+          status: license.status,
+          plan: license.plan,
+          expiresAt: license.expiresAt,
+          readOnly: license.readOnly,
+          readOnlyReason: license.readOnlyReason || null,
+          activeDevicesCount: license.activeDevicesCount ?? null,
+          maxDevices: license.maxDevices
+        },
+        backup: lastBackup
+          ? {
+              id: lastBackup.id,
+              backupType: lastBackup.backupType,
+              status: lastBackup.status,
+              encrypted: lastBackup.encrypted,
+              filePath: lastBackup.filePath,
+              startedAt: lastBackup.startedAt.toISOString(),
+              finishedAt: lastBackup.finishedAt ? lastBackup.finishedAt.toISOString() : null
+            }
+          : null,
+        version: {
+          product: "SOM PRO",
+          version: process.env.SOM_VERSION || "0.9.0-rc.1",
+          releaseChannel: process.env.SOM_RELEASE_CHANNEL || "release-candidate",
+          runtimeMode: process.env.SOM_RUNTIME_MODE || env.appEnv,
+          apiEnvironment: process.env.SOM_API_ENV || env.appEnv,
+          nodeVersion: process.version
+        },
+        storage: readStorageHealth(),
+        lastCheck: {
+          at: generatedAt,
+          source: "backend"
+        }
+      },
+      error: null
+    });
+  } catch (error) {
+    logSafeError("schools.operatorHealth", error);
+    res.status(500).json({ error: "OPERATOR_HEALTH_LOAD_FAILED", message: "تعذر تحميل تقرير صحة التشغيل" });
   }
 });
 

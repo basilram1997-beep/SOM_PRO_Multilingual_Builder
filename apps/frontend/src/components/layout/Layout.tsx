@@ -18,6 +18,7 @@ import {
   MapPin,
   Settings,
   ShieldCheck,
+  Stethoscope,
   Smile,
   Table2,
   UserCheck,
@@ -229,6 +230,7 @@ const settingsGroup: SidebarGroup = {
     { key: "reports", page: "reports", labelKey: "nav.reports", icon: FileText },
     { key: "operations", page: "operations", labelKey: "reports.operationsTitle", icon: Table2 },
     { key: "security-monitoring", page: "securityMonitoring", labelKey: "nav.securityMonitoring", icon: ShieldCheck },
+    { key: "operator-health", page: "operatorHealth", labelKey: "nav.operatorHealth", icon: Stethoscope },
     { key: "school-notifications", page: "schoolNotifications", labelKey: "nav.schoolNotifications", icon: BellRing },
     { key: "users", page: "users", labelKey: "nav.users", icon: UserCog },
     { key: "license", page: "license", labelKey: "nav.license", icon: ShieldCheck }
@@ -358,6 +360,8 @@ export function Layout({
   const isTeacherUser = currentUser.role === "TEACHER";
   const isStudentAreaUser = currentUser.role === "STUDENT" || currentUser.role === "PARENT";
   const showInternalTools = import.meta.env.DEV;
+  const showOperatorHealth =
+    import.meta.env.DEV || String(import.meta.env.VITE_SOM_SHOW_OPERATOR_HEALTH || "").toLowerCase() === "true";
   const visibleMainItems = mainItems.filter(
     (item) => canAccessPage(currentUser.role, item.page) && !(isStudentAreaUser && item.page === "studentPortal")
   );
@@ -375,6 +379,7 @@ export function Layout({
   const visibleSettingsItems = settingsGroup.items.filter((item) => {
     if (!canAccessPage(currentUser.role, item.page)) return false;
     if (!showInternalTools && (item.page === "operations" || item.page === "securityMonitoring")) return false;
+    if (!showOperatorHealth && item.page === "operatorHealth") return false;
     return true;
   });
   const visibleStudentPortalItems = studentPortalGroup.items.filter((item) =>
@@ -388,6 +393,7 @@ export function Layout({
     current === "archive" ||
     current === "reports" ||
     (showInternalTools && (current === "operations" || current === "securityMonitoring")) ||
+    (showOperatorHealth && current === "operatorHealth") ||
     current === "schoolNotifications" ||
     current === "users" ||
     current === "license";

@@ -23,6 +23,7 @@ Object.assign(ar, {
   "nav.teacherLessonToday": "درس اليوم",
   "nav.teacherHomework": "التحضير والواجبات",
   "nav.teacherExams": "جدول الامتحانات",
+  "nav.operatorHealth": "صحة التشغيل",
   "users.student": "طالب",
   "users.parent": "ولي أمر",
   "users.teacher": "معلم",

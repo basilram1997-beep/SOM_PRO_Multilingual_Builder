@@ -128,10 +128,15 @@ npm install
 - `SOM_LICENSE_SERVER_URL`
 - `DATABASE_URL`
 - `REDIS_URL`
+- `SOM_ENABLE_OPERATOR_HEALTH`
+- `VITE_SOM_SHOW_OPERATOR_HEALTH`
 - `CORS_ORIGIN`
 - `JWT_SECRET`
 
 لا تضع أسرارًا حقيقية داخل Git.
+
+صفحة `صحة التشغيل` مخصصة للدعم الفني والمطورين. لا تظهر للمستخدم النهائي افتراضياً؛ فعّلها فقط عند الحاجة عبر
+`SOM_ENABLE_OPERATOR_HEALTH=true` في الـ Backend و`VITE_SOM_SHOW_OPERATOR_HEALTH=true` في الـ Frontend.
 
 ### Recommended runtime
 

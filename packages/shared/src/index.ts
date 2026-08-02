@@ -29,6 +29,7 @@ export const ROLE_ALLOWED_PAGES = {
     "reports",
     "operations",
     "securityMonitoring",
+    "operatorHealth",
     "settings",
     "schoolNotifications",
     "users",

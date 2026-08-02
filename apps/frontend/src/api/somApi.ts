@@ -60,6 +60,7 @@ import type {
   SecurityIncidentUpdateRequest,
   SecurityReport
 } from "../features/reports/reportTypes";
+import type { OperatorHealthResponse } from "../features/operatorHealth/operatorHealthTypes";
 import type { SchoolInfo, SettingPeriod } from "../features/settings/settingsTypes";
 import type {
   Teacher,
@@ -515,6 +516,7 @@ export const somApi = {
     }) => api.post<{ data: { ok: boolean; expiresAt: string } }>("/api/reports/export-events", data)
   },
   schools: {
-    operations: () => api.get<{ data: SchoolOperationsResponse }>("/api/schools/operations")
+    operations: () => api.get<{ data: SchoolOperationsResponse }>("/api/schools/operations"),
+    operatorHealth: () => api.get<{ data: OperatorHealthResponse }>("/api/schools/operator-health")
   }
 };
