@@ -1,42 +1,13 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { somApi } from "../../api/somApi";
 import { setAuthToken } from "../../api/http";
 import type { AuthUser } from "./authTypes";
+import { useI18n } from "../../i18n/i18n";
 
 let rememberedLoginEmail = "";
 let rememberedLoginEnabled = false;
 
 type CreateRole = "STUDENT" | "PARENT" | "TEACHER" | "HOMEROOM_TEACHER";
-
-const labels = {
-  title: "تسجيل الدخول",
-  licenseCode: "كود الترخيص",
-  username: "اسم المستخدم",
-  password: "كلمة المرور",
-  passwordShort: "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
-  remember: "حفظ بيانات الدخول على هذا الجهاز",
-  login: "دخول",
-  loading: "جارٍ الدخول...",
-  failed: "اسم المستخدم أو كلمة المرور أو كود الترخيص غير صحيح",
-  missingLicense: "أدخل كود الترخيص أولًا",
-  licenseMismatch: "كود الترخيص لا يطابق ترخيص التثبيت على هذا الجهاز. استخدم نفس الكود الذي أدخلته أثناء التثبيت.",
-  createCardTitle: "إنشاء حساب جديد",
-  createCardHelp: "أدخل الاسم والبريد الإلكتروني وكلمة المرور ثم أنشئ الحساب مباشرة.",
-  createCardHint: "يمكنك إنشاء حساب طالب أو ولي أمر أو معلم أو مربي صف.",
-  createRole: "نوع الحساب",
-  createStudent: "طالب",
-  createParent: "ولي أمر",
-  createTeacher: "معلم",
-  createHomeroomTeacher: "مربي صف",
-  createName: "اسم الحساب",
-  createUsername: "البريد الإلكتروني",
-  createPassword: "كلمة المرور",
-  createAccount: "إنشاء الحساب",
-  createCreating: "جارٍ الإنشاء...",
-  createSaved: "تم إنشاء الحساب ويمكنك تسجيل الدخول به الآن",
-  createFailed: "تعذر إنشاء الحساب",
-  createRequired: "أكمل بيانات الحساب أولًا"
-};
 
 function normalizeCode(value: string) {
   return String(value || "")
@@ -66,6 +37,45 @@ async function createAccount(name: string, email: string, password: string, role
 }
 
 export function useLogin(onLogin: (user: AuthUser) => void) {
+  const { t } = useI18n();
+  const labels = useMemo(
+    () => ({
+      title: t("login.title"),
+      heroAriaLabel: t("login.heroAriaLabel"),
+      heroWelcome: t("login.heroWelcome"),
+      systemStatus: t("login.systemStatus"),
+      systemOnline: t("login.systemOnline"),
+      systemOffline: t("login.systemOffline"),
+      close: t("common.close"),
+      licenseCode: t("login.licenseCode"),
+      username: t("login.username"),
+      password: t("login.password"),
+      passwordShort: t("login.passwordShort"),
+      remember: t("login.remember"),
+      login: t("login.submit"),
+      loading: t("login.loading"),
+      failed: t("login.failed"),
+      missingLicense: t("login.missingLicense"),
+      licenseMismatch: t("login.licenseMismatch"),
+      createCardTitle: t("login.createCardTitle"),
+      createCardHelp: t("login.createCardHelp"),
+      createCardHint: t("login.createCardHint"),
+      createRole: t("login.createRole"),
+      createStudent: t("login.createStudent"),
+      createParent: t("login.createParent"),
+      createTeacher: t("login.createTeacher"),
+      createHomeroomTeacher: t("login.createHomeroomTeacher"),
+      createName: t("login.createName"),
+      createUsername: t("login.createUsername"),
+      createPassword: t("login.createPassword"),
+      createAccount: t("login.createAccount"),
+      createCreating: t("login.createCreating"),
+      createSaved: t("login.createSaved"),
+      createFailed: t("login.createFailed"),
+      createRequired: t("login.createRequired")
+    }),
+    [t]
+  );
   const [licenseCode, setLicenseCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { KeyRound, LockKeyhole, LogIn, X } from "lucide-react";
 import { useLogin } from "../../features/auth/useLogin";
 import type { AuthUser } from "../../features/auth/authTypes";
+import { LanguageSwitcher } from "../../i18n/i18n";
 
 type LoginPageProps = {
   onLogin: (user: AuthUser) => void;
@@ -51,20 +52,23 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   return (
     <main className="login-screen" data-e2e="login-screen">
+      <div className="login-language-switcher">
+        <LanguageSwitcher />
+      </div>
       <div className="login-stack">
-        <section className="login-hero-panel" aria-label="معلومات النظام">
+        <section className="login-hero-panel" aria-label={labels.heroAriaLabel}>
           <div className="login-hero-brand">
             <div className="login-hero-mark">SOM PRO</div>
             <div>
               <p className="login-hero-kicker">SOM PRO</p>
-              <h2>مرحبًا بك في SOM PRO، منصة إدارة المدرسة اليومية</h2>
+              <h2>{labels.heroWelcome}</h2>
             </div>
           </div>
 
           <div className="login-hero-status">
-            <span>حالة النظام</span>
+            <span>{labels.systemStatus}</span>
             <strong className={systemOnline ? "login-status-online" : "login-status-offline"}>
-              {systemOnline ? "متصل" : "غير متصل"}
+              {systemOnline ? labels.systemOnline : labels.systemOffline}
             </strong>
           </div>
         </section>
@@ -138,7 +142,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 type="button"
                 className="login-modal-close"
                 onClick={() => setCreateAccountOpen(false)}
-                aria-label="إغلاق"
+                aria-label={labels.close}
               >
                 <X size={18} />
               </button>

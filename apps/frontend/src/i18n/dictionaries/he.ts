@@ -44,6 +44,38 @@ Object.assign(he, {
 });
 
 Object.assign(he, {
+  "login.title": "כניסה",
+  "login.heroAriaLabel": "מידע מערכת",
+  "login.heroWelcome": "ברוכים הבאים ל-SOM PRO, פלטפורמת ניהול בית הספר היומית",
+  "login.systemStatus": "מצב המערכת",
+  "login.systemOnline": "מחובר",
+  "login.systemOffline": "לא מחובר",
+  "login.licenseCode": "קוד רישיון",
+  "login.username": "שם משתמש",
+  "login.password": "סיסמה",
+  "login.passwordShort": "הסיסמה חייבת לכלול לפחות 6 תווים",
+  "login.remember": "שמירת פרטי הכניסה במכשיר זה",
+  "login.submit": "כניסה",
+  "login.loading": "מתחבר...",
+  "login.failed": "שם המשתמש, הסיסמה או קוד הרישיון אינם נכונים",
+  "login.missingLicense": "יש להזין תחילה את קוד הרישיון",
+  "login.licenseMismatch": "קוד הרישיון אינו תואם לרישיון ההתקנה במכשיר זה. השתמש באותו קוד שהוזן בזמן ההתקנה.",
+  "login.createCardTitle": "יצירת חשבון חדש",
+  "login.createCardHelp": 'הזן שם, דוא"ל וסיסמה, ואז צור את החשבון ישירות.',
+  "login.createCardHint": "אפשר ליצור חשבון תלמיד, הורה, מורה או מחנך כיתה.",
+  "login.createRole": "סוג חשבון",
+  "login.createStudent": "תלמיד",
+  "login.createParent": "הורה",
+  "login.createTeacher": "מורה",
+  "login.createHomeroomTeacher": "מחנך כיתה",
+  "login.createName": "שם החשבון",
+  "login.createUsername": 'דוא"ל',
+  "login.createPassword": "סיסמה",
+  "login.createAccount": "יצירת חשבון",
+  "login.createCreating": "יוצר...",
+  "login.createSaved": "החשבון נוצר ואפשר להתחבר כעת",
+  "login.createFailed": "לא ניתן ליצור את החשבון",
+  "login.createRequired": "יש להשלים תחילה את פרטי החשבון",
   "certificates.printPdf": "הדפסה / שמירת PDF"
 });
 

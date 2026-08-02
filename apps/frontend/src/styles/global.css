@@ -2215,6 +2215,17 @@ html[dir="ltr"] .archive-table td {
     linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
   padding: 24px;
 }
+.login-language-switcher {
+  position: fixed;
+  top: 14px;
+  z-index: 40;
+}
+html[dir="ltr"] .login-language-switcher {
+  right: 14px;
+}
+html[dir="rtl"] .login-language-switcher {
+  left: 14px;
+}
 .login-stack {
   width: min(980px, 100%);
   display: grid;
@@ -2299,6 +2310,10 @@ html[dir="ltr"] .archive-table td {
   gap: 14px;
   direction: rtl;
 }
+html[dir="ltr"] .login-card,
+html[dir="ltr"] .login-create-modal {
+  direction: ltr;
+}
 .login-icon {
   width: 64px;
   height: 64px;
@@ -2342,6 +2357,9 @@ html[dir="ltr"] .archive-table td {
   justify-content: flex-end;
   gap: 10px;
   margin-top: 4px;
+}
+html[dir="ltr"] .login-card label.login-remember {
+  flex-direction: row;
 }
 .login-card label.login-remember span {
   line-height: 1.4;
