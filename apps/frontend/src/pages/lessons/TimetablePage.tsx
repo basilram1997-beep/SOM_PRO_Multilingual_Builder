@@ -158,6 +158,8 @@ export function TimetablePage({ currentUser }: Props) {
   const { t, language } = useI18n();
   const isStudentViewer = currentUser.role === "STUDENT" || currentUser.role === "PARENT";
   const [date] = useState(new Date().toISOString().slice(0, 10));
+  const [workingDays, setWorkingDays] = useState<string[]>([]);
+  const [baseDay, setBaseDay] = useState("");
   const [periodDefinitions, setPeriodDefinitions] = useState<PeriodDefinition[]>([]);
   const [baseSlots, setBaseSlots] = useState<ScheduleSlot[]>([]);
   const [dailyDetails, setDailyDetails] = useState<DailyDetailsResponse | null>(null);
@@ -173,6 +175,7 @@ export function TimetablePage({ currentUser }: Props) {
       .then((response) => {
         if (!active) return;
         const data = response.data as SettingsResponse;
+        setWorkingDays((data.settings.workingDays || []).map(canonicalDay).filter(Boolean));
         setPeriodDefinitions(data.periods || []);
       })
       .catch(() => {
@@ -228,24 +231,53 @@ export function TimetablePage({ currentUser }: Props) {
     [baseSlots]
   );
 
+  const baseDayOptions = useMemo(() => {
+    const daysFromSlots = weeklyRows.map((slot) => canonicalDay(slot.day || "")).filter(Boolean);
+    const options = workingDays.length > 0 ? workingDays : daysFromSlots;
+    return Array.from(new Set(options)).sort((left, right) => dayRank(left) - dayRank(right));
+  }, [weeklyRows, workingDays]);
+
+  useEffect(() => {
+    if (baseDayOptions.length === 0) return;
+    setBaseDay((current) => (current && baseDayOptions.includes(current) ? current : day || baseDayOptions[0]));
+  }, [baseDayOptions, day]);
+
   const selectedBaseRows = useMemo(() => {
+    if (!baseDay) return [];
+    return weeklyRows.filter((slot) => canonicalDay(slot.day || "") === baseDay);
+  }, [baseDay, weeklyRows]);
+
+  const currentDailyBaseRows = useMemo(() => {
     if (!day) return [];
-    return weeklyRows.filter((slot) => slot.day === day);
+    return weeklyRows.filter((slot) => canonicalDay(slot.day || "") === day);
   }, [day, weeklyRows]);
 
   const dailyRows = useMemo(() => {
     const slots =
       dailyDetails?.baseSlots && dailyDetails.baseSlots.length > 0
         ? (dailyDetails.baseSlots as ScheduleSlot[])
-        : selectedBaseRows;
+        : currentDailyBaseRows;
     return sortRows(buildDailyRows(slots, dailyDetails?.substitutions || [], dailyDetails?.events || []));
-  }, [dailyDetails?.baseSlots, dailyDetails?.events, dailyDetails?.substitutions, selectedBaseRows]);
+  }, [currentDailyBaseRows, dailyDetails?.baseSlots, dailyDetails?.events, dailyDetails?.substitutions]);
 
   return (
     <div className="page timetable-page">
       <h2>{isStudentViewer ? t("nav.studentTimetable") : t("timetable.title")}</h2>
 
       <Card title={t("nav.teacherBaseSchedule")}>
+        <div className="timetable-base-controls">
+          <label>
+            <span>{t("timetable.day")}:</span>
+            <select value={baseDay} onChange={(event) => setBaseDay(event.target.value)}>
+              {baseDayOptions.map((option) => (
+                <option key={option} value={option}>
+                  {localizeDay(option, language)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
         <div className="table-wrap lesson-table-wrap">
           <table className="lesson-table timetable-table">
             <thead>
@@ -259,7 +291,7 @@ export function TimetablePage({ currentUser }: Props) {
               </tr>
             </thead>
             <tbody>
-              {weeklyRows.map((slot) => (
+              {selectedBaseRows.map((slot) => (
                 <tr key={`${slot.day || ""}-${slot.period}-${slot.classId}`}>
                   <td>{localizeDay(slot.day || "", language)}</td>
                   <td>{slot.period}</td>
