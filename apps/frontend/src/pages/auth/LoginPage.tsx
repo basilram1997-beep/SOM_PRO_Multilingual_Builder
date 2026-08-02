@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { KeyRound, LockKeyhole, LogIn, X } from "lucide-react";
+import { KeyRound, LogIn, X } from "lucide-react";
 import { useLogin } from "../../features/auth/useLogin";
 import type { AuthUser } from "../../features/auth/authTypes";
 import { LanguageSwitcher } from "../../i18n/i18n";
@@ -60,7 +60,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           <div className="login-hero-brand">
             <div className="login-hero-mark">SOM PRO</div>
             <div>
-              <p className="login-hero-kicker">SOM PRO</p>
               <h2>{labels.heroWelcome}</h2>
             </div>
           </div>
@@ -74,12 +73,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         </section>
 
         <form className="login-card" onSubmit={submit} data-e2e="login-form" noValidate>
-          <div className="login-icon">
-            <LockKeyhole size={32} strokeWidth={2.2} />
-          </div>
-          <div className="login-brand">
-            <strong>SOM</strong> <span>PRO</span>
-          </div>
           <h1>{labels.title}</h1>
           <label htmlFor="login-username-input">
             <span>{labels.username}</span>
