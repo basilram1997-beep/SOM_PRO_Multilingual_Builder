@@ -11,6 +11,11 @@ services:
       - "5432:5432"
     volumes:
       - sompro_pg_data:/var/lib/postgresql/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   redis:
     image: redis:7-alpine
@@ -18,6 +23,11 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
 
 volumes:
   sompro_pg_data:
