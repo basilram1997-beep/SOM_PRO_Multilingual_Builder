@@ -168,7 +168,10 @@ export function SchoolNotificationsPage() {
                 .filter((entry) => entry.value && !["className", "studentName"].includes(entry.key));
 
               return (
-                <article key={item.id} className="school-notification-item">
+                <article
+                  key={item.id}
+                  className={`school-notification-item type-${item.eventType.toLowerCase().replace(/_/g, "-")} status-${item.status.toLowerCase()}`}
+                >
                   <header className="school-notification-header">
                     <div>
                       <strong>{item.title}</strong>

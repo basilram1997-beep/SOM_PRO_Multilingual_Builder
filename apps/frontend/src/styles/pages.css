@@ -4262,16 +4262,36 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 .school-notifications-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .school-notifications-summary > div {
   display: grid;
   gap: 6px;
-  padding: 14px;
-  border: 1px solid #d6deea;
-  border-radius: 14px;
-  background: #f8fafc;
+  min-height: 96px;
+  padding: 16px;
+  border: 1.75px solid #bfdbfe;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.12);
+}
+
+.school-notifications-summary > div:nth-child(2) {
+  border-color: #bbf7d0;
+  background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+  box-shadow: 0 14px 28px rgba(22, 163, 74, 0.12);
+}
+
+.school-notifications-summary > div:nth-child(3) {
+  border-color: #fecaca;
+  background: linear-gradient(180deg, #fff1f2 0%, #ffffff 100%);
+  box-shadow: 0 14px 28px rgba(220, 38, 38, 0.12);
+}
+
+.school-notifications-summary > div:nth-child(4) {
+  border-color: #fde68a;
+  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+  box-shadow: 0 14px 28px rgba(217, 119, 6, 0.12);
 }
 
 .school-notifications-summary span {
@@ -4295,27 +4315,73 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 .school-notifications-toolbar label {
   display: grid;
   gap: 8px;
+  padding: 14px;
+  border: 1.75px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
   color: #0f172a;
   font-weight: 800;
 }
 
 .school-notifications-toolbar select {
   min-height: 46px;
+  border: 1.5px solid #94a3b8;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  padding-inline: 12px;
+}
+
+.school-notifications-toolbar select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  outline: none;
 }
 
 .school-notifications-list {
   display: grid;
-  gap: 12px;
+  gap: 16px;
 }
 
 .school-notification-item {
   display: grid;
   gap: 12px;
-  padding: 16px;
-  border: 1px solid #d6deea;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  padding: 18px;
+  border: 1.75px solid #cbd5e1;
+  border-inline-start: 7px solid #2563eb;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+}
+
+.school-notification-item.type-attendance {
+  border-inline-start-color: #2563eb;
+}
+
+.school-notification-item.type-invitation {
+  border-inline-start-color: #7c3aed;
+}
+
+.school-notification-item.type-pledge {
+  border-inline-start-color: #0f766e;
+}
+
+.school-notification-item.type-school-message {
+  border-inline-start-color: #d97706;
+}
+
+.school-notification-item.status-sent {
+  border-color: #bbf7d0;
+}
+
+.school-notification-item.status-failed {
+  border-color: #fecaca;
+  background: linear-gradient(180deg, #fffafa 0%, #ffffff 100%);
+}
+
+.school-notification-item.status-queued {
+  border-color: #fde68a;
 }
 
 .school-notification-header {
@@ -4358,10 +4424,26 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 .school-notification-meta > div {
   display: grid;
   gap: 4px;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid #dbe4f0;
-  background: #f8fafc;
+  padding: 13px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #dbe4f0;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.07);
+}
+
+.school-notification-meta > div:nth-child(1) {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.school-notification-meta > div:nth-child(2) {
+  border-color: #c7d2fe;
+  background: #eef2ff;
+}
+
+.school-notification-meta > div:nth-child(3) {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
 }
 
 .school-notification-meta span,
@@ -4380,10 +4462,11 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 
 .school-notification-message {
   margin: 0;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-radius: 12px;
-  border: 1px dashed #bfdbfe;
-  background: #f8fbff;
+  border: 1.5px solid #bfdbfe;
+  background: #eff6ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   line-height: 1.8;
   color: #0f172a;
 }
@@ -4397,16 +4480,21 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 .school-notification-details {
   display: grid;
   gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid #cfe1f5;
-  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1.5px solid #cfe1f5;
+  border-radius: 12px;
   background: #f8fbff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
 .school-notification-details > div,
 .school-notification-payload > div > div {
   display: grid;
   gap: 4px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
 }
 
 .school-notification-details span,
