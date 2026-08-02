@@ -53,3 +53,12 @@ npm run release:prepare
 - `git status` يجب أن يكون نظيفاً أو يحتوي فقط على تغييرات مقصودة.
 - لا ترفع `.env` أو ملفات أسرار.
 - لا ترفع `release` أو `dist` أو `test-results`.
+
+## GitHub CI
+
+عند الرفع إلى GitHub يعمل CI الرسمي على مرحلتين:
+
+- `Quick Code Check`: يشغل `npm run check:quick`.
+- `Release Doctor`: يشغل `npm run release:doctor` مع PostgreSQL وRedis وPlaywright.
+
+لا تعتبر الفرع جاهزاً للدمج أو التسليم إذا فشل `Release Doctor`.

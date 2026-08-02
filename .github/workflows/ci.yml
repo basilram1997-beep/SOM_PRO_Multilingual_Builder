@@ -10,9 +10,14 @@ on:
     - cron: "0 3 * * 0"
   workflow_dispatch:
 
+concurrency:
+  group: som-pro-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  validate:
-    runs-on: windows-latest
+  quick_check:
+    name: Quick Code Check
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -27,44 +32,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Dependency scan
-        run: npm run security:deps
+      - name: Run quick checks
+        run: npm run check:quick
 
-      - name: SAST
-        run: npm run security:sast
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Build
-        run: npm run build
-
-      - name: Test
-        run: npm run test
-
-      - name: Contract and E2E tests
-        run: npm run test:all
-
-      - name: Desktop checks
-        run: npm run desktop:check
-
-      - name: Desktop SaaS checks
-        run: npm run desktop:check:saas
-
-      - name: Production check
-        run: npm run production:check
-
-      - name: Release readiness check
-        run: npm run release:check
-
-      - name: Security audit
-        run: npm run security:deps
-
-      - name: Full check
-        run: npm run check
-
-  browser_smoke:
-    needs: validate
+  release_doctor:
+    name: Release Doctor
+    needs: quick_check
     runs-on: ubuntu-latest
 
     services:
@@ -85,12 +58,20 @@ jobs:
         image: redis:7-alpine
         ports:
           - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
 
     env:
+      CI: true
       DATABASE_URL: postgresql://som_user:som_password@127.0.0.1:5432/som?schema=public
       REDIS_URL: redis://127.0.0.1:6379
       SOM_E2E_POSTGRES_HOST: 127.0.0.1
       SOM_E2E_POSTGRES_PORT: 5432
+      SOM_E2E_REDIS_PORT: 6379
+      SOM_E2E_TIMEOUT_MS: 120000
 
     steps:
       - name: Checkout
@@ -108,5 +89,5 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run browser smoke
-        run: npm run test:e2e:browser:smoke
+      - name: Run release doctor
+        run: npm run release:doctor
