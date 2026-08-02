@@ -7,9 +7,6 @@ type UserRole = "ADMIN" | "SCHEDULER" | "TEACHER" | "STUDENT" | "PARENT";
 
 export function UsersPage() {
   const { t } = useI18n();
-  // users.fullAdmin / users.scheduler / somApi.settings.suggestUsername
-  // onChange={e => suggestUsername(e.target.value as UserRole)}
-  // saving ? labels.saving : labels.add
   const {
     labels,
     roleLabels,

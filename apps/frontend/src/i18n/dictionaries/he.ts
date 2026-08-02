@@ -16,4 +16,31 @@ Object.assign(he, {
   "homeroomPortal.visibleTitle": "העמוד שלי"
 });
 
+Object.assign(he, {
+  "users.title": "משתמשים",
+  "users.name": "שם",
+  "users.username": "שם משתמש",
+  "users.password": "סיסמה",
+  "users.role": "סוג חשבון",
+  "users.fullAdmin": "מנהל מלא",
+  "users.teacher": "מחנך",
+  "users.homeroomTeacher": "מחנך",
+  "users.student": "תלמיד",
+  "users.parent": "הורה",
+  "users.linkedStudent": "תלמיד מקושר",
+  "users.selectStudent": "בחר תלמיד",
+  "users.requiredStudent": "יש לבחור תלמיד מקושר",
+  "users.readOnly": "קריאה בלבד",
+  "users.add": "הוספת משתמש",
+  "users.action": "פעולה",
+  "users.saving": "שומר...",
+  "users.saved": "המשתמש נשמר",
+  "users.removed": "המשתמש נמחק",
+  "users.required": "יש להזין שם וסיסמה",
+  "users.passwordShort": "הסיסמה חייבת לכלול לפחות 6 תווים",
+  "users.confirmDelete": "למחוק את המשתמש הזה?",
+  "users.duplicate": "שם המשתמש כבר קיים",
+  "users.saveFailed": "לא ניתן לשמור. בדוק את הנתונים ונסה שוב."
+});
+
 export default he;

@@ -505,4 +505,31 @@ Object.assign(ar, {
   "nav.schoolSettingsGroup": "إعداد المدرسة"
 });
 
+Object.assign(ar, {
+  "users.title": "المستخدمون",
+  "users.name": "الاسم",
+  "users.username": "اسم المستخدم",
+  "users.password": "كلمة المرور",
+  "users.role": "نوع الحساب",
+  "users.fullAdmin": "مدير كامل",
+  "users.teacher": "مربي",
+  "users.homeroomTeacher": "مربي",
+  "users.student": "طالب",
+  "users.parent": "ولي أمر",
+  "users.linkedStudent": "الطالب المرتبط",
+  "users.selectStudent": "اختر طالبًا",
+  "users.requiredStudent": "يجب اختيار الطالب المرتبط",
+  "users.readOnly": "قراءة فقط",
+  "users.add": "إضافة المستخدم",
+  "users.action": "الإجراء",
+  "users.saving": "جارٍ الحفظ...",
+  "users.saved": "تم حفظ المستخدم",
+  "users.removed": "تم حذف المستخدم",
+  "users.required": "أدخل الاسم وكلمة المرور",
+  "users.passwordShort": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+  "users.confirmDelete": "هل تريد حذف هذا المستخدم؟",
+  "users.duplicate": "اسم المستخدم موجود مسبقًا",
+  "users.saveFailed": "تعذر الحفظ. تحقق من البيانات وحاول مرة أخرى."
+});
+
 export default ar;

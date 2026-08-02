@@ -7,7 +7,7 @@ type UserRow = { id: string; name: string; email: string; role: UserRole | strin
 type StudentOption = { id: string; name: string };
 type UserForm = { name: string; email: string; password: string; role: UserRole; studentId: string };
 
-const emptyForm: UserForm = { name: "", email: "", password: "", role: "SCHEDULER", studentId: "" };
+const emptyForm: UserForm = { name: "", email: "", password: "", role: "TEACHER", studentId: "" };
 
 function needsStudentLink(role: UserRole) {
   return role === "STUDENT" || role === "PARENT";
@@ -23,8 +23,9 @@ function buildLabels(t: Translate) {
     linkedStudent: t("users.linkedStudent"),
     selectStudent: t("users.selectStudent"),
     fullAdmin: t("users.fullAdmin"),
-    scheduler: t("users.scheduler"),
+    scheduler: "SCHEDULER",
     teacher: t("users.teacher"),
+    homeroomTeacher: t("users.homeroomTeacher"),
     student: t("users.student"),
     parent: t("users.parent"),
     add: t("users.add"),
@@ -36,9 +37,7 @@ function buildLabels(t: Translate) {
     required: t("users.required"),
     passwordShort: t("users.passwordShort"),
     confirmDelete: t("users.confirmDelete"),
-    generated: t("users.generated"),
     duplicate: t("users.duplicate"),
-    generateAgain: t("users.generateAgain"),
     saveFailed: t("users.saveFailed"),
     requiredStudent: t("users.requiredStudent"),
     none: t("common.none")
@@ -48,8 +47,7 @@ function buildLabels(t: Translate) {
 function roleOptions(labels: ReturnType<typeof buildLabels>) {
   return [
     { value: "ADMIN" as const, label: labels.fullAdmin },
-    { value: "SCHEDULER" as const, label: labels.scheduler },
-    { value: "TEACHER" as const, label: labels.teacher },
+    { value: "TEACHER" as const, label: labels.homeroomTeacher },
     { value: "STUDENT" as const, label: labels.student },
     { value: "PARENT" as const, label: labels.parent }
   ];
@@ -61,11 +59,11 @@ export function useUsers(t: Translate) {
     () => ({
       ADMIN: labels.fullAdmin,
       SCHEDULER: labels.scheduler,
-      TEACHER: labels.teacher,
+      TEACHER: labels.homeroomTeacher,
       STUDENT: labels.student,
       PARENT: labels.parent
     }),
-    [labels.fullAdmin, labels.scheduler, labels.teacher, labels.student, labels.parent]
+    [labels.fullAdmin, labels.scheduler, labels.homeroomTeacher, labels.student, labels.parent]
   );
   const roles = useMemo(() => roleOptions(labels), [labels]);
 
@@ -93,7 +91,6 @@ export function useUsers(t: Translate) {
         studentId: needsStudentLink(role) ? previous.studentId : "",
         email: res.data.username
       }));
-      setMessage(labels.generated);
     } catch {
       setMessage(labels.saveFailed);
     } finally {
@@ -108,7 +105,7 @@ export function useUsers(t: Translate) {
       try {
         await load();
         if (!cancelled) {
-          await suggestUsername("SCHEDULER");
+          await suggestUsername("TEACHER");
         }
       } catch {
         if (!cancelled) setMessage(labels.saveFailed);
@@ -125,7 +122,7 @@ export function useUsers(t: Translate) {
   }, []);
 
   async function createUser() {
-    if (!form.name.trim() || !form.email.trim() || !form.password.trim()) {
+    if (!form.name.trim() || !form.password.trim()) {
       setMessage(labels.required);
       return;
     }
@@ -139,9 +136,10 @@ export function useUsers(t: Translate) {
     }
     setSaving(true);
     try {
+      const username = form.email.trim() || (await somApi.settings.suggestUsername(form.role)).data.username;
       await somApi.settings.createUser({
         ...form,
-        email: form.email.trim(),
+        email: username,
         studentId: needsStudentLink(form.role) ? form.studentId : null
       });
       setMessage(labels.saved);

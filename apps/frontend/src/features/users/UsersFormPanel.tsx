@@ -17,13 +17,11 @@ type Props = {
   labels: {
     add: string;
     name: string;
-    username: string;
     password: string;
     role: string;
     linkedStudent: string;
     selectStudent: string;
     saving: string;
-    generateAgain: string;
   };
   roles: Array<{ value: UserRole; label: string }>;
   students: StudentOption[];
@@ -93,20 +91,6 @@ export function UsersFormPanel({
             </select>
           </label>
         )}
-        <label className="users-field users-username-field">
-          {labels.username}
-          <div className="username-field">
-            <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value.trim() })} dir="ltr" />
-            <button
-              type="button"
-              className="secondary small"
-              onClick={() => suggestUsername(form.role)}
-              disabled={suggesting || saving}
-            >
-              {suggesting ? "..." : labels.generateAgain}
-            </button>
-          </div>
-        </label>
         <label className="users-field users-password-field">
           {labels.password}
           <input
