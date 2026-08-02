@@ -34,7 +34,7 @@ npm run desktop:build:saas
 أو من لوحة التحكم:
 
 ```cmd
-SOM_PRO_CONTROL_PANEL_WINDOWS.cmd
+START_HERE_WINDOWS.cmd
 ```
 
 ثم اختر:

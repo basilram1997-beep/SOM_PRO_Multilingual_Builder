@@ -12,7 +12,7 @@
 للتشغيل على Windows افتح:
 
 ```text
-SOM_PRO_CONTROL_PANEL_WINDOWS.cmd
+START_HERE_WINDOWS.cmd
 ```
 
 ثم اختر الخطوة المناسبة من القائمة.

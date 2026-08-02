@@ -13,17 +13,17 @@
 ## كيف أشغل المشروع على Windows؟
 
 ```text
-SOM_PRO_CONTROL_PANEL_WINDOWS.cmd
+START_HERE_WINDOWS.cmd
 ```
 
 ثم اختر خطوة التشغيل المناسبة من القائمة.
 
 ## الترتيب الموصى به
 
-1. `01_CHECK_SYSTEM_WINDOWS.cmd`
-2. `02_RUN_DESKTOP_TEST_WINDOWS.cmd`
-3. `03_RUN_WEB_LOCAL_WINDOWS.cmd`
-4. `04_BUILD_SOM_PRO_SETUP_EXE_WINDOWS.cmd`
+1. `scripts/windows/01_CHECK_SYSTEM_WINDOWS.cmd`
+2. `scripts/windows/02_RUN_DESKTOP_TEST_WINDOWS.cmd`
+3. `scripts/windows/03_RUN_WEB_LOCAL_WINDOWS.cmd`
+4. `scripts/windows/04_BUILD_SOM_PRO_SETUP_EXE_WINDOWS.cmd`
 
 ## تشغيل محلي سريع
 
