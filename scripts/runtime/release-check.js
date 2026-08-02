@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { isTcpReachable } = require("./ports");
 const { cleanStaleProcesses } = require("./cleanup");
+const { ensureLocalDataServices } = require("./local-data-services");
 
 const projectRoot = path.resolve(__dirname, "..", "..");
 const checks = [];
@@ -59,11 +60,15 @@ async function main() {
   const staleStopped = cleanStaleProcesses();
   record("Old processes", true, staleStopped ? `stopped ${staleStopped}` : "none");
 
-  const postgres = await isTcpReachable("127.0.0.1", Number(process.env.SOM_E2E_POSTGRES_PORT || 5432), 1500);
-  record("Database reachable", postgres, postgres ? "127.0.0.1:5432" : "start PostgreSQL first");
-
-  const redis = await isTcpReachable("127.0.0.1", Number(process.env.SOM_E2E_REDIS_PORT || 6379), 1500);
-  record("Redis reachable", redis, redis ? "127.0.0.1:6379" : "start Redis first");
+  const dataServices = await ensureLocalDataServices({ dockerWaitMs: 120_000, serviceWaitMs: 120_000 });
+  const postgres = dataServices.status.find((service) => service.name === "PostgreSQL")?.reachable || false;
+  const redis = dataServices.status.find((service) => service.name === "Redis")?.reachable || false;
+  record(
+    "Database reachable",
+    postgres,
+    postgres ? "127.0.0.1:5432" : dataServices.message || "PostgreSQL unavailable"
+  );
+  record("Redis reachable", redis, redis ? "127.0.0.1:6379" : dataServices.message || "Redis unavailable");
 
   const license = await isTcpReachable("127.0.0.1", Number(process.env.SOM_LICENSE_PORT || 4100), 1000);
   record("License server", true, license ? "already running on 4100" : "not running; E2E can use local license bypass");

@@ -1,6 +1,5 @@
 const { error, warn } = require("./cli-output");
 const {
-  assertLocalService,
   assertTcpPortFree,
   createE2EEnv,
   createProcessManager,
@@ -10,6 +9,7 @@ const {
   waitForShutdownSignal,
   waitForUrl
 } = require("./e2e-helpers");
+const { ensureLocalDataServices } = require("./runtime/local-data-services");
 
 const processes = createProcessManager();
 
@@ -17,13 +17,10 @@ async function main() {
   const env = createE2EEnv();
   trace("بدء تهيئة خادم E2E");
 
-  await assertLocalService({
-    name: "PostgreSQL",
-    host: process.env.SOM_E2E_POSTGRES_HOST || "127.0.0.1",
-    port: Number(process.env.SOM_E2E_POSTGRES_PORT || 5432),
-    timeoutMs: 30_000,
-    hint: "Start it with `docker compose up -d postgres redis` before running browser E2E."
-  });
+  const dataServices = await ensureLocalDataServices();
+  if (!dataServices.ok) {
+    throw new Error(dataServices.message);
+  }
 
   const migrate = runShell("npm run prisma:migrate:deploy -w apps/backend", env);
   if ((migrate.status || 0) !== 0) {

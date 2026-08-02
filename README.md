@@ -65,6 +65,8 @@ web-page/
 
 ```bash
 npm run clean
+npm run local:deps
+npm run setup:local
 npm run dev:all
 npm run check:quick
 npm run check:release
@@ -74,6 +76,8 @@ npm run release:prepare
 ```
 
 - `clean`: حذف مخرجات البناء والاختبارات والإصدارات القديمة.
+- `local:deps`: فحص PostgreSQL وRedis وتشغيلهما عبر Docker عند الحاجة.
+- `setup:local`: تشغيل الاعتمادات المحلية ثم تجهيز قاعدة البيانات.
 - `dev:all`: تشغيل خادم الترخيص والـ Backend والـ Frontend معاً.
 - `check:quick`: فحص سريع للكود والتنسيق والأنواع.
 - `check:release`: فحص إصدار كامل مع اختبارات المتصفح الأساسية والعميقة.
@@ -92,9 +96,8 @@ npm run release:prepare
 
 - Node.js 20+
 - npm
-- PostgreSQL
-- Redis
-- Docker Desktop عند تشغيل Local Trial محليًا
+- Docker Desktop عند تشغيل Local Trial محليًا أو عند رغبتك بتشغيل PostgreSQL/Redis تلقائياً
+- PostgreSQL وRedis، أو Docker Desktop ليشغلهما الأمر `npm run local:deps`
 - Windows عند بناء أو تجربة مثبت سطح المكتب
 
 ### التثبيت
@@ -140,17 +143,19 @@ npm install
 إذا كنت تشغّل المشروع للمرة الأولى على جهاز جديد، اتبع هذا الترتيب:
 
 1. انسخ ملفات البيئة المطلوبة من ملفات المثال.
-2. شغّل PostgreSQL وRedis. في الوضع المحلي السريع يمكن استخدام:
+2. جهز PostgreSQL وRedis. الأمر الرسمي يحاول تشغيلهما عبر Docker إذا لم يكونا يعملان:
 
    ```bash
-   docker compose up -d postgres redis
+   npm run local:deps
    ```
 
-3. أنشئ قاعدة البيانات وفعّل الترحيلات وتهيئة البيانات:
+3. أنشئ قاعدة البيانات وفعّل الترحيلات وتهيئة البيانات. يمكن تنفيذ الخطوتين السابقتين معاً عبر:
 
    ```bash
-   npm run setup:db
+   npm run setup:local
    ```
+
+   إذا أردت منع التشغيل التلقائي عبر Docker واستخدام PostgreSQL/Redis يدويين فقط، عيّن `SOM_SKIP_LOCAL_DATA_START=true`.
 
 4. شغّل الواجهة الخلفية والواجهة الأمامية:
 

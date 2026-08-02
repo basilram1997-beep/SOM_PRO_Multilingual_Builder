@@ -35,17 +35,25 @@ npm run e2e:clean
 
 ## قاعدة البيانات لا تعمل
 
-تأكد من تشغيل PostgreSQL وRedis:
+شغل الفحص الرسمي أولاً. سيحاول تشغيل PostgreSQL وRedis عبر Docker إذا لم يكونا يعملان:
 
 ```bash
-docker compose up -d postgres redis
+npm run local:deps
 ```
 
 ثم شغل:
 
 ```bash
-npm run prisma:migrate:deploy
+npm run setup:db
 ```
+
+إذا أردت التشغيل اليدوي فقط، شغل:
+
+```bash
+docker compose up -d postgres redis
+```
+
+ثم أعد `npm run local:deps` للتأكد.
 
 ## فشل اختبارات المتصفح
 

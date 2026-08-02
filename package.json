@@ -24,6 +24,8 @@
     "build:desktop:win": "npm run build:win -w apps/desktop",
     "build": "npm run build:shared \u0026\u0026 npm run build:backend \u0026\u0026 npm run build:frontend",
     "setup:db": "npm run setup:env \u0026\u0026 node scripts/ensure-prisma-baseline.js \u0026\u0026 npm run prisma:migrate:deploy -w apps/backend \u0026\u0026 npm run prisma:seed -w apps/backend",
+    "local:deps": "node scripts/runtime/local-data-services.js",
+    "setup:local": "npm run local:deps && npm run setup:db",
     "setup:env": "node scripts/ensure-env.js",
     "build:web": "npm run build:frontend",
     "build:hybrid": "npm run build:shared \u0026\u0026 npm run build:backend \u0026\u0026 npm run build:frontend \u0026\u0026 npm run build:desktop:win",

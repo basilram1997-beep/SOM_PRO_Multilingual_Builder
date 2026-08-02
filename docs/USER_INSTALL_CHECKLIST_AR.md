@@ -10,9 +10,12 @@
   - Backend: `4000`
   - License server: `4100`
   - Frontend E2E فقط: `4188`
+- في التشغيل المحلي، شغل فحص الاعتمادات قبل أول تشغيل:
+  - `npm run local:deps`
 - تأكد أن PostgreSQL وRedis يعملان إذا كان التشغيل محلياً:
   - PostgreSQL: `5432`
   - Redis: `6379`
+  - إذا لم يكونا يعملان، يحاول الأمر الرسمي تشغيلهما عبر Docker Desktop.
 
 ## التثبيت
 

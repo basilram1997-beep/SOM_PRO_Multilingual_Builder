@@ -8,6 +8,7 @@
 
 ```bash
 npm run clean
+npm run local:deps
 npm run check:quick
 npm run release:doctor
 npm run release:prepare
@@ -16,6 +17,7 @@ npm run release:prepare
 ## معنى الأوامر
 
 - `npm run clean`: يحذف مخرجات البناء والاختبار والإصدارات القديمة فقط.
+- `npm run local:deps`: يفحص PostgreSQL وRedis ويشغلهما عبر Docker عند الحاجة.
 - `npm run e2e:clean`: يوقف عمليات E2E/Backend/License القديمة التابعة للمشروع.
 - `npm run check:quick`: يشغل `lint` و`typecheck` و`format:check`.
 - `npm run check:release`: يشغل بناء وفحوصات جودة وفحوصات متصفح أساسية وعميقة.
@@ -31,7 +33,14 @@ npm run release:prepare
    npm run clean
    ```
 
-2. تأكد من تشغيل PostgreSQL وRedis.
+2. جهز PostgreSQL وRedis:
+
+   ```bash
+   npm run local:deps
+   ```
+
+   إذا كان Docker غير متاح، سيظهر الخطأ بوضوح بدل فشل غامض في الاختبارات.
+
 3. شغل:
 
    ```bash
