@@ -29,6 +29,7 @@ const staleProcessNeedles = [
   "tsx watch src/server.ts",
   "vite --host 0.0.0.0 --port 4188"
 ];
+const stalePorts = [4000, 4100, 4188];
 
 function resolveInsideProject(target) {
   const resolved = path.resolve(projectRoot, target);
@@ -65,9 +66,10 @@ function cleanStaleWindowsProcesses() {
   const escapedNeedles = staleProcessNeedles.map((needle) => needle.replace(/'/g, "''"));
   const script = `
 $needles = @('${escapedNeedles.join("','")}')
+$ports = @(${stalePorts.join(",")})
 $current = $PID
 $nodePid = ${process.pid}
-$matches = Get-CimInstance Win32_Process | Where-Object {
+$processMatches = Get-CimInstance Win32_Process | Where-Object {
   if (-not $_.CommandLine -or $_.ProcessId -eq $current -or $_.ProcessId -eq $nodePid -or $_.Name -notin @('node.exe','cmd.exe')) {
     return $false
   }
@@ -78,7 +80,28 @@ $matches = Get-CimInstance Win32_Process | Where-Object {
   }
   return $false
 }
-$ids = $matches | Select-Object -ExpandProperty ProcessId -Unique
+
+$portPids = @()
+$netstat = netstat -ano
+foreach ($line in $netstat) {
+  if ($line -notmatch 'LISTENING') {
+    continue
+  }
+  foreach ($port in $ports) {
+    if ($line -match ":$port\\s") {
+      $parts = $line -split '\\s+'
+      $pidValue = $parts[-1]
+      if ($pidValue -match '^\\d+$' -and [int]$pidValue -ne $current -and [int]$pidValue -ne $nodePid) {
+        $portPids += [int]$pidValue
+      }
+    }
+  }
+}
+
+$ids = @(
+  $processMatches | Select-Object -ExpandProperty ProcessId
+  $portPids
+) | Sort-Object -Unique
 if ($ids.Count -gt 0) {
   $ids | ForEach-Object { Stop-Process -Id $_ -Force }
 }
