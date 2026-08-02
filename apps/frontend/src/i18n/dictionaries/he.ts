@@ -43,4 +43,8 @@ Object.assign(he, {
   "users.saveFailed": "לא ניתן לשמור. בדוק את הנתונים ונסה שוב."
 });
 
+Object.assign(he, {
+  "certificates.printPdf": "הדפסה / שמירת PDF"
+});
+
 export default he;

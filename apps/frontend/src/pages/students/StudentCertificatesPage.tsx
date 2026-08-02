@@ -1620,14 +1620,6 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
             </Card>
 
             <Card title={t("certificates.attendanceTitle")}>
-              <p className="certificate-section-hint">{t("certificates.attendanceAutoHint")}</p>
-              <p className="certificate-section-hint">{t("certificates.behaviorManualHint")}</p>
-              <p className="certificate-section-hint">
-                {t("certificates.behaviorRuleHint")} {t(behaviorLabelKey(suggestedBehaviorLevel))}.
-              </p>
-              <p className="certificate-section-hint">
-                {t("certificates.resultRuleHint")} {t(resultLabelKey(suggestedResult))}.
-              </p>
               <div className="certificate-grid certificate-grid--three">
                 <label>
                   <span>{t("certificates.presentDays")}</span>
@@ -1712,11 +1704,11 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                   ))}
                 </div>
                 <label className="certificate-textarea-field">
-                  <span>{t("certificates.homeroomNotes")}</span>
                   <textarea
                     value={teacherNotes}
                     onChange={(event) => setTeacherNotes(event.target.value)}
                     placeholder={t("certificates.teacherNotesPlaceholder")}
+                    aria-label={t("certificates.homeroomNotes")}
                     aria-live="polite"
                   />
                 </label>

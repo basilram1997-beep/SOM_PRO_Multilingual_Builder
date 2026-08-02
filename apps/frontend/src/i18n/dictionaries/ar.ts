@@ -178,11 +178,6 @@ Object.assign(ar, {
   "certificates.recommendedResult": "النتيجة المقترحة",
   "certificates.attendanceTitle": "الحضور والسلوك",
   "certificates.attendanceDays": "أيام الحضور / الغياب / التأخر",
-  "certificates.attendanceAutoHint":
-    "يُحتسب الحضور تلقائيًا من أيام الحضور والغياب والتأخر والانصراف المسجلة من المعلم.",
-  "certificates.behaviorManualHint": "السلوك يُدخل يدويًا في هذا القسم.",
-  "certificates.behaviorRuleHint": "يُقترح تقييم السلوك تلقائيًا حسب السلوكيات المرصودة خلال الفترة:",
-  "certificates.resultRuleHint": "تُقترح نتيجة الطالب تلقائيًا حسب معدل العلامات:",
   "certificates.presentDays": "أيام الحضور",
   "certificates.absentDays": "أيام الغياب",
   "certificates.lateDays": "أيام التأخر",
