@@ -12,6 +12,7 @@ npm run local:deps
 npm run check:quick
 npm run release:doctor
 npm run release:prepare
+npm run update:safe
 ```
 
 ## معنى الأوامر
@@ -23,6 +24,7 @@ npm run release:prepare
 - `npm run check:release`: يشغل بناء وفحوصات جودة وفحوصات متصفح أساسية وعميقة.
 - `npm run release:doctor`: ينتج تقرير جاهزية واضح.
 - `npm run release:prepare`: ينظف ثم يشغل تقرير الجاهزية.
+- `npm run update:safe`: مسار تحديث منظم يحمي البيانات قبل migrations.
 
 ## ترتيب التسليم المقترح
 

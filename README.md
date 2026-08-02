@@ -73,6 +73,9 @@ npm run check:release
 npm run e2e:clean
 npm run release:doctor
 npm run release:prepare
+npm run update:dry-run
+npm run update:backup
+npm run update:safe
 ```
 
 - `clean`: حذف مخرجات البناء والاختبارات والإصدارات القديمة.
@@ -84,12 +87,16 @@ npm run release:prepare
 - `e2e:clean`: إيقاف بقايا تشغيل E2E والخوادم القديمة التابعة للمشروع.
 - `release:doctor`: تقرير جاهزية التسليم.
 - `release:prepare`: تنظيف ثم تقرير جاهزية.
+- `update:dry-run`: فحص مسار التحديث بدون لمس قاعدة البيانات.
+- `update:backup`: أخذ نسخة backup قبل التحديث فقط.
+- `update:safe`: backup ثم migrations ثم فحص صحة ثم rollback تلقائي عند الفشل.
 
 راجع أيضاً:
 
 - `docs/USER_INSTALL_CHECKLIST_AR.md`
 - `docs/ADMIN_BACKUP_RESTORE_AR.md`
 - `docs/RELEASE_PROCESS_AR.md`
+- `docs/SAFE_UPDATE_PROCESS_AR.md`
 - `docs/TROUBLESHOOTING_AR.md`
 
 ### المتطلبات

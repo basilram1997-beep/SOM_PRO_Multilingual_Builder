@@ -28,6 +28,7 @@ yarn-error.log*
 
 # Runtime data and local databases
 apps/license-server/data/
+deploy/backup/
 *.sqlite
 *.sqlite3
 
