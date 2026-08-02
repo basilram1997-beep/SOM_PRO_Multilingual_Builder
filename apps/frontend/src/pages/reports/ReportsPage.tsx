@@ -9,9 +9,7 @@ import { ReportHorizontalChart } from "../../features/reports/ReportHorizontalCh
 import { ReportPieChart } from "../../features/reports/ReportPieChart";
 import { ReportVerticalChart } from "../../features/reports/ReportVerticalChart";
 import { chartTitle } from "../../features/reports/reportLabels";
-import { SecurityMonitoringPanel } from "../../features/reports/SecurityMonitoringPanel";
 import { useReports } from "../../features/reports/useReports";
-import { useSecurityMonitoring } from "../../features/reports/useSecurityMonitoring";
 import type {
   AttendanceReportResponse,
   ClassroomLogsReportResponse,
@@ -20,7 +18,7 @@ import type {
 } from "../../features/reports/reportTypes";
 import { gradeCertificateTypeOptions } from "../../features/students/gradeEntryTypes";
 
-type ReportTab = "daily" | "attendance" | "grades" | "classroomLogs" | "summary" | "security";
+type ReportTab = "daily" | "attendance" | "grades" | "classroomLogs" | "summary";
 type SummaryDimension = "class" | "teacher" | "subject" | "homeroom";
 type LookupOption = { id: string; name: string };
 
@@ -29,8 +27,7 @@ const reportTabs: Array<{ key: ReportTab; labelKey: string }> = [
   { key: "attendance", labelKey: "reports.tabAttendance" },
   { key: "grades", labelKey: "reports.tabGrades" },
   { key: "classroomLogs", labelKey: "reports.tabClassroomLogs" },
-  { key: "summary", labelKey: "reports.tabScheduleStaff" },
-  { key: "security", labelKey: "reports.tabSecurity" }
+  { key: "summary", labelKey: "reports.tabScheduleStaff" }
 ];
 
 const summaryDimensionOptions: Array<{ value: SummaryDimension; labelKey: string }> = [
@@ -131,7 +128,6 @@ function summaryRowValue(value: unknown, language: string) {
 export function ReportsPage() {
   const { t, language } = useI18n();
   const daily = useReports(language);
-  const security = useSecurityMonitoring(language);
   const [activeTab, setActiveTab] = useState<ReportTab>("daily");
   const [classes, setClasses] = useState<LookupOption[]>([]);
   const [subjects, setSubjects] = useState<LookupOption[]>([]);
@@ -290,7 +286,7 @@ export function ReportsPage() {
   }
 
   async function exportWithAudit(options: {
-    reportType: "attendance" | "grades" | "classroom-logs" | "security";
+    reportType: "attendance" | "grades" | "classroom-logs";
     sectionId: string;
     title: string;
     fileName: string;
@@ -320,7 +316,6 @@ export function ReportsPage() {
   const gradesTitle = t("reports.gradesTitle");
   const logsTitle = t("reports.classroomLogsTitle");
   const summaryTitle = t("reports.summaryTitle");
-  const securityTitle = t("reports.securityTitle");
   const classOptions = [{ id: "", name: t("reports.allClasses") }, ...classes];
 
   return (
@@ -890,46 +885,6 @@ export function ReportsPage() {
               </div>
             </div>
           )}
-        </Card>
-      )}
-
-      {activeTab === "security" && (
-        <Card
-          title={securityTitle}
-          actions={
-            <button
-              className="secondary"
-              type="button"
-              onClick={() =>
-                void exportWithAudit({
-                  reportType: "security",
-                  sectionId: "security-report-print",
-                  title: securityTitle,
-                  fileName: "security-report.pdf",
-                  filters: { days: security.days }
-                })
-              }
-            >
-              {t("common.exportPdf")}
-            </button>
-          }
-        >
-          <div className="form-row no-print">
-            <input
-              type="number"
-              min={1}
-              max={30}
-              data-e2e="security-days-filter"
-              value={security.days}
-              onChange={(event) => security.setDays(Math.max(1, Math.min(30, Number(event.target.value) || 7)))}
-              aria-label={t("reports.securityDays")}
-            />
-            <button data-e2e="security-show" type="button" onClick={() => void security.load()}>
-              {t("reports.show")}
-            </button>
-          </div>
-          {security.error ? <p className="muted">{security.error}</p> : null}
-          <SecurityMonitoringPanel monitoring={security} />
         </Card>
       )}
     </div>
