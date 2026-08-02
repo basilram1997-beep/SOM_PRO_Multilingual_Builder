@@ -478,6 +478,13 @@ test("school operations route exposes operations dashboard data", () => {
   assert.match(source, /reportExports\.map/, "operations route should include report export rows");
   assert.match(source, /schoolsRouter\.post\("\/backups"/, "manual product backup route should exist");
   assert.match(source, /createProductBackup/, "manual product backup route should create a real backup artifact");
+
+  const protectionsSource = readFileSync("src/middleware/requestProtections.ts", "utf8");
+  assert.match(
+    protectionsSource,
+    /req\.path === "\/api\/schools\/backups"/,
+    "manual product backup route should be rate limited"
+  );
 });
 
 test("uploads route enforces scanner validation before accepting files", () => {

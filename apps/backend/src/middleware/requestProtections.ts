@@ -189,6 +189,16 @@ const sensitiveRouteRateLimitRules: RateLimitRule[] = [
       message: "تم تكرار عمليات تصدير أو حذف بيانات المدرسة بسرعة زائدة. حاول مرة أخرى بعد قليل.",
       auditAction: "RATE LIMITED SCHOOL EXPORT DELETE"
     })
+  },
+  {
+    match: (req) => req.method === "POST" && req.path === "/api/schools/backups",
+    middleware: createRateLimitMiddleware({
+      key: "sensitive:product-backup",
+      windowMs: 5 * 60_000,
+      max: 2,
+      message: "تم طلب إنشاء نسخ احتياطية كثيرة خلال وقت قصير. انتظر قليلاً قبل إنشاء نسخة جديدة.",
+      auditAction: "RATE LIMITED PRODUCT BACKUP"
+    })
   }
 ];
 
