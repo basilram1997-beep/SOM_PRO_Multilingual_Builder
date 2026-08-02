@@ -14,7 +14,8 @@ const emptyOperations: SchoolOperationsResponse = {
     expiresImmediately: false
   },
   reportExports: [],
-  backupJobs: []
+  backupJobs: [],
+  lastSuccessfulBackup: null
 };
 
 function exportFile(blob: Blob, fileName: string) {
@@ -36,6 +37,8 @@ export type SchoolOperationsState = {
   load: () => Promise<void>;
   exporting: boolean;
   exportAuditLog: () => Promise<void>;
+  creatingBackup: boolean;
+  createBackup: () => Promise<void>;
 };
 
 export function useSchoolOperations(language: AppLanguage): SchoolOperationsState {
@@ -43,6 +46,7 @@ export function useSchoolOperations(language: AppLanguage): SchoolOperationsStat
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [creatingBackup, setCreatingBackup] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -83,12 +87,33 @@ export function useSchoolOperations(language: AppLanguage): SchoolOperationsStat
     }
   }, [language]);
 
+  const createBackup = useCallback(async () => {
+    setCreatingBackup(true);
+    setError("");
+    try {
+      await somApi.schools.createBackup();
+      await load();
+    } catch {
+      setError(
+        language === "en"
+          ? "Could not create the product backup."
+          : language === "he"
+            ? "×œ× × ×™×ª×Ÿ ×œ×™×¦×•×¨ ×’×™×‘×•×™ ×ž×•×¦×¨."
+            : "ØªØ¹Ø°Ø± Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠØ©."
+      );
+    } finally {
+      setCreatingBackup(false);
+    }
+  }, [language, load]);
+
   return {
     operations,
     loading,
     error,
     load,
     exporting,
-    exportAuditLog
+    exportAuditLog,
+    creatingBackup,
+    createBackup
   };
 }

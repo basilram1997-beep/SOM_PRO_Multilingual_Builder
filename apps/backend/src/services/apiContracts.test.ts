@@ -474,7 +474,10 @@ test("school operations route exposes operations dashboard data", () => {
   assert.match(source, /schoolsRouter\.get\("\/operations"/, "operations dashboard route should exist");
   assert.match(source, /auditLogExport/, "operations route should expose audit log export metadata");
   assert.match(source, /backupJobs\.map/, "operations route should include backup job rows");
+  assert.match(source, /lastSuccessfulBackup/, "operations route should expose the latest successful backup");
   assert.match(source, /reportExports\.map/, "operations route should include report export rows");
+  assert.match(source, /schoolsRouter\.post\("\/backups"/, "manual product backup route should exist");
+  assert.match(source, /createProductBackup/, "manual product backup route should create a real backup artifact");
 });
 
 test("uploads route enforces scanner validation before accepting files", () => {

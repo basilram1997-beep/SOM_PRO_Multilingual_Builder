@@ -14,9 +14,14 @@ import { logSafeError } from "../../lib/safeLog";
 import { getRequestSchoolId } from "../../services/schoolContext";
 import { ensureSchoolSettings } from "../../services/schoolSettings";
 import { recordAuditLog } from "../../services/auditLog";
-import { createBackupJobRecord, createReportExportRecord } from "../../services/artifactRecords";
+import {
+  completeBackupJobRecord,
+  createBackupJobRecord,
+  createReportExportRecord
+} from "../../services/artifactRecords";
 import { getLicenseState } from "../../services/licenseService";
 import { getRequestDeviceInfo } from "../../services/deviceContext";
+import { createProductBackup } from "../../services/productBackup";
 
 export const schoolsRouter = Router();
 schoolsRouter.use(rejectMultipartContent);
@@ -251,7 +256,7 @@ schoolsRouter.get("/operations", async (req, res) => {
   }
 
   try {
-    const [school, reportExports, backupJobs] = await Promise.all([
+    const [school, reportExports, backupJobs, lastSuccessfulBackup] = await Promise.all([
       prisma.school.findUnique({ where: { id: schoolId }, select: { id: true, name: true, institutionCode: true } }),
       prisma.reportExport.findMany({
         where: { schoolId },
@@ -265,6 +270,13 @@ schoolsRouter.get("/operations", async (req, res) => {
         where: { schoolId },
         orderBy: [{ startedAt: "desc" }],
         take: 12,
+        include: {
+          createdByUser: { select: { id: true, name: true, email: true } }
+        }
+      }),
+      prisma.backupJob.findFirst({
+        where: { schoolId, status: "COMPLETED" },
+        orderBy: [{ finishedAt: "desc" }, { startedAt: "desc" }],
         include: {
           createdByUser: { select: { id: true, name: true, email: true } }
         }
@@ -308,12 +320,119 @@ schoolsRouter.get("/operations", async (req, res) => {
           finishedAt: item.finishedAt ? item.finishedAt.toISOString() : null,
           createdBy: item.createdBy,
           createdByName: item.createdByUser?.name || item.createdByUser?.email || null
-        }))
+        })),
+        lastSuccessfulBackup: lastSuccessfulBackup
+          ? {
+              id: lastSuccessfulBackup.id,
+              backupType: lastSuccessfulBackup.backupType,
+              filePath: lastSuccessfulBackup.filePath,
+              checksum: lastSuccessfulBackup.checksum,
+              encrypted: lastSuccessfulBackup.encrypted,
+              status: lastSuccessfulBackup.status,
+              startedAt: lastSuccessfulBackup.startedAt.toISOString(),
+              finishedAt: lastSuccessfulBackup.finishedAt ? lastSuccessfulBackup.finishedAt.toISOString() : null,
+              createdBy: lastSuccessfulBackup.createdBy,
+              createdByName:
+                lastSuccessfulBackup.createdByUser?.name || lastSuccessfulBackup.createdByUser?.email || null
+            }
+          : null
       }
     });
   } catch (error) {
     logSafeError("schools.operations", error);
     res.status(500).json({ error: "OPERATIONS_LOAD_FAILED", message: "تعذر تحميل لوحة العمليات" });
+  }
+});
+
+schoolsRouter.post("/backups", async (req, res) => {
+  const schoolId = await getRequestSchoolId(req);
+  if (!canManageSchoolOperations(req.user?.role)) {
+    return res
+      .status(403)
+      .json({ error: "FORBIDDEN", message: "Ù„ÙŠØ³ Ù„Ø¯ÙŠÙƒ ØµÙ„Ø§Ø­ÙŠØ© Ø¥Ù†Ø´Ø§Ø¡ Ù†Ø³Ø®Ø© Ø§Ø­ØªÙŠØ§Ø·ÙŠØ©" });
+  }
+
+  const now = new Date();
+  const userId = req.user?.id || req.user?.userId || null;
+  const backupJob = await createBackupJobRecord(prisma, {
+    schoolId,
+    backupType: "PRODUCT_MANUAL",
+    status: "PENDING",
+    filePath: `deploy/backup/product/pending-${now.toISOString().replace(/[:.]/g, "-")}`,
+    checksum: "pending",
+    encrypted: false,
+    startedAt: now,
+    finishedAt: null,
+    createdBy: userId
+  });
+
+  try {
+    const result = await createProductBackup({ schoolId, createdBy: userId });
+    const completed = await completeBackupJobRecord(prisma, backupJob.id, {
+      status: "COMPLETED",
+      finishedAt: new Date(),
+      checksum: result.checksum,
+      filePath: result.backupDir,
+      encrypted: false
+    });
+
+    recordAuditLog(prisma, {
+      schoolId,
+      userId,
+      action: "PRODUCT_BACKUP_CREATED",
+      entity: "BackupJob",
+      entityId: completed.id,
+      after: {
+        backupType: completed.backupType,
+        filePath: completed.filePath,
+        checksum: completed.checksum,
+        licenseDataCopied: result.licenseDataCopied
+      } as Prisma.InputJsonValue
+    });
+
+    res.json({
+      data: {
+        id: completed.id,
+        backupType: completed.backupType,
+        filePath: completed.filePath,
+        checksum: completed.checksum,
+        encrypted: completed.encrypted,
+        status: completed.status,
+        startedAt: completed.startedAt.toISOString(),
+        finishedAt: completed.finishedAt ? completed.finishedAt.toISOString() : null,
+        createdBy: completed.createdBy,
+        createdByName: null,
+        manifestPath: result.manifestPath,
+        postgresDumpPath: result.postgresDumpPath,
+        licenseDataCopied: result.licenseDataCopied
+      }
+    });
+  } catch (error) {
+    logSafeError("schools.backups.create", error);
+    const failed = await completeBackupJobRecord(prisma, backupJob.id, {
+      status: "FAILED",
+      finishedAt: new Date(),
+      checksum: "failed"
+    });
+
+    recordAuditLog(prisma, {
+      schoolId,
+      userId,
+      action: "PRODUCT_BACKUP_FAILED",
+      entity: "BackupJob",
+      entityId: failed.id,
+      after: {
+        backupType: failed.backupType,
+        filePath: failed.filePath,
+        status: failed.status
+      } as Prisma.InputJsonValue
+    });
+
+    res.status(500).json({
+      error: "PRODUCT_BACKUP_FAILED",
+      message:
+        "ØªØ¹Ø°Ø± Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠØ©. ØªØ£ÙƒØ¯ Ù…Ù† Ø¬Ø§Ù‡Ø²ÙŠØ© PostgreSQL Ø£Ùˆ Docker."
+    });
   }
 });
 

@@ -233,6 +233,12 @@ export type SchoolBackupJobItem = {
   createdByName: string | null;
 };
 
+export type ProductBackupResponse = SchoolBackupJobItem & {
+  manifestPath: string;
+  postgresDumpPath: string;
+  licenseDataCopied: boolean;
+};
+
 export type SchoolOperationsResponse = {
   schoolId: string;
   generatedAt: string;
@@ -249,4 +255,5 @@ export type SchoolOperationsResponse = {
   };
   reportExports: SchoolOperationReportItem[];
   backupJobs: SchoolBackupJobItem[];
+  lastSuccessfulBackup: SchoolBackupJobItem | null;
 };

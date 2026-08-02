@@ -53,6 +53,7 @@ import type {
   ReportCharts,
   ReportExportRequest,
   ReportExportResponse,
+  ProductBackupResponse,
   SchoolOperationsResponse,
   SecurityIncidentCreateRequest,
   SecurityIncidentListResponse,
@@ -517,6 +518,7 @@ export const somApi = {
   },
   schools: {
     operations: () => api.get<{ data: SchoolOperationsResponse }>("/api/schools/operations"),
+    createBackup: () => api.post<{ data: ProductBackupResponse }>("/api/schools/backups", {}),
     operatorHealth: () => api.get<{ data: OperatorHealthResponse }>("/api/schools/operator-health")
   }
 };

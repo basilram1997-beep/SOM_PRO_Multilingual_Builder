@@ -21,6 +21,7 @@ export function SchoolOperationsPanel({ operations }: Props) {
 
   const reportExports = operations.operations.reportExports;
   const backupJobs = operations.operations.backupJobs;
+  const lastSuccessfulBackup = operations.operations.lastSuccessfulBackup;
   const formatLabel =
     operations.operations.auditLogExport.format.toLowerCase() === "jsonl"
       ? t("reports.operationAuditExportFormatJsonl")
@@ -60,6 +61,14 @@ export function SchoolOperationsPanel({ operations }: Props) {
           <button
             type="button"
             className="secondary"
+            onClick={() => void operations.createBackup()}
+            disabled={operations.creatingBackup}
+          >
+            {operations.creatingBackup ? t("reports.operationsCreatingBackup") : t("reports.operationsCreateBackup")}
+          </button>
+          <button
+            type="button"
+            className="secondary"
             onClick={() => void operations.exportAuditLog()}
             disabled={operations.exporting}
           >
@@ -84,6 +93,10 @@ export function SchoolOperationsPanel({ operations }: Props) {
           <strong>{backupJobs.filter((job) => job.encrypted).length}</strong>
         </div>
         <div className="metric-card">
+          <span>{t("reports.operationLastSuccessfulBackup")}</span>
+          <strong>{lastSuccessfulBackup?.finishedAt ? ageSince(lastSuccessfulBackup.finishedAt) : "-"}</strong>
+        </div>
+        <div className="metric-card">
           <span>{t("reports.operationAuditExport")}</span>
           <strong>{formatLabel}</strong>
         </div>
@@ -92,6 +105,11 @@ export function SchoolOperationsPanel({ operations }: Props) {
       <div className="muted top-space">
         {t("reports.operationAuditExportPath")}: <code>{operations.operations.auditLogExport.path}</code>
       </div>
+      {lastSuccessfulBackup ? (
+        <div className="muted top-space">
+          {t("reports.operationLastSuccessfulBackupPath")}: <code dir="ltr">{lastSuccessfulBackup.filePath}</code>
+        </div>
+      ) : null}
 
       <div className="top-space">
         <strong>{t("reports.operationReportsTitle")}</strong>
