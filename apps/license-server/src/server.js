@@ -28,18 +28,38 @@ loadEnvFile(path.join(__dirname, "..", ".env"));
 const PORT = Number(process.env.LICENSE_PORT || 4100);
 const DEFAULT_LICENSE_SECRET = "change-this-secret-before-selling";
 const LICENSE_SECRET = process.env.SOM_PRO_LICENSE_SECRET || DEFAULT_LICENSE_SECRET;
+const IS_PRODUCTION = process.env.NODE_ENV === "production" || process.env.APP_ENV === "production";
+const CORS_ORIGIN = process.env.LICENSE_CORS_ORIGIN || process.env.PUBLIC_BASE_URL || (IS_PRODUCTION ? "" : "*");
 const DATA_FILE = path.join(__dirname, "..", "data", "licenses.json");
 const ACCOUNTS_FILE = path.join(__dirname, "..", "data", "license-admin-accounts.json");
 const PUBLIC_DIR = path.join(__dirname, "..", "public");
 const TOKEN_FILE = path.join(__dirname, "..", "data", "owner-token.txt");
-const ADMIN_TOKEN = process.env.LICENSE_ADMIN_TOKEN || readLocalAdminToken();
+const ADMIN_TOKEN = process.env.LICENSE_ADMIN_TOKEN || (IS_PRODUCTION ? "" : readLocalAdminToken());
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#";
 
-if (process.env.NODE_ENV === "production" && LICENSE_SECRET === DEFAULT_LICENSE_SECRET) {
+if (IS_PRODUCTION && LICENSE_SECRET === DEFAULT_LICENSE_SECRET) {
   console.error("SOM_PRO_LICENSE_SECRET must be changed before selling or production use.");
   process.exit(1);
 }
+
+if (IS_PRODUCTION && !process.env.LICENSE_ADMIN_TOKEN) {
+  console.error("LICENSE_ADMIN_TOKEN is required in production. Do not use a generated local owner token.");
+  process.exit(1);
+}
+
+if (IS_PRODUCTION && String(ADMIN_TOKEN || "").length < 32) {
+  console.error("LICENSE_ADMIN_TOKEN must be at least 32 characters in production.");
+  process.exit(1);
+}
+
+const requestBuckets = new Map();
+const RATE_LIMITS = {
+  admin: { limit: Number(process.env.LICENSE_ADMIN_RATE_LIMIT || 120), windowMs: 60_000 },
+  client: { limit: Number(process.env.LICENSE_CLIENT_RATE_LIMIT || 180), windowMs: 60_000 },
+  general: { limit: Number(process.env.LICENSE_GENERAL_RATE_LIMIT || 300), windowMs: 60_000 }
+};
+const MAX_BODY_BYTES = Number(process.env.LICENSE_MAX_BODY_BYTES || 32_768);
 
 function readLocalAdminToken() {
   fs.mkdirSync(path.dirname(TOKEN_FILE), { recursive: true });
@@ -392,25 +412,77 @@ function writeDb(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(safeData, null, 2) + "\n", "utf8");
 }
 
-function json(res, status, body) {
-  res.writeHead(status, {
-    "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": "*",
+function securityHeaders(contentType = "application/json; charset=utf-8") {
+  const headers = {
+    "Content-Type": contentType,
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Cache-Control": "no-store",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS"
+  };
+  if (CORS_ORIGIN) headers["Access-Control-Allow-Origin"] = CORS_ORIGIN;
+  return headers;
+}
+
+function json(res, status, body) {
+  res.writeHead(status, {
+    ...securityHeaders()
   });
   res.end(JSON.stringify(body));
 }
 
+function timingSafeTextEquals(left, right) {
+  const leftBuffer = Buffer.from(String(left || ""));
+  const rightBuffer = Buffer.from(String(right || ""));
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
 function isAdmin(req) {
   const header = req.headers.authorization || "";
-  return header === "Bearer " + ADMIN_TOKEN;
+  return timingSafeTextEquals(header, "Bearer " + ADMIN_TOKEN);
+}
+
+function clientAddress(req) {
+  return String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown")
+    .split(",")[0]
+    .trim();
+}
+
+function routeBucketName(req, url) {
+  if (url.pathname.startsWith("/api/admin/")) return "admin";
+  if (url.pathname.startsWith("/api/client/") || url.pathname.startsWith("/api/license/")) return "client";
+  return "general";
+}
+
+function isRateLimited(req, url) {
+  const bucket = routeBucketName(req, url);
+  const limit = RATE_LIMITS[bucket] || RATE_LIMITS.general;
+  const key = `${bucket}:${clientAddress(req)}`;
+  const now = Date.now();
+  const current = requestBuckets.get(key);
+  if (!current || current.resetAt <= now) {
+    requestBuckets.set(key, { count: 1, resetAt: now + limit.windowMs });
+    return false;
+  }
+  current.count += 1;
+  return current.count > limit.limit;
 }
 
 function readBody(req) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     let data = "";
-    req.on("data", (chunk) => (data += chunk));
+    let size = 0;
+    req.on("data", (chunk) => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        reject(new Error("BODY_TOO_LARGE"));
+        req.destroy();
+        return;
+      }
+      data += chunk;
+    });
     req.on("end", () => {
       try {
         resolve(data ? JSON.parse(data) : {});
@@ -551,13 +623,17 @@ function serveStatic(req, res) {
   }
   const ext = path.extname(full);
   const type = ext === ".html" ? "text/html; charset=utf-8" : "text/plain; charset=utf-8";
-  res.writeHead(200, { "Content-Type": type });
+  res.writeHead(200, {
+    ...securityHeaders(type),
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+  });
   fs.createReadStream(full).pipe(res);
 }
 
 async function handle(req, res) {
   if (req.method === "OPTIONS") return json(res, 204, {});
   const url = new URL(req.url, "http://localhost");
+  if (isRateLimited(req, url)) return json(res, 429, { error: "RATE_LIMITED" });
 
   if (url.pathname === "/health") return json(res, 200, { ok: true, service: "som-license-server" });
 
@@ -839,7 +915,10 @@ async function handle(req, res) {
 }
 
 const server = http.createServer((req, res) =>
-  handle(req, res).catch((error) => json(res, 500, { error: "INTERNAL_ERROR", message: error.message }))
+  handle(req, res).catch((error) => {
+    if (error?.message === "BODY_TOO_LARGE") return json(res, 413, { error: "BODY_TOO_LARGE" });
+    return json(res, 500, { error: "INTERNAL_ERROR" });
+  })
 );
 
 server.on("error", (error) => {
@@ -854,5 +933,7 @@ server.on("error", (error) => {
 server.listen(PORT, () => {
   console.log("SOM License Server running on http://localhost:" + PORT);
   console.log("Owner login: http://localhost:" + PORT);
-  console.log("Owner token saved in: " + TOKEN_FILE);
+  if (!process.env.LICENSE_ADMIN_TOKEN) {
+    console.log("Owner token saved in: " + TOKEN_FILE);
+  }
 });

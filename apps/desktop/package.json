@@ -6,13 +6,13 @@
   "scripts": {
     "dev": "electron .",
     "build:win": "npx electron-builder --config electron-builder.config.cjs --win nsis",
-    "build:win:signed": "set SOM_ENABLE_CODESIGN=true\u0026\u0026 npx electron-builder --config electron-builder.config.cjs --win nsis",
+    "build:win:signed": "set SOM_ENABLE_CODESIGN=true&& npx electron-builder --config electron-builder.config.cjs --win nsis",
     "build:dir": "npx electron-builder --config electron-builder.config.cjs --dir",
-    "build:dir:signed": "set SOM_ENABLE_CODESIGN=true\u0026\u0026 npx electron-builder --config electron-builder.config.cjs --dir",
+    "build:dir:signed": "set SOM_ENABLE_CODESIGN=true&& npx electron-builder --config electron-builder.config.cjs --dir",
     "check": "node src/desktopCheck.js"
   },
   "devDependencies": {
-    "electron": "42.5.0",
+    "electron": "^42.8.1",
     "electron-builder": "26.15.3"
   },
   "description": "SOM PRO desktop application",

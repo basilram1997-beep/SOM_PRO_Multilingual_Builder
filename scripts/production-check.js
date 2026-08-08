@@ -19,6 +19,7 @@ const required = [
   "deploy/scripts/restore-postgres.sh",
   "deploy/scripts/backup-license-data.sh",
   "deploy/scripts/rotate-backups.sh",
+  "scripts/security-secrets-check.js",
   "docs/PRODUCTION_DEPLOYMENT_GUIDE_AR.md",
   "docs/MONITORING_AND_HEALTHCHECKS_AR.md",
   "docs/PRODUCTION_SECURITY_CHECKLIST_AR.md",

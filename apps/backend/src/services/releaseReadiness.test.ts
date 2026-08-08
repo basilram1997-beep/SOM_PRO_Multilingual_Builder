@@ -494,16 +494,24 @@ test("database seed is clean and non-destructive for new installations", () => {
 });
 
 test("commercial install database checks are explicit and local-only by default", () => {
+  const gitignore = readFileSync("../../.gitignore", "utf8");
   const packageJson = readFileSync("../../package.json", "utf8");
   const compose = readFileSync("../../docker-compose.yml", "utf8");
   const productionCompose = readFileSync("../../docker-compose.production.yml", "utf8");
   const productionGuide = readFileSync("../../docs/PRODUCTION_DEPLOYMENT_GUIDE_AR.md", "utf8");
   const productionEnv = readFileSync("../../.env.production.example", "utf8");
   const backendProductionEnv = readFileSync(".env.production.example", "utf8");
+  const secretsCheck = readFileSync("../../scripts/security-secrets-check.js", "utf8");
   const doctor = readFileSync("../../scripts/runtime/install-doctor.js", "utf8");
   const localServices = readFileSync("../../scripts/runtime/local-data-services.js", "utf8");
   const databaseConfig = readFileSync("../../scripts/runtime/database-config.js", "utf8");
 
+  assert.match(gitignore, /^\.env$/m);
+  assert.match(gitignore, /^\.env\.\*$/m);
+  assert.match(gitignore, /^apps\/\*\/\.env\.\*$/m);
+  assert.match(packageJson, /"security:secrets": "node scripts\/security-secrets-check\.js"/);
+  assert.match(secretsCheck, /runGit\(\["ls-files"\]\)/);
+  assert.match(secretsCheck, /Forbidden tracked env file/);
   assert.match(packageJson, /"install:doctor": "node scripts\/runtime\/install-doctor\.js"/);
   assert.match(packageJson, /"install:prepare": "node scripts\/runtime\/install-doctor\.js --fix"/);
   assert.match(compose, /"127\.0\.0\.1:5432:5432"/);
@@ -525,6 +533,44 @@ test("commercial install database checks are explicit and local-only by default"
   assert.match(doctor, /npm run setup:db/);
   assert.match(localServices, /createLocalDataServices/);
   assert.match(databaseConfig, /resolveRuntimeDataConfig/);
+});
+
+test("license server keeps production security controls in place", () => {
+  const source = readFileSync("../../apps/license-server/src/server.js", "utf8");
+  const productionEnv = readFileSync("../../apps/license-server/.env.production.example", "utf8");
+
+  assert.match(source, /LICENSE_ADMIN_TOKEN is required in production/);
+  assert.match(source, /LICENSE_ADMIN_TOKEN must be at least 32 characters/);
+  assert.match(source, /crypto\.timingSafeEqual/);
+  assert.match(source, /MAX_BODY_BYTES/);
+  assert.match(source, /BODY_TOO_LARGE/);
+  assert.match(source, /RATE_LIMITS/);
+  assert.match(source, /RATE_LIMITED/);
+  assert.match(source, /X-Content-Type-Options/);
+  assert.match(source, /Content-Security-Policy/);
+  assert.doesNotMatch(source, /"Access-Control-Allow-Origin": "\*"/);
+  assert.match(productionEnv, /LICENSE_ADMIN_TOKEN=change-me-long-random-owner-token/);
+});
+
+test("trial license creation tolerates concurrent first-load requests", () => {
+  const source = readFileSync("src/services/licenseService.ts", "utf8");
+  assert.match(source, /catch \(error\)/);
+  assert.match(source, /code !== "P2002"/);
+  assert.match(source, /findUnique\(\{ where: \{ licenseKeyHash \} \}\)/);
+});
+
+test("role coverage matches every supported user role", () => {
+  const sharedSource = readFileSync("../../packages/shared/src/index.ts", "utf8");
+  const browserMatrix = readFileSync("../../tests/e2e/playwright/role-navigation-matrix.spec.js", "utf8");
+  const accessTest = readFileSync("../../apps/frontend/src/app/pageAccess.test.mjs", "utf8");
+
+  for (const role of ["ADMIN", "MANAGER", "SCHEDULER", "TEACHER", "STUDENT", "PARENT"]) {
+    assert.match(sharedSource, new RegExp(`${role}:`));
+    assert.match(browserMatrix, new RegExp(`role: "${role}"`));
+  }
+  assert.doesNotMatch(sharedSource, /DEVELOPER:/);
+  assert.match(browserMatrix, /nav-security-monitoring/);
+  assert.match(accessTest, /developer tools or license/);
 });
 
 test("hebrew locale and layout are configured for RTL rendering", () => {

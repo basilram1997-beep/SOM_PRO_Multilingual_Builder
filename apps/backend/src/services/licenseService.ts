@@ -150,20 +150,27 @@ export async function ensureTrialLicense(schoolId: string) {
   const deviceId = fallbackDeviceId();
   const licenseKeyHash = hash(`trial:${schoolId}:${deviceId}`);
 
-  return prisma.licenseActivation.upsert({
-    where: { licenseKeyHash },
-    update: {},
-    create: {
-      schoolId,
-      licenseKeyHash,
-      plan: "TRIAL",
-      status: "TRIAL",
-      expiresAt,
-      maxDevices: 1,
-      deviceFingerprint: deviceId,
-      metadata: { autoCreated: true, trialDays: TRIAL_DAYS }
-    }
-  });
+  try {
+    return await prisma.licenseActivation.upsert({
+      where: { licenseKeyHash },
+      update: {},
+      create: {
+        schoolId,
+        licenseKeyHash,
+        plan: "TRIAL",
+        status: "TRIAL",
+        expiresAt,
+        maxDevices: 1,
+        deviceFingerprint: deviceId,
+        metadata: { autoCreated: true, trialDays: TRIAL_DAYS }
+      }
+    });
+  } catch (error) {
+    if ((error as { code?: string }).code !== "P2002") throw error;
+    const createdByConcurrentRequest = await prisma.licenseActivation.findUnique({ where: { licenseKeyHash } });
+    if (createdByConcurrentRequest) return createdByConcurrentRequest;
+    throw error;
+  }
 }
 
 async function getPrimaryLicenseActivation(schoolId: string) {

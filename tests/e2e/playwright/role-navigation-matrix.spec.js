@@ -169,24 +169,30 @@ async function ensureRoleMatrixFixtures() {
     }
   });
 
-  await prisma.teacherAssignment.upsert({
+  const existingAssignment = await prisma.teacherAssignment.findFirst({
     where: {
-      schoolId_teacherId_classId_subjectId: {
-        schoolId: SCHOOL_ID,
-        teacherId: teacher.id,
-        classId: classItem.id,
-        subjectId: subject.id
-      }
-    },
-    update: { weeklyPeriods: 6 },
-    create: {
       schoolId: SCHOOL_ID,
       teacherId: teacher.id,
       classId: classItem.id,
-      subjectId: subject.id,
-      weeklyPeriods: 6
+      subjectId: subject.id
     }
   });
+  if (existingAssignment) {
+    await prisma.teacherAssignment.update({
+      where: { id: existingAssignment.id },
+      data: { weeklyPeriods: 6 }
+    });
+  } else {
+    await prisma.teacherAssignment.create({
+      data: {
+        schoolId: SCHOOL_ID,
+        teacherId: teacher.id,
+        classId: classItem.id,
+        subjectId: subject.id,
+        weeklyPeriods: 6
+      }
+    });
+  }
 
   const existingStudent = await prisma.student.findFirst({
     where: { schoolId: SCHOOL_ID, nationalId: `RM-${TEST_RUN_ID}` }
@@ -233,7 +239,10 @@ async function expandAvailableGroups(page) {
   ]) {
     const group = page.locator(selector);
     if ((await group.count()) > 0 && (await group.isVisible())) {
-      await clickStable(group);
+      const expanded = await group.getAttribute("aria-expanded");
+      if (expanded !== "true") {
+        await clickStable(group);
+      }
     }
   }
 }
