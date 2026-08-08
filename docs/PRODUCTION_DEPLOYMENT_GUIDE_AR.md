@@ -45,6 +45,13 @@ REDIS_URL=redis://:change-me-strong-redis-password@redis:6379
 
 الـ Backend فقط يجب أن يصل إلى Redis عبر شبكة Docker الداخلية.
 
+## PostgreSQL في production
+
+- لا تفتح PostgreSQL للعالم الخارجي.
+- لا تضف `ports: 5432:5432` في `docker-compose.production.yml`.
+- في التشغيل المحلي فقط، يستخدم `docker-compose.yml` الربط الآمن `127.0.0.1:5432:5432`.
+- في الإنتاج، الـ Backend فقط يجب أن يصل إلى PostgreSQL عبر شبكة Docker الداخلية باسم الخدمة `postgres`.
+
 ## تشغيل الخدمات
 
 ```bash

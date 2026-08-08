@@ -309,7 +309,7 @@ test("users page exposes supported account types through i18n", () => {
   assert.doesNotMatch(pageSource + hookSource + formSource, /users\.readOnly/);
   assert.doesNotMatch(pageSource + hookSource + formSource, /changePassword|passwordForm|changingPassword/);
   assert.match(enDict, /"users\.homeroomTeacher": "Homeroom teacher"/);
-  assert.match(heDict, /buildGeneratedLocaleDictionary\(en, "he"\)/);
+  assert.match(heDict, /buildReviewedLocaleDictionary\(en, "he"\)/);
   assert.match(routeSource, /ADMIN: "admin"/);
   assert.match(routeSource, /SCHEDULER: "scheduler"/);
   assert.doesNotMatch(routeSource, /"MANAGER"/);
@@ -515,8 +515,11 @@ test("commercial install database checks are explicit and local-only by default"
   assert.match(packageJson, /"install:doctor": "node scripts\/runtime\/install-doctor\.js"/);
   assert.match(packageJson, /"install:prepare": "node scripts\/runtime\/install-doctor\.js --fix"/);
   assert.match(compose, /"127\.0\.0\.1:5432:5432"/);
+  assert.doesNotMatch(compose, /"\s*5432:5432\s*"/);
   assert.match(compose, /pg_isready -U som_user -d som/);
   assert.match(compose, /redis-cli", "ping"/);
+  assert.doesNotMatch(productionCompose, /5432:5432/);
+  assert.doesNotMatch(productionCompose, /127\.0\.0\.1:5432:5432/);
   assert.match(productionCompose, /REDIS_PASSWORD/);
   assert.match(productionCompose, /redis\.production\.conf/);
   assert.match(productionCompose, /REDISCLI_AUTH/);
@@ -525,6 +528,8 @@ test("commercial install database checks are explicit and local-only by default"
   assert.match(productionEnv, /REDIS_PASSWORD=change-me-strong-redis-password/);
   assert.match(productionEnv, /REDIS_URL=redis:\/\/:change-me-strong-redis-password@redis:6379/);
   assert.match(backendProductionEnv, /REDIS_URL=redis:\/\/:change-me-strong-redis-password@redis:6379/);
+  assert.match(productionGuide, /لا تضف `ports: 5432:5432`/);
+  assert.match(productionGuide, /127\.0\.0\.1:5432:5432/);
   assert.match(productionGuide, /docker compose --env-file \.env\.production -f docker-compose\.production\.yml/);
   assert.match(doctor, /SOM PRO install doctor/);
   assert.match(doctor, /initialServicesReady/);
