@@ -31,11 +31,25 @@ cp apps/frontend/.env.production.example apps/frontend/.env.production
 
 غيّر كل قيم `change-me` إلى أسرار قوية. لا تستخدم أي كلمة مرور افتراضية.
 
+## Redis في production
+
+- لا تفتح Redis للعالم الخارجي.
+- لا تضف `ports: 6379:6379` في `docker-compose.production.yml`.
+- ضع كلمة مرور قوية في `REDIS_PASSWORD` داخل `.env.production`.
+- اجعل `REDIS_URL` في `apps/backend/.env.production` يحتوي نفس كلمة المرور:
+
+```env
+REDIS_PASSWORD=change-me-strong-redis-password
+REDIS_URL=redis://:change-me-strong-redis-password@redis:6379
+```
+
+الـ Backend فقط يجب أن يصل إلى Redis عبر شبكة Docker الداخلية.
+
 ## تشغيل الخدمات
 
 ```bash
-docker compose -f docker-compose.production.yml build
-docker compose -f docker-compose.production.yml up -d
+docker compose --env-file .env.production -f docker-compose.production.yml build
+docker compose --env-file .env.production -f docker-compose.production.yml up -d
 ```
 
 ## Prisma migrations

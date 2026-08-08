@@ -496,6 +496,10 @@ test("database seed is clean and non-destructive for new installations", () => {
 test("commercial install database checks are explicit and local-only by default", () => {
   const packageJson = readFileSync("../../package.json", "utf8");
   const compose = readFileSync("../../docker-compose.yml", "utf8");
+  const productionCompose = readFileSync("../../docker-compose.production.yml", "utf8");
+  const productionGuide = readFileSync("../../docs/PRODUCTION_DEPLOYMENT_GUIDE_AR.md", "utf8");
+  const productionEnv = readFileSync("../../.env.production.example", "utf8");
+  const backendProductionEnv = readFileSync(".env.production.example", "utf8");
   const doctor = readFileSync("../../scripts/runtime/install-doctor.js", "utf8");
   const localServices = readFileSync("../../scripts/runtime/local-data-services.js", "utf8");
   const databaseConfig = readFileSync("../../scripts/runtime/database-config.js", "utf8");
@@ -505,6 +509,15 @@ test("commercial install database checks are explicit and local-only by default"
   assert.match(compose, /"127\.0\.0\.1:5432:5432"/);
   assert.match(compose, /pg_isready -U som_user -d som/);
   assert.match(compose, /redis-cli", "ping"/);
+  assert.match(productionCompose, /REDIS_PASSWORD/);
+  assert.match(productionCompose, /redis\.production\.conf/);
+  assert.match(productionCompose, /REDISCLI_AUTH/);
+  assert.match(productionCompose, /REDIS_PASSWORD: \$\{REDIS_PASSWORD:\?set REDIS_PASSWORD in \.env\.production\}/);
+  assert.doesNotMatch(productionCompose, /6379:6379/);
+  assert.match(productionEnv, /REDIS_PASSWORD=change-me-strong-redis-password/);
+  assert.match(productionEnv, /REDIS_URL=redis:\/\/:change-me-strong-redis-password@redis:6379/);
+  assert.match(backendProductionEnv, /REDIS_URL=redis:\/\/:change-me-strong-redis-password@redis:6379/);
+  assert.match(productionGuide, /docker compose --env-file \.env\.production -f docker-compose\.production\.yml/);
   assert.match(doctor, /SOM PRO install doctor/);
   assert.match(doctor, /initialServicesReady/);
   assert.match(doctor, /SKIP/);

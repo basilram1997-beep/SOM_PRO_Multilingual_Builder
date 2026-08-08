@@ -2,8 +2,6 @@
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
-    env_file:
-      - .env.production
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-som}
       POSTGRES_USER: ${POSTGRES_USER:-som_user}
@@ -19,10 +17,19 @@
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD in .env.production}
+    command:
+      [
+        "sh",
+        "-c",
+        'redis-server /usr/local/etc/redis/redis.production.conf --requirepass "$${REDIS_PASSWORD:?set REDIS_PASSWORD in .env.production}"'
+      ]
     volumes:
       - sompro_redis_data:/data
+      - ./deploy/redis/redis.production.conf:/usr/local/etc/redis/redis.production.conf:ro
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", 'REDISCLI_AUTH="$${REDIS_PASSWORD}" redis-cli ping | grep PONG']
       interval: 15s
       timeout: 5s
       retries: 10
