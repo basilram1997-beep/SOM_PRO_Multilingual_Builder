@@ -292,17 +292,23 @@ test("scheduler users can access only schedule operation pages in the frontend",
   assert.doesNotMatch(layoutSource, /disabled=\{disabled\}/);
   assert.match(css, /\.sidebar button\.nav-disabled/);
 });
-test("users page exposes only admin and scheduler roles through i18n", () => {
+test("users page exposes supported account types through i18n", () => {
   const pageSource = readFileSync("../frontend/src/pages/users/UsersPage.tsx", "utf8");
+  const hookSource = readFileSync("../frontend/src/features/users/useUsers.ts", "utf8");
+  const formSource = readFileSync("../frontend/src/features/users/UsersFormPanel.tsx", "utf8");
   const routeSource = readFileSync("src/modules/settings/settings.routes.ts", "utf8");
   const enDict = readFileSync("../frontend/src/i18n/dictionaries/en.ts", "utf8");
   const heDict = readFileSync("../frontend/src/i18n/dictionaries/he.ts", "utf8");
   assert.match(pageSource, /useI18n/);
-  assert.match(pageSource, /users\.fullAdmin/);
-  assert.match(pageSource, /users\.scheduler/);
-  assert.doesNotMatch(pageSource, /users\.readOnly/);
-  assert.doesNotMatch(pageSource, /changePassword|passwordForm|changingPassword/);
-  assert.match(enDict, /"users\.scheduler": "Schedule manager"/);
+  assert.match(hookSource, /users\.fullAdmin/);
+  assert.match(hookSource, /users\.homeroomTeacher/);
+  assert.match(hookSource, /users\.student/);
+  assert.match(hookSource, /users\.parent/);
+  assert.doesNotMatch(hookSource, /\{ value: "SCHEDULER"/);
+  assert.doesNotMatch(formSource, /users\.scheduler/);
+  assert.doesNotMatch(pageSource + hookSource + formSource, /users\.readOnly/);
+  assert.doesNotMatch(pageSource + hookSource + formSource, /changePassword|passwordForm|changingPassword/);
+  assert.match(enDict, /"users\.homeroomTeacher": "Homeroom teacher"/);
   assert.match(heDict, /buildGeneratedLocaleDictionary\(en, "he"\)/);
   assert.match(routeSource, /ADMIN: "admin"/);
   assert.match(routeSource, /SCHEDULER: "scheduler"/);
@@ -316,10 +322,12 @@ test("users page uses generated usernames by role", () => {
   assert.match(routeSource, /const base = `\$\{prefix\}\$\{schoolPart\}`/);
   assert.match(routeSource, /USERNAME_EXISTS/);
 
-  const pageSource = readFileSync("../frontend/src/pages/users/UsersPage.tsx", "utf8");
-  assert.match(pageSource, /somApi\.settings\.suggestUsername/);
-  assert.match(pageSource, /onChange=\{e => suggestUsername\(e\.target\.value as UserRole\)\}/);
-  assert.match(pageSource, /saving \? labels\.saving : labels\.add/);
+  const hookSource = readFileSync("../frontend/src/features/users/useUsers.ts", "utf8");
+  const formSource = readFileSync("../frontend/src/features/users/UsersFormPanel.tsx", "utf8");
+  assert.match(hookSource, /somApi\.settings\.suggestUsername/);
+  assert.match(formSource, /const role = e\.target\.value as UserRole/);
+  assert.match(formSource, /suggestUsername\(role\)/);
+  assert.match(formSource, /saving \? labels\.saving : labels\.add/);
 });
 
 test("users page focus styling does not grow focused inputs", () => {

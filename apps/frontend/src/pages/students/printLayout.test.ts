@@ -96,10 +96,10 @@ test("report exports keep print-only controls hidden and preserve RTL-aware expo
     /exportWithAudit\(\{\s*reportType: "classroom-logs"/,
     "classroom logs should be exported through the audited wrapper"
   );
-  assert.match(
+  assert.doesNotMatch(
     reportsPage,
-    /exportWithAudit\(\{\s*reportType: "security"[\s\S]{0,160}?sectionId: "security-report-print"/,
-    "security report should be exported through the audited wrapper"
+    /security-report-print|reportType: "security"/,
+    "security report should stay out of the end-user reports page"
   );
   assert.match(reportsPage, /exportSectionPdf\("daily-report-print"/, "daily report should be exportable directly");
   assert.match(reportsPage, /className="report-tabs no-print"/, "report tabs should stay out of print output");

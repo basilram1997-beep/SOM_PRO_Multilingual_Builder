@@ -56,6 +56,9 @@ function npmRun(script, options = {}) {
 
 async function main() {
   const quick = process.argv.includes("--quick");
+  const e2eCommandTimeoutMs = Number(
+    process.env.SOM_E2E_COMMAND_TIMEOUT_MS || process.env.SOM_E2E_TIMEOUT_MS || 150_000
+  );
 
   const staleStopped = cleanStaleProcesses();
   record("Old processes", true, staleStopped ? `stopped ${staleStopped}` : "none");
@@ -94,13 +97,13 @@ async function main() {
   if (!quick && postgres && redis) {
     const smoke = npmRun("test:e2e:browser:smoke:core", {
       env: { SOM_E2E_TIMEOUT_MS: process.env.SOM_E2E_TIMEOUT_MS || "60000" },
-      timeoutMs: 90_000
+      timeoutMs: Math.max(90_000, e2eCommandTimeoutMs)
     });
     record("Browser smoke", smoke.ok);
 
     const deep = npmRun("test:e2e:browser:deep", {
       env: { SOM_E2E_TIMEOUT_MS: process.env.SOM_E2E_TIMEOUT_MS || "120000" },
-      timeoutMs: 150_000
+      timeoutMs: Math.max(150_000, e2eCommandTimeoutMs)
     });
     record("Deep E2E", deep.ok);
   } else if (quick) {
