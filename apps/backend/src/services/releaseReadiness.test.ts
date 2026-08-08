@@ -493,6 +493,24 @@ test("database seed is clean and non-destructive for new installations", () => {
   assert.doesNotMatch(source, /أحمد سامح|SEED_MVP6_DATA|20 teachers/);
 });
 
+test("commercial install database checks are explicit and local-only by default", () => {
+  const packageJson = readFileSync("../../package.json", "utf8");
+  const compose = readFileSync("../../docker-compose.yml", "utf8");
+  const doctor = readFileSync("../../scripts/runtime/install-doctor.js", "utf8");
+  const localServices = readFileSync("../../scripts/runtime/local-data-services.js", "utf8");
+  const databaseConfig = readFileSync("../../scripts/runtime/database-config.js", "utf8");
+
+  assert.match(packageJson, /"install:doctor": "node scripts\/runtime\/install-doctor\.js"/);
+  assert.match(packageJson, /"install:prepare": "node scripts\/runtime\/install-doctor\.js --fix"/);
+  assert.match(compose, /"127\.0\.0\.1:5432:5432"/);
+  assert.match(compose, /pg_isready -U som_user -d som/);
+  assert.match(compose, /redis-cli", "ping"/);
+  assert.match(doctor, /SOM PRO install doctor/);
+  assert.match(doctor, /npm run setup:db/);
+  assert.match(localServices, /createLocalDataServices/);
+  assert.match(databaseConfig, /resolveRuntimeDataConfig/);
+});
+
 test("hebrew locale and layout are configured for RTL rendering", () => {
   const indexHtml = readFileSync("../frontend/index.html", "utf8");
   const localeRegistry = readFileSync("../frontend/src/i18n/localeRegistry.ts", "utf8");

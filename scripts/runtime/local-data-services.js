@@ -2,14 +2,12 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const { log, success, warn } = require("../cli-output");
+const { createLocalDataServices } = require("./database-config");
 const { isTcpReachable, waitForTcp } = require("./ports");
 const { shellCommand } = require("./services");
 
 const projectRoot = path.resolve(__dirname, "..", "..");
-const defaultServices = [
-  { name: "PostgreSQL", host: "127.0.0.1", port: 5432, composeService: "postgres" },
-  { name: "Redis", host: "127.0.0.1", port: 6379, composeService: "redis" }
-];
+const defaultServices = createLocalDataServices(projectRoot);
 
 function run(commandLine, options = {}) {
   const shell = shellCommand(commandLine);
@@ -111,7 +109,12 @@ async function ensureLocalDataServices(options = {}) {
   if (!autoStart) {
     const missing = formatMissing(status);
     warn(`Local data services are not reachable: ${missing}.`);
-    return { ok: false, started: false, status, message: `Missing local data services: ${missing}` };
+    return {
+      ok: false,
+      started: false,
+      status,
+      message: `Missing local data services: ${missing}. Run \`npm run install:doctor\` for a full setup report.`
+    };
   }
 
   if (!hasDockerComposeFile()) {
@@ -133,7 +136,7 @@ async function ensureLocalDataServices(options = {}) {
       status,
       message:
         `Docker is not ready, so SOM PRO could not start ${missing}. ` +
-        "Start Docker Desktop, then run `npm run local:deps`."
+        "Start Docker Desktop, then run `npm run install:doctor`."
     };
   }
 

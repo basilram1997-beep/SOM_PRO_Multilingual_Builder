@@ -8,9 +8,14 @@ services:
       POSTGRES_USER: som_user
       POSTGRES_PASSWORD: som_password
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - sompro_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U som_user -d som"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     logging:
       driver: json-file
       options:
@@ -26,6 +31,11 @@ services:
       - "127.0.0.1:6379:6379"
     volumes:
       - ./deploy/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     logging:
       driver: json-file
       options:
