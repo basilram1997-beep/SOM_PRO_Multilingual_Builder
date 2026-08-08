@@ -1,7 +1,7 @@
-import { buildGeneratedLocaleDictionary } from "../localeTranslation.ts";
+import { buildReviewedLocaleDictionary } from "../localeTranslation.ts";
 import { en } from "./en.ts";
 
-export const ar: Record<string, string> = buildGeneratedLocaleDictionary(en, "ar");
+export const ar: Record<string, string> = buildReviewedLocaleDictionary(en, "ar");
 
 Object.assign(ar, {
   "dashboard.contactName": "باسل رموني",

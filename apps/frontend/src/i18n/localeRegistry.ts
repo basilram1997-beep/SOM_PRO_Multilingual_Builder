@@ -1,5 +1,5 @@
 import { createSafeDictionary } from "./translationSafety.ts";
-import { buildGeneratedLocaleDictionary } from "./localeTranslation.ts";
+import { buildReviewedLocaleDictionary } from "./localeTranslation.ts";
 
 export type LocaleDictionary = Record<string, string>;
 export type LocaleModule = Record<string, unknown> & { default?: unknown };
@@ -82,11 +82,11 @@ export function buildLocaleRegistry(modules: Record<string, LocaleModule>) {
   const englishDictionary = entries.find((entry) => entry.code === "en")?.dictionary || entries[0]?.dictionary || {};
 
   const safeEntries = entries.map((entry) => {
-    const generatedFallback =
+    const reviewedFallback =
       entry.code === "ar" || entry.code === "he"
-        ? buildGeneratedLocaleDictionary(englishDictionary, entry.code)
+        ? buildReviewedLocaleDictionary(englishDictionary, entry.code)
         : englishDictionary;
-    const safeDictionary = createSafeDictionary(entry.code, entry.dictionary, generatedFallback);
+    const safeDictionary = createSafeDictionary(entry.code, entry.dictionary, reviewedFallback);
     return {
       code: entry.code,
       dictionary: safeDictionary,

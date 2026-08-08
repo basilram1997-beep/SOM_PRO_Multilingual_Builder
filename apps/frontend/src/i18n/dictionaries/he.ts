@@ -1,7 +1,7 @@
-import { buildGeneratedLocaleDictionary } from "../localeTranslation.ts";
+import { buildReviewedLocaleDictionary } from "../localeTranslation.ts";
 import { en } from "./en.ts";
 
-export const he: Record<string, string> = buildGeneratedLocaleDictionary(en, "he");
+export const he: Record<string, string> = buildReviewedLocaleDictionary(en, "he");
 
 Object.assign(he, {
   "common.none": "אין",
