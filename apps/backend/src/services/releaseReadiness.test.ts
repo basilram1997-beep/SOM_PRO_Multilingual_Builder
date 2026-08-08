@@ -506,6 +506,9 @@ test("commercial install database checks are explicit and local-only by default"
   assert.match(compose, /pg_isready -U som_user -d som/);
   assert.match(compose, /redis-cli", "ping"/);
   assert.match(doctor, /SOM PRO install doctor/);
+  assert.match(doctor, /initialServicesReady/);
+  assert.match(doctor, /SKIP/);
+  assert.match(doctor, /not needed because PostgreSQL and Redis are already reachable/);
   assert.match(doctor, /npm run setup:db/);
   assert.match(localServices, /createLocalDataServices/);
   assert.match(databaseConfig, /resolveRuntimeDataConfig/);

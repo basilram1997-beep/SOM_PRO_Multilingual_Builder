@@ -29,6 +29,10 @@ function statusLine(name, ok, detail) {
   log(`${marker} ${name}${detail ? ` - ${detail}` : ""}`);
 }
 
+function statusMessage(marker, name, detail) {
+  log(`${marker} ${name}${detail ? ` - ${detail}` : ""}`);
+}
+
 async function inspectRuntime() {
   const config = resolveRuntimeDataConfig(projectRoot);
   const services = [
@@ -91,13 +95,18 @@ async function main() {
   section("SOM PRO install doctor");
   statusLine("Project root", true, projectRoot);
   statusLine("docker-compose.yml", composeExists, composeExists ? "found" : "missing");
-  statusLine(
-    "Docker daemon for local fallback",
-    dockerOk,
-    dockerOk ? "ready" : "not ready; acceptable when PostgreSQL and Redis are already reachable"
-  );
 
   let inspected = await inspectRuntime();
+  const initialServicesReady = inspected.status.every((service) => service.reachable);
+  statusMessage(
+    dockerOk ? "OK" : initialServicesReady ? "SKIP" : "FAIL",
+    "Docker daemon for local fallback",
+    dockerOk
+      ? "ready"
+      : initialServicesReady
+        ? "not needed because PostgreSQL and Redis are already reachable"
+        : "not ready; required to start missing local data services"
+  );
   statusLine(
     "Backend .env",
     inspected.config.backendEnv.exists,
