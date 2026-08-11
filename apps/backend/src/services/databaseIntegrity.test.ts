@@ -22,6 +22,7 @@ async function cleanupSchoolData(schoolId: string) {
   await prisma.schoolClass.deleteMany({ where: { schoolId } }).catch(() => null);
   await prisma.reportExport.deleteMany({ where: { schoolId } }).catch(() => null);
   await prisma.backupJob.deleteMany({ where: { schoolId } }).catch(() => null);
+  await prisma.user.deleteMany({ where: { schoolId } }).catch(() => null);
   await prisma.school.deleteMany({ where: { id: schoolId } }).catch(() => null);
 }
 
@@ -72,6 +73,15 @@ test("database contracts keep the core integrity guardrails in place", () => {
   );
   const hardeningMigrationSource = readFileSync(
     "prisma/migrations/20260719083000_data_integrity_hardening/migration.sql",
+    "utf8"
+  );
+  const schemaRepairSource = readFileSync("src/services/schemaRepair.ts", "utf8");
+  const artifactMigrationSource = readFileSync(
+    "prisma/migrations/20260808190000_add_unique_report_export_and_backup_file_paths/migration.sql",
+    "utf8"
+  );
+  const legacyAttendanceMigrationSource = readFileSync(
+    "prisma/migrations/20260811121000_normalize_legacy_attendance_absent_status/migration.sql",
     "utf8"
   );
   const backupMigrationSource = readFileSync(
@@ -144,6 +154,15 @@ test("database contracts keep the core integrity guardrails in place", () => {
   assert.match(hardeningMigrationSource, /AuditLog_schoolId_entity_type_entityId_idx/);
   assert.match(hardeningMigrationSource, /reports_exports_school_id_requested_by_created_at_idx/);
   assert.match(hardeningMigrationSource, /backup_jobs_school_id_created_by_started_at_idx/);
+  assert.match(schemaRepairSource, /allowedRepairTables/);
+  assert.match(schemaRepairSource, /assertAllowedRepairTarget/);
+  assert.match(schemaRepairSource, /quotedIdentifier/);
+  assert.doesNotMatch(schemaRepairSource, /\$executeRawUnsafe/);
+  assert.doesNotMatch(schemaRepairSource, /\$queryRawUnsafe/);
+  assert.match(artifactMigrationSource, /reports_exports_school_id_file_path_key/);
+  assert.match(artifactMigrationSource, /backup_jobs_school_id_file_path_key/);
+  assert.match(legacyAttendanceMigrationSource, /ABSENT_UNEXCUSED/);
+  assert.doesNotMatch(legacyAttendanceMigrationSource, /ABSENT_EXCUSED/);
   assert.doesNotMatch(hardeningMigrationSource, /employeeNumber/);
   assert.match(backupMigrationSource, /CREATE TABLE "reports_exports"/);
   assert.match(backupMigrationSource, /CREATE TABLE "backup_jobs"/);
@@ -158,6 +177,8 @@ test("database contracts keep the core integrity guardrails in place", () => {
   assert.ok(migrationDirs.includes("20260718175000_baseline_current_schema"));
   assert.ok(migrationDirs.includes("20260718193000_add_reports_exports_and_backup_jobs"));
   assert.ok(migrationDirs.includes("20260722103000_add_schoolclass_max_students"));
+  assert.ok(migrationDirs.includes("20260808190000_add_unique_report_export_and_backup_file_paths"));
+  assert.ok(migrationDirs.includes("20260811121000_normalize_legacy_attendance_absent_status"));
 });
 
 test("a failed batch write rolls back all inserted rows instead of leaving a partial set behind", async () => {
@@ -256,6 +277,114 @@ test("attendance stays unique for a student on the same day", async () => {
     assert.equal(records.length, 1);
     assert.equal(records[0]?.status, "LATE");
     assert.equal(records[0]?.lateAt, "08:30");
+  } finally {
+    await cleanupSchoolData(schoolId);
+  }
+});
+
+test("attendance CRUD keeps create, read, update, and delete behavior aligned", async () => {
+  const runId = makeRunId();
+  const { schoolId, classId } = await createSchoolFixture(runId);
+  const student = await prisma.student.create({
+    data: {
+      schoolId,
+      classId,
+      name: `Attendance CRUD ${runId}`,
+      nationalId: `CRUD-${runId}`
+    }
+  });
+
+  try {
+    const created = await prisma.studentAttendance.upsert({
+      where: {
+        schoolId_studentId_date: {
+          schoolId,
+          studentId: student.id,
+          date: "2026-07-24"
+        }
+      },
+      create: {
+        schoolId,
+        studentId: student.id,
+        date: "2026-07-24",
+        day: "Ø§Ù„Ø®Ù…ÙŠØ³",
+        status: "ABSENT_EXCUSED",
+        note: "medical leave"
+      },
+      update: {
+        day: "Ø§Ù„Ø®Ù…ÙŠØ³",
+        status: "ABSENT_EXCUSED",
+        note: "medical leave"
+      }
+    });
+
+    const readBack = await prisma.studentAttendance.findUnique({
+      where: {
+        schoolId_studentId_date: {
+          schoolId,
+          studentId: student.id,
+          date: "2026-07-24"
+        }
+      }
+    });
+
+    assert.equal(created.status, "ABSENT_EXCUSED");
+    assert.equal(readBack?.studentId, student.id);
+    assert.equal(readBack?.status, "ABSENT_EXCUSED");
+    assert.equal(readBack?.note, "medical leave");
+
+    const updated = await prisma.studentAttendance.upsert({
+      where: {
+        schoolId_studentId_date: {
+          schoolId,
+          studentId: student.id,
+          date: "2026-07-24"
+        }
+      },
+      create: {
+        schoolId,
+        studentId: student.id,
+        date: "2026-07-24",
+        day: "Ø§Ù„Ø®Ù…ÙŠØ³",
+        status: "PRESENT"
+      },
+      update: {
+        day: "Ø§Ù„Ø®Ù…ÙŠØ³",
+        status: "LATE",
+        lateAt: "08:12",
+        note: "late arrival"
+      }
+    });
+
+    const reread = await prisma.studentAttendance.findUnique({
+      where: {
+        schoolId_studentId_date: {
+          schoolId,
+          studentId: student.id,
+          date: "2026-07-24"
+        }
+      }
+    });
+
+    assert.equal(updated.status, "LATE");
+    assert.equal(reread?.status, "LATE");
+    assert.equal(reread?.lateAt, "08:12");
+    assert.equal(reread?.note, "late arrival");
+
+    const deleted = await prisma.studentAttendance.deleteMany({
+      where: { schoolId, studentId: student.id, date: "2026-07-24" }
+    });
+    assert.equal(deleted.count, 1);
+    const afterDelete = await prisma.studentAttendance.findUnique({
+      where: {
+        schoolId_studentId_date: {
+          schoolId,
+          studentId: student.id,
+          date: "2026-07-24"
+        }
+      }
+    });
+    assert.equal(afterDelete, null);
   } finally {
     await cleanupSchoolData(schoolId);
   }
@@ -389,12 +518,22 @@ test("backup and report export records upsert cleanly without duplicating storag
   });
 
   try {
+    const operator = await prisma.user.create({
+      data: {
+        schoolId,
+        name: `DB Operator ${runId}`,
+        email: `operator-${runId}@db-e2e.local`,
+        password: "hash",
+        role: "ADMIN"
+      }
+    });
+
     const initialReport = await createReportExportRecord(prisma, {
       schoolId,
       reportType: "attendance",
       fileType: "xlsx",
       filePath: `/tmp/report-${runId}.xlsx`,
-      requestedBy: null,
+      requestedBy: operator.id,
       status: "REQUESTED"
     });
 
@@ -403,12 +542,13 @@ test("backup and report export records upsert cleanly without duplicating storag
       reportType: "attendance",
       fileType: "xlsx",
       filePath: `/tmp/report-${runId}.xlsx`,
-      requestedBy: null,
+      requestedBy: operator.id,
       status: "READY"
     });
 
     assert.equal(initialReport.id, updatedReport.id);
     assert.equal(updatedReport.status, "READY");
+    assert.equal(updatedReport.requestedBy, operator.id);
 
     const initialBackup = await createBackupJobRecord(prisma, {
       schoolId,
@@ -417,7 +557,7 @@ test("backup and report export records upsert cleanly without duplicating storag
       checksum: `checksum-${runId}`,
       encrypted: true,
       status: "PENDING",
-      createdBy: null
+      createdBy: operator.id
     });
 
     const completedBackup = await completeBackupJobRecord(prisma, initialBackup.id, {
@@ -433,13 +573,16 @@ test("backup and report export records upsert cleanly without duplicating storag
       checksum: `checksum-${runId}-new`,
       encrypted: true,
       status: "COMPLETED",
-      createdBy: null
+      createdBy: operator.id
     });
 
     assert.equal(initialBackup.id, completedBackup.id);
     assert.equal(completedBackup.status, "COMPLETED");
+    assert.equal(completedBackup.createdBy, operator.id);
+    assert.equal(completedBackup.filePath, `/tmp/backup-${runId}.zip`);
     assert.equal(updatedBackup.id, completedBackup.id);
     assert.equal(updatedBackup.checksum, `checksum-${runId}-new`);
+    assert.equal(updatedBackup.status, "COMPLETED");
   } finally {
     await cleanupSchoolData(schoolId);
   }

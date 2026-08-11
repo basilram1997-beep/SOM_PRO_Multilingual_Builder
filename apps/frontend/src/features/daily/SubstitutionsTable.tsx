@@ -16,7 +16,7 @@ export function SubstitutionsTable({ t, language, substitutions, onExport, onOpe
   return (
     <Card
       actions={
-        <button className="secondary" onClick={onExport}>
+        <button type="button" className="secondary" data-e2e="daily-substitutions-export" onClick={onExport}>
           {t("daily.exportSubstitutions")}
         </button>
       }
@@ -50,14 +50,20 @@ export function SubstitutionsTable({ t, language, substitutions, onExport, onOpe
                     : "-"}
                 </td>
                 <td
-                  data-e2e={`daily-substitution-edit-${substitution.id}`}
                   className="clickable-cell teacher-color-cell"
                   style={teacherColorStyle(substitution.substituteTeacher)}
-                  onClick={() => onOpenSubstitution(substitution)}
                 >
-                  {substitution.substituteTeacher?.name
-                    ? localizeTeacherName(substitution.substituteTeacher.name, language)
-                    : t("daily.noSubstitute")}
+                  <button
+                    type="button"
+                    data-e2e={`daily-substitution-edit-${substitution.id}`}
+                    className="cell-button"
+                    onClick={() => onOpenSubstitution(substitution)}
+                    aria-label={t("daily.substitute")}
+                  >
+                    {substitution.substituteTeacher?.name
+                      ? localizeTeacherName(substitution.substituteTeacher.name, language)
+                      : t("daily.noSubstitute")}
+                  </button>
                 </td>
                 <td>{substitutionKindLabel(substitution.kind || "", t)}</td>
               </tr>

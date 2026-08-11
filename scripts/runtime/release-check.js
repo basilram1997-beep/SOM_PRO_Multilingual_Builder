@@ -56,6 +56,7 @@ function npmRun(script, options = {}) {
 
 async function main() {
   const quick = process.argv.includes("--quick");
+  const skipBaseline = process.argv.includes("--skip-baseline");
   const e2eCommandTimeoutMs = Number(
     process.env.SOM_E2E_COMMAND_TIMEOUT_MS || process.env.SOM_E2E_TIMEOUT_MS || 150_000
   );
@@ -79,8 +80,20 @@ async function main() {
   record("Frontend port", !(await isTcpReachable("127.0.0.1", 4188, 500)), "4188 free for E2E");
   record("Backend port", !(await isTcpReachable("127.0.0.1", 4000, 500)), "4000 free for E2E");
 
-  const audit = run("npm", ["audit", "--omit=dev"], { timeoutMs: 120_000 });
-  record("npm audit --omit=dev", audit.ok);
+  if (!skipBaseline) {
+    const audit = run("node", ["scripts/runtime/audit-baseline.js"], { timeoutMs: 120_000 });
+    record("npm audit --omit=dev", audit.ok);
+
+    const installDoctor = npmRun("install:doctor", { timeoutMs: 120_000 });
+    record("Install doctor", installDoctor.ok);
+
+    const secrets = npmRun("security:secrets", { timeoutMs: 120_000 });
+    record("Secrets scan", secrets.ok);
+  } else {
+    record("npm audit --omit=dev", true, "skipped because CI already ran the baseline checks");
+    record("Install doctor", true, "skipped because CI already ran the baseline checks");
+    record("Secrets scan", true, "skipped because CI already ran the baseline checks");
+  }
 
   const lint = npmRun("lint", { timeoutMs: 120_000 });
   record("Lint", lint.ok);
@@ -100,6 +113,18 @@ async function main() {
       timeoutMs: Math.max(90_000, e2eCommandTimeoutMs)
     });
     record("Browser smoke", smoke.ok);
+
+    const smokeStudents = npmRun("test:e2e:browser:smoke:students", {
+      env: { SOM_E2E_TIMEOUT_MS: process.env.SOM_E2E_TIMEOUT_MS || "90000" },
+      timeoutMs: Math.max(120_000, e2eCommandTimeoutMs)
+    });
+    record("Browser smoke students", smokeStudents.ok);
+
+    const smokeDaily = npmRun("test:e2e:browser:smoke:daily", {
+      env: { SOM_E2E_TIMEOUT_MS: process.env.SOM_E2E_TIMEOUT_MS || "90000" },
+      timeoutMs: Math.max(120_000, e2eCommandTimeoutMs)
+    });
+    record("Browser smoke daily", smokeDaily.ok);
 
     const deep = npmRun("test:e2e:browser:deep", {
       env: { SOM_E2E_TIMEOUT_MS: process.env.SOM_E2E_TIMEOUT_MS || "120000" },

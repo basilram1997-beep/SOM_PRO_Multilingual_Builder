@@ -55,6 +55,12 @@ const redisRateLimitClient = new Redis(env.redisUrl, {
   connectTimeout: 1000
 });
 let redisConnectStarted = false;
+const studentHighVolumeWritePaths = new Set([
+  "/api/students/import",
+  "/api/students/attendance",
+  "/api/students/grade-entries",
+  "/api/students/certificates"
+]);
 
 const sensitiveRouteRateLimitRules: RateLimitRule[] = [
   {
@@ -68,7 +74,40 @@ const sensitiveRouteRateLimitRules: RateLimitRule[] = [
     })
   },
   {
-    match: (req) => writeMethods.has(req.method) && req.path.startsWith("/api/students"),
+    match: (req) => req.method === "PUT" && req.path === "/api/students/attendance",
+    middleware: createRateLimitMiddleware({
+      key: "sensitive:students-attendance",
+      windowMs: 60_000,
+      max: 120,
+      message: "تم تكرار عمليات الحضور بسرعة زائدة. حاول مرة أخرى بعد قليل.",
+      auditAction: "RATE LIMITED STUDENTS ATTENDANCE"
+    })
+  },
+  {
+    match: (req) => req.method === "POST" && req.path === "/api/students/grade-entries",
+    middleware: createRateLimitMiddleware({
+      key: "sensitive:students-grade-entries",
+      windowMs: 60_000,
+      max: 120,
+      message: "تم تكرار عمليات العلامات بسرعة زائدة. حاول مرة أخرى بعد قليل.",
+      auditAction: "RATE LIMITED STUDENTS GRADE ENTRIES"
+    })
+  },
+  {
+    match: (req) => req.method === "POST" && req.path === "/api/students/certificates",
+    middleware: createRateLimitMiddleware({
+      key: "sensitive:students-certificates",
+      windowMs: 60_000,
+      max: 240,
+      message: "تم تكرار عمليات الشهادات بسرعة زائدة. حاول مرة أخرى بعد قليل.",
+      auditAction: "RATE LIMITED STUDENTS CERTIFICATES"
+    })
+  },
+  {
+    match: (req) =>
+      writeMethods.has(req.method) &&
+      req.path.startsWith("/api/students") &&
+      !studentHighVolumeWritePaths.has(req.path),
     middleware: createRateLimitMiddleware({
       key: "sensitive:students-write",
       windowMs: 60_000,

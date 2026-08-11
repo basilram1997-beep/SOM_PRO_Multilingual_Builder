@@ -5,6 +5,7 @@ import { createApp } from "./app";
 test("license and audit middleware protect write routes", () => {
   const app = createApp() as unknown as {
     _router: { stack: Array<{ handle?: { name?: string }; regexp?: RegExp | string }> };
+    get(name: string): unknown;
   };
   const stack = app._router.stack;
   const licenseGuardIndex = stack.findIndex((layer) => layer.handle?.name === "licenseGuard");
@@ -12,6 +13,7 @@ test("license and audit middleware protect write routes", () => {
   const teachersIndex = stack.findIndex((layer) => String(layer.regexp).includes("api\\/teachers"));
   const studentsIndex = stack.findIndex((layer) => String(layer.regexp).includes("api\\/students"));
 
+  assert.equal(app.get("trust proxy"), false, "trust proxy should stay off unless explicitly enabled");
   assert.ok(licenseGuardIndex >= 0, "licenseGuard must be registered");
   assert.ok(auditTrailIndex > licenseGuardIndex, "auditTrail should run after licenseGuard");
   assert.ok(teachersIndex > licenseGuardIndex, "teacher writes must be behind licenseGuard");

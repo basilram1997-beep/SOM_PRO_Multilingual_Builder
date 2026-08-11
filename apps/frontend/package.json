@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "test": "node --test --experimental-strip-types src/api/httpUtils.test.mjs src/app/pageAccess.test.mjs src/i18n/translationSafety.test.mjs src/i18n/localeRegistry.test.mjs src/features/students/gradeEntryDraft.test.ts src/features/students/gradeImport.test.ts src/pages/students/printLayout.test.ts src/features/teachers/teacherHelpers.test.ts"
+    "test": "node --test --experimental-strip-types src/api/httpUtils.test.mjs src/app/pageAccess.test.mjs src/i18n/translationSafety.test.mjs src/i18n/localeRegistry.test.mjs src/features/students/gradeEntryDraft.test.ts src/features/students/gradeImport.test.ts src/features/settings/useSettings.test.ts src/pages/students/printLayout.test.ts src/features/teachers/teacherHelpers.test.ts"
   },
   "dependencies": {
     "@som/shared": "0.9.0-rc.1",

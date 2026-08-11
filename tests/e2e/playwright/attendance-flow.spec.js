@@ -103,5 +103,6 @@ test.describe.serial("SOM PRO end-to-end attendance flow", () => {
     await expect(page.locator("#attendance-report-print")).toContainText(selectedClassName);
     await expect(page.locator("#attendance-report-print")).toContainText(selectedStudentName);
     await expect(page.locator("#attendance-report-print")).toContainText(expectedDate);
+    await expect(page.locator("#attendance-report-print table tbody tr").first()).toContainText(/حاضر|Present/);
   });
 });

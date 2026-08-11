@@ -11,3 +11,7 @@ package-lock.json
 *.ico
 *.png
 *.bmp
+tests/stress/artifacts/
+tests/load/artifacts/
+tests/perf/artifacts/
+tests/e2e/artifacts/

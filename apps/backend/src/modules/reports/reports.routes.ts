@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import crypto from "node:crypto";
+import { performance } from "node:perf_hooks";
 import { Router, type Request } from "express";
 import { z } from "zod";
 import { StudentCertificateTypeSchema } from "@som/shared";
@@ -10,6 +11,7 @@ import { createReportExportRecord } from "../../services/artifactRecords";
 import { getRequestSchoolId } from "../../services/schoolContext";
 
 export const reportsRouter = Router();
+const reportsProfileEnabled = String(process.env.REPORTS_PROFILE || "").toLowerCase() === "1";
 
 type Lang = "ar" | "en" | "he";
 
@@ -68,11 +70,14 @@ const ExportReportSchema = z.object({
 });
 
 reportsRouter.post("/export-events", async (req, res) => {
+  const routeStartedAt = performance.now();
   const schoolId = await getRequestSchoolId(req);
+  logReportProfile("export-events", "school-id", routeStartedAt, { schoolId });
   if (!req.user) {
     return res.status(401).json({ error: "AUTH_REQUIRED", message: "تسجيل الدخول مطلوب" });
   }
 
+  const validationStartedAt = performance.now();
   const parsed = ExportEventSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "INVALID_EXPORT_EVENT", message: "بيانات التصدير غير صحيحة" });
@@ -83,9 +88,11 @@ reportsRouter.post("/export-events", async (req, res) => {
     return res.status(403).json({ error: "FORBIDDEN", message: "لا تملك صلاحية التصدير" });
   }
 
+  logReportProfile("export-events", "validation", validationStartedAt, { permission, kind, page });
+  const writesStartedAt = performance.now();
   const expiresAt = new Date(Date.now() + (expiresInMinutes || 15) * 60_000).toISOString();
   const reportExportId = crypto.randomUUID();
-  await createReportExportRecord(prisma, {
+  const exportRecordPromise = createReportExportRecord(prisma, {
     schoolId,
     reportType: page,
     fileType: kind,
@@ -94,7 +101,7 @@ reportsRouter.post("/export-events", async (req, res) => {
     status: "REQUESTED",
     expiresAt: new Date(expiresAt)
   });
-  await prisma.auditLog.create({
+  const auditLogPromise = prisma.auditLog.create({
     data: {
       schoolId,
       userId: req.user.id,
@@ -111,8 +118,11 @@ reportsRouter.post("/export-events", async (req, res) => {
       }
     }
   });
+  await Promise.all([exportRecordPromise, auditLogPromise]);
+  logReportProfile("export-events", "writes", writesStartedAt, { reportExportId });
 
   res.json({ data: { ok: true, expiresAt, exportId: reportExportId } });
+  logReportProfile("export-events", "total", routeStartedAt, { reportExportId });
 });
 
 const kindLabels: Record<Lang, Record<string, string>> = {
@@ -187,6 +197,12 @@ function safeLang(value: unknown): Lang {
 
 function canViewReports(req: Request) {
   return Boolean(req.user && canRole(req.user.role, "manageSettings"));
+}
+
+function logReportProfile(route: string, step: string, startedAt: number, details?: Record<string, unknown>) {
+  if (!reportsProfileEnabled) return;
+  const elapsedMs = Number((performance.now() - startedAt).toFixed(1));
+  console.log(`[reports-profile] ${route}:${step}`, details ? { elapsedMs, ...details } : { elapsedMs });
 }
 
 reportsRouter.get("/", async (req, res) => {
@@ -1137,16 +1153,18 @@ reportsRouter.post("/export", async (req, res) => {
 
   const expiresAt = new Date(Date.now() + (expiresInMinutes || 15) * 60_000).toISOString();
   const reportExportId = crypto.randomUUID();
-  await createReportExportRecord(prisma, {
-    schoolId,
-    reportType,
-    fileType: kind,
-    filePath: `reports/${reportType}/${reportExportId}.${kind.toLowerCase()}`,
-    requestedBy: req.user.id,
-    status: "REQUESTED",
-    expiresAt: new Date(expiresAt)
+  const exportRecordPromise = prisma.reportExport.create({
+    data: {
+      schoolId,
+      reportType,
+      fileType: kind,
+      filePath: `reports/${reportType}/${reportExportId}.${kind.toLowerCase()}`,
+      requestedBy: req.user.id,
+      status: "REQUESTED",
+      expiresAt: new Date(expiresAt)
+    }
   });
-  await recordAuditLog(prisma, {
+  const auditLogPromise = recordAuditLog(prisma, {
     schoolId,
     userId: req.user.id,
     action: `EXPORT REPORT ${reportType.toUpperCase()}`,
@@ -1162,6 +1180,7 @@ reportsRouter.post("/export", async (req, res) => {
       filters: toJsonInput(filters)
     }
   });
+  await Promise.all([exportRecordPromise, auditLogPromise]);
 
   res.json({
     data: {

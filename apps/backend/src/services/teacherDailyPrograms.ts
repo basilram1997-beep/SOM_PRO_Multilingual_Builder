@@ -1,5 +1,74 @@
-﻿import { prisma } from "../db/prisma";
+import { prisma } from "../db/prisma";
 import { ensureSchoolSettings } from "./schoolSettings";
+
+const teacherDailySelect = {
+  id: true,
+  name: true,
+  specialty: true
+} as const;
+
+const dailySlotSelect = {
+  id: true,
+  schoolId: true,
+  day: true,
+  period: true,
+  classId: true,
+  subjectId: true,
+  teacherId: true,
+  room: true,
+  class: {
+    select: {
+      id: true,
+      name: true
+    }
+  },
+  subject: {
+    select: {
+      id: true,
+      name: true
+    }
+  },
+  teacher: {
+    select: teacherDailySelect
+  }
+} as const;
+
+const dailyStatusSelect = {
+  teacherId: true,
+  type: true,
+  fromPeriod: true,
+  toPeriod: true,
+  reason: true
+} as const;
+
+const dailySubstitutionSelect = {
+  id: true,
+  period: true,
+  baseSlotId: true,
+  classId: true,
+  subjectId: true,
+  absentTeacherId: true,
+  substituteTeacherId: true,
+  note: true,
+  class: {
+    select: {
+      id: true,
+      name: true
+    }
+  },
+  subject: {
+    select: {
+      id: true,
+      name: true
+    }
+  },
+  absentTeacher: {
+    select: teacherDailySelect
+  },
+  substituteTeacher: {
+    select: teacherDailySelect
+  }
+} as const;
 
 export type TeacherProgramLesson = {
   period: number;
@@ -39,15 +108,18 @@ export async function buildTeacherDailyPrograms(params: { schoolId: string; date
 
   const daily = await prisma.dailySchedule.findUnique({
     where: { schoolId_date: { schoolId, date } },
-    include: {
-      statuses: { include: { teacher: true } },
+    select: {
+      id: true,
+      schoolId: true,
+      date: true,
+      day: true,
+      createdAt: true,
+      updatedAt: true,
+      statuses: {
+        select: dailyStatusSelect
+      },
       substitutions: {
-        include: {
-          class: true,
-          subject: true,
-          absentTeacher: true,
-          substituteTeacher: true
-        }
+        select: dailySubstitutionSelect
       }
     }
   });
@@ -59,10 +131,14 @@ export async function buildTeacherDailyPrograms(params: { schoolId: string; date
   const settings = await ensureSchoolSettings(schoolId);
 
   const [teachers, baseSlots] = await Promise.all([
-    prisma.teacher.findMany({ where: { schoolId }, orderBy: { name: "asc" } }),
+    prisma.teacher.findMany({
+      where: { schoolId },
+      select: teacherDailySelect,
+      orderBy: { name: "asc" }
+    }),
     prisma.baseScheduleSlot.findMany({
       where: { schoolId, day: daily.day, period: { lte: settings.periodsPerDay } },
-      include: { class: true, subject: true, teacher: true },
+      select: dailySlotSelect,
       orderBy: [{ period: "asc" }]
     })
   ]);

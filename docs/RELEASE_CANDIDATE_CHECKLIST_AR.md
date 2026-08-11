@@ -1,55 +1,52 @@
 # قائمة فحص Release Candidate - SOM PRO v0.9.0-rc.1
 
-استخدم هذه القائمة قبل تسليم أي نسخة اختبار لمدرسة أو لبيئة staging.
+استخدم هذه القائمة قبل تسليم أي نسخة اختبار أو staging.
 
 ## قبل البناء
 
-- [ ] نجاح `npm run release:check`.
-- [ ] ضبط API URL على staging وليس localhost.
-- [ ] ضبط License Server URL على staging.
+- [ ] نجاح `npm run check:quick`.
+- [ ] نجاح `npm run release:doctor`.
+- [ ] التأكد من أن `API URL` و `License Server URL` يشيران إلى staging أو البيئة الصحيحة.
 - [ ] التأكد من عدم وجود أسرار production داخل ملفات المشروع.
-- [ ] التأكد أن رقم الإصدار هو `0.9.0-rc.1`.
+- [ ] التأكد من أن رقم الإصدار هو `0.9.0-rc.1`.
 
-## بناء نسخة SaaS
+## قبل التسليم الداخلي
 
-- [ ] تشغيل `npm run release:build:saas`.
-- [ ] ظهور `SOM-PRO-Setup-0.9.0-rc.1-SaaS.exe`.
-- [ ] التأكد أن التطبيق لا يستخدم localhost في وضع SaaS.
-- [ ] التأكد أن المدير لا يحتاج Node أو Docker بعد التثبيت.
+- [ ] نجاح `npm run release:prepare`.
+- [ ] إزالة أي ناتج قديم داخل `release/` أو `dist/` أو `test-results/`.
+- [ ] عدم وجود أكثر من Installer واحد نهائي في مجلد التسليم.
 
-## بناء نسخة Trial
+## التثبيت على Windows
 
-- [ ] تشغيل `npm run release:build:trial` عند الحاجة.
-- [ ] ظهور `SOM-PRO-Setup-0.9.0-rc.1-Trial.exe`.
-- [ ] توضيح أن Trial ليست المسار التجاري النهائي.
+- [ ] التثبيت على Windows نظيف.
+- [ ] فتح البرنامج بدون Node أو Docker على الجهاز.
+- [ ] تسجيل الدخول بحساب صالح.
+- [ ] فتح صفحات الطلاب والمعلمين والجداول والتقارير.
 
-## اختبار Windows نظيف
+## التغطية التي يجب مراجعتها
 
-- [ ] تثبيت التطبيق على Windows نظيف.
-- [ ] فتح التطبيق بدون تثبيت Node.
-- [ ] فتح التطبيق بدون تثبيت Docker.
-- [ ] إدخال license key صحيح.
-- [ ] تسجيل الدخول بحساب المدرسة.
-- [ ] فتح صفحة المعلمين.
-- [ ] توليد برنامج يومي.
-- [ ] توليد برامج المعلمين.
+- [ ] browser usability.
+- [ ] browser smoke الأساسي.
+- [ ] compatibility.
+- [ ] migration / upgrade.
+- [ ] volume tiny / normal.
+- [ ] stress login / outage recovery.
 
-## اختبار مدارس وترخيص
+## التحقق من staging
 
-- [ ] اختبار مدرسة واحدة.
-- [ ] اختبار مدرستين والتأكد من عدم اختلاط البيانات.
-- [ ] اختبار `maxDevices`.
-- [ ] اختبار Grace Period عند انقطاع الإنترنت.
-- [ ] اختبار انتهاء الترخيص.
-- [ ] اختبار إلغاء الترخيص من لوحة المالك.
-
-## اختبار staging
-
-- [ ] اختبار health checks.
-- [ ] اختبار migration على قاعدة staging.
-- [ ] Backup and restore are now formally closed within the current release scope.
+- [ ] نجاح health checks.
+- [ ] نجاح migration على staging.
+- [ ] نجاح backup / restore حسب runbook.
 - [ ] توثيق أي مشكلة ظهرت.
 
-## ملاحظات
+## القبول النهائي
 
-إذا فشل أي بند، لا تعتبر النسخة جاهزة للتسليم الخارجي. أصلح السبب أو وثقه كخطر معروف قبل الانتقال إلى v1.0.
+- [ ] نجاح `npm run acceptance:check`.
+- [ ] ضبط `SOM_E2E_BASE_URL` و `SOM_E2E_API_BASE_URL` على staging الحقيقي قبل `npm run acceptance:run`.
+- [ ] نجاح سيناريوهات القبول الأساسية: الدخول، التنقل، الحضور، التقارير، الشهادات، الصلاحيات.
+- [ ] تعبئة [ACCEPTANCE_RESULTS_TEMPLATE_AR.md](./ACCEPTANCE_RESULTS_TEMPLATE_AR.md).
+- [ ] اعتماد المالك/العميل النهائي على النتائج قبل التسليم.
+
+## ملاحظة
+
+إذا فشل أي بند مهم، لا تعتبر النسخة جاهزة للتسليم الخارجي حتى يُصلح السبب ويُعاد الفحص.

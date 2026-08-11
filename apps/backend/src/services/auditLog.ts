@@ -14,7 +14,7 @@ export function recordAuditLog(prisma: PrismaClient, input: AuditInput) {
   const before = input.before === undefined ? undefined : (input.before ?? Prisma.JsonNull);
   const after = input.after === undefined ? undefined : (input.after ?? Prisma.JsonNull);
 
-  void prisma.auditLog
+  return prisma.auditLog
     .create({
       data: {
         schoolId: input.schoolId ?? null,

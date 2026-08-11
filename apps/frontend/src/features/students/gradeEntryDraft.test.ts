@@ -4,6 +4,7 @@ import {
   buildGradeEntryStorageKey,
   calculateWeightedTotal,
   countCompletedMarks,
+  createEmptyGradeEntryDraft,
   isCompletionBadgeComplete,
   isCompletionBadgeEmpty,
   normalizeGradeEntryDraft,
@@ -206,4 +207,67 @@ test("saved grade drafts can be updated and reloaded without duplicating old val
   assert.ok(reloaded && reloaded.updatedAt);
 
   clearGradeEntryDraft(storageKey);
+});
+
+test("grade entry drafts stay isolated per storage key and start empty", () => {
+  const keyA = buildGradeEntryStorageKey({
+    schoolId: "school-a",
+    teacherId: "teacher-a",
+    classId: "class-a",
+    subjectId: "subject-a",
+    certificateType: "TERM1_BIMONTHLY"
+  });
+  const keyB = buildGradeEntryStorageKey({
+    schoolId: "school-a",
+    teacherId: "teacher-a",
+    classId: "class-b",
+    subjectId: "subject-a",
+    certificateType: "TERM1_BIMONTHLY"
+  });
+
+  clearGradeEntryDraft(keyA);
+  clearGradeEntryDraft(keyB);
+
+  const emptyDraft = createEmptyGradeEntryDraft();
+  assert.deepEqual(emptyDraft.rows, {});
+  assert.match(emptyDraft.updatedAt, /^\d{4}-\d{2}-\d{2}T/);
+
+  saveGradeEntryDraft(keyA, {
+    rows: { "student-a": { "daily-exam": "8", "attendance-participation": "7", "bimonthly-exam": "6" } },
+    updatedAt: "2026-07-19T00:00:00.000Z"
+  });
+  saveGradeEntryDraft(keyB, {
+    rows: { "student-b": { "daily-exam": "4", "attendance-participation": "5", "bimonthly-exam": "6" } },
+    updatedAt: "2026-07-19T00:10:00.000Z"
+  });
+
+  assert.deepEqual(loadGradeEntryDraft(keyA)?.rows["student-a"], {
+    "daily-exam": "8",
+    "attendance-participation": "7",
+    "bimonthly-exam": "6"
+  });
+  assert.deepEqual(loadGradeEntryDraft(keyB)?.rows["student-b"], {
+    "daily-exam": "4",
+    "attendance-participation": "5",
+    "bimonthly-exam": "6"
+  });
+
+  saveGradeEntryDraft(keyA, {
+    rows: { "student-a": { "daily-exam": "9", "attendance-participation": "8", "bimonthly-exam": "7" } },
+    updatedAt: "2026-07-19T00:15:00.000Z"
+  });
+
+  assert.deepEqual(loadGradeEntryDraft(keyA)?.rows["student-a"], {
+    "daily-exam": "9",
+    "attendance-participation": "8",
+    "bimonthly-exam": "7"
+  });
+  assert.deepEqual(loadGradeEntryDraft(keyB)?.rows["student-b"], {
+    "daily-exam": "4",
+    "attendance-participation": "5",
+    "bimonthly-exam": "6"
+  });
+
+  clearGradeEntryDraft(keyA);
+  clearGradeEntryDraft(keyB);
 });

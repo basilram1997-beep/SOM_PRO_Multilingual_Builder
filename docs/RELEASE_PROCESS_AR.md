@@ -1,10 +1,8 @@
 # عملية تجهيز الإصدار
 
-هذه هي العملية الرسمية قبل تسليم نسخة جديدة من SOM PRO.
+هذا هو المسار الرسمي قبل تسليم نسخة جديدة من SOM PRO.
 
 ## الأوامر الرسمية
-
-استخدم هذه الأوامر بدل تشغيل سكربتات كثيرة بشكل متفرق:
 
 ```bash
 npm run clean
@@ -17,59 +15,40 @@ npm run update:safe
 
 ## معنى الأوامر
 
-- `npm run clean`: يحذف مخرجات البناء والاختبار والإصدارات القديمة فقط.
-- `npm run local:deps`: يفحص PostgreSQL وRedis ويشغلهما عبر Docker عند الحاجة.
-- `npm run e2e:clean`: يوقف عمليات E2E/Backend/License القديمة التابعة للمشروع.
-- `npm run check:quick`: يشغل `lint` و`typecheck` و`format:check`.
-- `npm run check:release`: يشغل بناء وفحوصات جودة وفحوصات متصفح أساسية وعميقة.
-- `npm run release:doctor`: ينتج تقرير جاهزية واضح.
-- `npm run release:prepare`: ينظف ثم يشغل تقرير الجاهزية.
-- `npm run update:safe`: مسار تحديث منظم يحمي البيانات قبل migrations.
+- `npm run clean`: يحذف المخرجات القديمة وملفات التشغيل المؤقتة.
+- `npm run local:deps`: يتأكد من PostgreSQL وRedis ويشغلهما محليًا عند الحاجة.
+- `npm run check:quick`: فحص سريع للكود والأنواع والتنسيق.
+- `npm run release:doctor`: تقرير جاهزية الإصدار من نقطة واحدة.
+- `npm run release:prepare`: تنظيف ثم تقرير الجاهزية.
+- `npm run update:safe`: backup ثم migrations ثم فحص صحة، مع إيقاف آمن عند الفشل.
 
-## ترتيب التسليم المقترح
+## الترتيب المقترح
 
-1. شغل:
-
-   ```bash
-   npm run e2e:clean
-   npm run clean
-   ```
-
-2. جهز PostgreSQL وRedis:
-
-   ```bash
-   npm run local:deps
-   ```
-
-   إذا كان Docker غير متاح، سيظهر الخطأ بوضوح بدل فشل غامض في الاختبارات.
-
-3. شغل:
-
-   ```bash
-   npm run release:doctor
-   ```
-
-4. لا تبني Installer جديداً إلا إذا كانت النتيجة `READY`.
-5. بعد بناء Installer، احتفظ بنسخة واحدة فقط في مجلد التسليم.
+1. شغّل `npm run e2e:clean` إذا كان هناك بقايا تشغيل قديمة.
+2. شغّل `npm run clean`.
+3. شغّل `npm run local:deps`.
+4. شغّل `npm run release:doctor`.
+5. لا تبنِ Installer جديدًا إلا إذا كانت نتيجة `release:doctor` سليمة.
+6. احتفظ بنسخة واحدة فقط من ناتج الإصدار داخل مجلد التسليم.
 
 ## قواعد تمنع الالتباس
 
 - لا تترك أكثر من Installer قديم داخل مجلد التسليم.
-- لا تترك خوادم `dev` تعمل أثناء تشغيل E2E.
-- لا تعتبر ملفات `dist` مصدراً؛ هي مخرجات قابلة لإعادة البناء.
-- لا تعدل أكثر من سكربت تشغيل واحد لنفس السلوك؛ ضع المنطق المشترك في `scripts/runtime`.
+- لا تشغّل خوادم التطوير أثناء E2E.
+- لا تعتبر `dist` مصدرًا نهائيًا؛ هو ناتج بناء فقط.
+- إن أردت تعديل منطق التشغيل، انقله إلى `scripts/runtime/` بدل تكرار الأوامر في أكثر من سكربت.
 
-## قبل رفع GitHub
+## قبل رفع المشروع
 
-- `git status` يجب أن يكون نظيفاً أو يحتوي فقط على تغييرات مقصودة.
-- لا ترفع `.env` أو ملفات أسرار.
-- لا ترفع `release` أو `dist` أو `test-results`.
+- تأكد أن `git status` نظيف أو يحوي تغييرات مقصودة فقط.
+- لا ترفع `.env` أو ملفات الأسرار.
+- لا ترفع `release/` أو `dist/` أو `test-results/`.
 
 ## GitHub CI
 
-عند الرفع إلى GitHub يعمل CI الرسمي على مرحلتين:
+الـ CI الرسمي يجب أن يشغّل على الأقل:
 
-- `Quick Code Check`: يشغل `npm run check:quick`.
-- `Release Doctor`: يشغل `npm run release:doctor` مع PostgreSQL وRedis وPlaywright.
+- `npm run check:quick`
+- `npm run release:doctor`
 
-لا تعتبر الفرع جاهزاً للدمج أو التسليم إذا فشل `Release Doctor`.
+إذا فشل `release:doctor` فلا تعتبر النسخة جاهزة للدمج أو التسليم.

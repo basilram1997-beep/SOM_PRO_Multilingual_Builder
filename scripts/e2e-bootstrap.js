@@ -88,6 +88,25 @@ async function resetDailyState() {
   });
 }
 
+async function upsertDailySchedule() {
+  await prisma.dailySchedule.upsert({
+    where: {
+      schoolId_date: {
+        schoolId,
+        date: dailyDate
+      }
+    },
+    update: {
+      day: workingDays[0]
+    },
+    create: {
+      schoolId,
+      date: dailyDate,
+      day: workingDays[0]
+    }
+  });
+}
+
 async function upsertPeriods() {
   for (const period of defaultPeriods) {
     await prisma.periodDefinition.upsert({
@@ -304,10 +323,19 @@ async function upsertTeacherUser(teacherId) {
     }
   });
 
-  await prisma.teacher.update({
-    where: { id: teacherId },
-    data: { userId: user.id }
-  });
+  await prisma.$transaction([
+    prisma.teacher.updateMany({
+      where: {
+        userId: user.id,
+        NOT: { id: teacherId }
+      },
+      data: { userId: null }
+    }),
+    prisma.teacher.update({
+      where: { id: teacherId },
+      data: { userId: user.id }
+    })
+  ]);
 }
 
 async function upsertStudentAreaUsers(studentId) {
@@ -406,6 +434,7 @@ async function main() {
   await upsertAssignment(teacher.id, schoolClass.id, subject.id);
   await upsertHomeroom(teacher.id, schoolClass.id);
   await upsertBaseSlot(teacher.id, schoolClass.id, subject.id);
+  await upsertDailySchedule();
   const student = await upsertStudent(schoolClass.id);
   await upsertAdminUser();
   await upsertTeacherUser(teacher.id);

@@ -6,8 +6,8 @@ export type AppLanguage = LanguageCode;
 
 export type TeacherAssignmentWithDetails = TeacherAssignment & {
   baseSchedulePeriods?: number;
-  class: { id?: string; name: string };
-  subject: { id?: string; name: string };
+  class?: { id?: string; name: string } | null;
+  subject?: { id?: string; name: string } | null;
 };
 
 export type TeacherWithAssignments = Teacher & {

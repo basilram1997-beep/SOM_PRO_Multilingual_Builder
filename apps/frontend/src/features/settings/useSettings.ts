@@ -3,11 +3,11 @@ import { somApi } from "../../api/somApi";
 import { localizePeriodName } from "../../i18n/displayNames";
 import { userFacingErrorMessage } from "../../lib/errorMessage";
 import type { SchoolInfo, SettingPeriod } from "./settingsTypes";
+import { PERIOD_LABEL } from "./settingsState";
+export { upsertPeriod } from "./settingsState";
 
 const ALL_WEEK_DAYS = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
 const DEFAULT_WORKING_DAYS = ["السبت", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس"];
-const PERIOD_LABEL = "الحصة";
-
 export type SettingsLanguage = "ar" | "en" | "he";
 
 export function useSettings(
@@ -124,10 +124,4 @@ export function useSettings(
     savePeriods,
     localizePeriodName
   };
-}
-
-export function upsertPeriod(list: SettingPeriod[], period: number, patch: Partial<SettingPeriod>) {
-  const found = list.find((p) => p.period === period) || { period, label: `${PERIOD_LABEL} ${period}`, isActive: true };
-  const next = { ...found, ...patch };
-  return [...list.filter((p) => p.period !== period), next].sort((a, b) => a.period - b.period);
 }

@@ -14,8 +14,44 @@ import { resolveTeacherForRequest } from "../../services/teacherScope";
 import { buildTeacherDuplicateWhere } from "../../services/teacherIdentity";
 import { logSafeError } from "../../lib/safeLog";
 import { recordAuditLog } from "../../services/auditLog";
+import { invalidateSchoolReferenceData } from "../../services/schoolReferenceData";
+import { getTeacherDirectoryResponse, invalidateTeacherDirectoryCache } from "../../services/teacherDirectoryCache";
 
 export const teachersRouter = Router();
+
+const teacherAssignmentSelect = {
+  id: true,
+  teacherId: true,
+  classId: true,
+  subjectId: true,
+  weeklyPeriods: true
+} as const;
+
+const teacherListSelect = {
+  id: true,
+  schoolId: true,
+  name: true,
+  userId: true,
+  employeeNumber: true,
+  externalId: true,
+  status: true,
+  nationalId: true,
+  specialty: true,
+  adminRole: true,
+  employmentRatio: true,
+  workDays: true,
+  preferredDays: true,
+  preferredClasses: true,
+  preferredPeriods: true,
+  releaseHours: true,
+  targetLoad: true,
+  notes: true,
+  createdAt: true,
+  updatedAt: true,
+  assignments: {
+    select: teacherAssignmentSelect
+  }
+} as const;
 
 const WeeklyPeriodsSchema = z.object({
   weeklyPeriods: z.number().int().min(0).max(40)
@@ -170,35 +206,37 @@ teachersRouter.post("/:id/assign-subject", validateBody(TeacherAssignSubjectSche
 
 teachersRouter.get("/", requirePermission("manageTeachers"), async (req, res) => {
   const schoolId = await getRequestSchoolId(req);
-  const [teachers, baseSlots] = await Promise.all([
-    prisma.teacher.findMany({
-      where: { schoolId },
-      include: {
-        assignments: { include: { class: true, subject: true } }
-      },
-      orderBy: { name: "asc" }
-    }),
-    prisma.baseScheduleSlot.groupBy({
-      by: ["teacherId", "classId", "subjectId"],
-      where: { schoolId },
-      _count: { _all: true }
-    })
-  ]);
+  const payload = await getTeacherDirectoryResponse(schoolId, async () => {
+    const [teachers, baseSlots] = await Promise.all([
+      prisma.teacher.findMany({
+        where: { schoolId },
+        select: teacherListSelect,
+        orderBy: { name: "asc" }
+      }),
+      prisma.baseScheduleSlot.groupBy({
+        by: ["teacherId", "classId", "subjectId"],
+        where: { schoolId },
+        _count: { _all: true }
+      })
+    ]);
 
-  const baseCountByAssignment = new Map(
-    baseSlots.map((row) => [assignmentKey(row.teacherId, row.classId, row.subjectId), row._count._all])
-  );
+    const baseCountByAssignment = new Map(
+      baseSlots.map((row) => [assignmentKey(row.teacherId, row.classId, row.subjectId), row._count._all])
+    );
 
-  const data = teachers.map((teacher) => ({
-    ...teacher,
-    assignments: teacher.assignments.map((assignment) => ({
-      ...assignment,
-      baseSchedulePeriods:
-        baseCountByAssignment.get(assignmentKey(teacher.id, assignment.classId, assignment.subjectId)) || 0
-    }))
-  }));
+    return {
+      data: teachers.map((teacher) => ({
+        ...teacher,
+        assignments: teacher.assignments.map((assignment) => ({
+          ...assignment,
+          baseSchedulePeriods:
+            baseCountByAssignment.get(assignmentKey(teacher.id, assignment.classId, assignment.subjectId)) || 0
+        }))
+      }))
+    };
+  });
 
-  res.json({ data });
+  res.json(payload);
 });
 
 teachersRouter.post("/", requirePermission("manageTeachers"), validateBody(TeacherSchema), async (req, res) => {
@@ -214,6 +252,8 @@ teachersRouter.post("/", requirePermission("manageTeachers"), validateBody(Teach
   const teacher = await prisma.teacher.create({
     data: { ...req.body, schoolId }
   });
+  invalidateSchoolReferenceData(schoolId);
+  invalidateTeacherDirectoryCache(schoolId);
   res.status(201).json({ data: teacher });
 });
 
@@ -240,6 +280,8 @@ teachersRouter.patch(
       data: { weeklyPeriods: req.body.weeklyPeriods },
       include: { class: true, subject: true }
     });
+    invalidateSchoolReferenceData(schoolId);
+    invalidateTeacherDirectoryCache(schoolId);
     res.json({ data: updated });
   }
 );
@@ -271,6 +313,8 @@ teachersRouter.delete("/:id/assignments/:assignmentId", requirePermission("manag
       }),
       prisma.teacherAssignment.delete({ where: { id: assignment.id } })
     ]);
+    invalidateSchoolReferenceData(schoolId);
+    invalidateTeacherDirectoryCache(schoolId);
     res.status(204).send();
   } catch (error) {
     logSafeError("teachers.assignment.delete", error);
@@ -302,6 +346,8 @@ teachersRouter.patch(
       where: { id: existing.id },
       data: req.body
     });
+    invalidateSchoolReferenceData(schoolId);
+    invalidateTeacherDirectoryCache(schoolId);
     res.json({ data: teacher });
   }
 );
@@ -327,6 +373,8 @@ teachersRouter.put(
       where: { id: existing.id },
       data: req.body
     });
+    invalidateSchoolReferenceData(schoolId);
+    invalidateTeacherDirectoryCache(schoolId);
     res.json({ data: teacher });
   }
 );
@@ -352,6 +400,8 @@ teachersRouter.delete("/:id", requirePermission("manageTeachers"), async (req, r
       prisma.teacherExam.deleteMany({ where: { teacherId } }),
       prisma.teacher.delete({ where: { id: teacherId } })
     ]);
+    invalidateSchoolReferenceData(schoolId);
+    invalidateTeacherDirectoryCache(schoolId);
     res.status(204).send();
   } catch (error) {
     logSafeError("teachers.delete", error);
@@ -389,6 +439,8 @@ teachersRouter.post("/:id/deactivate", requirePermission("manageTeachers"), asyn
       prisma.teacherExam.deleteMany({ where: { teacherId } }),
       prisma.teacher.delete({ where: { id: teacherId } })
     ]);
+    invalidateSchoolReferenceData(schoolId);
+    invalidateTeacherDirectoryCache(schoolId);
     res.status(204).send();
   } catch (error) {
     logSafeError("teachers.deactivate", error);

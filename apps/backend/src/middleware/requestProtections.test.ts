@@ -170,11 +170,11 @@ test("user context override in the request body is rejected", async () => {
   assert.equal((res.body as { error?: string })?.error, "INVALID_USER_CONTEXT");
 });
 
-test("sensitive write routes are rate limited beyond auth and license", async () => {
+test("general student write routes are rate limited beyond auth and license", async () => {
   clearRequestProtectionState();
   const req = createMockRequest(false) as never;
   (req as { method: string; path: string }).method = "POST";
-  (req as { method: string; path: string }).path = "/api/students/attendance";
+  (req as { method: string; path: string }).path = "/api/students/123/deactivate";
   const res = createMockResponse();
   let nextCalls = 0;
   const next = () => {
@@ -187,6 +187,27 @@ test("sensitive write routes are rate limited beyond auth and license", async ()
   await new Promise((resolve) => setTimeout(resolve, 0));
 
   assert.equal(nextCalls, 30);
+  assert.equal(res.statusCode, 429);
+  assert.equal((res.body as { error?: string })?.error, "RATE_LIMITED");
+});
+
+test("student certificate writes use a dedicated higher-volume rate limit bucket", async () => {
+  clearRequestProtectionState();
+  const req = createMockRequest(false) as never;
+  (req as { method: string; path: string }).method = "POST";
+  (req as { method: string; path: string }).path = "/api/students/certificates";
+  const res = createMockResponse();
+  let nextCalls = 0;
+  const next = () => {
+    nextCalls += 1;
+  };
+
+  for (let index = 0; index < 241; index += 1) {
+    sensitiveWriteRateLimit(req, res as never, next);
+  }
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(nextCalls, 240);
   assert.equal(res.statusCode, 429);
   assert.equal((res.body as { error?: string })?.error, "RATE_LIMITED");
 });

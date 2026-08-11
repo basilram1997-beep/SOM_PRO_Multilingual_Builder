@@ -23,14 +23,6 @@ type BackupJobRecordInput = {
 };
 
 export async function createReportExportRecord(prisma: PrismaClient, input: ReportExportRecordInput) {
-  const existing = await prisma.reportExport.findFirst({
-    where: {
-      schoolId: input.schoolId,
-      reportType: input.reportType,
-      filePath: input.filePath
-    }
-  });
-
   const data = {
     schoolId: input.schoolId,
     reportType: input.reportType,
@@ -41,25 +33,19 @@ export async function createReportExportRecord(prisma: PrismaClient, input: Repo
     expiresAt: input.expiresAt ?? null
   };
 
-  if (existing) {
-    return prisma.reportExport.update({
-      where: { id: existing.id },
-      data
-    });
-  }
-
-  return prisma.reportExport.create({ data });
+  return prisma.reportExport.upsert({
+    where: {
+      schoolId_filePath: {
+        schoolId: input.schoolId,
+        filePath: input.filePath
+      }
+    },
+    create: data,
+    update: data
+  });
 }
 
 export async function createBackupJobRecord(prisma: PrismaClient, input: BackupJobRecordInput) {
-  const existing = await prisma.backupJob.findFirst({
-    where: {
-      schoolId: input.schoolId,
-      backupType: input.backupType,
-      filePath: input.filePath
-    }
-  });
-
   const data = {
     schoolId: input.schoolId,
     backupType: input.backupType,
@@ -72,14 +58,16 @@ export async function createBackupJobRecord(prisma: PrismaClient, input: BackupJ
     createdBy: input.createdBy ?? null
   };
 
-  if (existing) {
-    return prisma.backupJob.update({
-      where: { id: existing.id },
-      data
-    });
-  }
-
-  return prisma.backupJob.create({ data });
+  return prisma.backupJob.upsert({
+    where: {
+      schoolId_filePath: {
+        schoolId: input.schoolId,
+        filePath: input.filePath
+      }
+    },
+    create: data,
+    update: data
+  });
 }
 
 export async function completeBackupJobRecord(

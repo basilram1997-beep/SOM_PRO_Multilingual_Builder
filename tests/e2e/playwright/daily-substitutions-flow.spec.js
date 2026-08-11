@@ -109,9 +109,8 @@ test.describe.serial("SOM PRO end-to-end daily substitutions flow", () => {
 
     expect(substitutionRow, "Expected at least one substitution row after generating daily schedule").not.toBeNull();
 
-    const firstRow = substitutionRow;
-    const editableCell = firstRow.locator('[data-e2e^="daily-substitution-edit-"]');
-    await editableCell.click({ force: true });
+    const editableCell = page.locator('[data-e2e^="daily-substitution-edit-"]').first();
+    await clickStable(editableCell);
     await expect(page.locator(".modal-card")).toBeVisible();
 
     const candidateButton = page.locator('[data-e2e^="daily-substitute-option-"]').first();
@@ -121,7 +120,7 @@ test.describe.serial("SOM PRO end-to-end daily substitutions flow", () => {
 
     await clickStable(page.locator('[data-e2e="nav-program-substitutions"]'));
     await expect(page.locator('[data-e2e^="daily-substitution-row-"]').first()).toBeVisible();
-    const substitutionsExport = page.locator("section.card:has(#daily-substitutions-section) button");
+    const substitutionsExport = page.locator('[data-e2e="daily-substitutions-export"]');
     await expect(substitutionsExport).toBeVisible();
     await page.once("dialog", (dialog) => dialog.accept());
     const substitutionsDownloadPromise = page.waitForEvent("download");

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { KeyRound, LogIn, X } from "lucide-react";
 import { useLogin } from "../../features/auth/useLogin";
 import type { AuthUser } from "../../features/auth/authTypes";
-import { LanguageSwitcher } from "../../i18n/i18n";
+import { LanguageSwitcher, useI18n } from "../../i18n/i18n";
 
 type LoginPageProps = {
   onLogin: (user: AuthUser) => void;
@@ -11,6 +11,7 @@ type LoginPageProps = {
 export { type AuthUser };
 
 export function LoginPage({ onLogin }: LoginPageProps) {
+  const { t } = useI18n();
   const [createAccountOpen, setCreateAccountOpen] = useState(false);
   const [systemOnline, setSystemOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
   const {
@@ -51,7 +52,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }, []);
 
   return (
-    <main className="login-screen" data-e2e="login-screen">
+    <main className="login-screen" data-e2e="login-screen" id="login-main-content">
+      <a className="skip-link" href="#login-main-content">
+        {t("common.skipToContent")}
+      </a>
       <div className="login-language-switcher">
         <LanguageSwitcher />
       </div>
@@ -64,7 +68,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
           </div>
 
-          <div className="login-hero-status">
+          <div className="login-hero-status" role="status" aria-live="polite" data-e2e="login-system-status">
             <span>{labels.systemStatus}</span>
             <strong className={systemOnline ? "login-status-online" : "login-status-offline"}>
               {systemOnline ? labels.systemOnline : labels.systemOffline}

@@ -4,6 +4,7 @@ import { en } from "./en.ts";
 export const he: Record<string, string> = buildReviewedLocaleDictionary(en, "he");
 
 Object.assign(he, {
+  "common.skipToContent": "דילוג לתוכן",
   "common.none": "אין",
   "users.student": "תלמיד",
   "users.parent": "הורה",
@@ -76,7 +77,8 @@ Object.assign(he, {
   "login.createSaved": "החשבון נוצר ואפשר להתחבר כעת",
   "login.createFailed": "לא ניתן ליצור את החשבון",
   "login.createRequired": "יש להשלים תחילה את פרטי החשבון",
-  "certificates.printPdf": "הדפסה / שמירת PDF"
+  "certificates.printPdf": "הדפסה / שמירת PDF",
+  "nav.mainContent": "תוכן ראשי"
 });
 
 export default he;

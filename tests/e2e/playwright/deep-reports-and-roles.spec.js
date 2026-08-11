@@ -239,9 +239,21 @@ test.describe.serial("SOM PRO deep browser E2E coverage", () => {
     await page.locator('[data-e2e="summary-show"]').click();
     await expect(page.locator('[data-e2e="summary-report-print"]')).toContainText(seeded.classItem.name);
 
-    await page.locator('[data-e2e="report-tab-security"]').click();
-    await page.locator('[data-e2e="security-days-filter"]').fill("7");
-    await page.locator('[data-e2e="security-show"]').click();
+    await openSidebarSection(
+      page,
+      '[data-e2e="nav-group-toggle-school-settings"]',
+      '[data-e2e="nav-security-monitoring"]'
+    );
+    await expect(page.locator('[data-e2e="security-monitoring-page"]')).toBeVisible();
+    await page
+      .locator(
+        'input[aria-label="مراقبة الأمن"], input[aria-label="Security Monitoring"], input[aria-label="Security monitoring"], input[type="number"]'
+      )
+      .fill("7");
+    await page
+      .locator("button", { hasText: /عرض التقرير|Show|show/i })
+      .first()
+      .click();
     await expect(page.locator("#security-report-print")).toBeVisible();
   });
 

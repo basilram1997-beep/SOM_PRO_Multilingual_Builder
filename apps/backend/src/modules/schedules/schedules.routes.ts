@@ -42,7 +42,36 @@ schedulesRouter.get("/base", async (req, res) => {
       schoolId,
       ...(day ? { day } : {})
     },
-    include: { teacher: true, class: true, subject: true },
+    select: {
+      id: true,
+      schoolId: true,
+      day: true,
+      period: true,
+      classId: true,
+      subjectId: true,
+      teacherId: true,
+      room: true,
+      updatedAt: true,
+      class: {
+        select: {
+          id: true,
+          name: true
+        }
+      },
+      subject: {
+        select: {
+          id: true,
+          name: true
+        }
+      },
+      teacher: {
+        select: {
+          id: true,
+          name: true,
+          specialty: true
+        }
+      }
+    },
     orderBy: [{ day: "asc" }, { period: "asc" }]
   });
   res.json({ data: slots });

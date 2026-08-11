@@ -20,6 +20,7 @@ However, a real staging deployment, clean Windows install verification, and fina
 - Personal-data exports now carry an explicit privacy warning policy, and the responsibility for approving exceptions is documented instead of left informal.
 - The Trial Windows installer artifact is now produced in `release/` by the documented build path, so the buyer can exercise a real executable instead of relying on a description only.
 - The SaaS Windows installer artifact is now also produced in `release/` when the build is given explicit HTTPS API and license URLs, so both packaging modes are represented by real artifacts.
+- The current branch now has a verified browser usability pass, a verified migration / upgrade integration pass, and a verified volume pass on `tiny` and `normal`; the remaining work is mostly about widening coverage and closing the external-only gates.
 
 ## Closed operational gates:
 
@@ -50,6 +51,8 @@ However, a real staging deployment, clean Windows install verification, and fina
 ## Performance notes:
 
 - Build and test performance are acceptable for the current project size.
+- The current caching pass reduced the visible tail in reports, daily schedule, teachers, and school reference reads.
+- `volume:test` is now green on `tiny` and `normal`.
 - The frontend bundle should still be monitored as features grow.
 - No heavy runtime dependency was added in this documentation pass.
 
@@ -60,6 +63,10 @@ However, a real staging deployment, clean Windows install verification, and fina
 - `npm run desktop:check`
 - `npm run desktop:check:saas`
 - `npm run production:check`
+- `npm run test:e2e:browser:usability`
+- `npm run volume:test` on `tiny` and `normal`
+- `node --test --import tsx src/services/migrationUpgradeIntegration.test.ts`
+- `npm run stress:test` on the login / outage recovery path
 - `npm audit --omit=dev` could not be revalidated in this session because the npm registry endpoint was unavailable from the current environment. Re-run it in a network-enabled staging or maintenance environment before final release.
 - Existing backend and frontend tests already passing in the repository state.
 

@@ -112,11 +112,11 @@ export function useTeachers({ language }: UseTeachersOptions) {
         .map((classId) => schoolClasses.find((item) => item.id === classId)?.name || classId)
         .join(" ");
     return teachers.filter((t) =>
-      `${t.name} ${localizeTeacherName(t.name, language)} ${t.specialty || ""} ${t.adminRole || ""} ${assignmentText(t, "classes")} ${assignmentText(t, "classes", language)} ${classNames(t)}`.includes(
+      `${t.name} ${localizeTeacherName(t.name, language)} ${t.specialty || ""} ${t.adminRole || ""} ${assignmentText(t, "classes", language, schoolClasses, schoolSubjects)} ${classNames(t)}`.includes(
         q
       )
     );
-  }, [teachers, query, language, schoolClasses]);
+  }, [teachers, query, language, schoolClasses, schoolSubjects]);
 
   function openTeacher(t: TeacherWithAssignments) {
     setSelected(t);

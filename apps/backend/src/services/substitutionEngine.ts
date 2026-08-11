@@ -37,12 +37,48 @@ export async function generateSubstitutions(params: {
 
   const baseSlots = await db.baseScheduleSlot.findMany({
     where: { schoolId, day, period: { lte: settings.periodsPerDay } },
-    include: { teacher: true, class: true, subject: true }
+    select: {
+      id: true,
+      schoolId: true,
+      day: true,
+      period: true,
+      classId: true,
+      subjectId: true,
+      teacherId: true,
+      room: true,
+      class: {
+        select: {
+          id: true,
+          name: true
+        }
+      },
+      subject: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    }
   });
 
   const teachers = await db.teacher.findMany({
     where: { schoolId },
-    include: { assignments: { include: { class: true, subject: true } } }
+    select: {
+      id: true,
+      schoolId: true,
+      name: true,
+      assignments: {
+        select: {
+          classId: true,
+          subjectId: true,
+          class: {
+            select: {
+              name: true
+            }
+          }
+        }
+      }
+    }
   });
 
   const manualBySlot = new Map(manualSubstitutions.map((item) => [item.baseScheduleSlotId, item.substituteTeacherId]));
@@ -132,10 +168,32 @@ export async function generateSubstitutions(params: {
           note: status ? status.reason || statusReason(status.type, status.fromPeriod, status.toPeriod) : null
         },
         include: {
-          class: true,
-          subject: true,
-          absentTeacher: true,
-          substituteTeacher: true
+          class: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          subject: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          absentTeacher: {
+            select: {
+              id: true,
+              name: true,
+              specialty: true
+            }
+          },
+          substituteTeacher: {
+            select: {
+              id: true,
+              name: true,
+              specialty: true
+            }
+          }
         }
       })
     );

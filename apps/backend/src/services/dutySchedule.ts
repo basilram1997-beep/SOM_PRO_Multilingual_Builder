@@ -66,11 +66,30 @@ export function dutyOverlapsStatus(
   return timedPeriods.some((period) => rangesOverlap(dutyStart, dutyEnd, period.start, period.end));
 }
 
-export async function buildDailyDutyRows(schoolId: string, date: string, fallbackDay?: string) {
-  const daily = await prisma.dailySchedule.findUnique({
-    where: { schoolId_date: { schoolId, date } },
-    include: { statuses: true }
-  });
+export async function buildDailyDutyRows(
+  schoolId: string,
+  date: string,
+  fallbackDay?: string,
+  knownStatuses?: DutyStatus[]
+) {
+  const daily =
+    knownStatuses && fallbackDay
+      ? null
+      : await prisma.dailySchedule.findUnique({
+          where: { schoolId_date: { schoolId, date } },
+          select: {
+            day: true,
+            statuses: {
+              select: {
+                teacherId: true,
+                type: true,
+                fromPeriod: true,
+                toPeriod: true,
+                reason: true
+              }
+            }
+          }
+        });
   const day = daily?.day || fallbackDay;
   if (!day) return [];
 
@@ -78,7 +97,22 @@ export async function buildDailyDutyRows(schoolId: string, date: string, fallbac
   const [duties, periodDefinitions] = await Promise.all([
     prisma.dutyAssignment.findMany({
       where: { schoolId, day, isActive: true },
-      include: { teacher: true },
+      select: {
+        id: true,
+        day: true,
+        startTime: true,
+        endTime: true,
+        place: true,
+        notes: true,
+        teacherId: true,
+        teacher: {
+          select: {
+            id: true,
+            name: true,
+            specialty: true
+          }
+        }
+      },
       orderBy: [{ startTime: "asc" }, { endTime: "asc" }, { place: "asc" }]
     }),
     prisma.periodDefinition.findMany({
@@ -87,7 +121,7 @@ export async function buildDailyDutyRows(schoolId: string, date: string, fallbac
     })
   ]);
 
-  const statuses = (daily?.statuses || []) as DutyStatus[];
+  const statuses = knownStatuses || daily?.statuses || [];
   return duties.map((duty) => {
     const teacherStatuses = statuses.filter(
       (status) =>

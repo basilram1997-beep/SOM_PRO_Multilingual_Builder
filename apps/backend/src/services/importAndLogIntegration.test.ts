@@ -123,3 +123,37 @@ test("classroom logs report stitches lesson, homework, and exam rows into one ti
   assert.match(source, /details:\s*\{\s*kind: item\.kind,/, "homework rows should keep their homework details");
   assert.match(source, /details:\s*\{\s*startTime: item\.startTime,/, "exam rows should keep their exam details");
 });
+
+test("student import updates a newly created duplicate later in the same batch", () => {
+  const existingRows: StudentRecord[] = [];
+
+  const result = simulateStudentImport(existingRows, [
+    {
+      classId: "class-10a",
+      name: "حمزة",
+      nationalId: "318535679",
+      fatherName: "باسل",
+      motherName: "سوسو",
+      fatherPhone: "0001",
+      motherPhone: "0002",
+      guardianPhone: "0003",
+      studentPhone: "0004"
+    },
+    {
+      classId: "class-11a",
+      name: "حمزة",
+      nationalId: "318535679",
+      fatherName: "باسل",
+      motherName: "سوسو",
+      fatherPhone: "0001",
+      motherPhone: "0002",
+      guardianPhone: "0003",
+      studentPhone: "0004"
+    }
+  ]);
+
+  assert.equal(result.created.length, 1);
+  assert.equal(result.updated.length, 1);
+  assert.equal(result.rows.length, 1);
+  assert.equal(result.rows[0].classId, "class-11a");
+});

@@ -14,7 +14,15 @@ export const blankTeacher: Teacher = {
   preferredPeriods: []
 };
 
-export const arabicDays = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+export const arabicDays = [
+  "Ø§Ù„Ø£Ø­Ø¯",
+  "Ø§Ù„Ø¥Ø«Ù†ÙŠÙ†",
+  "Ø§Ù„Ø«Ù„Ø§Ø«Ø§Ø¡",
+  "Ø§Ù„Ø£Ø±Ø¨Ø¹Ø§Ø¡",
+  "Ø§Ù„Ø®Ù…ÙŠØ³",
+  "Ø§Ù„Ø¬Ù…Ø¹Ø©",
+  "Ø§Ù„Ø³Ø¨Øª"
+];
 
 function normalizeText(value: unknown) {
   if (typeof value !== "string") return "";
@@ -88,12 +96,20 @@ export function normalizeTeacherRecord<T extends Teacher | TeacherWithAssignment
 export function assignmentText(
   teacher: TeacherWithAssignments,
   kind: "subjects" | "classes",
-  language: AppLanguage = "ar"
+  language: AppLanguage = "ar",
+  classes: { id: string; name: string }[] = [],
+  subjects: { id: string; name: string }[] = []
 ) {
-  const values = (teacher.assignments || []).map((assignment) =>
-    kind === "subjects" ? assignment.subject.name : localizeClassName(assignment.class.name, language)
-  );
-  return Array.from(new Set(values)).join("، ");
+  const classNameById = new Map(classes.map((item) => [item.id, item.name]));
+  const subjectNameById = new Map(subjects.map((item) => [item.id, item.name]));
+  const values = (teacher.assignments || []).map((assignment) => {
+    if (kind === "subjects") {
+      return assignment.subject?.name || (assignment.subjectId ? subjectNameById.get(assignment.subjectId) || "" : "");
+    }
+    const className = assignment.class?.name || (assignment.classId ? classNameById.get(assignment.classId) || "" : "");
+    return className ? localizeClassName(className, language) : "";
+  });
+  return Array.from(new Set(values)).join("ØŒ ");
 }
 
 export function preferredClassText(
@@ -102,7 +118,7 @@ export function preferredClassText(
   language: AppLanguage = "ar"
 ) {
   const selected = classes.filter((item) => (teacher.preferredClasses || []).includes(item.id));
-  return selected.map((item) => localizeClassName(item.name, language)).join("، ");
+  return selected.map((item) => localizeClassName(item.name, language)).join("ØŒ ");
 }
 
 export function effectiveLoad(teacher?: Pick<Teacher, "targetLoad" | "releaseHours"> | null) {

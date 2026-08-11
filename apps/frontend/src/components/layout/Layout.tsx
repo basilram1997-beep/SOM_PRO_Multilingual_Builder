@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   Archive,
@@ -353,6 +353,7 @@ export function Layout({
   children: ReactNode;
 }) {
   const { t } = useI18n();
+  const [systemOnline, setSystemOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
   const [programsExpanded, setProgramsExpanded] = useState(true);
   const [permissionsExpanded, setPermissionsExpanded] = useState(true);
   const [studentsExpanded, setStudentsExpanded] = useState(false);
@@ -420,8 +421,24 @@ export function Layout({
           : t("users.teacher")
         : currentUser.role;
 
+  useEffect(() => {
+    const handleOnline = () => setSystemOnline(true);
+    const handleOffline = () => setSystemOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   return (
     <div className="shell" data-e2e="app-shell">
+      <a className="skip-link" href="#main-content">
+        {t("common.skipToContent")}
+      </a>
       <LanguageSwitcher />
       <aside className="sidebar" aria-label={t("nav.sidebar")}>
         <h1>
@@ -431,6 +448,12 @@ export function Layout({
         <div className="sidebar-user">
           <strong>{currentUser.name}</strong>
           <span>{sidebarRoleLabel}</span>
+        </div>
+        <div className="shell-connection-status" role="status" aria-live="polite" data-e2e="shell-connection-status">
+          <span>{t("login.systemStatus")}</span>
+          <strong className={systemOnline ? "shell-status-online" : "shell-status-offline"}>
+            {systemOnline ? t("login.systemOnline") : t("login.systemOffline")}
+          </strong>
         </div>
         <nav data-e2e="sidebar-nav" aria-label={t("nav.mainNavigation")}>
           {visibleMainItems.map((item) => (

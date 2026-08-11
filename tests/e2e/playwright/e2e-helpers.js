@@ -21,6 +21,23 @@ async function clickStable(locator) {
   });
 }
 
+async function postJsonWithRetry(request, url, data, { retries = 2, delayMs = 500 } = {}) {
+  let lastFailure = null;
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      return await request.post(url, { data });
+    } catch (failure) {
+      lastFailure = failure;
+      const message = String(failure?.message || failure || "");
+      if (!/ECONNRESET|ECONNREFUSED|socket hang up/i.test(message) || attempt === retries) {
+        throw failure;
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+  throw lastFailure;
+}
+
 async function openSidebarSection(page, groupSelector, itemSelector) {
   await clickStable(page.locator(groupSelector));
   await clickStable(page.locator(itemSelector));
@@ -29,5 +46,6 @@ async function openSidebarSection(page, groupSelector, itemSelector) {
 module.exports = {
   getE2ELicenseCode,
   clickStable,
+  postJsonWithRetry,
   openSidebarSection
 };

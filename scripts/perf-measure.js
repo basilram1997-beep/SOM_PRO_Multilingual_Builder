@@ -751,6 +751,15 @@ async function runPerfPreflight(context) {
     certificateReadStatus: certificateReadResponse.status,
     exportStatus: exportResponse.status
   });
+
+  const teacherWarmup = await context.request(`${DEFAULT_API_URL}/api/teachers`, { timeoutMs: 20_000 });
+  if (!teacherWarmup.ok) {
+    trace("perf preflight teachers warmup failed", {
+      status: teacherWarmup.status,
+      body: (teacherWarmup.bodyText || "").slice(0, 300)
+    });
+    throw new Error(`Load preflight teachers warmup failed with status ${teacherWarmup.status}`);
+  }
 }
 
 async function runWarmup(operations, context, warmupIterations, modeName) {
@@ -1028,6 +1037,14 @@ async function main() {
 
     runtimeSampler = createRuntimeSampler(5000);
     overallStartedAt = performance.now();
+
+    const classWarmup = await httpRequest(`${DEFAULT_API_URL}/api/classes`, {
+      headers: admin.headers,
+      timeoutMs: 20_000
+    });
+    if (!classWarmup.ok) {
+      throw new Error(`Load preflight classes warmup failed with status ${classWarmup.status}`);
+    }
 
     for (const phase of phases) {
       trace("official phase started", phase);

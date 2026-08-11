@@ -17,8 +17,7 @@ export function useReports(language: AppLanguage) {
       setText(res.data.text);
       setChart(res.data.chart || []);
       setCharts(res.data.charts || emptyCharts);
-    } catch (error) {
-      console.error(error);
+    } catch {
       setText("");
       setChart([]);
       setCharts(emptyCharts);

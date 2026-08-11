@@ -47,7 +47,39 @@ async function loginAndGetAuthData(baseUrl: string, email: string, password: str
 
   const payload = JSON.parse(responseText);
   assert.ok(payload?.data?.token, `Expected login token for ${email}`);
-  return payload.data as { token: string; user: { role: string; studentId?: string | null } };
+  return payload.data as {
+    token: string;
+    user: {
+      id: string;
+      schoolId: string;
+      name: string;
+      email: string;
+      role: string;
+      studentId?: string | null;
+    };
+  };
+}
+
+function useRuntimeIntegrationEnv() {
+  const originalRequireCentral = process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE;
+  const originalCentralUrl = process.env.SOM_PRO_LICENSE_SERVER_URL;
+  const originalLegacyCentralUrl = process.env.SOM_LICENSE_SERVER_URL;
+  const originalRuntimeMode = process.env.SOM_RUNTIME_MODE;
+  const originalDisableRateLimit = process.env.SOM_E2E_DISABLE_RATE_LIMIT;
+
+  process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE = "false";
+  process.env.SOM_PRO_LICENSE_SERVER_URL = "";
+  process.env.SOM_LICENSE_SERVER_URL = "";
+  process.env.SOM_RUNTIME_MODE = "development";
+  process.env.SOM_E2E_DISABLE_RATE_LIMIT = "true";
+
+  return () => {
+    process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE = originalRequireCentral;
+    process.env.SOM_PRO_LICENSE_SERVER_URL = originalCentralUrl;
+    process.env.SOM_LICENSE_SERVER_URL = originalLegacyCentralUrl;
+    process.env.SOM_RUNTIME_MODE = originalRuntimeMode;
+    process.env.SOM_E2E_DISABLE_RATE_LIMIT = originalDisableRateLimit;
+  };
 }
 
 test("license flow accepts a valid license activation", () => {
@@ -518,6 +550,112 @@ test("settings router stays mounted only on explicit settings prefixes", () => {
     "settings router should stay mounted on /api/settings"
   );
 });
+
+test("API exchanges JSON data with stable envelopes across version, login, class create, and protected reads", async () => {
+  const runId = `${Date.now().toString(36)}-${process.pid}-api`;
+  const schoolId = `api-runtime-${runId}`;
+  const managerEmail = `api-manager-${runId}@example.com`;
+  const managerPassword = "Api-Manager-123!";
+  const className = `API Class ${runId}`;
+
+  await prisma.school.create({
+    data: {
+      id: schoolId,
+      name: `API Runtime ${runId}`,
+      address: "",
+      managerName: "API Manager",
+      institutionCode: `AP${runId.toUpperCase()}`,
+      isActive: true
+    }
+  });
+
+  await prisma.user.create({
+    data: {
+      id: `api-manager-user-${runId}`,
+      schoolId,
+      name: "API Manager",
+      email: managerEmail,
+      password: hashPassword(managerPassword),
+      role: "MANAGER"
+    }
+  });
+
+  const restoreRuntimeEnv = useRuntimeIntegrationEnv();
+  const { createApp } = await import("../app");
+  const app = createApp();
+  const server = app.listen(0);
+
+  try {
+    await new Promise<void>((resolve) => {
+      server.once("listening", resolve);
+    });
+
+    const address = server.address();
+    if (!address || typeof address === "string") {
+      throw new Error("Failed to determine runtime test port");
+    }
+    const baseUrl = `http://127.0.0.1:${address.port}`;
+
+    const versionResponse = await fetch(`${baseUrl}/api/version`);
+    assert.equal(versionResponse.status, 200);
+    assert.match(versionResponse.headers.get("content-type") || "", /application\/json/i);
+    const versionPayload = await versionResponse.json();
+    assert.equal(versionPayload?.data?.product, "SOM PRO");
+    assert.equal(versionPayload?.error, null);
+    assert.ok(String(versionPayload?.data?.version || "").length > 0);
+
+    const auth = await loginAndGetAuthData(baseUrl, managerEmail, managerPassword);
+    assert.equal(auth.user.email, managerEmail);
+    assert.equal(auth.user.role, "MANAGER");
+
+    const createClassResponse = await fetch(`${baseUrl}/api/classes`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${auth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: className
+      })
+    });
+    assert.equal(createClassResponse.status, 201);
+    assert.match(createClassResponse.headers.get("content-type") || "", /application\/json/i);
+    const createClassPayload = await createClassResponse.json();
+    assert.equal(createClassPayload?.data?.name, className);
+    assert.equal(createClassPayload?.data?.schoolId, schoolId);
+
+    const listClassesResponse = await fetch(`${baseUrl}/api/classes`, {
+      headers: {
+        Authorization: `Bearer ${auth.token}`
+      }
+    });
+    assert.equal(listClassesResponse.status, 200);
+    assert.match(listClassesResponse.headers.get("content-type") || "", /application\/json/i);
+    const listClassesPayload = await listClassesResponse.json();
+    assert.ok(Array.isArray(listClassesPayload?.data));
+    assert.equal(
+      listClassesPayload?.data?.some((item: { id?: string; name?: string }) => item.name === className),
+      true
+    );
+
+    const protectedReadResponse = await fetch(`${baseUrl}/api/teachers`);
+    assert.equal(protectedReadResponse.status, 401);
+    assert.match(protectedReadResponse.headers.get("content-type") || "", /application\/json/i);
+    const protectedReadPayload = await protectedReadResponse.json();
+    assert.equal(protectedReadPayload?.error, "AUTH_REQUIRED");
+    assert.ok(String(protectedReadPayload?.message || "").length > 0);
+  } finally {
+    await new Promise<void>((resolve) => {
+      server.close(() => resolve());
+    });
+
+    restoreRuntimeEnv();
+    await prisma.user.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.schoolClass.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.school.delete({ where: { id: schoolId } }).catch(() => null);
+  }
+});
+
 test("settings permission review enforces manageSettings at runtime", async () => {
   const runId = `${Date.now().toString(36)}-${process.pid}`;
   const schoolId = `settings-runtime-${runId}`;
@@ -558,14 +696,7 @@ test("settings permission review enforces manageSettings at runtime", async () =
     ]
   });
 
-  const originalRequireCentral = process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE;
-  const originalCentralUrl = process.env.SOM_PRO_LICENSE_SERVER_URL;
-  const originalLegacyCentralUrl = process.env.SOM_LICENSE_SERVER_URL;
-  const originalRuntimeMode = process.env.SOM_RUNTIME_MODE;
-  process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE = "false";
-  process.env.SOM_PRO_LICENSE_SERVER_URL = "";
-  process.env.SOM_LICENSE_SERVER_URL = "";
-  process.env.SOM_RUNTIME_MODE = "development";
+  const restoreRuntimeEnv = useRuntimeIntegrationEnv();
   const { createApp } = await import("../app");
   const app = createApp();
   const server = app.listen(0);
@@ -612,12 +743,636 @@ test("settings permission review enforces manageSettings at runtime", async () =
       server.close(() => resolve());
     });
 
-    process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE = originalRequireCentral;
-    process.env.SOM_PRO_LICENSE_SERVER_URL = originalCentralUrl;
-    process.env.SOM_LICENSE_SERVER_URL = originalLegacyCentralUrl;
-    process.env.SOM_RUNTIME_MODE = originalRuntimeMode;
+    restoreRuntimeEnv();
     await prisma.user.deleteMany({ where: { schoolId } }).catch(() => null);
     await prisma.school.delete({ where: { id: schoolId } }).catch(() => null);
+  }
+});
+
+test("teachers, students, and settings flows keep happy paths and forbidden writes separated", async () => {
+  const runId = `${Date.now().toString(36)}-${process.pid}-heavy`;
+  const schoolId = `heavy-runtime-${runId}`;
+  const classId = `heavy-class-${runId}`;
+  const linkedStudentId = `heavy-linked-student-${runId}`;
+  const importedStudentName = `Imported Student ${runId}`;
+  const teacherName = `Runtime Teacher ${runId}`;
+  const managerEmail = `heavy-manager-${runId}@example.com`;
+  const teacherEmail = `heavy-teacher-${runId}@example.com`;
+  const parentEmail = `heavy-parent-${runId}@example.com`;
+  const importedNationalId = `994${runId}`;
+
+  await prisma.school.create({
+    data: {
+      id: schoolId,
+      name: `Heavy Runtime ${runId}`,
+      address: "",
+      managerName: "Heavy Manager",
+      institutionCode: `HR${runId.toUpperCase()}`,
+      isActive: true
+    }
+  });
+
+  await prisma.schoolClass.create({
+    data: {
+      id: classId,
+      schoolId,
+      name: "Grade 1 A",
+      status: "ACTIVE"
+    }
+  });
+
+  await prisma.student.create({
+    data: {
+      id: linkedStudentId,
+      schoolId,
+      classId,
+      name: "Linked Student",
+      nationalId: `995${runId}`
+    }
+  });
+
+  await prisma.user.createMany({
+    data: [
+      {
+        id: `heavy-manager-user-${runId}`,
+        schoolId,
+        name: "Heavy Manager",
+        email: managerEmail,
+        password: hashPassword("Heavy-Manager-123!"),
+        role: "MANAGER"
+      },
+      {
+        id: `heavy-teacher-user-${runId}`,
+        schoolId,
+        name: teacherName,
+        email: teacherEmail,
+        password: hashPassword("Heavy-Teacher-123!"),
+        role: "TEACHER"
+      }
+    ]
+  });
+
+  const restoreRuntimeEnv = useRuntimeIntegrationEnv();
+  const { createApp } = await import("../app");
+  const app = createApp();
+  const server = app.listen(0);
+
+  try {
+    await new Promise<void>((resolve) => {
+      server.once("listening", resolve);
+    });
+
+    const address = server.address();
+    if (!address || typeof address === "string") {
+      throw new Error("Failed to determine runtime test port");
+    }
+    const baseUrl = `http://127.0.0.1:${address.port}`;
+    const managerAuth = await loginAndGetAuthData(baseUrl, managerEmail, "Heavy-Manager-123!");
+    const teacherAuth = await loginAndGetAuthData(baseUrl, teacherEmail, "Heavy-Teacher-123!");
+
+    const teacherCreateResponse = await fetch(`${baseUrl}/api/teachers`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${managerAuth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: teacherName,
+        employeeNumber: `EMP-${runId}`,
+        specialty: "Mathematics",
+        employmentRatio: 100,
+        workDays: ["Sunday"],
+        preferredDays: ["Sunday"],
+        preferredClasses: [classId],
+        preferredPeriods: [1],
+        releaseHours: 0,
+        targetLoad: 24
+      })
+    });
+    assert.equal(teacherCreateResponse.status, 201);
+    const teacherCreatePayload = await teacherCreateResponse.json();
+    const createdTeacherId = teacherCreatePayload?.data?.id;
+    assert.ok(createdTeacherId);
+    assert.equal(teacherCreatePayload?.data?.name, teacherName);
+
+    const teacherListResponse = await fetch(`${baseUrl}/api/teachers`, {
+      headers: {
+        Authorization: `Bearer ${managerAuth.token}`
+      }
+    });
+    assert.equal(teacherListResponse.status, 200);
+    const teacherListPayload = await teacherListResponse.json();
+    assert.ok(Array.isArray(teacherListPayload?.data));
+    assert.equal(
+      teacherListPayload?.data?.some((item: { id?: string; name?: string }) => item.id === createdTeacherId),
+      true
+    );
+
+    const teacherListForbidden = await fetch(`${baseUrl}/api/teachers`, {
+      headers: {
+        Authorization: `Bearer ${teacherAuth.token}`
+      }
+    });
+    assert.equal(teacherListForbidden.status, 403);
+    const teacherListForbiddenPayload = await teacherListForbidden.json();
+    assert.equal(teacherListForbiddenPayload?.error, "FORBIDDEN");
+
+    const settingsUserResponse = await fetch(`${baseUrl}/api/settings/users`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${managerAuth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: "Parent Runtime",
+        email: parentEmail,
+        password: "Parent-12345!",
+        role: "PARENT",
+        studentId: linkedStudentId
+      })
+    });
+    assert.equal(settingsUserResponse.status, 201);
+    const settingsUserPayload = await settingsUserResponse.json();
+    assert.equal(settingsUserPayload?.data?.role, "PARENT");
+    assert.equal(settingsUserPayload?.data?.studentId, linkedStudentId);
+
+    const teacherSettingsForbidden = await fetch(`${baseUrl}/api/settings/users`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${teacherAuth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: "Teacher Attempt",
+        email: `teacher-attempt-${runId}@example.com`,
+        password: "Teacher-12345!",
+        role: "PARENT",
+        studentId: linkedStudentId
+      })
+    });
+    assert.equal(teacherSettingsForbidden.status, 403);
+    const teacherSettingsForbiddenPayload = await teacherSettingsForbidden.json();
+    assert.equal(teacherSettingsForbiddenPayload?.error, "FORBIDDEN");
+
+    const studentImportResponse = await fetch(`${baseUrl}/api/students/import`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${managerAuth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        classId,
+        students: [
+          {
+            name: importedStudentName,
+            nationalId: importedNationalId,
+            fatherName: "Father",
+            motherName: "Mother",
+            residence: "City",
+            fatherPhone: "0500000000",
+            motherPhone: "0500000001",
+            guardianPhone: "0500000002",
+            healthFund: "Fund",
+            studentPhone: "0500000003"
+          }
+        ]
+      })
+    });
+    assert.equal(studentImportResponse.status, 201);
+    const studentImportPayload = await studentImportResponse.json();
+    assert.equal(studentImportPayload?.data?.created, 1);
+    assert.equal(studentImportPayload?.data?.updated, 0);
+    assert.equal(studentImportPayload?.data?.total, 1);
+    assert.equal(studentImportPayload?.data?.students?.[0]?.name, importedStudentName);
+
+    const teacherImportForbidden = await fetch(`${baseUrl}/api/students/import`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${teacherAuth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        classId,
+        students: [
+          {
+            name: `Teacher Import Attempt ${runId}`,
+            nationalId: `996${runId}`
+          }
+        ]
+      })
+    });
+    assert.equal(teacherImportForbidden.status, 403);
+    const teacherImportForbiddenPayload = await teacherImportForbidden.json();
+    assert.equal(teacherImportForbiddenPayload?.error, "FORBIDDEN");
+  } finally {
+    await new Promise<void>((resolve) => {
+      server.close(() => resolve());
+    });
+
+    restoreRuntimeEnv();
+    await prisma.teacherAssignment.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.user.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.student.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.teacher.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.subject.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.schoolClass.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.school.deleteMany({ where: { id: schoolId } }).catch(() => null);
+  }
+});
+
+test("attendance writes feed the attendance report and enforce role boundaries", async () => {
+  const runId = `${Date.now().toString(36)}-${process.pid}-attendance`;
+  const schoolId = `attendance-runtime-${runId}`;
+  const classId = `attendance-class-${runId}`;
+  const otherClassId = `attendance-class-other-${runId}`;
+  const subjectId = `attendance-subject-${runId}`;
+  const studentId = `attendance-student-${runId}`;
+  const teacherEmail = `attendance-teacher-${runId}@example.com`;
+  const managerEmail = `attendance-manager-${runId}@example.com`;
+  const reportDate = "2026-08-09";
+
+  await prisma.school.create({
+    data: {
+      id: schoolId,
+      name: `Attendance Runtime ${runId}`,
+      address: "",
+      managerName: "Attendance Manager",
+      institutionCode: `AT${runId.toUpperCase()}`,
+      isActive: true
+    }
+  });
+
+  await prisma.schoolClass.createMany({
+    data: [
+      {
+        id: classId,
+        schoolId,
+        name: "Grade 2 A",
+        status: "ACTIVE"
+      },
+      {
+        id: otherClassId,
+        schoolId,
+        name: "Grade 2 B",
+        status: "ACTIVE"
+      }
+    ]
+  });
+
+  await prisma.subject.create({
+    data: {
+      id: subjectId,
+      schoolId,
+      name: "Arabic"
+    }
+  });
+
+  await prisma.student.create({
+    data: {
+      id: studentId,
+      schoolId,
+      classId,
+      name: "Attendance Student",
+      nationalId: `996${runId}`
+    }
+  });
+
+  await prisma.teacher.create({
+    data: {
+      id: `attendance-teacher-record-${runId}`,
+      schoolId,
+      name: `Attendance Teacher ${runId}`,
+      employeeNumber: `EMP-A-${runId}`
+    }
+  });
+
+  await prisma.teacherAssignment.create({
+    data: {
+      schoolId,
+      teacherId: `attendance-teacher-record-${runId}`,
+      classId: otherClassId,
+      subjectId,
+      weeklyPeriods: 2
+    }
+  });
+
+  await prisma.user.createMany({
+    data: [
+      {
+        id: `attendance-manager-user-${runId}`,
+        schoolId,
+        name: "Attendance Manager",
+        email: managerEmail,
+        password: hashPassword("Attendance-Manager-123!"),
+        role: "MANAGER"
+      },
+      {
+        id: `attendance-teacher-user-${runId}`,
+        schoolId,
+        name: `Attendance Teacher ${runId}`,
+        email: teacherEmail,
+        password: hashPassword("Attendance-Teacher-123!"),
+        role: "TEACHER"
+      }
+    ]
+  });
+
+  const restoreRuntimeEnv = useRuntimeIntegrationEnv();
+  const { createApp } = await import("../app");
+  const app = createApp();
+  const server = app.listen(0);
+
+  try {
+    await new Promise<void>((resolve) => {
+      server.once("listening", resolve);
+    });
+
+    const address = server.address();
+    if (!address || typeof address === "string") {
+      throw new Error("Failed to determine runtime test port");
+    }
+    const baseUrl = `http://127.0.0.1:${address.port}`;
+    const managerAuth = await loginAndGetAuthData(baseUrl, managerEmail, "Attendance-Manager-123!");
+    const teacherAuth = await loginAndGetAuthData(baseUrl, teacherEmail, "Attendance-Teacher-123!");
+
+    const firstAttendance = await fetch(`${baseUrl}/api/students/attendance`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${managerAuth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        studentId,
+        date: reportDate,
+        day: "Sunday",
+        status: "ABSENT_UNEXCUSED",
+        note: "first save"
+      })
+    });
+    assert.equal(firstAttendance.status, 200);
+    const firstAttendancePayload = await firstAttendance.json();
+    assert.equal(firstAttendancePayload?.data?.status, "ABSENT_UNEXCUSED");
+
+    const secondAttendance = await fetch(`${baseUrl}/api/students/attendance`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${managerAuth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        studentId,
+        date: reportDate,
+        day: "Sunday",
+        status: "LATE",
+        lateAt: "08:10",
+        note: "updated save"
+      })
+    });
+    assert.equal(secondAttendance.status, 200);
+    const secondAttendancePayload = await secondAttendance.json();
+    assert.equal(secondAttendancePayload?.data?.status, "LATE");
+    assert.equal(secondAttendancePayload?.data?.lateAt, "08:10");
+
+    const reportResponse = await fetch(
+      `${baseUrl}/api/reports/attendance?classId=${encodeURIComponent(classId)}&from=${reportDate}&to=${reportDate}`,
+      {
+        headers: {
+          Authorization: `Bearer ${managerAuth.token}`
+        }
+      }
+    );
+    assert.equal(reportResponse.status, 200);
+    const reportPayload = await reportResponse.json();
+    assert.equal(reportPayload?.data?.classId, classId);
+    assert.equal(reportPayload?.data?.summary?.total, 1);
+    assert.equal(reportPayload?.data?.summary?.late, 1);
+    assert.equal(reportPayload?.data?.summary?.absent, 0);
+    assert.equal(reportPayload?.data?.rows?.length, 1);
+    assert.equal(reportPayload?.data?.rows?.[0]?.status, "LATE");
+
+    const badReportQuery = await fetch(`${baseUrl}/api/reports/attendance?classId=&from=bad-date&to=${reportDate}`, {
+      headers: {
+        Authorization: `Bearer ${managerAuth.token}`
+      }
+    });
+    assert.equal(badReportQuery.status, 400);
+    const badReportQueryPayload = await badReportQuery.json();
+    assert.equal(badReportQueryPayload?.error, "INVALID_ATTENDANCE_REPORT_QUERY");
+
+    const teacherAttendanceForbidden = await fetch(`${baseUrl}/api/students/attendance`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${teacherAuth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        studentId,
+        date: reportDate,
+        day: "Sunday",
+        status: "PRESENT"
+      })
+    });
+    assert.equal(teacherAttendanceForbidden.status, 403);
+    const teacherAttendanceForbiddenPayload = await teacherAttendanceForbidden.json();
+    assert.equal(teacherAttendanceForbiddenPayload?.error, "FORBIDDEN");
+
+    const teacherReportForbidden = await fetch(
+      `${baseUrl}/api/reports/attendance?classId=${encodeURIComponent(classId)}&from=${reportDate}&to=${reportDate}`,
+      {
+        headers: {
+          Authorization: `Bearer ${teacherAuth.token}`
+        }
+      }
+    );
+    assert.equal(teacherReportForbidden.status, 403);
+    const teacherReportForbiddenPayload = await teacherReportForbidden.json();
+    assert.equal(teacherReportForbiddenPayload?.error, "FORBIDDEN");
+  } finally {
+    await new Promise<void>((resolve) => {
+      server.close(() => resolve());
+    });
+
+    restoreRuntimeEnv();
+    await prisma.studentAttendance.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.teacherAssignment.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.user.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.student.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.teacher.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.subject.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.schoolClass.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.school.deleteMany({ where: { id: schoolId } }).catch(() => null);
+  }
+});
+
+test("report exports persist export records and enforce report permissions", async () => {
+  const runId = `${Date.now().toString(36)}-${process.pid}-reports`;
+  const schoolId = `reports-runtime-${runId}`;
+  const classId = `reports-class-${runId}`;
+  const subjectId = `reports-subject-${runId}`;
+  const teacherId = `reports-teacher-${runId}`;
+  const managerEmail = `reports-manager-${runId}@example.com`;
+  const teacherEmail = `reports-teacher-${runId}@example.com`;
+
+  await prisma.school.create({
+    data: {
+      id: schoolId,
+      name: `Reports Runtime ${runId}`,
+      address: "",
+      managerName: "Reports Manager",
+      institutionCode: `RP${runId.toUpperCase()}`,
+      isActive: true
+    }
+  });
+
+  await prisma.schoolClass.create({
+    data: {
+      id: classId,
+      schoolId,
+      name: "Reports Class",
+      status: "ACTIVE"
+    }
+  });
+
+  await prisma.subject.create({
+    data: {
+      id: subjectId,
+      schoolId,
+      name: "Reports Subject",
+      status: "ACTIVE"
+    }
+  });
+
+  await prisma.teacher.create({
+    data: {
+      id: teacherId,
+      schoolId,
+      name: "Reports Teacher",
+      nationalId: `992${runId}`
+    }
+  });
+
+  await prisma.user.createMany({
+    data: [
+      {
+        schoolId,
+        name: "Reports Manager",
+        email: managerEmail,
+        password: hashPassword("Reports-Manager-123!"),
+        role: "MANAGER"
+      },
+      {
+        schoolId,
+        name: "Reports Teacher",
+        email: teacherEmail,
+        password: hashPassword("Reports-Teacher-123!"),
+        role: "TEACHER"
+      }
+    ]
+  });
+
+  const restoreRuntimeEnv = useRuntimeIntegrationEnv();
+  const { createApp } = await import("../app");
+  const app = createApp();
+  const server = app.listen(0);
+  try {
+    const address = server.address();
+    assert.ok(address && typeof address === "object");
+    const baseUrl = `http://127.0.0.1:${address.port}`;
+    const managerAuth = await loginAndGetAuthData(baseUrl, managerEmail, "Reports-Manager-123!");
+    const teacherAuth = await loginAndGetAuthData(baseUrl, teacherEmail, "Reports-Teacher-123!");
+
+    const exportResponse = await fetch(`${baseUrl}/api/reports/export`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${managerAuth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        reportType: "attendance",
+        title: "Attendance Export",
+        fileName: "attendance-export.pdf",
+        kind: "PDF",
+        permission: "manageSettings",
+        expiresInMinutes: 15,
+        privacyWarningAccepted: true,
+        filters: {
+          classId,
+          subjectId
+        }
+      })
+    });
+    assert.equal(exportResponse.status, 200);
+    const exportPayload = await exportResponse.json();
+    assert.equal(exportPayload?.data?.ok, true);
+    assert.equal(exportPayload?.data?.reportType, "attendance");
+    assert.ok(exportPayload?.data?.exportId);
+    assert.ok(exportPayload?.data?.expiresAt);
+
+    const exportId = exportPayload.data.exportId as string;
+    const exportFilePath = `reports/attendance/${exportId}.pdf`;
+    const exportRecord = await prisma.reportExport.findUnique({
+      where: {
+        schoolId_filePath: {
+          schoolId,
+          filePath: exportFilePath
+        }
+      }
+    });
+    assert.ok(exportRecord, "expected report export row to be created");
+    assert.equal(exportRecord?.reportType, "attendance");
+    assert.equal(exportRecord?.fileType, "PDF");
+    assert.equal(exportRecord?.requestedBy, managerAuth.user.id);
+    assert.equal(exportRecord?.status, "REQUESTED");
+
+    const teacherExportForbidden = await fetch(`${baseUrl}/api/reports/export`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${teacherAuth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        reportType: "attendance",
+        title: "Teacher Export Attempt",
+        fileName: "teacher-export.pdf",
+        kind: "PDF",
+        permission: "manageSettings",
+        privacyWarningAccepted: true
+      })
+    });
+    assert.equal(teacherExportForbidden.status, 403);
+    const teacherExportForbiddenPayload = await teacherExportForbidden.json();
+    assert.equal(teacherExportForbiddenPayload?.error, "FORBIDDEN");
+
+    const invalidExport = await fetch(`${baseUrl}/api/reports/export`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${managerAuth.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        reportType: "attendance",
+        title: "Invalid Export",
+        fileName: "invalid-export.pdf",
+        kind: "PDF",
+        permission: "manageSettings"
+      })
+    });
+    assert.equal(invalidExport.status, 400);
+    const invalidExportPayload = await invalidExport.json();
+    assert.equal(invalidExportPayload?.error, "INVALID_REPORT_EXPORT");
+  } finally {
+    await new Promise<void>((resolve) => {
+      server.close(() => resolve());
+    });
+
+    await prisma.reportExport.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.user.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.teacher.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.subject.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.schoolClass.deleteMany({ where: { schoolId } }).catch(() => null);
+    await prisma.school.deleteMany({ where: { id: schoolId } }).catch(() => null);
+
+    restoreRuntimeEnv();
   }
 });
 
@@ -703,14 +1458,7 @@ test("student and parent accounts can be created and log in against a linked stu
     ]
   });
 
-  const originalRequireCentral = process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE;
-  const originalCentralUrl = process.env.SOM_PRO_LICENSE_SERVER_URL;
-  const originalLegacyCentralUrl = process.env.SOM_LICENSE_SERVER_URL;
-  const originalRuntimeMode = process.env.SOM_RUNTIME_MODE;
-  process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE = "false";
-  process.env.SOM_PRO_LICENSE_SERVER_URL = "";
-  process.env.SOM_LICENSE_SERVER_URL = "";
-  process.env.SOM_RUNTIME_MODE = "development";
+  const restoreRuntimeEnv = useRuntimeIntegrationEnv();
   const { createApp } = await import("../app");
   const app = createApp();
   const server = app.listen(0);
@@ -778,10 +1526,7 @@ test("student and parent accounts can be created and log in against a linked stu
       server.close(() => resolve());
     });
 
-    process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE = originalRequireCentral;
-    process.env.SOM_PRO_LICENSE_SERVER_URL = originalCentralUrl;
-    process.env.SOM_LICENSE_SERVER_URL = originalLegacyCentralUrl;
-    process.env.SOM_RUNTIME_MODE = originalRuntimeMode;
+    restoreRuntimeEnv();
     await prisma.user.deleteMany({ where: { schoolId } }).catch(() => null);
     await prisma.schoolClass.delete({ where: { id: classId } }).catch(() => null);
     await prisma.schoolClass.delete({ where: { id: otherClassId } }).catch(() => null);
@@ -861,14 +1606,7 @@ test("student write routes stay manageSettings-only and school export stays scho
     ]
   });
 
-  const originalRequireCentral = process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE;
-  const originalCentralUrl = process.env.SOM_PRO_LICENSE_SERVER_URL;
-  const originalLegacyCentralUrl = process.env.SOM_LICENSE_SERVER_URL;
-  const originalRuntimeMode = process.env.SOM_RUNTIME_MODE;
-  process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE = "false";
-  process.env.SOM_PRO_LICENSE_SERVER_URL = "";
-  process.env.SOM_LICENSE_SERVER_URL = "";
-  process.env.SOM_RUNTIME_MODE = "development";
+  const restoreRuntimeEnv = useRuntimeIntegrationEnv();
   const { createApp } = await import("../app");
   const app = createApp();
   const server = app.listen(0);
@@ -946,10 +1684,7 @@ test("student write routes stay manageSettings-only and school export stays scho
       server.close(() => resolve());
     });
 
-    process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE = originalRequireCentral;
-    process.env.SOM_PRO_LICENSE_SERVER_URL = originalCentralUrl;
-    process.env.SOM_LICENSE_SERVER_URL = originalLegacyCentralUrl;
-    process.env.SOM_RUNTIME_MODE = originalRuntimeMode;
+    restoreRuntimeEnv();
     await prisma.user.deleteMany({ where: { schoolId } }).catch(() => null);
     await prisma.student.delete({ where: { id: studentId } }).catch(() => null);
     await prisma.schoolClass.delete({ where: { id: classId } }).catch(() => null);

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "../db/prisma";
 
 type RepairStep = {
@@ -5,7 +6,20 @@ type RepairStep = {
   backfill: () => Promise<void>;
 };
 
+const allowedRepairTables = new Set(["DailyTeacherStatus", "Substitution", "TeacherAssignment", "DailyEvent"]);
+
+function assertAllowedRepairTarget(tableName: string) {
+  if (!allowedRepairTables.has(tableName)) {
+    throw new Error(`Unsupported repair target: ${tableName}`);
+  }
+}
+
+function quotedIdentifier(value: string) {
+  return Prisma.raw(`"${value}"`);
+}
+
 async function columnExists(tableName: string, columnName: string) {
+  assertAllowedRepairTarget(tableName);
   const rows = await prisma.$queryRaw<Array<{ exists: boolean }>>`
     SELECT EXISTS (
       SELECT 1
@@ -19,8 +33,9 @@ async function columnExists(tableName: string, columnName: string) {
 }
 
 async function nullCount(tableName: string, columnName: string) {
-  const rows = await prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
-    `SELECT COUNT(*)::bigint AS count FROM "${tableName}" WHERE "${columnName}" IS NULL`
+  assertAllowedRepairTarget(tableName);
+  const rows = await prisma.$queryRaw<Array<{ count: bigint }>>(
+    Prisma.sql`SELECT COUNT(*)::bigint AS count FROM ${quotedIdentifier(tableName)} WHERE ${quotedIdentifier(columnName)} IS NULL`
   );
   return Number(rows[0]?.count || 0);
 }
@@ -35,9 +50,12 @@ async function defaultSchoolId() {
 }
 
 async function ensureSchoolIdRepair(tableName: string, backfill: () => Promise<void>) {
+  assertAllowedRepairTarget(tableName);
   const hasColumn = await columnExists(tableName, "schoolId");
   if (!hasColumn) {
-    await prisma.$executeRawUnsafe(`ALTER TABLE "${tableName}" ADD COLUMN "schoolId" TEXT`);
+    await prisma.$executeRaw(
+      Prisma.sql`ALTER TABLE ${quotedIdentifier(tableName)} ADD COLUMN ${quotedIdentifier("schoolId")} TEXT`
+    );
   }
 
   await backfill();
@@ -51,9 +69,8 @@ async function ensureSchoolIdRepair(tableName: string, backfill: () => Promise<v
       );
     }
 
-    await prisma.$executeRawUnsafe(
-      `UPDATE "${tableName}" SET "schoolId" = $1 WHERE "schoolId" IS NULL`,
-      fallbackSchoolId
+    await prisma.$executeRaw(
+      Prisma.sql`UPDATE ${quotedIdentifier(tableName)} SET ${quotedIdentifier("schoolId")} = ${fallbackSchoolId} WHERE ${quotedIdentifier("schoolId")} IS NULL`
     );
   }
 
@@ -62,114 +79,134 @@ async function ensureSchoolIdRepair(tableName: string, backfill: () => Promise<v
     throw new Error(`${tableName}: ${remaining} rows still have null schoolId after repair.`);
   }
 
-  await prisma.$executeRawUnsafe(
-    `CREATE INDEX IF NOT EXISTS "${tableName}_schoolId_idx" ON "${tableName}"("schoolId")`
+  await prisma.$executeRaw(
+    Prisma.sql`CREATE INDEX IF NOT EXISTS ${quotedIdentifier(`${tableName}_schoolId_idx`)} ON ${quotedIdentifier(tableName)}(${quotedIdentifier("schoolId")})`
   );
 }
 
 async function repairDailyTeacherStatus() {
   await ensureSchoolIdRepair("DailyTeacherStatus", async () => {
-    await prisma.$executeRawUnsafe(`
-      UPDATE "DailyTeacherStatus" dts
-      SET "schoolId" = ds."schoolId"
-      FROM "DailySchedule" ds
-      WHERE dts."schoolId" IS NULL
-        AND dts."dailyScheduleId" = ds.id
-        AND ds."schoolId" IS NOT NULL
-    `);
+    await prisma.$executeRaw(
+      Prisma.sql`
+        UPDATE ${quotedIdentifier("DailyTeacherStatus")} dts
+        SET ${quotedIdentifier("schoolId")} = ds.${quotedIdentifier("schoolId")}
+        FROM ${quotedIdentifier("DailySchedule")} ds
+        WHERE dts.${quotedIdentifier("schoolId")} IS NULL
+          AND dts.${quotedIdentifier("dailyScheduleId")} = ds.id
+          AND ds.${quotedIdentifier("schoolId")} IS NOT NULL
+      `
+    );
 
-    await prisma.$executeRawUnsafe(`
-      UPDATE "DailyTeacherStatus" dts
-      SET "schoolId" = t."schoolId"
-      FROM "Teacher" t
-      WHERE dts."schoolId" IS NULL
-        AND dts."teacherId" = t.id
-        AND t."schoolId" IS NOT NULL
-    `);
+    await prisma.$executeRaw(
+      Prisma.sql`
+        UPDATE ${quotedIdentifier("DailyTeacherStatus")} dts
+        SET ${quotedIdentifier("schoolId")} = t.${quotedIdentifier("schoolId")}
+        FROM ${quotedIdentifier("Teacher")} t
+        WHERE dts.${quotedIdentifier("schoolId")} IS NULL
+          AND dts.${quotedIdentifier("teacherId")} = t.id
+          AND t.${quotedIdentifier("schoolId")} IS NOT NULL
+      `
+    );
   });
 }
 
 async function repairSubstitution() {
   await ensureSchoolIdRepair("Substitution", async () => {
-    await prisma.$executeRawUnsafe(`
-      UPDATE "Substitution" s
-      SET "schoolId" = ds."schoolId"
-      FROM "DailySchedule" ds
-      WHERE s."schoolId" IS NULL
-        AND s."dailyScheduleId" = ds.id
-        AND ds."schoolId" IS NOT NULL
-    `);
+    await prisma.$executeRaw(
+      Prisma.sql`
+        UPDATE ${quotedIdentifier("Substitution")} s
+        SET ${quotedIdentifier("schoolId")} = ds.${quotedIdentifier("schoolId")}
+        FROM ${quotedIdentifier("DailySchedule")} ds
+        WHERE s.${quotedIdentifier("schoolId")} IS NULL
+          AND s.${quotedIdentifier("dailyScheduleId")} = ds.id
+          AND ds.${quotedIdentifier("schoolId")} IS NOT NULL
+      `
+    );
 
-    await prisma.$executeRawUnsafe(`
-      UPDATE "Substitution" s
-      SET "schoolId" = c."schoolId"
-      FROM "SchoolClass" c
-      WHERE s."schoolId" IS NULL
-        AND s."classId" = c.id
-        AND c."schoolId" IS NOT NULL
-    `);
+    await prisma.$executeRaw(
+      Prisma.sql`
+        UPDATE ${quotedIdentifier("Substitution")} s
+        SET ${quotedIdentifier("schoolId")} = c.${quotedIdentifier("schoolId")}
+        FROM ${quotedIdentifier("SchoolClass")} c
+        WHERE s.${quotedIdentifier("schoolId")} IS NULL
+          AND s.${quotedIdentifier("classId")} = c.id
+          AND c.${quotedIdentifier("schoolId")} IS NOT NULL
+      `
+    );
 
-    await prisma.$executeRawUnsafe(`
-      UPDATE "Substitution" s
-      SET "schoolId" = t."schoolId"
-      FROM "Teacher" t
-      WHERE s."schoolId" IS NULL
-        AND s."absentTeacherId" = t.id
-        AND t."schoolId" IS NOT NULL
-    `);
+    await prisma.$executeRaw(
+      Prisma.sql`
+        UPDATE ${quotedIdentifier("Substitution")} s
+        SET ${quotedIdentifier("schoolId")} = t.${quotedIdentifier("schoolId")}
+        FROM ${quotedIdentifier("Teacher")} t
+        WHERE s.${quotedIdentifier("schoolId")} IS NULL
+          AND s.${quotedIdentifier("absentTeacherId")} = t.id
+          AND t.${quotedIdentifier("schoolId")} IS NOT NULL
+      `
+    );
   });
 }
 
 async function repairTeacherAssignment() {
   await ensureSchoolIdRepair("TeacherAssignment", async () => {
-    await prisma.$executeRawUnsafe(`
-      UPDATE "TeacherAssignment" ta
-      SET "schoolId" = t."schoolId"
-      FROM "Teacher" t
-      WHERE ta."schoolId" IS NULL
-        AND ta."teacherId" = t.id
-        AND t."schoolId" IS NOT NULL
-    `);
+    await prisma.$executeRaw(
+      Prisma.sql`
+        UPDATE ${quotedIdentifier("TeacherAssignment")} ta
+        SET ${quotedIdentifier("schoolId")} = t.${quotedIdentifier("schoolId")}
+        FROM ${quotedIdentifier("Teacher")} t
+        WHERE ta.${quotedIdentifier("schoolId")} IS NULL
+          AND ta.${quotedIdentifier("teacherId")} = t.id
+          AND t.${quotedIdentifier("schoolId")} IS NOT NULL
+      `
+    );
 
-    await prisma.$executeRawUnsafe(`
-      UPDATE "TeacherAssignment" ta
-      SET "schoolId" = c."schoolId"
-      FROM "SchoolClass" c
-      WHERE ta."schoolId" IS NULL
-        AND ta."classId" = c.id
-        AND c."schoolId" IS NOT NULL
-    `);
+    await prisma.$executeRaw(
+      Prisma.sql`
+        UPDATE ${quotedIdentifier("TeacherAssignment")} ta
+        SET ${quotedIdentifier("schoolId")} = c.${quotedIdentifier("schoolId")}
+        FROM ${quotedIdentifier("SchoolClass")} c
+        WHERE ta.${quotedIdentifier("schoolId")} IS NULL
+          AND ta.${quotedIdentifier("classId")} = c.id
+          AND c.${quotedIdentifier("schoolId")} IS NOT NULL
+      `
+    );
 
-    await prisma.$executeRawUnsafe(`
-      UPDATE "TeacherAssignment" ta
-      SET "schoolId" = s."schoolId"
-      FROM "Subject" s
-      WHERE ta."schoolId" IS NULL
-        AND ta."subjectId" = s.id
-        AND s."schoolId" IS NOT NULL
-    `);
+    await prisma.$executeRaw(
+      Prisma.sql`
+        UPDATE ${quotedIdentifier("TeacherAssignment")} ta
+        SET ${quotedIdentifier("schoolId")} = s.${quotedIdentifier("schoolId")}
+        FROM ${quotedIdentifier("Subject")} s
+        WHERE ta.${quotedIdentifier("schoolId")} IS NULL
+          AND ta.${quotedIdentifier("subjectId")} = s.id
+          AND s.${quotedIdentifier("schoolId")} IS NOT NULL
+      `
+    );
   });
 }
 
 async function repairDailyEvent() {
   await ensureSchoolIdRepair("DailyEvent", async () => {
-    await prisma.$executeRawUnsafe(`
-      UPDATE "DailyEvent" de
-      SET "schoolId" = ds."schoolId"
-      FROM "DailySchedule" ds
-      WHERE de."schoolId" IS NULL
-        AND de."dailyScheduleId" = ds.id
-        AND ds."schoolId" IS NOT NULL
-    `);
+    await prisma.$executeRaw(
+      Prisma.sql`
+        UPDATE ${quotedIdentifier("DailyEvent")} de
+        SET ${quotedIdentifier("schoolId")} = ds.${quotedIdentifier("schoolId")}
+        FROM ${quotedIdentifier("DailySchedule")} ds
+        WHERE de.${quotedIdentifier("schoolId")} IS NULL
+          AND de.${quotedIdentifier("dailyScheduleId")} = ds.id
+          AND ds.${quotedIdentifier("schoolId")} IS NOT NULL
+      `
+    );
 
-    await prisma.$executeRawUnsafe(`
-      UPDATE "DailyEvent" de
-      SET "schoolId" = c."schoolId"
-      FROM "SchoolClass" c
-      WHERE de."schoolId" IS NULL
-        AND de."classId" = c.id
-        AND c."schoolId" IS NOT NULL
-    `);
+    await prisma.$executeRaw(
+      Prisma.sql`
+        UPDATE ${quotedIdentifier("DailyEvent")} de
+        SET ${quotedIdentifier("schoolId")} = c.${quotedIdentifier("schoolId")}
+        FROM ${quotedIdentifier("SchoolClass")} c
+        WHERE de.${quotedIdentifier("schoolId")} IS NULL
+          AND de.${quotedIdentifier("classId")} = c.id
+          AND c.${quotedIdentifier("schoolId")} IS NOT NULL
+      `
+    );
   });
 }
 

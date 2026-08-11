@@ -114,18 +114,20 @@ function buildRows(
   selected: TeacherWithAssignments | null,
   teacherId: string | undefined,
   weeklySlots: BaseScheduleSlotWithDetails[],
-  schoolClasses: { id: string; name: string }[] = []
+  schoolClasses: { id: string; name: string }[] = [],
+  schoolSubjects: { id: string; name: string }[] = []
 ) {
   if (!teacherId) return [];
 
   const rows = new Map<string, Row>();
   const classNameById = new Map(schoolClasses.map((cls) => [cls.id, cls.name]));
+  const subjectNameById = new Map(schoolSubjects.map((subject) => [subject.id, subject.name]));
 
   for (const assignment of selected?.assignments || []) {
     const classId = assignment.classId || assignment.class?.id || null;
     const subjectId = assignment.subjectId || assignment.subject?.id || null;
-    const className = assignment.class?.name || "-";
-    const subjectName = assignment.subject?.name || "-";
+    const className = assignment.class?.name || (classId ? classNameById.get(classId) || "-" : "-");
+    const subjectName = assignment.subject?.name || (subjectId ? subjectNameById.get(subjectId) || "-" : "-");
     const key = rowKey(classId, subjectId, className, subjectName);
     rows.set(key, {
       key,
@@ -155,10 +157,10 @@ function buildRows(
   }
 
   for (const slot of weeklySlots.filter((slot) => slot.teacherId === teacherId)) {
-    const className = slot.class?.name || "-";
-    const subjectName = slot.subject?.name || "-";
+    const className = slot.class?.name || (slot.classId ? classNameById.get(slot.classId) || "-" : "-");
+    const subjectName = slot.subject?.name || (slot.subjectId ? subjectNameById.get(slot.subjectId) || "-" : "-");
     const key = rowKey(slot.classId, slot.subjectId, className, subjectName);
-    const current = rows.get(key) || {
+    const current: Row = rows.get(key) || {
       key,
       classId: slot.classId,
       subjectId: slot.subjectId,
@@ -186,7 +188,7 @@ export function TeacherWeeklyLoadTable({
   onAddAssignment
 }: Props) {
   const text = labels(language);
-  const rows = buildRows(selected, teacherId, weeklySlots, schoolClasses);
+  const rows = buildRows(selected, teacherId, weeklySlots, schoolClasses, schoolSubjects);
   const requiredTotal = rows.reduce((sum, row) => sum + row.requiredWeekly, 0);
   const rowsSignature = useMemo(
     () => rows.map((row) => `${row.assignmentId || row.key}:${row.requiredWeekly}`).join("|"),

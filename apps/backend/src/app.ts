@@ -1,4 +1,4 @@
-﻿import express from "express";
+import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -38,7 +38,7 @@ import { logSafeError } from "./lib/safeLog";
 export function createApp() {
   const app = express();
 
-  app.set("trust proxy", 1);
+  app.set("trust proxy", env.trustProxy);
   app.disable("x-powered-by");
   app.use(
     helmet({

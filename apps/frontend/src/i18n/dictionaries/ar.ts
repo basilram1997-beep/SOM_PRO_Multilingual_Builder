@@ -4,6 +4,7 @@ import { en } from "./en.ts";
 export const ar: Record<string, string> = buildReviewedLocaleDictionary(en, "ar");
 
 Object.assign(ar, {
+  "common.skipToContent": "تجاوز إلى المحتوى",
   "dashboard.contactName": "باسل رموني",
   "nav.teacherPortal": "بوابة المعلم",
   "nav.studentPortal": "ملفي الشخصي",
@@ -494,6 +495,7 @@ Object.assign(ar, {
 
 Object.assign(ar, {
   "nav.dashboard": "الرئيسية",
+  "nav.mainContent": "المحتوى الرئيسي",
   "nav.programsGroup": "البرامج والجداول",
   "nav.studentsGroup": "إدارة الطالب",
   "nav.permissionsGroup": "الاستئذانات والاستدعاءات",

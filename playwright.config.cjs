@@ -21,6 +21,12 @@ const e2eLicenseCode =
 process.env.SOM_E2E_LICENSE_CODE = e2eLicenseCode;
 
 const e2eBaseUrl = process.env.SOM_E2E_BASE_URL || "http://127.0.0.1:4188";
+const webServerTimeoutMs = Number(process.env.PLAYWRIGHT_WEB_SERVER_TIMEOUT_MS || 105_000);
+const viewportWidth = Number(process.env.PLAYWRIGHT_VIEWPORT_WIDTH || 1440);
+const viewportHeight = Number(process.env.PLAYWRIGHT_VIEWPORT_HEIGHT || 900);
+const browserProject = String(process.env.PLAYWRIGHT_BROWSER_PROJECT || "")
+  .trim()
+  .toLowerCase();
 
 const webServer = process.env.PLAYWRIGHT_SKIP_WEB_SERVER
   ? undefined
@@ -28,7 +34,7 @@ const webServer = process.env.PLAYWRIGHT_SKIP_WEB_SERVER
       command: "node scripts/e2e-server.js",
       url: e2eBaseUrl,
       reuseExistingServer: true,
-      timeout: 120_000,
+      timeout: Number.isFinite(webServerTimeoutMs) && webServerTimeoutMs >= 10_000 ? webServerTimeoutMs : 105_000,
       env: {
         ...process.env,
         SOM_PRO_LICENSE_SECRET: process.env.SOM_PRO_LICENSE_SECRET || "change-this-secret-before-selling",
@@ -36,6 +42,7 @@ const webServer = process.env.PLAYWRIGHT_SKIP_WEB_SERVER
         SOM_PRO_REQUIRE_CENTRAL_LICENSE: process.env.SOM_PRO_REQUIRE_CENTRAL_LICENSE || "false",
         SOM_PRO_LICENSE_SERVER_URL: process.env.SOM_PRO_LICENSE_SERVER_URL || "",
         SOM_LICENSE_SERVER_URL: process.env.SOM_LICENSE_SERVER_URL || "",
+        E2E_SERVER_SKIP_FRONTEND_WAIT: "1",
         CORS_ORIGIN: process.env.CORS_ORIGIN || "http://127.0.0.1:4188,http://localhost:4188",
         SOM_E2E_LICENSE_CODE: e2eLicenseCode,
         SOM_E2E_ADMIN_EMAIL: process.env.SOM_E2E_ADMIN_EMAIL || "admin662452",
@@ -67,10 +74,21 @@ module.exports = defineConfig({
     trace: "off",
     screenshot: "only-on-failure",
     video: "off",
-    viewport: { width: 1440, height: 900 },
+    viewport: {
+      width: Number.isFinite(viewportWidth) && viewportWidth > 0 ? viewportWidth : 1440,
+      height: Number.isFinite(viewportHeight) && viewportHeight > 0 ? viewportHeight : 900
+    },
     launchOptions: {
       executablePath: browserExecutablePath
     }
   },
+  projects: [
+    {
+      name: browserProject || "chromium",
+      use: {
+        browserName: browserProject || "chromium"
+      }
+    }
+  ],
   webServer
 });

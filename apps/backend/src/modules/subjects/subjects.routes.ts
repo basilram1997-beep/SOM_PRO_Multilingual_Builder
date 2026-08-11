@@ -5,6 +5,7 @@ import { prisma } from "../../db/prisma";
 import { validateBody } from "../../middleware/validate";
 import { getRequestSchoolId } from "../../services/schoolContext";
 import { resolveTeacherScopeForRequest } from "../../services/teacherScope";
+import { invalidateSchoolReferenceData } from "../../services/schoolReferenceData";
 
 export const subjectsRouter = Router();
 
@@ -28,6 +29,7 @@ subjectsRouter.post("/", validateBody(SubjectSchema), async (req, res) => {
 
   const schoolId = await getRequestSchoolId(req);
   const item = await prisma.subject.create({ data: { ...req.body, schoolId } });
+  invalidateSchoolReferenceData(schoolId);
   res.status(201).json({ data: item });
 });
 
@@ -58,6 +60,7 @@ subjectsRouter.put("/:id", validateBody(SubjectUpdateSchema), async (req, res) =
     where: { id: existing.id },
     data: req.body
   });
+  invalidateSchoolReferenceData(schoolId);
   res.json({ data: item });
 });
 
@@ -70,5 +73,6 @@ subjectsRouter.post("/:id/deactivate", async (req, res) => {
     where: { id: existing.id },
     data: { status: "ARCHIVED" }
   });
+  invalidateSchoolReferenceData(schoolId);
   res.status(204).send();
 });

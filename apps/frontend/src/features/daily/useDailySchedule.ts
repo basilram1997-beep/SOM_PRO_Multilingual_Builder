@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Teacher } from "@som/shared";
 import { sortSchoolClasses } from "@som/shared";
 import { somApi } from "../../api/somApi";
@@ -128,9 +128,15 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
         setToPeriod(settingsResponse.data.settings.periodsPerDay || 7);
         setDay(days[0] || defaultDay);
         setPeriodDefinitions(settingsResponse.data.periods || []);
-      } catch (error) {
+      } catch {
         if (!cancelled) {
-          console.error(error);
+          setTeachers([]);
+          setAllClasses([]);
+          setWorkingDays(defaultWorkingDays);
+          setPeriodsPerDay(7);
+          setToPeriod(7);
+          setDay(defaultDay);
+          setPeriodDefinitions([]);
         }
       }
     }
@@ -147,14 +153,15 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
     try {
       const res = await somApi.schedules.base(targetDay);
       setDayBaseSlots(res.data || []);
-    } catch (error) {
-      console.error(error);
+    } catch {
       setDayBaseSlots([]);
     }
   }
 
   useEffect(() => {
-    loadDayBaseSlots(day).catch((error) => console.error(error));
+    loadDayBaseSlots(day).catch(() => {
+      setDayBaseSlots([]);
+    });
   }, [day]);
 
   useEffect(() => {
@@ -175,8 +182,7 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
       }
     }
 
-    loadDailyForDate().catch((error) => {
-      console.error(error);
+    loadDailyForDate().catch(() => {
       if (!cancelled) {
         resetScheduleState(setResult, setEvents, setStatuses, setTeacherPrograms);
       }
@@ -206,7 +212,6 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
       setEvents(res.data.events || []);
       setTeacherPrograms([]);
     } catch (error) {
-      console.error(error);
       alert(dailyErrorMessage(error, "فشل توليد برنامج اليومي الجديد"));
     }
   }
@@ -232,7 +237,6 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
       alert("تم حفظ اليوم في الأرشيف وفتح صفحة الأرشيف");
       onArchiveComplete?.();
     } catch (error: unknown) {
-      console.error(error);
       alert(dailyErrorMessage(error, "لم يتم حفظ اليوم في الأرشيف"));
     }
   }
@@ -246,7 +250,6 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
       setTeacherPrograms(programs);
       if (programs.length === 0) alert("لم يتم العثور على معلمات مخصصات لهذا اليوم");
     } catch (error: unknown) {
-      console.error(error);
       alert(dailyErrorMessage(error, "فشلت عملية توليد برامج المعلمين"));
     } finally {
       setLoadingTeacherPrograms(false);
@@ -271,7 +274,6 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
       setResult((prev) => (prev ? { ...prev, events: res.data || [] } : prev));
       setEventForm(emptyEventForm());
     } catch (error) {
-      console.error(error);
       alert(dailyErrorMessage(error, "فشل حفظ الحدث"));
     }
   }
@@ -282,7 +284,6 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
       setEvents((prev) => prev.filter((event) => event.id !== id));
       setResult((prev) => (prev ? { ...prev, events: (prev.events || []).filter((event) => event.id !== id) } : prev));
     } catch (error) {
-      console.error(error);
       alert(dailyErrorMessage(error, "فشل حذف الحدث"));
     }
   }
@@ -387,7 +388,6 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
       setSubModal(null);
       setTeacherPrograms([]);
     } catch (error) {
-      console.error(error);
       alert(dailyErrorMessage(error, "فشل تحديث البديل"));
     }
   }

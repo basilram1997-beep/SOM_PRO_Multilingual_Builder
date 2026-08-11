@@ -229,16 +229,25 @@ function classSortLabel(item: SchoolClassLike) {
   };
 }
 
+const classNameCollator = new Intl.Collator("ar", { numeric: true, sensitivity: "base" });
+
 export function compareSchoolClasses(left: SchoolClassLike, right: SchoolClassLike) {
   const leftSort = classSortLabel(left);
   const rightSort = classSortLabel(right);
   if (leftSort.gradeRank !== rightSort.gradeRank) return leftSort.gradeRank - rightSort.gradeRank;
   if (leftSort.sectionRank !== rightSort.sectionRank) return leftSort.sectionRank - rightSort.sectionRank;
-  return leftSort.label.localeCompare(rightSort.label, "ar", { numeric: true, sensitivity: "base" });
+  return classNameCollator.compare(leftSort.label, rightSort.label);
 }
 
 export function sortSchoolClasses<T extends SchoolClassLike>(classes: T[]) {
-  return [...classes].sort(compareSchoolClasses);
+  return [...classes]
+    .map((item) => ({ item, sort: classSortLabel(item) }))
+    .sort((left, right) => {
+      if (left.sort.gradeRank !== right.sort.gradeRank) return left.sort.gradeRank - right.sort.gradeRank;
+      if (left.sort.sectionRank !== right.sort.sectionRank) return left.sort.sectionRank - right.sort.sectionRank;
+      return classNameCollator.compare(left.sort.label, right.sort.label);
+    })
+    .map((entry) => entry.item);
 }
 
 export const TeacherSchema = z.object({

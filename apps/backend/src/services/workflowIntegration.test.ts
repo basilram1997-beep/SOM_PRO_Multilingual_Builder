@@ -78,7 +78,7 @@ test("daily absence planning keeps manual substitutes and covered events from co
     schoolId: "school-a",
     dailyScheduleId: "daily-a",
     day: "الأحد",
-    statuses: [{ teacherId: "teacher-a", type: "ABSENT", fromPeriod: 2, toPeriod: 3 }],
+    statuses: [{ teacherId: "teacher-a", type: "ABSENT", fromPeriod: 2, toPeriod: 2 }],
     manualSubstitutions: [{ baseScheduleSlotId: "slot-1", substituteTeacherId: "teacher-b" }],
     settings: { periodsPerDay: 7 },
     db: fakeDb
@@ -184,4 +184,79 @@ test("teacher, class, and homeroom routing keep schedule updates in sync with th
     /dailyEvent\.findFirst\(\{/,
     "daily event generation should update-or-create matching events"
   );
+});
+
+test("daily absence planning keeps a covered event from being treated as busy while selecting substitutes", async () => {
+  const created: Array<{ substituteTeacherId: string | null; isManual: boolean; kind: string; baseSlotId: string }> =
+    [];
+  const fakeDb = {
+    baseScheduleSlot: {
+      findMany: async () => [
+        {
+          id: "slot-1",
+          period: 2,
+          teacherId: "teacher-a",
+          classId: "class-10a",
+          subjectId: "math",
+          teacher: { id: "teacher-a", name: "المعلم الغائب" },
+          class: { name: "العاشر أ" },
+          subject: { name: "رياضيات" }
+        },
+        {
+          id: "slot-2",
+          period: 2,
+          teacherId: "teacher-a",
+          classId: "class-10a",
+          subjectId: "math",
+          teacher: { id: "teacher-a", name: "المعلم الغائب" },
+          class: { name: "العاشر أ" },
+          subject: { name: "رياضيات" }
+        }
+      ]
+    },
+    teacher: {
+      findMany: async () => [
+        {
+          id: "teacher-b",
+          name: "المعلم البديل",
+          assignments: [
+            {
+              classId: "class-10a",
+              subjectId: "math",
+              class: { name: "العاشر أ" },
+              subject: { name: "رياضيات" }
+            }
+          ]
+        }
+      ]
+    },
+    dailyEvent: {
+      findMany: async () => []
+    },
+    substitution: {
+      create: async ({
+        data
+      }: {
+        data: { substituteTeacherId: string | null; isManual: boolean; kind: string; baseSlotId: string };
+      }) => {
+        created.push(data);
+        return { ...data } as never;
+      }
+    }
+  } as never;
+
+  const result = await generateSubstitutions({
+    schoolId: "school-a",
+    dailyScheduleId: "daily-a",
+    day: "الأحد",
+    statuses: [{ teacherId: "teacher-a", type: "ABSENT", fromPeriod: 2, toPeriod: 2 }],
+    manualSubstitutions: [],
+    settings: { periodsPerDay: 7 },
+    db: fakeDb
+  });
+
+  assert.equal(created.length, 2);
+  assert.equal(result.length, 2);
+  assert.equal(created[0].kind, "SAME_CLASS_AND_SUBJECT");
+  assert.equal(created[1].kind, "NO_SUBSTITUTE");
 });

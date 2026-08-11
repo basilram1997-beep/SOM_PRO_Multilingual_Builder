@@ -12,6 +12,23 @@ function trace(message, details) {
   console.log(`[${timestamp()}] ${message}`, details);
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isProcessRunning(pid) {
+  if (!pid) {
+    return false;
+  }
+
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function normalizeWindowsEnv(env) {
   if (process.platform !== "win32") {
     return env;
@@ -75,39 +92,54 @@ function createProcessManager() {
   const childProcesses = [];
   let cleanupCompleted = false;
 
+  async function stopChild(child) {
+    if (!child?.pid || child.exitCode !== null) {
+      return;
+    }
+
+    trace("terminating child process", { pid: child.pid });
+
+    if (process.platform === "win32") {
+      spawnSync("taskkill", ["/PID", String(child.pid), "/T"], {
+        stdio: "ignore",
+        timeout: 5000
+      });
+      await sleep(300);
+
+      if (isProcessRunning(child.pid)) {
+        trace("forcing child process shutdown", { pid: child.pid });
+        spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
+          stdio: "ignore",
+          timeout: 5000
+        });
+        await sleep(300);
+      }
+
+      return;
+    }
+
+    child.kill("SIGTERM");
+    await sleep(300);
+
+    if (isProcessRunning(child.pid)) {
+      child.kill("SIGKILL");
+      await sleep(300);
+    }
+  }
+
   return {
     add(child) {
       childProcesses.push(child);
       return child;
     },
-    stopAll() {
+    async stopAll() {
       if (cleanupCompleted) {
         return;
       }
       cleanupCompleted = true;
 
       for (const child of childProcesses.reverse()) {
-        if (!child?.pid || child.exitCode !== null) {
-          continue;
-        }
-
-        trace("terminating child process", { pid: child.pid });
-        if (process.platform === "win32") {
-          spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
-            stdio: "ignore",
-            timeout: 5000
-          });
-          continue;
-        }
-
-        child.kill("SIGTERM");
-        spawnSync(process.execPath, ["-e", "setTimeout(() => process.exit(0), 500)"], {
-          stdio: "ignore",
-          timeout: 1000
-        });
-        if (child.exitCode === null) {
-          child.kill("SIGKILL");
-        }
+        await stopChild(child);
       }
     }
   };

@@ -6,7 +6,6 @@ const { generateE2ELicenseCode } = require("./e2e-license");
 
 const prisma = new PrismaClient();
 const nodeCommand = process.platform === "win32" ? "node.exe" : "node";
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 
 function trace(message, details) {
   if (details === undefined) {
@@ -181,26 +180,14 @@ async function waitForUrl(url, timeoutMs = 60_000) {
   throw new Error(`Timed out waiting for ${url}`);
 }
 
-function spawnProcess(command, args, env, label) {
-  const child =
-    process.platform === "win32" && /\.cmd$/i.test(command)
-      ? spawn("cmd.exe", ["/d", "/s", "/c", [command, ...args].join(" ")], {
-          stdio: "inherit",
-          windowsHide: true,
-          env,
-          shell: false
-        })
-      : spawn(command, args, {
-          stdio: "inherit",
-          windowsHide: true,
-          env,
-          shell: false
-        });
-
-  trace(`${label} spawned`, { pid: child.pid });
-  child.once("exit", (code, signal) => trace(`${label} exit`, { pid: child.pid, code, signal }));
-  child.once("error", (error) => trace(`${label} error`, { pid: child.pid, message: error.message }));
-  return child;
+function spawnBackendProcess(env) {
+  return spawn(nodeCommand, ["--import", "tsx", "apps/backend/src/server.ts"], {
+    cwd: process.cwd(),
+    stdio: "inherit",
+    windowsHide: true,
+    env,
+    shell: false
+  });
 }
 
 function waitForExit(child, timeoutMs = 5000) {
@@ -226,9 +213,19 @@ async function terminateProcessTree(child) {
     return;
   }
 
+  child.kill("SIGTERM");
+  await waitForExit(child, 3_000);
+  if (child.exitCode !== null || child.signalCode !== null) {
+    return;
+  }
+
   if (process.platform === "win32") {
-    spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+    spawnSync("taskkill", ["/PID", String(child.pid), "/T"], { stdio: "ignore" });
     await waitForExit(child, 5000);
+    if (child.exitCode === null && child.signalCode === null && typeof child.unref === "function") {
+      spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+      await waitForExit(child, 5000);
+    }
     if (child.exitCode === null && child.signalCode === null && typeof child.unref === "function") {
       child.unref();
     }
@@ -282,9 +279,9 @@ function buildEnv({ runKey }) {
     SOM_PRO_AUTH_SECRET: process.env.SOM_PRO_AUTH_SECRET || "change-this-auth-secret-before-selling",
     CORS_ORIGIN: "http://localhost:4188,http://127.0.0.1:4188",
     SOM_E2E_LICENSE_CODE: e2eLicenseCode,
-    SOM_E2E_ADMIN_EMAIL: process.env.SOM_E2E_ADMIN_EMAIL || `load-admin-${runKey}@load.local`,
-    SOM_E2E_ADMIN_PASSWORD: process.env.SOM_E2E_ADMIN_PASSWORD || "Load-Admin-123!",
-    SOM_E2E_ADMIN_NAME: process.env.SOM_E2E_ADMIN_NAME || `Load Admin ${runKey}`,
+    SOM_E2E_ADMIN_EMAIL: process.env.SOM_E2E_ADMIN_EMAIL || `perf-admin-${runKey}@perf.local`,
+    SOM_E2E_ADMIN_PASSWORD: process.env.SOM_E2E_ADMIN_PASSWORD || "Perf-Admin-123!",
+    SOM_E2E_ADMIN_NAME: process.env.SOM_E2E_ADMIN_NAME || `Perf Admin ${runKey}`,
     SOM_E2E_SCHOOL_ID: schoolId,
     SOM_E2E_SCHOOL_NAME: process.env.SOM_E2E_SCHOOL_NAME || `Load School ${runKey}`,
     SOM_E2E_INSTITUTION_CODE: process.env.SOM_E2E_INSTITUTION_CODE || `PERF-${runKey.toUpperCase().slice(0, 16)}`,
@@ -365,6 +362,12 @@ async function main() {
   });
 
   try {
+    spawnSync(nodeCommand, ["scripts/runtime/cleanup.js", "--processes", "--processes-only"], {
+      stdio: "inherit",
+      env,
+      shell: false
+    });
+
     const seedResult = spawnSync(
       nodeCommand,
       ["scripts/perf-seed.js", `--runId=${runKey}`, `--datasetSize=${profile}`],
@@ -380,7 +383,7 @@ async function main() {
 
     await verifyDataset(runKey, profile);
 
-    backendProcess = spawnProcess(npmCommand, ["run", "dev:backend"], env, "backend");
+    backendProcess = spawnBackendProcess(env);
     await waitForUrl(`${apiUrl}/health`, 60_000);
 
     const measure = spawnSync(nodeCommand, ["scripts/perf-measure.js", `--mode=${mode}`, `--datasetSize=${profile}`], {

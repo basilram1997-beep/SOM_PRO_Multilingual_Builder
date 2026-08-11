@@ -1,4 +1,4 @@
-﻿import type { Request } from "express";
+import type { Request } from "express";
 import { prisma } from "../db/prisma";
 
 export class SchoolContextError extends Error {
@@ -25,7 +25,11 @@ function isProductionEnvironment() {
 export async function getDefaultSchoolIdForDevelopmentOnly() {
   if (developmentSchoolIdResolver) return developmentSchoolIdResolver();
 
-  let school = await prisma.school.findFirst();
+  const preferredSchoolId = process.env.SOM_E2E_SCHOOL_ID?.trim();
+  let school = preferredSchoolId ? await prisma.school.findUnique({ where: { id: preferredSchoolId } }) : null;
+  if (!school) {
+    school = await prisma.school.findFirst({ orderBy: { createdAt: "desc" } });
+  }
   if (!school) {
     school = await prisma.school.create({
       data: {

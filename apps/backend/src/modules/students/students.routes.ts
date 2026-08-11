@@ -1,4 +1,4 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { z } from "zod";
 import {
   StudentAcademicRecordSchema,
@@ -196,6 +196,78 @@ function buildAttendancePayload(body: {
     leftAt: body.status === "LEFT_EARLY" ? normalizeOptionalText(body.leftAt) : null,
     note: normalizeOptionalText(body.note)
   };
+}
+
+async function saveAttendanceRecord(req: any, res: any) {
+  const schoolId = await getRequestSchoolId(req);
+  const teacherScope = await getTeacherScopeForRequest(req, schoolId);
+  const student = await prisma.student.findFirst({
+    where: { id: req.body.studentId, schoolId },
+    select: {
+      id: true,
+      name: true,
+      classId: true,
+      fatherName: true,
+      motherName: true,
+      guardianPhone: true,
+      fatherPhone: true,
+      motherPhone: true,
+      studentPhone: true
+    }
+  });
+  if (!student) return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
+  if (teacherScope && !teacherCanAccessClass(teacherScope, student.classId)) {
+    return teacherWriteForbidden(res);
+  }
+
+  const attendancePayload = buildAttendancePayload(req.body);
+  const existingRecord = await prisma.studentAttendance.findUnique({
+    where: {
+      schoolId_studentId_date: {
+        schoolId,
+        studentId: student.id,
+        date: req.body.date
+      }
+    }
+  });
+  const record = await prisma.studentAttendance.upsert({
+    where: {
+      schoolId_studentId_date: {
+        schoolId,
+        studentId: student.id,
+        date: req.body.date
+      }
+    },
+    create: {
+      schoolId,
+      studentId: student.id,
+      date: req.body.date,
+      ...attendancePayload
+    },
+    update: {
+      ...attendancePayload
+    }
+  });
+  recordAuditLog(prisma, {
+    schoolId,
+    userId: req.user?.userId || null,
+    action: existingRecord ? "ATTENDANCE_UPDATE" : "ATTENDANCE_CREATE",
+    entity: "StudentAttendance",
+    entityId: `${student.id}:${req.body.date}`,
+    before: existingRecord,
+    after: record
+  });
+  const schoolClass = await prisma.schoolClass.findFirst({
+    where: { id: student.classId, schoolId },
+    select: { name: true }
+  });
+  await createAttendanceNotification(prisma, {
+    schoolId,
+    student,
+    className: schoolClass?.name || student.classId,
+    attendance: record
+  }).catch(() => null);
+  return res.json({ data: record });
 }
 async function getTeacherScopeForRequest(req: any, schoolId: string): Promise<TeacherScope | null> {
   if (!req.user) return null;
@@ -478,151 +550,13 @@ studentsRouter.put(
   "/attendance",
   requirePermissionForWrite("manageLessons"),
   validateBody(StudentAttendanceSchema),
-  async (req, res) => {
-    const schoolId = await getRequestSchoolId(req);
-    const teacherScope = await getTeacherScopeForRequest(req, schoolId);
-    const student = await prisma.student.findFirst({
-      where: { id: req.body.studentId, schoolId },
-      select: {
-        id: true,
-        name: true,
-        classId: true,
-        fatherName: true,
-        motherName: true,
-        guardianPhone: true,
-        fatherPhone: true,
-        motherPhone: true,
-        studentPhone: true
-      }
-    });
-    if (!student) return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
-    if (teacherScope && !teacherCanAccessClass(teacherScope, student.classId)) {
-      return teacherWriteForbidden(res);
-    }
-    const attendancePayload = buildAttendancePayload(req.body);
-    const existingRecord = await prisma.studentAttendance.findUnique({
-      where: {
-        schoolId_studentId_date: {
-          schoolId,
-          studentId: student.id,
-          date: req.body.date
-        }
-      }
-    });
-    const record = await prisma.studentAttendance.upsert({
-      where: {
-        schoolId_studentId_date: {
-          schoolId,
-          studentId: student.id,
-          date: req.body.date
-        }
-      },
-      create: {
-        schoolId,
-        studentId: student.id,
-        date: req.body.date,
-        ...attendancePayload
-      },
-      update: {
-        ...attendancePayload
-      }
-    });
-    recordAuditLog(prisma, {
-      schoolId,
-      userId: req.user?.userId || null,
-      action: existingRecord ? "ATTENDANCE_UPDATE" : "ATTENDANCE_CREATE",
-      entity: "StudentAttendance",
-      entityId: `${student.id}:${req.body.date}`,
-      before: existingRecord,
-      after: record
-    });
-    const schoolClass = await prisma.schoolClass.findFirst({
-      where: { id: student.classId, schoolId },
-      select: { name: true }
-    });
-    await createAttendanceNotification(prisma, {
-      schoolId,
-      student,
-      className: schoolClass?.name || student.classId,
-      attendance: record
-    }).catch(() => null);
-    res.json({ data: record });
-  }
+  saveAttendanceRecord
 );
 studentsRouter.post(
   "/attendance",
   requirePermissionForWrite("manageLessons"),
   validateBody(StudentAttendanceSchema),
-  async (req, res) => {
-    const schoolId = await getRequestSchoolId(req);
-    const teacherScope = await getTeacherScopeForRequest(req, schoolId);
-    const student = await prisma.student.findFirst({
-      where: { id: req.body.studentId, schoolId },
-      select: {
-        id: true,
-        name: true,
-        classId: true,
-        fatherName: true,
-        motherName: true,
-        guardianPhone: true,
-        fatherPhone: true,
-        motherPhone: true,
-        studentPhone: true
-      }
-    });
-    if (!student) return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
-    if (teacherScope && !teacherCanAccessClass(teacherScope, student.classId)) {
-      return teacherWriteForbidden(res);
-    }
-    const attendancePayload = buildAttendancePayload(req.body);
-    const existingRecord = await prisma.studentAttendance.findUnique({
-      where: {
-        schoolId_studentId_date: {
-          schoolId,
-          studentId: student.id,
-          date: req.body.date
-        }
-      }
-    });
-    const record = await prisma.studentAttendance.upsert({
-      where: {
-        schoolId_studentId_date: {
-          schoolId,
-          studentId: student.id,
-          date: req.body.date
-        }
-      },
-      create: {
-        schoolId,
-        studentId: student.id,
-        date: req.body.date,
-        ...attendancePayload
-      },
-      update: {
-        ...attendancePayload
-      }
-    });
-    recordAuditLog(prisma, {
-      schoolId,
-      userId: req.user?.userId || null,
-      action: existingRecord ? "ATTENDANCE_UPDATE" : "ATTENDANCE_CREATE",
-      entity: "StudentAttendance",
-      entityId: `${student.id}:${req.body.date}`,
-      before: existingRecord,
-      after: record
-    });
-    const schoolClass = await prisma.schoolClass.findFirst({
-      where: { id: student.classId, schoolId },
-      select: { name: true }
-    });
-    await createAttendanceNotification(prisma, {
-      schoolId,
-      student,
-      className: schoolClass?.name || student.classId,
-      attendance: record
-    }).catch(() => null);
-    res.json({ data: record });
-  }
+  saveAttendanceRecord
 );
 studentsRouter.put(
   "/attendance/:id",

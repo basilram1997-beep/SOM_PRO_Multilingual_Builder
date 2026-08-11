@@ -7,6 +7,8 @@ import {
   type BaseScheduleConflictSlot
 } from "./scheduleBuilder";
 import { ensureSchoolSettings } from "./schoolSettings";
+import { invalidateDailyScheduleDetailsCache } from "./scheduleCoordinator";
+import { invalidateTeacherDirectoryCache } from "./teacherDirectoryCache";
 
 export class ScheduleConflictError extends Error {
   constructor(
@@ -81,6 +83,8 @@ export async function saveBaseScheduleSlotFromRules(
     }
   });
 
+  invalidateDailyScheduleDetailsCache(schoolId);
+  invalidateTeacherDirectoryCache(schoolId);
   return { data: { slot, existing } };
 }
 
@@ -159,6 +163,8 @@ export async function copyBaseScheduleDayFromRules(
       return { copied: created.length, slots: created };
     });
 
+    invalidateDailyScheduleDetailsCache(schoolId);
+    invalidateTeacherDirectoryCache(schoolId);
     return { data: result };
   } catch (error) {
     if (error instanceof ScheduleConflictError) {
@@ -292,6 +298,8 @@ export async function swapBaseSchedulePeriodsFromRules(
       return { swapped: 1 };
     });
 
+    invalidateDailyScheduleDetailsCache(schoolId);
+    invalidateTeacherDirectoryCache(schoolId);
     return { data: result };
   } catch (error) {
     if (error instanceof ScheduleConflictError) {

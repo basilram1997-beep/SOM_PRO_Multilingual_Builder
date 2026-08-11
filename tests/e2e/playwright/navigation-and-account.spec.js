@@ -1,5 +1,5 @@
 const { expect, test } = require("@playwright/test");
-const { getE2ELicenseCode, clickStable, openSidebarSection } = require("./e2e-helpers");
+const { getE2ELicenseCode, clickStable, openSidebarSection, postJsonWithRetry } = require("./e2e-helpers");
 
 const DEFAULT_ADMIN_EMAIL = "admin662452";
 const DEFAULT_ADMIN_PASSWORD = "E2E-Playwright-123!";
@@ -14,17 +14,19 @@ async function authenticate(page) {
 
   if (!licenseCode) throw new Error("Missing E2E license code.");
 
-  bootstrapPromise ||= page.request
-    .post("http://127.0.0.1:4000/api/auth/bootstrap-license", {
-      data: { licenseCode, licenseKey: licenseCode }
-    })
-    .then(async (response) => {
-      if (!response.ok() && response.status() !== 429) throw new Error(`Bootstrap failed: ${response.status()}`);
-    });
+  bootstrapPromise ||= postJsonWithRetry(page.request, "http://127.0.0.1:4000/api/auth/bootstrap-license", {
+    licenseCode,
+    licenseKey: licenseCode
+  }).then(async (response) => {
+    if (!response.ok() && response.status() !== 429) throw new Error(`Bootstrap failed: ${response.status()}`);
+  });
   await bootstrapPromise;
 
-  const loginResponse = await page.request.post("http://127.0.0.1:4000/api/auth/login", {
-    data: { email, password, licenseCode, licenseKey: licenseCode }
+  const loginResponse = await postJsonWithRetry(page.request, "http://127.0.0.1:4000/api/auth/login", {
+    email,
+    password,
+    licenseCode,
+    licenseKey: licenseCode
   });
   const loginPayload = await loginResponse.json();
   if (!loginResponse.ok()) throw new Error(loginPayload?.message || `Login failed: ${loginResponse.status()}`);

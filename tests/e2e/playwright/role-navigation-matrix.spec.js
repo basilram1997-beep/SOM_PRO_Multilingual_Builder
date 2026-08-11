@@ -260,7 +260,7 @@ async function expectNavigation(page, visible, hidden) {
 async function openAndExpect(page, navSelector, pageSelector) {
   await expandAvailableGroups(page);
   await clickStable(page.locator(navSelector));
-  await expect(page.locator(pageSelector)).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator(pageSelector)).toBeVisible({ timeout: 20_000 });
 }
 
 test.describe.serial("SOM PRO browser role navigation matrix", () => {

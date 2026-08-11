@@ -6,7 +6,9 @@ import { prisma } from "../db/prisma";
 import { resolveAuthenticatedUserFromToken } from "../middleware/auth";
 import {
   createAuthToken,
+  changeUserPassword,
   hashPassword,
+  loginWithPassword,
   normalizeLoginIdentifier,
   verifyAuthToken,
   verifyPassword
@@ -123,4 +125,153 @@ test("auth login route requires a license code before password login", () => {
   assert.match(source, /validateBody\(RecoverSchema\)/);
   assert.match(source, /await bootstrapLicenseAccess\(licenseCode, getRequestDeviceInfo\(req\)\)/);
   assert.match(source, /syncLicenseAdminAccountForLogin\(email, password, getRequestDeviceInfo\(req\), licenseCode\)/);
+});
+
+test("loginWithPassword returns a token and user on the happy path", async () => {
+  const originalFindFirst = prisma.user.findFirst;
+  const originalFindMany = prisma.user.findMany;
+  const originalUpdate = prisma.user.update;
+  const password = "correct-password";
+
+  prisma.user.findFirst = (async () => ({
+    id: "admin-1",
+    schoolId: "school-1",
+    studentId: null,
+    name: "Admin",
+    email: "admin@example.com",
+    password: hashPassword("bootstrap-password"),
+    role: "ADMIN",
+    tokenVersion: 0,
+    lastActivityAt: null
+  })) as unknown as typeof prisma.user.findFirst;
+
+  prisma.user.findMany = (async () => [
+    {
+      id: "admin-1",
+      schoolId: "school-1",
+      studentId: null,
+      name: "Admin",
+      email: "admin@example.com",
+      password: hashPassword(password),
+      role: "ADMIN",
+      tokenVersion: 2,
+      lastActivityAt: null,
+      school: { isActive: true }
+    }
+  ]) as unknown as typeof prisma.user.findMany;
+
+  prisma.user.update = (async (args: { data: Record<string, unknown> }) => ({
+    id: "admin-1",
+    schoolId: "school-1",
+    studentId: null,
+    name: "Admin",
+    email: "admin@example.com",
+    password: hashPassword(password),
+    role: "ADMIN",
+    tokenVersion: 2,
+    lastActivityAt: args.data.lastActivityAt ? new Date() : null
+  })) as unknown as typeof prisma.user.update;
+
+  try {
+    const result = await loginWithPassword("admin@example.com", password);
+    assert.ok(result.token.length > 10);
+    assert.equal(result.user.id, "admin-1");
+    assert.equal(result.user.role, "ADMIN");
+    assert.equal(result.user.email, "admin@example.com");
+  } finally {
+    prisma.user.findFirst = originalFindFirst;
+    prisma.user.findMany = originalFindMany;
+    prisma.user.update = originalUpdate;
+  }
+});
+
+test("loginWithPassword rejects invalid credentials and inactive schools", async () => {
+  const originalFindFirst = prisma.user.findFirst;
+  const originalFindMany = prisma.user.findMany;
+  const originalUpdate = prisma.user.update;
+
+  prisma.user.findFirst = (async () => ({
+    id: "admin-1",
+    schoolId: "school-1",
+    studentId: null,
+    name: "Admin",
+    email: "admin@example.com",
+    password: hashPassword("bootstrap-password"),
+    role: "ADMIN",
+    tokenVersion: 0,
+    lastActivityAt: null
+  })) as unknown as typeof prisma.user.findFirst;
+
+  prisma.user.findMany = (async () => [
+    {
+      id: "admin-1",
+      schoolId: "school-1",
+      studentId: null,
+      name: "Admin",
+      email: "admin@example.com",
+      password: hashPassword("correct-password"),
+      role: "ADMIN",
+      tokenVersion: 0,
+      lastActivityAt: null,
+      school: { isActive: false }
+    }
+  ]) as unknown as typeof prisma.user.findMany;
+
+  prisma.user.update = originalUpdate;
+
+  try {
+    await assert.rejects(() => loginWithPassword("admin@example.com", "wrong-password"), /INVALID_LOGIN/);
+    await assert.rejects(() => loginWithPassword("admin@example.com", "correct-password"), /SCHOOL_INACTIVE/);
+  } finally {
+    prisma.user.findFirst = originalFindFirst;
+    prisma.user.findMany = originalFindMany;
+    prisma.user.update = originalUpdate;
+  }
+});
+
+test("changeUserPassword accepts a valid current password and rejects the wrong one", async () => {
+  const originalFindUnique = prisma.user.findUnique;
+  const originalUpdate = prisma.user.update;
+  const currentPassword = "current-password";
+  const updatedPasswords: Array<Record<string, unknown>> = [];
+
+  prisma.user.findUnique = (async () => ({
+    id: "user-1",
+    schoolId: "school-1",
+    studentId: null,
+    name: "Admin",
+    email: "admin@example.com",
+    password: hashPassword(currentPassword),
+    role: "ADMIN",
+    tokenVersion: 3,
+    lastActivityAt: null
+  })) as unknown as typeof prisma.user.findUnique;
+
+  prisma.user.update = (async (args: { data: Record<string, unknown> }) => {
+    updatedPasswords.push(args.data);
+    return {
+      id: "user-1",
+      schoolId: "school-1",
+      studentId: null,
+      name: "Admin",
+      email: "admin@example.com",
+      password: hashPassword(String(args.data.password || "")),
+      role: "ADMIN",
+      tokenVersion: 4,
+      lastActivityAt: null
+    };
+  }) as unknown as typeof prisma.user.update;
+
+  try {
+    assert.equal(await changeUserPassword("user-1", currentPassword, "new-password"), true);
+    assert.equal(updatedPasswords.length, 1);
+    assert.ok(updatedPasswords[0]?.password);
+    await assert.rejects(
+      () => changeUserPassword("user-1", "wrong-password", "new-password"),
+      /INVALID_CURRENT_PASSWORD/
+    );
+  } finally {
+    prisma.user.findUnique = originalFindUnique;
+    prisma.user.update = originalUpdate;
+  }
 });

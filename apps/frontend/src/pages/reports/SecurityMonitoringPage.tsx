@@ -10,7 +10,7 @@ export function SecurityMonitoringPage() {
   const securityTitle = t("reports.securityTitle");
 
   return (
-    <div className="page">
+    <div className="page" data-e2e="security-monitoring-page">
       <h2>{securityTitle}</h2>
       <Card
         title={securityTitle}

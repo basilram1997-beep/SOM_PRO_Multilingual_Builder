@@ -4,6 +4,7 @@ import { assertValidDayAndPeriod, ensureSchoolSettings } from "./schoolSettings"
 import { generateSubstitutions } from "./substitutionEngine";
 import { classifySubstitutionCandidate } from "./scheduleRules";
 import { buildDailyDutyRows } from "./dutySchedule";
+import { getSchoolReferenceData } from "./schoolReferenceData";
 
 /*
  * Source contract anchors for text-based release tests.
@@ -36,6 +37,70 @@ type DailyEventBody = {
 };
 
 type BaseScheduleSlotRecord = Awaited<ReturnType<typeof prisma.baseScheduleSlot.create>>;
+type BaseScheduleSlotDetails = {
+  id: string;
+  schoolId: string;
+  day: string;
+  period: number;
+  classId: string;
+  subjectId: string;
+  teacherId: string;
+  room?: string | null;
+};
+
+type NamedRecord = { id: string; name: string; specialty?: string | null };
+
+type DailyScheduleDetailsResponse = {
+  data: unknown;
+};
+
+type CachedDailyScheduleDetails = {
+  expiresAt: number;
+  promise?: Promise<DailyScheduleDetailsResponse>;
+  value?: DailyScheduleDetailsResponse;
+};
+
+const dailyScheduleDetailsCache = new Map<string, CachedDailyScheduleDetails>();
+const DAILY_DETAILS_CACHE_TTL_MS = 10_000;
+
+function dailyCacheKey(schoolId: string, date: string) {
+  return `${schoolId}:${date}`;
+}
+
+export function invalidateDailyScheduleDetailsCache(schoolId: string, date?: string) {
+  if (date) {
+    dailyScheduleDetailsCache.delete(dailyCacheKey(schoolId, date));
+    return;
+  }
+
+  for (const key of dailyScheduleDetailsCache.keys()) {
+    if (key.startsWith(`${schoolId}:`)) {
+      dailyScheduleDetailsCache.delete(key);
+    }
+  }
+}
+
+function serializeBaseSlots(
+  baseSlots: BaseScheduleSlotDetails[],
+  classMap: Map<string, NamedRecord>,
+  subjectMap: Map<string, NamedRecord>,
+  teacherMap: Map<string, NamedRecord>
+) {
+  return baseSlots.map((slot) => {
+    const classRecord = classMap.get(slot.classId);
+    const subjectRecord = subjectMap.get(slot.subjectId);
+    const teacherRecord = teacherMap.get(slot.teacherId);
+    return {
+      ...slot,
+      class: classRecord ? { ...classRecord } : { id: slot.classId, name: slot.classId },
+      subject: subjectRecord ? { id: subjectRecord.id, name: subjectRecord.name } : null,
+      teacher: teacherRecord ? { ...teacherRecord } : { id: slot.teacherId, name: slot.teacherId },
+      className: classRecord?.name || slot.classId,
+      subjectName: subjectRecord?.name || slot.subjectId,
+      teacherName: teacherRecord?.name || slot.teacherId
+    };
+  });
+}
 
 export type GenerateDailyInput = {
   date: string;
@@ -100,14 +165,32 @@ export async function generateDailyScheduleFromRules(schoolId: string, input: Ge
     return { daily, substitutions };
   });
 
-  const baseSlots = await prisma.baseScheduleSlot.findMany({
-    where: { schoolId, day: input.day, period: { lte: settings.periodsPerDay } },
-    include: { teacher: true, class: true, subject: true },
-    orderBy: [{ period: "asc" }]
-  });
+  const [baseSlotsRaw, referenceData, duties] = await Promise.all([
+    prisma.baseScheduleSlot.findMany({
+      where: { schoolId, day: input.day, period: { lte: settings.periodsPerDay } },
+      select: {
+        id: true,
+        schoolId: true,
+        day: true,
+        period: true,
+        classId: true,
+        subjectId: true,
+        teacherId: true,
+        room: true
+      },
+      orderBy: [{ period: "asc" }]
+    }),
+    getSchoolReferenceData(schoolId),
+    buildDailyDutyRows(schoolId, input.date, input.day)
+  ]);
+  const baseSlots = serializeBaseSlots(
+    baseSlotsRaw,
+    referenceData.classMap,
+    referenceData.subjectMap,
+    referenceData.teacherMap
+  );
 
-  const duties = await buildDailyDutyRows(schoolId, input.date, input.day);
-
+  invalidateDailyScheduleDetailsCache(schoolId, input.date);
   return { data: { daily: result.daily, baseSlots, substitutions: result.substitutions, duties } };
 }
 
@@ -118,10 +201,26 @@ export async function updateDailySubstitutionTeacher(
 ) {
   const existing = await prisma.substitution.findFirst({
     where: { id: substitutionId, schoolId },
-    include: {
-      class: true,
-      subject: true,
-      dailySchedule: true
+    select: {
+      id: true,
+      schoolId: true,
+      dailyScheduleId: true,
+      period: true,
+      classId: true,
+      subjectId: true,
+      absentTeacherId: true,
+      substituteTeacherId: true,
+      baseSlotId: true,
+      note: true,
+      class: {
+        select: { id: true, name: true }
+      },
+      subject: {
+        select: { id: true, name: true }
+      },
+      dailySchedule: {
+        select: { id: true, schoolId: true, date: true, day: true }
+      }
     }
   });
 
@@ -135,7 +234,21 @@ export async function updateDailySubstitutionTeacher(
   if (substituteTeacherId) {
     const teacher = await prisma.teacher.findUnique({
       where: { id: substituteTeacherId },
-      include: { assignments: { include: { class: true, subject: true } } }
+      select: {
+        id: true,
+        schoolId: true,
+        assignments: {
+          select: {
+            classId: true,
+            subjectId: true,
+            class: {
+              select: {
+                name: true
+              }
+            }
+          }
+        }
+      }
     });
 
     if (!teacher || teacher.schoolId !== schoolId) {
@@ -158,6 +271,7 @@ export async function updateDailySubstitutionTeacher(
     include: { class: true, subject: true, absentTeacher: true, substituteTeacher: true }
   });
 
+  invalidateDailyScheduleDetailsCache(schoolId, existing.dailySchedule.date);
   return { data: updated };
 }
 
@@ -241,6 +355,7 @@ export async function createDailyEventFromRules(schoolId: string, date: string, 
 
     return row;
   });
+  invalidateDailyScheduleDetailsCache(schoolId, date);
 
   const events = await prisma.dailyEvent.findMany({
     where: { schoolId, dailyScheduleId: daily.id },
@@ -264,34 +379,150 @@ export async function deleteDailyEventFromRules(schoolId: string, eventId: strin
   }
 
   await prisma.dailyEvent.delete({ where: { id: existing.id } });
+  invalidateDailyScheduleDetailsCache(schoolId, existing.dailySchedule.date);
   return { data: null };
 }
 
 export async function getDailyScheduleDetails(schoolId: string, date: string) {
+  const key = dailyCacheKey(schoolId, date);
+  const cached = dailyScheduleDetailsCache.get(key);
+  const now = Date.now();
+  if (cached?.value && cached.expiresAt > now) {
+    return cached.value;
+  }
+  if (cached?.promise) {
+    return cached.promise;
+  }
+
+  const promise = getDailyScheduleDetailsImpl(schoolId, date);
+  dailyScheduleDetailsCache.set(key, { promise, expiresAt: now + DAILY_DETAILS_CACHE_TTL_MS });
+  try {
+    const value = await promise;
+    dailyScheduleDetailsCache.set(key, { value, expiresAt: Date.now() + DAILY_DETAILS_CACHE_TTL_MS });
+    return value;
+  } catch (error) {
+    dailyScheduleDetailsCache.delete(key);
+    throw error;
+  }
+}
+
+async function getDailyScheduleDetailsImpl(schoolId: string, date: string) {
   const daily = await prisma.dailySchedule.findUnique({
     where: { schoolId_date: { schoolId, date } },
-    include: {
-      statuses: { include: { teacher: true } },
-      substitutions: {
-        include: { class: true, subject: true, absentTeacher: true, substituteTeacher: true }
+    select: {
+      id: true,
+      schoolId: true,
+      date: true,
+      day: true,
+      createdAt: true,
+      updatedAt: true,
+      statuses: {
+        select: {
+          id: true,
+          schoolId: true,
+          dailyScheduleId: true,
+          teacherId: true,
+          type: true,
+          fromPeriod: true,
+          toPeriod: true,
+          reason: true,
+          teacher: {
+            select: {
+              id: true,
+              name: true,
+              specialty: true
+            }
+          }
+        }
       },
-      events: true
+      substitutions: {
+        select: {
+          id: true,
+          schoolId: true,
+          dailyScheduleId: true,
+          period: true,
+          baseSlotId: true,
+          classId: true,
+          subjectId: true,
+          absentTeacherId: true,
+          substituteTeacherId: true,
+          kind: true,
+          isManual: true,
+          note: true,
+          class: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          subject: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          absentTeacher: {
+            select: {
+              id: true,
+              name: true,
+              specialty: true
+            }
+          },
+          substituteTeacher: {
+            select: {
+              id: true,
+              name: true,
+              specialty: true
+            }
+          }
+        }
+      },
+      events: {
+        select: {
+          id: true,
+          schoolId: true,
+          dailyScheduleId: true,
+          type: true,
+          classId: true,
+          fromPeriod: true,
+          toPeriod: true,
+          color: true,
+          note: true
+        }
+      }
     }
   });
 
   if (!daily) return { data: null };
 
   const settings = await ensureSchoolSettings(schoolId);
-  const baseSlots = await prisma.baseScheduleSlot.findMany({
-    where: { schoolId, day: daily.day, period: { lte: settings.periodsPerDay } },
-    include: { teacher: true, class: true, subject: true },
-    orderBy: [{ period: "asc" }]
-  });
-
-  const classMap = new Map((await prisma.schoolClass.findMany({ where: { schoolId } })).map((cls) => [cls.id, cls]));
+  const [baseSlotsRaw, referenceData] = await Promise.all([
+    prisma.baseScheduleSlot.findMany({
+      where: { schoolId, day: daily.day, period: { lte: settings.periodsPerDay } },
+      select: {
+        id: true,
+        schoolId: true,
+        day: true,
+        period: true,
+        classId: true,
+        subjectId: true,
+        teacherId: true,
+        room: true
+      },
+      orderBy: [{ period: "asc" }]
+    }),
+    getSchoolReferenceData(schoolId)
+  ]);
+  const baseSlots = serializeBaseSlots(
+    baseSlotsRaw,
+    referenceData.classMap,
+    referenceData.subjectMap,
+    referenceData.teacherMap
+  );
+  const classMap = referenceData.classMap;
   const events = daily.events.map((event) => ({ ...event, class: event.classId ? classMap.get(event.classId) : null }));
 
-  const duties = await buildDailyDutyRows(schoolId, date, daily.day);
+  const duties = await buildDailyDutyRows(schoolId, date, daily.day, daily.statuses);
 
   return { data: { ...daily, events, baseSlots, duties } };
 }
@@ -386,91 +617,101 @@ export async function applyHomeroomsToBaseScheduleFromRules(
   schoolId: string,
   options: { overwriteConflicts: boolean; classIds?: string[] }
 ) {
-  return prisma.$transaction(async (tx) => {
-    const homeroomSubject = await ensureHomeroomSubject(schoolId, tx);
-    const requestedClassIds = options.classIds || [];
-    const rows = await tx.homeroomAssignment.findMany({
-      where: { schoolId, isActive: true, ...(requestedClassIds.length ? { classId: { in: requestedClassIds } } : {}) }
-    });
-    const created: BaseScheduleSlotRecord[] = [];
-    const conflicts: string[] = [];
-
-    for (const row of rows) {
-      if (!row.weeklyDay || !row.weeklyPeriod) continue;
-      await assertValidDayAndPeriod(schoolId, row.weeklyDay, row.weeklyPeriod);
-
-      const existingClassSlot = await tx.baseScheduleSlot.findUnique({
-        where: {
-          schoolId_day_period_classId: { schoolId, day: row.weeklyDay, period: row.weeklyPeriod, classId: row.classId }
-        },
-        include: { teacher: true, class: true, subject: true }
+  return prisma
+    .$transaction(async (tx) => {
+      const homeroomSubject = await ensureHomeroomSubject(schoolId, tx);
+      const requestedClassIds = options.classIds || [];
+      const rows = await tx.homeroomAssignment.findMany({
+        where: { schoolId, isActive: true, ...(requestedClassIds.length ? { classId: { in: requestedClassIds } } : {}) }
       });
-      const teacherBusy = await tx.baseScheduleSlot.findFirst({
-        where: {
-          schoolId,
-          day: row.weeklyDay,
-          period: row.weeklyPeriod,
-          teacherId: row.teacherId,
-          NOT: { classId: row.classId }
-        },
-        include: { teacher: true, class: true, subject: true }
-      });
+      const created: BaseScheduleSlotRecord[] = [];
+      const conflicts: string[] = [];
 
-      await tx.teacherAssignment.upsert({
-        where: {
-          schoolId_teacherId_classId_subjectId: {
-            schoolId,
-            teacherId: row.teacherId,
-            classId: row.classId,
-            subjectId: homeroomSubject.id
-          }
-        },
-        update: {},
-        create: { schoolId, teacherId: row.teacherId, classId: row.classId, subjectId: homeroomSubject.id }
-      });
+      for (const row of rows) {
+        if (!row.weeklyDay || !row.weeklyPeriod) continue;
+        await assertValidDayAndPeriod(schoolId, row.weeklyDay, row.weeklyPeriod);
 
-      if (teacherBusy && !options.overwriteConflicts) {
-        conflicts.push(
-          `المربي مشغول في ${row.weeklyDay} الحصة ${row.weeklyPeriod}: ${teacherBusy.teacher.name} يدرس ${teacherBusy.class.name}`
-        );
-        continue;
-      }
-      if (teacherBusy && options.overwriteConflicts) {
-        await tx.baseScheduleSlot.delete({ where: { id: teacherBusy.id } });
-      }
-
-      if (existingClassSlot && !options.overwriteConflicts) {
-        conflicts.push(
-          `الصف ${existingClassSlot.class.name} لديه حصة ${existingClassSlot.subject.name} مع ${existingClassSlot.teacher.name} في ${row.weeklyDay} الحصة ${row.weeklyPeriod}`
-        );
-        continue;
-      }
-
-      if (existingClassSlot) {
-        created.push(
-          await tx.baseScheduleSlot.update({
-            where: { id: existingClassSlot.id },
-            data: { teacherId: row.teacherId, subjectId: homeroomSubject.id },
-            include: { teacher: true, class: true, subject: true }
-          })
-        );
-      } else {
-        created.push(
-          await tx.baseScheduleSlot.create({
-            data: {
+        const existingClassSlot = await tx.baseScheduleSlot.findUnique({
+          where: {
+            schoolId_day_period_classId: {
               schoolId,
               day: row.weeklyDay,
               period: row.weeklyPeriod,
-              classId: row.classId,
-              subjectId: homeroomSubject.id,
-              teacherId: row.teacherId
-            },
-            include: { teacher: true, class: true, subject: true }
-          })
-        );
-      }
-    }
+              classId: row.classId
+            }
+          },
+          include: { teacher: true, class: true, subject: true }
+        });
+        const teacherBusy = await tx.baseScheduleSlot.findFirst({
+          where: {
+            schoolId,
+            day: row.weeklyDay,
+            period: row.weeklyPeriod,
+            teacherId: row.teacherId,
+            NOT: { classId: row.classId }
+          },
+          include: { teacher: true, class: true, subject: true }
+        });
 
-    return { data: { applied: created.length, conflicts, slots: created } };
-  });
+        await tx.teacherAssignment.upsert({
+          where: {
+            schoolId_teacherId_classId_subjectId: {
+              schoolId,
+              teacherId: row.teacherId,
+              classId: row.classId,
+              subjectId: homeroomSubject.id
+            }
+          },
+          update: {},
+          create: { schoolId, teacherId: row.teacherId, classId: row.classId, subjectId: homeroomSubject.id }
+        });
+
+        if (teacherBusy && !options.overwriteConflicts) {
+          conflicts.push(
+            `المربي مشغول في ${row.weeklyDay} الحصة ${row.weeklyPeriod}: ${teacherBusy.teacher.name} يدرس ${teacherBusy.class.name}`
+          );
+          continue;
+        }
+        if (teacherBusy && options.overwriteConflicts) {
+          await tx.baseScheduleSlot.delete({ where: { id: teacherBusy.id } });
+        }
+
+        if (existingClassSlot && !options.overwriteConflicts) {
+          conflicts.push(
+            `الصف ${existingClassSlot.class.name} لديه حصة ${existingClassSlot.subject.name} مع ${existingClassSlot.teacher.name} في ${row.weeklyDay} الحصة ${row.weeklyPeriod}`
+          );
+          continue;
+        }
+
+        if (existingClassSlot) {
+          created.push(
+            await tx.baseScheduleSlot.update({
+              where: { id: existingClassSlot.id },
+              data: { teacherId: row.teacherId, subjectId: homeroomSubject.id },
+              include: { teacher: true, class: true, subject: true }
+            })
+          );
+        } else {
+          created.push(
+            await tx.baseScheduleSlot.create({
+              data: {
+                schoolId,
+                day: row.weeklyDay,
+                period: row.weeklyPeriod,
+                classId: row.classId,
+                subjectId: homeroomSubject.id,
+                teacherId: row.teacherId
+              },
+              include: { teacher: true, class: true, subject: true }
+            })
+          );
+        }
+      }
+
+      return { data: { applied: created.length, conflicts, slots: created } };
+    })
+    .then((result) => {
+      invalidateDailyScheduleDetailsCache(schoolId);
+      return result;
+    });
 }

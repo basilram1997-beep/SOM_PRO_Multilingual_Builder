@@ -1,6 +1,6 @@
 # Security Testing and SSDLC
 
-This document describes the minimum security testing posture for SOM PRO before production or sale.
+This document defines the minimum security testing posture for SOM PRO before production or sale.
 
 ## Goals
 
@@ -12,29 +12,29 @@ This document describes the minimum security testing posture for SOM PRO before 
 ## Minimum security review stack
 
 - Dependency scan.
+- Secrets scan.
 - Static analysis / SAST.
 - Manual code review for sensitive paths.
 - Browser smoke checks on staging.
 - Limited DAST against a non-production environment.
 - A qualified external penetration test before commercial release or shortly after a major release, depending on the deployment agreement.
-- OWASP Top 10 coverage mapped in `docs/OWASP_TOP_10_AR.md`.
 
-## Suggested repository scripts
+## Canonical scripts
 
-- `npm run security:deps`
+- `npm run security:baseline`
+- `npm run security:review`
 - `npm run security:sast`
 - `npm run security:dast`
-- `npm run security:review`
+- `npm run security:pentest:prep`
 
 ## What each step checks
 
-### Dependency scan
+### `security:baseline`
 
-- Vulnerable packages.
-- Outdated packages that need human review.
-- Known license concerns for sale.
+- Secret leakage in the repository.
+- Vulnerabilities reported by `npm audit --omit=dev`.
 
-### SAST
+### `security:sast`
 
 - Unsafe string handling.
 - Authorization gaps.
@@ -42,7 +42,7 @@ This document describes the minimum security testing posture for SOM PRO before 
 - Dangerous direct object access.
 - Weak input validation.
 
-### DAST
+### `security:dast`
 
 - Login and logout flow.
 - Permission boundaries.
@@ -59,6 +59,11 @@ The product is prepared for a real penetration test with these expectations:
 - The tester receives only the access required for the agreed scope.
 - Findings are recorded with severity and reproduction notes.
 - Critical and high findings block release until fixed or formally accepted.
+
+### Handoff command
+
+Run `npm run security:pentest:prep` before handing the environment to an external tester.
+It checks that the handoff documents exist and prints the minimum checklist for a staging engagement.
 
 ## Recommended PT deliverables
 

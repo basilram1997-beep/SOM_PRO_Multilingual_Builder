@@ -93,6 +93,7 @@ npm run update:safe
 
 راجع أيضاً:
 
+- `docs/DELIVERY_INDEX.md`
 - `docs/USER_INSTALL_CHECKLIST_AR.md`
 - `docs/ADMIN_BACKUP_RESTORE_AR.md`
 - `docs/RELEASE_PROCESS_AR.md`
@@ -266,6 +267,15 @@ Browser E2E expects the local database stack to be reachable before it starts:
 - Redis when the local stack requires it
 
 The browser runner applies Prisma migrations, seeds the E2E school, starts temporary Backend and Frontend processes, waits for `4000/health` and `4188/`, runs Playwright, then stops the temporary services.
+
+### Recent verified checks in this branch
+
+These are the checks we have already confirmed in the current working tree and should now be treated as the live reference point:
+
+- `npm run test:e2e:browser:usability` passed on desktop and mobile.
+- `npm run volume:test` passed on the `tiny` and `normal` profiles.
+- `node --test --import tsx src/services/migrationUpgradeIntegration.test.ts` passed.
+- `npm run stress:test` passed on the login burst and outage recovery path.
 
 ### Acceptance matrix
 

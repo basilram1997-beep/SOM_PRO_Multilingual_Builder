@@ -1061,6 +1061,7 @@ model ReportExport {
   requestedByUser  User?  @relation("ReportExportRequestedBy", fields: [requestedBy], references: [id], onDelete: SetNull)
 
   @@map("reports_exports")
+  @@unique([schoolId, filePath])
   @@index([schoolId, createdAt])
   @@index([schoolId, expiresAt])
   @@index([schoolId, status])
@@ -1084,6 +1085,7 @@ model BackupJob {
   createdByUser  User?  @relation("BackupJobCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@map("backup_jobs")
+  @@unique([schoolId, filePath])
   @@index([schoolId, startedAt])
   @@index([schoolId, status])
   @@index([schoolId, backupType])

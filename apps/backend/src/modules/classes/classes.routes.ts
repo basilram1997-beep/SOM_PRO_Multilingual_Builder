@@ -10,6 +10,8 @@ import { applyHomeroomsToBaseScheduleFromRules } from "../../services/scheduleCo
 import { resolveTeacherScopeForRequest } from "../../services/teacherScope";
 import { logSafeError } from "../../lib/safeLog";
 import { buildClassDuplicateWhere } from "../../services/classIdentity";
+import { getSchoolReferenceData, invalidateSchoolReferenceData } from "../../services/schoolReferenceData";
+import { invalidateTeacherDirectoryCache } from "../../services/teacherDirectoryCache";
 
 export const classesRouter = Router();
 
@@ -45,6 +47,8 @@ async function removeClassById(req: Request, res: Response, classId: string) {
       prisma.student.deleteMany({ where: { schoolId, classId } }),
       prisma.schoolClass.delete({ where: { id: classId } })
     ]);
+    invalidateSchoolReferenceData(schoolId);
+    invalidateTeacherDirectoryCache(schoolId);
     recordAuditLog(prisma, {
       schoolId,
       userId: req.user?.id || req.user?.userId || null,
@@ -120,18 +124,17 @@ async function saveHomeroomAssignment(req: Request, res: Response, classId: stri
     after: row as Prisma.InputJsonValue
   });
   await applyHomeroomsToBaseScheduleFromRules(schoolId, { overwriteConflicts: false, classIds: [classId] });
+  invalidateSchoolReferenceData(schoolId);
   return res.status(201).json({ data: row });
 }
 
 classesRouter.get("/", async (req, res) => {
   const schoolId = await getRequestSchoolId(req);
   const scope = req.user ? await resolveTeacherScopeForRequest(schoolId, req.user) : null;
-  const classes = await prisma.schoolClass.findMany({
-    where: {
-      schoolId,
-      ...(scope ? { id: { in: scope.classIds } } : {})
-    }
-  });
+  const referenceData = await getSchoolReferenceData(schoolId);
+  const classes = scope
+    ? referenceData.classes.filter((schoolClass) => scope.classIds.includes(schoolClass.id))
+    : referenceData.classes;
   res.json({ data: sortSchoolClasses(classes) });
 });
 
@@ -161,6 +164,7 @@ classesRouter.post("/", validateBody(ClassSchema), async (req, res) => {
 
   try {
     const item = await prisma.schoolClass.create({ data: { ...req.body, schoolId } });
+    invalidateSchoolReferenceData(schoolId);
     recordAuditLog(prisma, {
       schoolId,
       userId: req.user?.id || req.user?.userId || null,
@@ -239,6 +243,8 @@ classesRouter.patch("/:id", validateBody(ClassSchema.partial()), async (req, res
     });
 
     await applyHomeroomsToBaseScheduleFromRules(schoolId, { overwriteConflicts: false, classIds: [classId] });
+    invalidateSchoolReferenceData(schoolId);
+    invalidateTeacherDirectoryCache(schoolId);
 
     res.json({ data: item });
   } catch (error) {
@@ -298,6 +304,8 @@ classesRouter.put("/:id", validateBody(ClassSchema.partial()), async (req, res) 
     });
 
     await applyHomeroomsToBaseScheduleFromRules(schoolId, { overwriteConflicts: false, classIds: [classId] });
+    invalidateSchoolReferenceData(schoolId);
+    invalidateTeacherDirectoryCache(schoolId);
 
     res.json({ data: item });
   } catch (error) {

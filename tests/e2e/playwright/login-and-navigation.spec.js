@@ -1,5 +1,5 @@
 const { expect, test } = require("@playwright/test");
-const { clickStable, getE2ELicenseCode, openSidebarSection } = require("./e2e-helpers");
+const { clickStable, getE2ELicenseCode, openSidebarSection, postJsonWithRetry } = require("./e2e-helpers");
 
 const DEFAULT_ADMIN_EMAIL = "admin662452";
 const DEFAULT_ADMIN_PASSWORD = "E2E-Playwright-123!";
@@ -13,19 +13,21 @@ async function authenticate(page) {
   const email = process.env.SOM_E2E_ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL;
   const password = process.env.SOM_E2E_ADMIN_PASSWORD || DEFAULT_ADMIN_PASSWORD;
 
-  bootstrapPromise ||= page.request
-    .post("http://localhost:4000/api/auth/bootstrap-license", {
-      data: { licenseCode, licenseKey: licenseCode }
-    })
-    .then(async (response) => {
-      if (!response.ok() && response.status() !== 429) {
-        throw new Error(`Bootstrap failed with status ${response.status()}`);
-      }
-    });
+  bootstrapPromise ||= postJsonWithRetry(page.request, "http://localhost:4000/api/auth/bootstrap-license", {
+    licenseCode,
+    licenseKey: licenseCode
+  }).then(async (response) => {
+    if (!response.ok() && response.status() !== 429) {
+      throw new Error(`Bootstrap failed with status ${response.status()}`);
+    }
+  });
   await bootstrapPromise;
 
-  const loginResponse = await page.request.post("http://localhost:4000/api/auth/login", {
-    data: { email, password, licenseCode, licenseKey: licenseCode }
+  const loginResponse = await postJsonWithRetry(page.request, "http://localhost:4000/api/auth/login", {
+    email,
+    password,
+    licenseCode,
+    licenseKey: licenseCode
   });
   const loginPayload = await loginResponse.json();
   if (!loginResponse.ok()) {
@@ -72,5 +74,13 @@ test.describe("SOM PRO browser smoke path", () => {
     await expect(page.locator('[data-e2e="students-page"]')).toBeVisible();
     await page.locator('[data-e2e="students-class-filter"]').selectOption({ index: 1 });
     await expect(page.locator('[data-e2e="students-page"] .row-actions').first()).toBeVisible();
+  });
+
+  test("opens the reports page from the school settings group", async ({ page }) => {
+    await authenticate(page);
+
+    await openSidebarSection(page, '[data-e2e="nav-group-toggle-school-settings"]', '[data-e2e="nav-reports"]');
+    await clickStable(page.locator('[data-e2e="nav-reports"]'));
+    await expect(page.locator('[data-e2e="reports-page"]')).toBeVisible();
   });
 });

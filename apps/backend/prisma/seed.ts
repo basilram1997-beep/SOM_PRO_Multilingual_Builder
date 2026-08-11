@@ -16,15 +16,15 @@ const defaultPeriods = [
 ];
 
 async function ensureOptionalMfaColumns() {
-  await prisma.$executeRawUnsafe(`
+  await prisma.$executeRaw`
     ALTER TABLE "School"
     ADD COLUMN IF NOT EXISTS "admin_mfa_required" BOOLEAN NOT NULL DEFAULT false;
-  `);
+  `;
 
-  await prisma.$executeRawUnsafe(`
+  await prisma.$executeRaw`
     ALTER TABLE "SchoolSettings"
     ADD COLUMN IF NOT EXISTS "admin_mfa_required" BOOLEAN NOT NULL DEFAULT false;
-  `);
+  `;
 }
 
 async function main() {
