@@ -1,0 +1,46 @@
+# Ministry Evidence Index
+
+Review date: 2026-08-12
+
+Purpose: index evidence that can be presented to a Ministry technical/security committee later. `Exists` means there is a current repository artifact; it does not mean independently verified compliance.
+
+| Evidence | Exists / Missing | Current file/location | Owner | How to generate | Last verified date |
+| -------- | ---------------- | --------------------- | ----- | --------------- | ------------------ |
+| Ministry compliance matrix | Exists | `docs/MINISTRY_COMPLIANCE_MATRIX.md` | Technical/security reviewer | Maintain manually after official standards are obtained | 2026-08-12 |
+| Ministry test plan | Exists | `docs/MINISTRY_TEST_PLAN.md` | QA/security | Maintain manually; convert rows to automated tests | 2026-08-12 |
+| Official Ministry supplier standards | Missing | Not in repository | Product owner/legal/compliance | Download from `sapakim.education.gov.il`, record version/date, archive PDF | Needs Verification |
+| Architecture document | Partial | `README.md`, `ARCHITECTURE_AR.md`, `docs/ENGINEERING_STRUCTURE_AR.md` | Engineering | Review and repair mojibake/encoding before external handoff | 2026-08-12 |
+| Privacy requirements | Exists | `docs/PRIVACY_REQUIREMENTS.md`, `docs/PRIVACY_POLICY_AR_EN_HE.md`, `docs/DPA_TEMPLATE_AR_EN_HE.md` | Legal/privacy owner | Legal review, align with official Ministry privacy procedure | 2026-08-12 |
+| Data map | Exists | `docs/DATA_MAP.md`, Prisma schema | Engineering/privacy | Regenerate from `apps/backend/prisma/schema.prisma` and reconcile manually | 2026-08-12 |
+| Retention/deletion policy | Exists | `docs/RETENTION_AND_DELETION_POLICY.md` | Legal/privacy owner | Legal review and map to official procedure | 2026-08-12 |
+| Authentication implementation evidence | Exists | `apps/backend/src/modules/auth/auth.routes.ts`, `apps/backend/src/services/authService.ts`, `apps/backend/src/middleware/auth.ts` | Backend | Run backend auth tests | 2026-08-12 |
+| MFA implementation evidence | Missing | MFA fields in `apps/backend/prisma/schema.prisma`; no MFA flow found | Backend/security | Implement and test TOTP/WebAuthn/IdP MFA | Missing |
+| SSO/IdM implementation evidence | Missing | `docs/IDM_SESSION_AND_RBAC_AR.md` only | Backend/security | Implement OIDC/SAML after Ministry/IdP decision | Missing |
+| RBAC matrix | Partial | `apps/backend/src/services/accessPolicy.ts`, `docs/ROLE_ACCESS_MATRIX_AR.md` | Backend/product | Generate route/role matrix from Express mounts and tests | 2026-08-12 |
+| Tenant isolation proof | Partial | `apps/backend/src/services/schoolContext.ts`, `apps/backend/src/middleware/requestProtections.ts`, Prisma schema, `apps/backend/src/services/tenantIsolation.security.test.ts` | Backend/security | Run `node --test --import tsx src/services/tenantIsolation.security.test.ts`; continue expanding by route inventory | Expanded baseline verified 2026-08-12 across students, attendance, classes, teachers, subjects, schedules, daily/archive, reports, operations metadata, uploads, audit, and school lifecycle; needs full route inventory verification |
+| API route inventory | Missing | Routes in `apps/backend/src/modules/**` | Backend/security | Generate route inventory with auth/authz/license/validation columns | Missing |
+| Audit logging evidence | Partial | `apps/backend/src/services/auditLog.ts`, `apps/backend/src/middleware/auditTrail.ts`, `apps/backend/prisma/schema.prisma` | Backend/security | Run audit redaction/immutability tests; export audit sample | 2026-08-12 |
+| Security incident procedure | Exists | `docs/INCIDENT_RESPONSE_POLICY.md`, `apps/backend/src/modules/securityIncidents/securityIncidents.routes.ts` | Security/operations | Run tabletop exercise and attach report | 2026-08-12 |
+| Backup script evidence | Exists | `deploy/scripts/backup-postgres.sh`, `deploy/scripts/backup-license-data.sh` | Operations | Run in staging; attach backup manifest/checksum | 2026-08-12 |
+| Restore test report | Partial | `apps/backend/src/services/backupRestoreIntegration.test.ts`, `docs/STAGING_BACKUP_RESTORE_TEST_AR.md` | QA/operations | Run restore drill in staging and attach logs | Needs staging verification |
+| DR/RPO/RTO report | Missing | `docs/BUSINESS_CONTINUITY.md` policy only | Operations | Conduct timed DR drill; record RPO/RTO | Missing |
+| TLS/hosting evidence | Partial | `docker-compose.production.yml`, `deploy/nginx/sompro.conf`, `docs/HOSTING_REQUIREMENTS.md` | DevOps | Deploy to real domain, configure HTTPS, run SSL/staging checks | Needs Verification |
+| Data region/provider certifications | Missing | No provider evidence in repo | Product owner/DevOps | Collect hosting contract, region statement, ISO/SOC certificates | Missing |
+| Encryption/key management evidence | Partial | `docs/ENCRYPTION_AND_KEYS_AR.md` | DevOps/security | Select KMS/secret manager and attach rotation/runbook evidence | Needs Verification |
+| Secret scan report | Exists | `scripts/security-secrets-check.js` | Security/CI | Run `npm run security:secrets` | 2026-08-12 |
+| Dependency audit report | Partial | `scripts/runtime/audit-baseline.js`, `package-lock.json` | Security/CI | Run `npm audit --omit=dev` in network-enabled CI and archive output | Needs fresh run |
+| SBOM | Missing | None found | Security/release | Generate CycloneDX/SPDX SBOM during release | Missing |
+| License report | Missing | None found | Legal/release | Generate dependency license report | Missing |
+| SAST report | Missing | CI uses ESLint only for `security:sast` | Security/CI | Add CodeQL/Semgrep and archive report | Missing |
+| DAST report | Missing | `security:dast` maps to staging smoke, not DAST | Security/CI | Run OWASP ZAP/API DAST against staging | Missing |
+| Penetration test report | Missing | `docs/PEN_TEST_REPORT_TEMPLATE_AR.md` only | External security tester | Commission scoped test and attach signed report | Missing |
+| Accessibility report | Partial | `docs/ACCESSIBILITY_READINESS_AR.md`, `tests/e2e/playwright/mobile-accessibility.spec.js` | Frontend/QA | Run manual WCAG/screen-reader review and attach report | Needs manual verification |
+| Arabic/Hebrew RTL evidence | Partial | `apps/frontend/src/i18n/**`, `scripts/i18n-audit.mjs`, dictionaries | Frontend/QA | Run Arabic/Hebrew E2E and PDF visual checks | Needs comprehensive verification |
+| Browser compatibility report | Partial | `.github/workflows/ci.yml`, `tests/e2e/playwright/compatibility-matrix.spec.js` | QA | Run CI matrix and archive artifacts | Needs latest CI artifact |
+| Performance/load report | Partial | `scripts/stress-run.js`, `scripts/perf-run.js`, `scripts/scalability-test.js`, `docs/LOAD_TESTING_AR.md` | QA/DevOps | Run staging load test with Ministry pilot assumptions | Needs staging run |
+| Reliability/chaos report | Partial | `scripts/resilience-test.js`, `.github/workflows/ci.yml` resilience smoke | QA/DevOps | Run Redis/Postgres/license outage drills | Needs staging run |
+| Electron security review | Partial | `apps/desktop/src/window.js`, `apps/desktop/preload.js`, `apps/desktop/electron-builder.config.cjs` | Desktop/security | Run desktop security checklist and signing verification | Needs hardening |
+| Code signing evidence | Missing | Signing path exists, certificate not evidenced | Release owner | Build signed installer and attach signature verification | Missing |
+| License server security evidence | Partial | `apps/license-server/src/server.js`, license service tests | Backend/security | Add server-level security tests and storage hardening evidence | Needs hardening |
+| Ministry integration/data exchange evidence | Missing | Reports/exports exist, official interface spec not obtained | Product/backend | Obtain official interface spec and build conformance tests | Missing |
+| Release manifest | Partial | `CHANGELOG.md`, `SALE_READINESS_REPORT.md`, `docs/RELEASE_CANDIDATE_CHECKLIST_AR.md` | Release owner | Generate signed release manifest with hashes/SBOM/test reports | Needs release run |

@@ -163,6 +163,10 @@ schedulesRouter.post("/base/swap-periods", validateBody(SwapPeriodsSchema), asyn
 schedulesRouter.post("/base/swap-periods/preview", validateBody(SwapPeriodsSchema), async (req, res) => {
   const schoolId = await getRequestSchoolId(req);
   const result = await previewBaseScheduleSwapPeriodsFromRules(schoolId, req.body);
+  const previewError = "error" in result ? result.error : undefined;
+  if (previewError) {
+    return res.status(previewError.status).json(previewError.body);
+  }
   res.json({ data: result.data });
 });
 

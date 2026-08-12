@@ -30,6 +30,23 @@ export type SaveBaseScheduleSlotInput = {
   expectedUpdatedAt?: string | null;
 };
 
+async function ensureClassInSchool(schoolId: string, classId: string, db: PrismaClient) {
+  const schoolClass = await db.schoolClass.findFirst({
+    where: { id: classId, schoolId },
+    select: { id: true }
+  });
+
+  if (schoolClass) return null;
+
+  return {
+    status: 404,
+    body: {
+      error: "CLASS_NOT_FOUND",
+      message: "Class was not found for the current school"
+    }
+  };
+}
+
 export async function saveBaseScheduleSlotFromRules(
   schoolId: string,
   input: SaveBaseScheduleSlotInput,
@@ -262,6 +279,11 @@ export async function swapBaseSchedulePeriodsFromRules(
   schoolId: string,
   input: { day: string; classId: string; firstPeriod: number; secondPeriod: number }
 ) {
+  const classError = await ensureClassInSchool(schoolId, input.classId, prisma);
+  if (classError) {
+    return { error: classError };
+  }
+
   try {
     const result = await prisma.$transaction(async (tx) => {
       const firstSlot = await tx.baseScheduleSlot.findUnique({
@@ -323,6 +345,11 @@ export async function previewBaseScheduleSwapPeriodsFromRules(
   input: { day: string; classId: string; firstPeriod: number; secondPeriod: number },
   db: PrismaClient = prisma
 ) {
+  const classError = await ensureClassInSchool(schoolId, input.classId, db);
+  if (classError) {
+    return { error: classError };
+  }
+
   const settings = await ensureSchoolSettings(schoolId, db);
   const [slots, assignments] = await Promise.all([
     db.baseScheduleSlot.findMany({
