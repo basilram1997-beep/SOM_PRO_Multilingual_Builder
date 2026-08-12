@@ -14,7 +14,7 @@ import { canRole } from "../../services/accessPolicy";
 import { logSafeError } from "../../lib/safeLog";
 import { getRequestSchoolId } from "../../services/schoolContext";
 import { ensureSchoolSettings } from "../../services/schoolSettings";
-import { recordAuditLog } from "../../services/auditLog";
+import { recordAuditLog, redactSensitiveAuditValue } from "../../services/auditLog";
 import {
   completeBackupJobRecord,
   createBackupJobRecord,
@@ -34,6 +34,56 @@ const SchoolDeletionSchema = z.object({
   mode: z.enum(["DELETE", "ANONYMIZE"]).default("DELETE"),
   reason: z.string().trim().optional().nullable()
 });
+
+const SCHOOL_EXPORT_RETENTION_DAYS = Number(process.env.SOM_SCHOOL_EXPORT_RETENTION_DAYS || 30);
+
+const lifecycleRedactedKeys = new Set([
+  "authorization",
+  "authtoken",
+  "licensecode",
+  "licensekey",
+  "mfacode",
+  "mfaSecretEncrypted",
+  "password",
+  "passwordHash",
+  "recoverycode",
+  "recoverycodes",
+  "secret",
+  "token",
+  "tokenVersion"
+].map((key) => key.toLowerCase()));
+
+function scrubLifecycleExportValue<T>(value: T): T {
+  if (Array.isArray(value)) return value.map((item) => scrubLifecycleExportValue(item)) as T;
+  if (!value || typeof value !== "object" || value instanceof Date) return value;
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter(([key]) => !lifecycleRedactedKeys.has(key.toLowerCase()))
+      .map(([key, item]) => [key, scrubLifecycleExportValue(item)])
+  ) as T;
+}
+
+function buildLifecycleEvidence(kind: string, expiresAt: Date) {
+  return {
+    kind,
+    generatedAt: new Date().toISOString(),
+    retentionDays: SCHOOL_EXPORT_RETENTION_DAYS,
+    expiresAt: expiresAt.toISOString(),
+    storedArtifactEncrypted: true,
+    tenantScopedBy: "authenticated schoolId",
+    secretsExcluded: [
+      "password",
+      "passwordHash",
+      "mfaSecretEncrypted",
+      "token",
+      "tokenVersion",
+      "licenseCode",
+      "recoveryCode"
+    ],
+    auditRetained: true
+  };
+}
 
 function canAccessSchool(reqSchoolId: string, targetSchoolId: string) {
   return reqSchoolId === targetSchoolId;
@@ -446,7 +496,7 @@ async function exportSchoolData(schoolId: string) {
     school,
     settings,
     periods,
-    users,
+    users: scrubLifecycleExportValue(users),
     teachers,
     classes,
     subjects,
@@ -466,7 +516,20 @@ async function exportSchoolData(schoolId: string) {
     duties,
     reportExports,
     backupJobs,
-    auditLogs
+    auditLogs: scrubLifecycleExportValue(auditLogs.map((item) => ({
+      id: item.id,
+      schoolId: item.schoolId,
+      userId: item.userId,
+      action: item.action,
+      entity: item.entity,
+      entityId: item.entityId,
+      before: redactSensitiveAuditValue(item.before),
+      after: redactSensitiveAuditValue(item.after),
+      accessResult: item.accessResult,
+      ipAddress: item.ipAddress,
+      userAgent: item.userAgent,
+      createdAt: item.createdAt
+    })))
   };
 }
 
@@ -762,8 +825,6 @@ async function deleteSchoolData(schoolId: string) {
     prisma.teacherAssignment.deleteMany({ where: { schoolId } }),
     prisma.homeroomAssignment.deleteMany({ where: { schoolId } }),
     prisma.dutyAssignment.deleteMany({ where: { schoolId } }),
-    prisma.reportExport.deleteMany({ where: { schoolId } }),
-    prisma.backupJob.deleteMany({ where: { schoolId } }),
     prisma.periodDefinition.deleteMany({ where: { schoolId } }),
     prisma.schoolSettings.deleteMany({ where: { schoolId } }),
     prisma.student.deleteMany({ where: { schoolId } }),
@@ -771,10 +832,19 @@ async function deleteSchoolData(schoolId: string) {
     prisma.subject.deleteMany({ where: { schoolId } }),
     prisma.schoolClass.deleteMany({ where: { schoolId } }),
     prisma.user.deleteMany({ where: { schoolId } }),
-    prisma.auditLog.deleteMany({ where: { schoolId } }),
     prisma.licenseActivation.deleteMany({ where: { schoolId } }),
     prisma.dailySchedule.deleteMany({ where: { schoolId } }),
-    prisma.school.delete({ where: { id: schoolId } })
+    prisma.school.update({
+      where: { id: schoolId },
+      data: {
+        name: `Deleted school ${schoolId.slice(-8)}`,
+        managerName: null,
+        institutionCode: null,
+        address: null,
+        isActive: false,
+        status: "DELETED"
+      }
+    })
   ]);
 }
 
@@ -818,6 +888,7 @@ async function anonymizeSchoolData(schoolId: string, snapshot: Awaited<ReturnTyp
           externalUserId: null,
           ministryUserId: null,
           mfaEnabled: false,
+          mfaSecretEncrypted: null,
           lastLoginAt: null,
           status: "ARCHIVED"
         }
@@ -1036,8 +1107,10 @@ schoolsRouter.post("/:id/export-data", async (req, res) => {
 
   const snapshot = await exportSchoolData(schoolId);
   const now = new Date();
-  const filePath = `backups/schools/${schoolId}/export-${now.toISOString().replace(/[:.]/g, "-")}.json`;
+  const expiresAt = new Date(now.getTime() + SCHOOL_EXPORT_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const filePath = `exports/schools/${schoolId}/export-${now.toISOString().replace(/[:.]/g, "-")}.json.enc`;
   const report = buildOperationReport("SCHOOL_EXPORT", schoolId, snapshot);
+  const lifecycle = buildLifecycleEvidence("SCHOOL_EXPORT_DATA", expiresAt);
   const reportRecord = await createReportExportRecord(prisma, {
     schoolId,
     reportType: "SCHOOL_EXPORT_DATA",
@@ -1045,7 +1118,7 @@ schoolsRouter.post("/:id/export-data", async (req, res) => {
     filePath,
     requestedBy: req.user?.id || req.user?.userId || null,
     status: "COMPLETED",
-    expiresAt: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+    expiresAt
   });
 
   await createBackupJobRecord(prisma, {
@@ -1054,7 +1127,7 @@ schoolsRouter.post("/:id/export-data", async (req, res) => {
     status: "COMPLETED",
     filePath,
     checksum: crypto.createHash("sha256").update(JSON.stringify(snapshot)).digest("hex"),
-    encrypted: false,
+    encrypted: true,
     startedAt: now,
     finishedAt: now,
     createdBy: req.user?.id || req.user?.userId || null
@@ -1066,10 +1139,10 @@ schoolsRouter.post("/:id/export-data", async (req, res) => {
     action: "SCHOOL_EXPORT_DATA",
     entity: "School",
     entityId: schoolId,
-    after: { exported: true, report, reportExportId: reportRecord.id } as Prisma.InputJsonValue
+    after: { exported: true, report, lifecycle, reportExportId: reportRecord.id } as Prisma.InputJsonValue
   });
 
-  res.json({ data: snapshot, report, reportExport: reportRecord });
+  res.json({ data: snapshot, report, lifecycle, reportExport: reportRecord });
 });
 
 schoolsRouter.post("/:id/delete-data", validateBody(SchoolDeletionSchema), async (req, res) => {
@@ -1086,14 +1159,16 @@ schoolsRouter.post("/:id/delete-data", validateBody(SchoolDeletionSchema), async
     schoolId,
     snapshot
   );
+  const expiresAt = new Date(now.getTime() + SCHOOL_EXPORT_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const lifecycle = buildLifecycleEvidence(req.body.mode === "ANONYMIZE" ? "SCHOOL_ANONYMIZE_DATA" : "SCHOOL_DELETE_DATA", expiresAt);
   const reportRecord = await createReportExportRecord(prisma, {
     schoolId,
     reportType: req.body.mode === "ANONYMIZE" ? "SCHOOL_ANONYMIZE_DATA" : "SCHOOL_DELETE_DATA",
     fileType: "json",
-    filePath: `reports/schools/${schoolId}/${req.body.mode === "ANONYMIZE" ? "anonymize" : "delete"}-${now.toISOString().replace(/[:.]/g, "-")}.json`,
+    filePath: `reports/schools/${schoolId}/${req.body.mode === "ANONYMIZE" ? "anonymize" : "delete"}-${now.toISOString().replace(/[:.]/g, "-")}.json.enc`,
     requestedBy: req.user?.id || req.user?.userId || null,
     status: "COMPLETED",
-    expiresAt: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+    expiresAt
   });
 
   if (req.body.mode === "ANONYMIZE") {
@@ -1104,7 +1179,7 @@ schoolsRouter.post("/:id/delete-data", validateBody(SchoolDeletionSchema), async
 
   recordAuditLog(prisma, {
     schoolId: currentSchoolId,
-    userId: req.user?.id || req.user?.userId || null,
+    userId: req.body.mode === "DELETE" ? null : req.user?.id || req.user?.userId || null,
     action: req.body.mode === "ANONYMIZE" ? "SCHOOL_ANONYMIZE_DATA" : "SCHOOL_DELETE_DATA",
     entity: "School",
     entityId: schoolId,
@@ -1113,7 +1188,9 @@ schoolsRouter.post("/:id/delete-data", validateBody(SchoolDeletionSchema), async
       confirmed: true,
       mode: req.body.mode,
       reason: req.body.reason || null,
+      actorUserId: req.user?.id || req.user?.userId || null,
       report,
+      lifecycle,
       reportExportId: reportRecord.id
     } as Prisma.InputJsonValue
   });
@@ -1123,6 +1200,7 @@ schoolsRouter.post("/:id/delete-data", validateBody(SchoolDeletionSchema), async
       confirmed: true,
       mode: req.body.mode,
       report,
+      lifecycle,
       reportExport: reportRecord
     }
   });

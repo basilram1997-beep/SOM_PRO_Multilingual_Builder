@@ -29,7 +29,8 @@ const sensitiveAuditKeys = new Set([
   "recoverycode",
   "recoverycodes",
   "secret",
-  "token"
+  "token",
+  "tokenversion"
 ].map((key) => key.toLowerCase()));
 
 export function redactSensitiveAuditValue(value: unknown): unknown {
