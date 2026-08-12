@@ -226,7 +226,7 @@ authRouter.post("/mfa/setup", authenticateRequest, async (req, res) => {
     }
   });
 
-  recordAuditLog(prisma, {
+  await recordAuditLog(prisma, {
     schoolId: actor.schoolId,
     userId: actor.id,
     action: "MFA_SETUP_STARTED",
@@ -265,7 +265,7 @@ authRouter.post("/mfa/enable", authenticateRequest, validateBody(MfaEnableSchema
     data: { mfaEnabled: true, mfaMethod: "TOTP", tokenVersion: { increment: 1 } }
   });
 
-  recordAuditLog(prisma, {
+  await recordAuditLog(prisma, {
     schoolId: actor.schoolId,
     userId: actor.id,
     action: "MFA_ENABLED",
@@ -307,7 +307,7 @@ authRouter.post("/mfa/disable", authenticateRequest, validateBody(MfaDisableSche
     data: { mfaEnabled: false, mfaMethod: null, mfaSecretEncrypted: null, tokenVersion: { increment: 1 } }
   });
 
-  recordAuditLog(prisma, {
+  await recordAuditLog(prisma, {
     schoolId: actor.schoolId,
     userId: actor.id,
     action: "MFA_DISABLED",
@@ -334,6 +334,19 @@ authRouter.get("/sso/oidc/config", (_req, res) => {
 
 authRouter.post("/sso/oidc/callback", validateBody(OidcCallbackSchema), async (req, res) => {
   if (req.body.schoolId || req.body.role) {
+    await recordAuditLog(prisma, {
+      schoolId: null,
+      userId: null,
+      action: "OIDC_CLIENT_CONTEXT_FORBIDDEN",
+      entity: "SSO",
+      after: {
+        attemptedSchoolId: req.body.schoolId || null,
+        attemptedRole: req.body.role || null,
+        hasIdToken: Boolean(req.body.idToken),
+        hasCode: Boolean(req.body.code)
+      } as Prisma.InputJsonValue
+    });
+
     return res.status(400).json({
       error: "OIDC_CLIENT_CONTEXT_FORBIDDEN",
       message: "OIDC school and role must be resolved from trusted provider claims, not client input"
