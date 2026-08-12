@@ -373,7 +373,7 @@ schoolsRouter.post("/backups", async (req, res) => {
       finishedAt: new Date(),
       checksum: result.checksum,
       filePath: result.backupDir,
-      encrypted: false
+      encrypted: result.encrypted
     });
 
     recordAuditLog(prisma, {
@@ -386,6 +386,7 @@ schoolsRouter.post("/backups", async (req, res) => {
         backupType: completed.backupType,
         filePath: completed.filePath,
         checksum: completed.checksum,
+        encrypted: completed.encrypted,
         licenseDataCopied: result.licenseDataCopied
       } as Prisma.InputJsonValue
     });
@@ -404,6 +405,7 @@ schoolsRouter.post("/backups", async (req, res) => {
         createdByName: null,
         manifestPath: result.manifestPath,
         postgresDumpPath: result.postgresDumpPath,
+        encryptedArtifact: result.encrypted,
         licenseDataCopied: result.licenseDataCopied
       }
     });

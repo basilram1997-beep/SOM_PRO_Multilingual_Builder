@@ -57,7 +57,7 @@ async function runScheduledBackup() {
         finishedAt: new Date(),
         checksum: result.checksum,
         filePath: result.backupDir,
-        encrypted: false
+        encrypted: result.encrypted
       });
 
       recordAuditLog(prisma, {
@@ -70,6 +70,7 @@ async function runScheduledBackup() {
           backupType: completed.backupType,
           filePath: completed.filePath,
           checksum: completed.checksum,
+          encrypted: completed.encrypted,
           licenseDataCopied: result.licenseDataCopied
         } as Prisma.InputJsonValue
       });

@@ -11,6 +11,7 @@ type ProductBackupInput = {
 export type ProductBackupResult = {
   backupDir: string;
   checksum: string;
+  encrypted: boolean;
   manifestPath: string;
   postgresDumpPath: string;
   licenseDataCopied: boolean;
@@ -143,6 +144,37 @@ function checksumBackup(backupDir: string) {
   return hash.digest("hex");
 }
 
+function backupEncryptionKey() {
+  const source =
+    process.env.SOM_BACKUP_ENCRYPTION_KEY ||
+    process.env.SOM_BACKUP_PASSPHRASE ||
+    process.env.SOM_PRO_AUTH_SECRET ||
+    process.env.SOM_PRO_LICENSE_SECRET;
+  if (!source && process.env.NODE_ENV === "production") {
+    throw new Error("SOM_BACKUP_ENCRYPTION_KEY or SOM_BACKUP_PASSPHRASE is required for production backups.");
+  }
+  return crypto.createHash("sha256").update(source || "development-backup-encryption-key").digest();
+}
+
+function encryptFileInPlace(filePath: string) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv("aes-256-gcm", backupEncryptionKey(), iv);
+  const plaintext = fs.readFileSync(filePath);
+  const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  const encryptedPath = `${filePath}.enc`;
+  fs.writeFileSync(encryptedPath, Buffer.concat([Buffer.from("SOMENC1:"), iv, tag, encrypted]));
+  fs.rmSync(filePath, { force: true });
+  return encryptedPath;
+}
+
+function encryptFilesRecursive(root: string) {
+  for (const filePath of listFilesRecursive(root)) {
+    if (filePath.endsWith(".enc")) continue;
+    encryptFileInPlace(filePath);
+  }
+}
+
 export async function createProductBackup(input: ProductBackupInput): Promise<ProductBackupResult> {
   const backupRoot = resolveBackupRoot();
   const backupDir = path.join(backupRoot, `sompro-product-backup-${timestampForFile()}`);
@@ -153,6 +185,10 @@ export async function createProductBackup(input: ProductBackupInput): Promise<Pr
   fs.mkdirSync(backupDir, { recursive: true });
   createPostgresDump(postgresDumpPath);
   const licenseDataCopied = copyLicenseData(licenseTargetDir);
+  const encryptedPostgresDumpPath = encryptFileInPlace(postgresDumpPath);
+  if (licenseDataCopied) {
+    encryptFilesRecursive(licenseTargetDir);
+  }
   const checksum = checksumBackup(backupDir);
 
   fs.writeFileSync(
@@ -163,6 +199,15 @@ export async function createProductBackup(input: ProductBackupInput): Promise<Pr
         createdAt: new Date().toISOString(),
         schoolId: input.schoolId,
         createdBy: input.createdBy,
+        encrypted: true,
+        encryption: {
+          algorithm: "aes-256-gcm",
+          keySource: process.env.SOM_BACKUP_ENCRYPTION_KEY
+            ? "SOM_BACKUP_ENCRYPTION_KEY"
+            : process.env.SOM_BACKUP_PASSPHRASE
+              ? "SOM_BACKUP_PASSPHRASE"
+              : "development-fallback"
+        },
         checksum,
         includes: {
           postgres: true,
@@ -179,8 +224,9 @@ export async function createProductBackup(input: ProductBackupInput): Promise<Pr
   return {
     backupDir,
     checksum,
+    encrypted: true,
     manifestPath,
-    postgresDumpPath,
+    postgresDumpPath: encryptedPostgresDumpPath,
     licenseDataCopied
   };
 }

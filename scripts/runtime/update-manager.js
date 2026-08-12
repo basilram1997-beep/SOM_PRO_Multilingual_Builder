@@ -14,6 +14,47 @@ function timestamp() {
   return new Date().toISOString().replace(/[:.]/g, "-");
 }
 
+function backupEncryptionKey() {
+  const source =
+    process.env.SOM_BACKUP_ENCRYPTION_KEY ||
+    process.env.SOM_BACKUP_PASSPHRASE ||
+    process.env.SOM_PRO_AUTH_SECRET ||
+    process.env.SOM_PRO_LICENSE_SECRET;
+  if (!source && process.env.NODE_ENV === "production") {
+    throw new Error("SOM_BACKUP_ENCRYPTION_KEY or SOM_BACKUP_PASSPHRASE is required for production update backups.");
+  }
+  return require("node:crypto").createHash("sha256").update(source || "development-backup-encryption-key").digest();
+}
+
+function encryptBackupFile(plaintextFile) {
+  const crypto = require("node:crypto");
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv("aes-256-gcm", backupEncryptionKey(), iv);
+  const encrypted = Buffer.concat([cipher.update(fs.readFileSync(plaintextFile)), cipher.final()]);
+  const encryptedFile = `${plaintextFile}.enc`;
+  fs.writeFileSync(encryptedFile, Buffer.concat([Buffer.from("SOMENC1:"), iv, cipher.getAuthTag(), encrypted]));
+  fs.rmSync(plaintextFile, { force: true });
+  return encryptedFile;
+}
+
+function decryptBackupFile(encryptedFile) {
+  const crypto = require("node:crypto");
+  const payload = fs.readFileSync(encryptedFile);
+  const prefix = Buffer.from("SOMENC1:");
+  if (!payload.subarray(0, prefix.length).equals(prefix)) {
+    throw new Error("Encrypted backup has an unsupported format.");
+  }
+  const iv = payload.subarray(prefix.length, prefix.length + 12);
+  const tag = payload.subarray(prefix.length + 12, prefix.length + 28);
+  const encrypted = payload.subarray(prefix.length + 28);
+  const decipher = crypto.createDecipheriv("aes-256-gcm", backupEncryptionKey(), iv);
+  decipher.setAuthTag(tag);
+  const plaintext = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+  const tempFile = path.join(backupRoot, `restore-${timestamp()}.sql`);
+  fs.writeFileSync(tempFile, plaintext);
+  return tempFile;
+}
+
 function parseArgs(argv) {
   const args = {
     dryRun: false,
@@ -116,8 +157,9 @@ function createBackup() {
     throw new Error("Pre-update backup failed; update stopped before migrations.");
   }
 
-  success(`Backup saved: ${backupFile}`);
-  return backupFile;
+  const encryptedFile = encryptBackupFile(backupFile);
+  success(`Encrypted backup saved: ${encryptedFile}`);
+  return encryptedFile;
 }
 
 function restoreWithPsql(backupFile) {
@@ -144,10 +186,23 @@ function restoreBackup(backupFile) {
     throw new Error(`Backup file not found: ${backupFile || "-"}`);
   }
 
+  let restoreFile = backupFile;
+  let removeRestoreFile = false;
+  if (backupFile.endsWith(".enc")) {
+    restoreFile = decryptBackupFile(backupFile);
+    removeRestoreFile = true;
+  } else if (process.env.ALLOW_PLAINTEXT_RESTORE !== "yes") {
+    throw new Error("Plaintext restore files are blocked. Use encrypted .enc backups.");
+  }
+
   section("Restoring backup");
-  const result = hasCommand("psql") ? restoreWithPsql(backupFile) : restoreWithDocker(backupFile);
-  if (result.status !== 0) {
-    throw new Error(`Restore failed with exit code ${result.status || 1}`);
+  try {
+    const result = hasCommand("psql") ? restoreWithPsql(restoreFile) : restoreWithDocker(restoreFile);
+    if (result.status !== 0) {
+      throw new Error(`Restore failed with exit code ${result.status || 1}`);
+    }
+  } finally {
+    if (removeRestoreFile) fs.rmSync(restoreFile, { force: true });
   }
   success("Rollback restore completed.");
 }
