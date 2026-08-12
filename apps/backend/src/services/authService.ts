@@ -2,6 +2,12 @@ import crypto from "node:crypto";
 import { UserRole } from "@prisma/client";
 import { prisma } from "../db/prisma";
 import { getDefaultSchoolId } from "./schoolContext";
+import {
+  createMfaChallengeToken,
+  getSchoolMfaPolicy,
+  userRequiresMfa,
+  verifyUserSecondFactor
+} from "./mfaService";
 
 const DEFAULT_AUTH_SECRET = "change-this-auth-secret-before-selling";
 const AUTH_SECRET = process.env.SOM_PRO_AUTH_SECRET || process.env.SOM_PRO_LICENSE_SECRET || DEFAULT_AUTH_SECRET;
@@ -53,6 +59,11 @@ export type AuthTokenPayload = {
   role: UserRole;
   tokenVersion: number;
   exp: number;
+};
+
+export type LoginSecondFactorInput = {
+  mfaCode?: string;
+  recoveryCode?: string;
 };
 
 function assertAuthSecretConfigured() {
@@ -191,7 +202,7 @@ export async function changeUserPassword(userId: string, currentPassword: string
   return true;
 }
 
-export async function loginWithPassword(email: string, password: string) {
+export async function loginWithPassword(email: string, password: string, secondFactor?: LoginSecondFactorInput) {
   await ensureDefaultAdminUser();
   const users = await findUsersByLoginIdentifier(email);
   const user = users.find((candidate) => verifyPassword(password, candidate.password) && candidate.school.isActive);
@@ -202,6 +213,44 @@ export async function loginWithPassword(email: string, password: string) {
     if (inactiveMatch) throw new Error("SCHOOL_INACTIVE");
     throw new Error("INVALID_LOGIN");
   }
+
+  const mfaPolicy = await getSchoolMfaPolicy(user.schoolId);
+  if (userRequiresMfa(user, mfaPolicy)) {
+    if (!user.mfaEnabled || user.mfaMethod !== "TOTP" || !user.mfaSecretEncrypted) {
+      return {
+        mfaRequired: true,
+        mfaEnrollmentRequired: true,
+        user: {
+          id: user.id,
+          schoolId: user.schoolId,
+          studentId: user.studentId,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      };
+    }
+
+    const secondFactorOk = await verifyUserSecondFactor(user, {
+      code: secondFactor?.mfaCode,
+      recoveryCode: secondFactor?.recoveryCode
+    });
+    if (!secondFactorOk) {
+      return {
+        mfaRequired: true,
+        mfaToken: createMfaChallengeToken(user),
+        user: {
+          id: user.id,
+          schoolId: user.schoolId,
+          studentId: user.studentId,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      };
+    }
+  }
+
   await prisma.user
     .update({
       where: { id: user.id },
