@@ -85,9 +85,9 @@ export function createApp() {
   app.use("/api/settings", requirePermissionForWrite("manageSettings"), settingsRouter);
   app.use("/api/homeroom", requirePermissionForWrite("manageSchedules"), homeroomRouter);
   app.use("/api/duties", requirePermissionForWrite("manageSchedules"), dutiesRouter);
-  app.use("/api/lessons", lessonTodayRouter);
-  app.use("/api/lessons/homework", homeworkRouter);
-  app.use("/api/lessons/exams", examsRouter);
+  app.use("/api/lessons", requirePermissionForWrite("manageLessons"), lessonTodayRouter);
+  app.use("/api/lessons/homework", requirePermissionForWrite("manageLessons"), homeworkRouter);
+  app.use("/api/lessons/exams", requirePermissionForWrite("manageLessons"), examsRouter);
   app.use("/api/uploads", requirePermissionForWrite("manageSettings"), uploadsRouter);
   app.use("/api/teachers", requirePermissionForWrite("manageTeachers"), teachersRouter);
   app.use("/api/students", requirePermission("read"), studentsRouter);

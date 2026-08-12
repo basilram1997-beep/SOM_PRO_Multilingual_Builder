@@ -73,6 +73,14 @@ const passwordChangeRateLimit = createRateLimitMiddleware({
   auditAction: "RATE LIMITED PASSWORD CHANGE"
 });
 
+const authSelfServiceRateLimit = createRateLimitMiddleware({
+  key: "auth:self-service",
+  windowMs: 60_000,
+  max: 12,
+  message: "Auth self-service requests are being repeated too quickly. Try again shortly.",
+  auditAction: "RATE LIMITED AUTH SELF SERVICE"
+});
+
 type BootstrapLicenseAccessResult = Awaited<ReturnType<typeof bootstrapLicenseAccess>>;
 
 function emptyStringToUndefined(value: unknown) {
@@ -209,7 +217,7 @@ authRouter.post("/login", loginRateLimit, validateBody(LoginSchema), async (req,
   }
 });
 
-authRouter.post("/mfa/setup", authenticateRequest, async (req, res) => {
+authRouter.post("/mfa/setup", authenticateRequest, authSelfServiceRateLimit, async (req, res) => {
   const actor = req.user!;
   if (!["ADMIN", "MANAGER", "SCHEDULER"].includes(actor.role)) {
     return res.status(403).json({ error: "MFA_NOT_ALLOWED", message: "MFA is required only for privileged accounts" });
@@ -245,7 +253,7 @@ authRouter.post("/mfa/setup", authenticateRequest, async (req, res) => {
   });
 });
 
-authRouter.post("/mfa/enable", authenticateRequest, validateBody(MfaEnableSchema), async (req, res) => {
+authRouter.post("/mfa/enable", authenticateRequest, authSelfServiceRateLimit, validateBody(MfaEnableSchema), async (req, res) => {
   const actor = req.user!;
   const user = await prisma.user.findFirst({
     where: { id: actor.id, schoolId: actor.schoolId },
@@ -287,7 +295,7 @@ authRouter.get("/mfa/readiness", authenticateRequest, async (req, res) => {
   res.json({ data: readiness });
 });
 
-authRouter.post("/mfa/disable", authenticateRequest, validateBody(MfaDisableSchema), async (req, res) => {
+authRouter.post("/mfa/disable", authenticateRequest, authSelfServiceRateLimit, validateBody(MfaDisableSchema), async (req, res) => {
   const actor = req.user!;
   if (!canRole(actor.role, "manageSettings")) {
     return res.status(403).json({ error: "FORBIDDEN", message: "Disabling MFA requires settings authority" });
@@ -426,10 +434,18 @@ authRouter.post("/register", registerRateLimit, validateBody(RegisterSchema), as
   }
 });
 
-authRouter.post("/logout", authenticateRequest, async (_req, res) => {
+authRouter.post("/logout", authenticateRequest, authSelfServiceRateLimit, async (_req, res) => {
   await prisma.user.update({
     where: { id: _req.user!.id },
     data: { tokenVersion: { increment: 1 } }
+  });
+  await recordAuditLog(prisma, {
+    schoolId: _req.user!.schoolId,
+    userId: _req.user!.id,
+    action: "USER_LOGOUT",
+    entity: "SchoolUser",
+    entityId: _req.user!.id,
+    after: { tokenRevoked: true } as Prisma.InputJsonValue
   });
   res.json({ data: { ok: true } });
 });
@@ -458,6 +474,14 @@ authRouter.post(
         String(req.body.currentPassword || ""),
         String(req.body.newPassword || "")
       );
+      await recordAuditLog(prisma, {
+        schoolId: req.user!.schoolId,
+        userId: req.user!.id,
+        action: "PASSWORD_RESET_CONFIRM",
+        entity: "SchoolUser",
+        entityId: req.user!.id,
+        after: { passwordChanged: true } as Prisma.InputJsonValue
+      });
       res.json({ data: { ok: true } });
     } catch (error: unknown) {
       logSafeError("auth.password-reset.confirm", error);
@@ -503,6 +527,14 @@ authRouter.post(
         String(req.body.currentPassword || ""),
         String(req.body.newPassword || "")
       );
+      await recordAuditLog(prisma, {
+        schoolId: req.user!.schoolId,
+        userId: req.user!.id,
+        action: "PASSWORD_CHANGE",
+        entity: "SchoolUser",
+        entityId: req.user!.id,
+        after: { passwordChanged: true } as Prisma.InputJsonValue
+      });
       res.json({ data: { ok: true } });
     } catch (error: unknown) {
       logSafeError("auth.change-password", error);
