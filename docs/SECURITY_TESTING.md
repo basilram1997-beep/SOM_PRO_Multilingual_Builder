@@ -25,7 +25,12 @@ This document defines the minimum security testing posture for SOM PRO before pr
 - `npm run security:review`
 - `npm run security:sast`
 - `npm run security:dast`
+- `npm run security:sbom`
+- `npm run security:licenses`
+- `npm run security:release-evidence`
 - `npm run security:pentest:prep`
+- `npm run compliance:test`
+- `npm run destructive:test`
 
 ## What each step checks
 
@@ -33,22 +38,44 @@ This document defines the minimum security testing posture for SOM PRO before pr
 
 - Secret leakage in the repository.
 - Vulnerabilities reported by `npm audit --omit=dev`.
+- CycloneDX SBOM generation under `reports/security/sbom.cyclonedx.json`.
+- Dependency license report generation under `reports/security/license-report.json` and `reports/security/license-report.md`.
 
 ### `security:sast`
 
-- Unsafe string handling.
-- Authorization gaps.
-- Logging of secrets.
-- Dangerous direct object access.
-- Weak input validation.
+- Runs the local SAST baseline and writes `reports/security/sast-baseline.json`.
+- Requires the CI workflow to include CodeQL for `javascript-typescript`.
+- Runs ESLint as part of the local baseline.
+- Fails on high-confidence critical/high patterns such as disabled TLS validation, `eval`, and dynamic function construction.
 
 ### `security:dast`
 
-- Login and logout flow.
-- Permission boundaries.
-- Rate limiting.
-- Export routes.
-- Sensitive write routes.
+- Requires `STAGING_URL=https://...`.
+- Rejects localhost and placeholder staging targets.
+- Verifies HTTP-to-HTTPS redirect.
+- Verifies HSTS on the HTTPS response.
+- Verifies the staging health endpoint.
+- Writes `reports/security/dast-baseline.json`.
+
+### `security:release-evidence`
+
+- Runs secrets, dependency audit, SBOM, license report, and SAST baseline.
+- Produces reviewable artifacts under `reports/security/`.
+- Does not replace live DAST; run `npm run security:dast` after `STAGING_URL` points to a real HTTPS staging host.
+
+### `compliance:test`
+
+- Commercial compliance readiness.
+- GDPR / HIPAA / PCI-DSS control mapping.
+- Masked staging and retention controls.
+- Audit and export policy coverage.
+
+### `destructive:test`
+
+- Invalid and boundary input rejection.
+- Confirmation-gated delete and anonymize flows.
+- School-scoped cleanup behavior.
+- Permission and request-protection boundaries.
 
 ## Penetration test readiness
 
@@ -90,6 +117,7 @@ Before release, confirm:
 - Build succeeds.
 - Tests pass or the gap is documented.
 - SAST and dependency scan have been reviewed.
-- DAST was run on staging or documented as pending.
+- SBOM and dependency license report are attached to the release pack.
+- DAST was run on real HTTPS staging with `STAGING_URL` or documented as pending with owner/date.
 - New secrets were not committed.
 - Penetration testing has been completed, or is formally scheduled with scope, owner, and re-test plan.

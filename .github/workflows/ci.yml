@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 concurrency:
   group: som-pro-ci-${{ github.workflow }}-${{ github.ref }}
@@ -242,6 +243,117 @@ jobs:
 
       - name: Run security baseline
         run: npm run security:baseline
+
+      - name: Upload security baseline artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-baseline-artifacts
+          path: reports/security/
+          if-no-files-found: ignore
+
+  codeql_sast:
+    name: CodeQL SAST
+    runs-on: ubuntu-latest
+    needs: quick_check
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          queries: security-extended,security-and-quality
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for CodeQL
+        run: npm run build
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
+
+  release_security_artifacts:
+    name: Release Security Artifacts
+    runs-on: ubuntu-latest
+    needs:
+      - quick_check
+      - codeql_sast
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate release security evidence
+        run: npm run security:release-evidence
+
+      - name: Upload release security artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-security-artifacts
+          path: reports/security/
+          if-no-files-found: error
+
+  dast_baseline:
+    name: DAST Baseline
+    runs-on: ubuntu-latest
+    needs:
+      - quick_check
+      - release_security_artifacts
+    timeout-minutes: 15
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+    env:
+      STAGING_URL: ${{ secrets.STAGING_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run DAST baseline against staging
+        run: npm run security:dast
+
+      - name: Upload DAST artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dast-baseline-artifacts
+          path: reports/security/dast-baseline.json
+          if-no-files-found: error
 
   resilience_smoke:
     name: Resilience Smoke
@@ -494,6 +606,8 @@ jobs:
       - usability_smoke
       - install_doctor
       - security_baseline
+      - codeql_sast
+      - release_security_artifacts
     timeout-minutes: 35
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
 

@@ -13,6 +13,7 @@ tests/stress/artifacts/
 tests/load/artifacts/
 tests/perf/artifacts/
 tests/e2e/artifacts/
+reports/
 
 # Desktop installers and generated release artifacts
 apps/desktop/release/
