@@ -370,17 +370,7 @@ archiveRouter.delete("/:date", async (req, res) => {
     return;
   }
 
-  await prisma.$transaction([
-    prisma.auditLog.deleteMany({
-      where: {
-        schoolId,
-        action: "ARCHIVE_DAY",
-        entity: "DailySchedule",
-        entityId: daily.id
-      }
-    }),
-    prisma.dailySchedule.delete({ where: { id: daily.id } })
-  ]);
+  await prisma.dailySchedule.delete({ where: { id: daily.id } });
   recordAuditLog(prisma, {
     schoolId,
     userId: req.user?.id || req.user?.userId || null,

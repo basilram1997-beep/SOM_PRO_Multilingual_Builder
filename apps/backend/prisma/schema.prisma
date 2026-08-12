@@ -1057,7 +1057,7 @@ model ReportExport {
   createdAt   DateTime @default(now()) @map("created_at")
   expiresAt   DateTime? @map("expires_at")
 
-  school          School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school          School @relation(fields: [schoolId], references: [id], onDelete: Restrict)
   requestedByUser  User?  @relation("ReportExportRequestedBy", fields: [requestedBy], references: [id], onDelete: SetNull)
 
   @@map("reports_exports")
@@ -1081,7 +1081,7 @@ model BackupJob {
   finishedAt  DateTime? @map("finished_at")
   createdBy   String?  @map("created_by")
 
-  school         School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school         School @relation(fields: [schoolId], references: [id], onDelete: Restrict)
   createdByUser  User?  @relation("BackupJobCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@map("backup_jobs")
@@ -1145,4 +1145,3 @@ model LicenseActivation {
   @@index([schoolId, status])
   @@index([deviceFingerprint])
 }
-
