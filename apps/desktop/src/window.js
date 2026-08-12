@@ -3,6 +3,8 @@ const fs = require("fs/promises");
 const { BrowserWindow, shell, ipcMain, dialog } = require("electron");
 const { DEFAULT_WEB_URL, waitForUrl, bundledWebIndex, desktopRoot, runtimeConfig } = require("./paths");
 const { ensureLocalBackend } = require("./backendProcess");
+const { getDesktopDeviceInfo } = require("./desktopDevice");
+const { isAllowedExternalUrl, isTrustedNavigationUrl } = require("./securityPolicy");
 
 function isLocalOrLoopbackUrl(url) {
   try {
@@ -68,8 +70,62 @@ async function waitForLocalBackend(retries = 1, pauseMs = 8000) {
   return false;
 }
 
+function parseIni(content) {
+  const data = {};
+  for (const rawLine of String(content || "").split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("[") || line.startsWith(";")) continue;
+    const index = line.indexOf("=");
+    if (index === -1) continue;
+    data[line.slice(0, index).trim()] = line.slice(index + 1).trim();
+  }
+  return data;
+}
+
+function readLicenseSetupSync(root) {
+  const syncFs = require("fs");
+  const exeDir = process.execPath ? path.dirname(process.execPath) : "";
+  const candidates = [
+    path.join(exeDir, "license-setup.ini"),
+    path.join(process.resourcesPath || "", "license-setup.ini"),
+    path.join(root, "license-setup.ini")
+  ];
+
+  for (const file of candidates) {
+    try {
+      if (!file || !syncFs.existsSync(file)) continue;
+      const data = parseIni(syncFs.readFileSync(file, "utf8"));
+      if (data.licenseCode) return data;
+    } catch {
+      // Ignore unreadable local setup files and let the app show manual activation.
+    }
+  }
+  return null;
+}
+
+function buildDesktopBridgeData(root) {
+  return {
+    appName: "SOM PRO",
+    mode: runtimeConfig.mode,
+    apiUrl: runtimeConfig.apiUrl,
+    licenseServerUrl: runtimeConfig.licenseServerUrl,
+    device: getDesktopDeviceInfo(),
+    licenseSetup: readLicenseSetupSync(root)
+  };
+}
+
+function isTrustedSender(event) {
+  const senderUrl = event.senderFrame?.url || event.sender?.getURL?.() || "";
+  return isTrustedNavigationUrl(senderUrl, runtimeConfig);
+}
+
 async function createWindow() {
   const root = desktopRoot();
+  ipcMain.removeAllListeners("som-desktop-bridge-data");
+  ipcMain.on("som-desktop-bridge-data", (event) => {
+    event.returnValue = isTrustedSender(event) ? buildDesktopBridgeData(root) : null;
+  });
+
   const win = new BrowserWindow({
     width: 1360,
     height: 880,
@@ -83,23 +139,48 @@ async function createWindow() {
     webPreferences: {
       preload: path.join(root, "preload.js"),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      sandbox: true,
+      webSecurity: true,
+      allowRunningInsecureContent: false
     }
+  });
+
+  win.webContents.on("will-navigate", (event, url) => {
+    if (!isTrustedNavigationUrl(url, runtimeConfig)) {
+      event.preventDefault();
+    }
+  });
+
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (isAllowedExternalUrl(url, runtimeConfig)) {
+      shell.openExternal(url);
+    }
+    return { action: "deny" };
   });
 
   await win.loadFile(path.join(root, "loading.html"));
   win.show();
 
   ipcMain.removeHandler("som-repair-local-services");
-  ipcMain.handle("som-repair-local-services", async () => {
+  ipcMain.handle("som-repair-local-services", async (event) => {
+    if (!isTrustedSender(event)) {
+      return { ok: false, error: "UNTRUSTED_SENDER" };
+    }
     const ready = runtimeConfig.isSaas ? true : await waitForLocalBackend(1, 8000);
     if (ready) await loadBestAvailableApp(win);
     return { ok: ready };
   });
-  win.on("closed", () => ipcMain.removeHandler("som-repair-local-services"));
+  win.on("closed", () => {
+    ipcMain.removeHandler("som-repair-local-services");
+    ipcMain.removeAllListeners("som-desktop-bridge-data");
+  });
 
   ipcMain.removeHandler("som-export-pdf");
   ipcMain.handle("som-export-pdf", async (event, options = {}) => {
+    if (!isTrustedSender(event)) {
+      return { ok: false, error: "UNTRUSTED_SENDER" };
+    }
     const sourceWindow = BrowserWindow.fromWebContents(event.sender);
     if (!sourceWindow) {
       return { ok: false, error: "NO_ACTIVE_WINDOW" };
@@ -151,10 +232,6 @@ async function createWindow() {
     else await win.loadFile(path.join(root, "offline.html"));
   });
 
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
-    return { action: "deny" };
-  });
 }
 
 module.exports = { createWindow };

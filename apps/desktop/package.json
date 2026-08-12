@@ -9,7 +9,7 @@
     "build:win:signed": "set SOM_ENABLE_CODESIGN=true&& npx electron-builder --config electron-builder.config.cjs --win nsis",
     "build:dir": "npx electron-builder --config electron-builder.config.cjs --dir",
     "build:dir:signed": "set SOM_ENABLE_CODESIGN=true&& npx electron-builder --config electron-builder.config.cjs --dir",
-    "check": "node src/desktopCheck.js"
+    "check": "node src/desktopCheck.js && node --test security.test.js"
   },
   "devDependencies": {
     "electron": "^42.8.1",

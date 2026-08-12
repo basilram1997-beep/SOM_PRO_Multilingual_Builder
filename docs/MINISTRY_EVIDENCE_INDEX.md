@@ -1,4 +1,4 @@
-# Ministry Evidence Index
+﻿# Ministry Evidence Index
 
 Review date: 2026-08-12
 
@@ -39,8 +39,8 @@ Purpose: index evidence that can be presented to a Ministry technical/security c
 | Browser compatibility report | Partial | `.github/workflows/ci.yml`, `tests/e2e/playwright/compatibility-matrix.spec.js` | QA | Run CI matrix and archive artifacts | Needs latest CI artifact |
 | Performance/load report | Partial | `scripts/stress-run.js`, `scripts/perf-run.js`, `scripts/scalability-test.js`, `docs/LOAD_TESTING_AR.md` | QA/DevOps | Run staging load test with Ministry pilot assumptions | Needs staging run |
 | Reliability/chaos report | Partial | `scripts/resilience-test.js`, `.github/workflows/ci.yml` resilience smoke | QA/DevOps | Run Redis/Postgres/license outage drills | Needs staging run |
-| Electron security review | Partial | `apps/desktop/src/window.js`, `apps/desktop/preload.js`, `apps/desktop/electron-builder.config.cjs` | Desktop/security | Run desktop security checklist and signing verification | Needs hardening |
-| Code signing evidence | Missing | Signing path exists, certificate not evidenced | Release owner | Build signed installer and attach signature verification | Missing |
+| Electron security review | Partial | `apps/desktop/src/window.js`, `apps/desktop/src/securityPolicy.js`, `apps/desktop/preload.js`, `apps/desktop/security.test.js`, `apps/desktop/electron-builder.config.cjs` | Desktop/security | Run `npm run desktop:check`; verify packaged installer signing/update separately | Shell hardening baseline verified 2026-08-12; signing/update evidence still needed |
+| Code signing evidence | Partial | `apps/desktop/electron-builder.config.cjs`, `scripts/desktop-signing-check.js`, generated `reports/security/desktop-signing-report.json` | Release owner | Run `npm run desktop:signing:check`; for final release set `SOM_ENABLE_CODESIGN=true`, build signed installer, and verify with `SOM_DESKTOP_INSTALLER=<path>` | Baseline gate added 2026-08-12; real certificate/signed installer still needed |
 | License server security evidence | Partial | `apps/license-server/src/server.js`, license service tests | Backend/security | Add server-level security tests and storage hardening evidence | Needs hardening |
 | Ministry integration/data exchange evidence | Missing | Reports/exports exist, official interface spec not obtained | Product/backend | Obtain official interface spec and build conformance tests | Missing |
 | Release manifest | Partial | `CHANGELOG.md`, `SALE_READINESS_REPORT.md`, `docs/RELEASE_CANDIDATE_CHECKLIST_AR.md` | Release owner | Generate signed release manifest with hashes/SBOM/test reports | Needs release run |

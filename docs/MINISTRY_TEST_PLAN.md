@@ -1,4 +1,4 @@
-# Ministry Test Plan
+﻿# Ministry Test Plan
 
 Review date: 2026-08-12
 
@@ -33,10 +33,10 @@ Purpose: define the missing or required tests before SOM PRO can be defended in 
 | Backup/Restore | Verify restore round trip | Isolated test DB | Backup, mutate/drop, restore | Data restored and app works | Automated | `apps/backend/src/services/backupRestoreIntegration.test.ts` | P0 |
 | Backup/Restore | Verify backup tenant isolation | Two-school test data | Restore/export backup views | No school can access another school's backup metadata/files | Automated | `apps/backend/src/services/backupTenantIsolation.security.test.ts` | P0 |
 | Backup/Restore | Verify RPO/RTO | Staging environment with encrypted backup artifact | Timed restore drill from `.enc` backup | Published RPO/RTO met or gap recorded against manifest targets | Manual | `docs/STAGING_BACKUP_RESTORE_TEST_AR.md` | P1 |
-| Electron | Verify BrowserWindow hardening | Desktop app build | Inspect webPreferences | `contextIsolation`, `nodeIntegration=false`, `sandbox` expected | Automated | `apps/desktop/security.test.js` | P1 |
-| Electron | Verify external URL allowlist | Desktop app | Attempt `window.open` with allowed/disallowed URLs | Disallowed denied, allowed opened externally | Automated | `apps/desktop/navigation.security.test.js` | P1 |
-| Electron | Verify preload API minimality | Desktop app | Inspect `window.somDesktop` | Only expected safe methods/data exposed | Automated | `apps/desktop/preload.security.test.js` | P1 |
-| Electron | Verify signed installer | Code-signing cert available | Build signed installer | Signature valid and publisher expected | Manual/Automated | `reports/desktop-signing-report.md` | P1 |
+| Electron | Verify BrowserWindow hardening | Desktop app source | Inspect webPreferences | `contextIsolation`, `nodeIntegration=false`, `sandbox=true`, `webSecurity=true`, and mixed-content blocking are enforced | Automated | `apps/desktop/security.test.js` | P1 |
+| Electron | Verify external URL allowlist | Desktop app source | Test trusted navigation and external URL policy with allowed/disallowed URLs | Untrusted navigation is prevented; `window.open` is denied; only allowed HTTPS origins can open externally | Automated | `apps/desktop/security.test.js`, `apps/desktop/src/securityPolicy.js` | P1 |
+| Electron | Verify preload API minimality | Desktop app source | Inspect sandboxed preload bridge | Preload uses only `contextBridge`/`ipcRenderer`, exposes one frozen namespace, sanitizes PDF filenames, and does not require `fs`, `path`, or local modules | Automated | `apps/desktop/security.test.js`, `apps/desktop/preload.js` | P1 |
+| Electron | Verify signed installer | Code-signing cert available | Build signed installer with `SOM_ENABLE_CODESIGN=true`, then run `SOM_DESKTOP_INSTALLER=<path> npm run desktop:signing:check` | Signature valid, SHA-256 hash recorded, and `reports/security/desktop-signing-report.json` attached to release pack | Manual/Automated | `scripts/desktop-signing-check.js`, `reports/security/desktop-signing-report.json` | P1 |
 | License Server | Verify admin auth | License server running | Call admin APIs without/with bad token/with valid token | 401/401/200 | Automated | `apps/license-server/src/server.security.test.js` | P0 |
 | License Server | Verify license signature tamper resistance | Issued license | Modify payload/signature | Rejected | Automated | `apps/license-server/src/license-signature.test.js` | P0 |
 | License Server | Verify replay/device limits | License with max devices | Activate same/different devices, replay old requests | Same device ok, over-limit denied, replay policy enforced | Automated | `apps/license-server/src/activation.security.test.js` | P1 |

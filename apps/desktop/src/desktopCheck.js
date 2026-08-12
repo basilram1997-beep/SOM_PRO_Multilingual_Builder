@@ -9,6 +9,8 @@ const required = [
   "apps/desktop/src/window.js",
   "apps/desktop/src/runtimeConfig.js",
   "apps/desktop/src/desktopDevice.js",
+  "apps/desktop/src/securityPolicy.js",
+  "apps/desktop/security.test.js",
   "apps/desktop/preload.js",
   "apps/desktop/loading.html",
   "apps/desktop/offline.html",
