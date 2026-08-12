@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from "react";
-import { Activity, Archive, BadgeCheck, Database, HardDrive, RefreshCw, ShieldCheck } from "lucide-react";
+import { Activity, Archive, BadgeCheck, Bell, Database, HardDrive, RefreshCw, Server, ShieldCheck } from "lucide-react";
 import { Card } from "../../components/ui/Card";
 import { useI18n } from "../../i18n/i18n";
 import { useOperatorHealth } from "../../features/operatorHealth/useOperatorHealth";
@@ -23,6 +23,16 @@ function formatBytes(value: number | null | undefined) {
     unitIndex += 1;
   }
   return `${size.toFixed(size >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function yesNo(language: string, value: boolean) {
+  if (language === "ar") return value ? "مفعّل" : "غير مفعّل";
+  return value ? "Enabled" : "Disabled";
+}
+
+function statusLabel(language: string, ok: boolean) {
+  if (language === "ar") return ok ? "جاهز" : "بحاجة إلى ضبط";
+  return ok ? "Ready" : "Needs setup";
 }
 
 function StatusBadge({ ok, label }: { ok: boolean; label: string }) {
@@ -62,6 +72,7 @@ export function OperatorHealthPage() {
   const health = useOperatorHealth();
   const data = health.data;
   const isArabic = language === "ar";
+  const alertingChannels = data?.alerting.channels || [];
 
   useEffect(() => {
     void health.load();
@@ -116,6 +127,33 @@ export function OperatorHealthPage() {
               ok={Boolean(data.backup && data.backup.status !== "FAILED")}
             />
             <HealthTile
+              icon={<RefreshCw size={22} />}
+              title={isArabic ? "نسخ احتياطي تلقائي" : "Backup automation"}
+              value={data.backupPolicy.automatic ? (isArabic ? "مفعّل" : "Scheduled") : isArabic ? "يدوي" : "Manual"}
+              detail={`${data.backupPolicy.message}${data.backupPolicy.lastSuccessfulBackupAt ? ` · ${formatDate(data.backupPolicy.lastSuccessfulBackupAt)}` : ""}`}
+              ok={data.backupPolicy.automatic}
+            />
+            <HealthTile
+              icon={<Bell size={22} />}
+              title={isArabic ? "التنبيهات" : "Alerting"}
+              value={yesNo(language, data.alerting.configured)}
+              detail={
+                alertingChannels.length === 0
+                  ? "-"
+                  : alertingChannels
+                      .map((channel) => `${channel.name}: ${channel.message}${channel.target ? ` (${channel.target})` : ""}`)
+                      .join(" · ")
+              }
+              ok={data.alerting.configured}
+            />
+            <HealthTile
+              icon={<Server size={22} />}
+              title={isArabic ? "النسخ الاحتياطي / failover" : "Redundancy / failover"}
+              value={statusLabel(language, data.redundancy.ready)}
+              detail={`${data.redundancy.mode} / ${data.redundancy.message}`}
+              ok={data.redundancy.mode === "single-region" ? true : data.redundancy.ready}
+            />
+            <HealthTile
               icon={<BadgeCheck size={22} />}
               title={isArabic ? "إصدار البرنامج" : "Version"}
               value={data.version.version}
@@ -167,6 +205,40 @@ export function OperatorHealthPage() {
                   <tr>
                     <th>{isArabic ? "وضع القراءة فقط" : "Read-only mode"}</th>
                     <td>{data.license.readOnly ? data.license.readOnlyReason || "true" : "false"}</td>
+                  </tr>
+                  <tr>
+                    <th>{isArabic ? "التنبيهات" : "Alerting"}</th>
+                    <td>
+                      {alertingChannels.length === 0
+                        ? isArabic
+                          ? "غير مفعلة"
+                          : "Disabled"
+                        : alertingChannels.map((channel) => `${channel.name}: ${channel.target || channel.message}`).join(" · ")}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>{isArabic ? "النسخ الاحتياطي التلقائي" : "Automatic backup"}</th>
+                    <td>{`${yesNo(language, data.backupPolicy.automatic)} / ${data.backupPolicy.message}`}</td>
+                  </tr>
+                  <tr>
+                    <th>{isArabic ? "آخر backup ناجح" : "Last successful backup"}</th>
+                    <td>{formatDate(data.backupPolicy.lastSuccessfulBackupAt)}</td>
+                  </tr>
+                  <tr>
+                    <th>{isArabic ? "وضع redundancy" : "Redundancy mode"}</th>
+                    <td>{`${data.redundancy.mode} / ${data.redundancy.message}`}</td>
+                  </tr>
+                  <tr>
+                    <th>{isArabic ? "قاعدة البيانات الاحتياطية" : "Database replica"}</th>
+                    <td>{data.redundancy.database.target || (isArabic ? "غير مهيأ" : "Not configured")}</td>
+                  </tr>
+                  <tr>
+                    <th>{isArabic ? "خادم الواجهة الاحتياطي" : "Backend replica"}</th>
+                    <td>{data.redundancy.backend.target || (isArabic ? "غير مهيأ" : "Not configured")}</td>
+                  </tr>
+                  <tr>
+                    <th>{isArabic ? "خادم الترخيص الاحتياطي" : "License replica"}</th>
+                    <td>{data.redundancy.license.target || (isArabic ? "غير مهيأ" : "Not configured")}</td>
                   </tr>
                 </tbody>
               </table>

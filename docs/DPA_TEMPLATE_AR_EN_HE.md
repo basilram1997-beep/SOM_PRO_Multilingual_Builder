@@ -1,6 +1,7 @@
 # DPA Template / قالب اتفاقية معالجة بيانات / תבנית DPA
 
 هذه الصفحة ليست استشارة قانونية.  
+Ready for external review and approval. Final signatures and local legal review must happen outside the repository.
 This is not legal advice.  
 זה אינו ייעוץ משפטי.
 

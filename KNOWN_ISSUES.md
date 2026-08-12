@@ -21,6 +21,7 @@ This file lists the remaining issues that are not fully closed yet.
 | Browser compatibility is not fully verified on every target browser  | Possible layout or form edge cases                | Run a browser matrix QA pass         |
 | Accessibility still needs broader human review                       | Some small UX/accessibility gaps may remain       | Run a manual accessibility checklist |
 | README still contains some legacy copy that could be cleaned further | Documentation is readable, but not fully polished | Do a final documentation polish pass |
+| External-review packaging still needs a final buyer/legal pass       | Approval may still depend on reviewer feedback    | Run the external review pack end to end |
 
 ## P3 - Optional future improvement
 

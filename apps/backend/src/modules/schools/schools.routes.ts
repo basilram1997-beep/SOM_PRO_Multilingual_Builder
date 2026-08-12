@@ -1,6 +1,7 @@
 import { Prisma, type UserRole } from "@prisma/client";
 import crypto from "node:crypto";
 import fs from "node:fs";
+import net from "node:net";
 import path from "node:path";
 import { Router } from "express";
 import { z } from "zod";
@@ -44,6 +45,226 @@ function canManageSchoolOperations(role: UserRole | undefined) {
 
 function canUseOperatorHealth() {
   return env.appEnv !== "production" || process.env.SOM_ENABLE_OPERATOR_HEALTH === "true";
+}
+
+type EndpointHealth = {
+  configured: boolean;
+  target: string | null;
+  ok: boolean;
+  latencyMs: number | null;
+  statusCode: number | null;
+  message: string;
+};
+
+type OperatorHealthAlertChannel = {
+  name: string;
+  configured: boolean;
+  target: string | null;
+  message: string;
+};
+
+type OperatorHealthAlerting = {
+  configured: boolean;
+  channels: OperatorHealthAlertChannel[];
+};
+
+type OperatorHealthReplica = {
+  mode: string;
+  configured: boolean;
+  ready: boolean;
+  message: string;
+  database: EndpointHealth;
+  backend: EndpointHealth;
+  license: EndpointHealth;
+};
+
+type OperatorHealthBackupPolicy = {
+  automatic: boolean;
+  intervalHours: number | null;
+  runOnStart: boolean;
+  lastSuccessfulBackupAt: string | null;
+  message: string;
+};
+
+function normalizeConfiguredUrl(raw: string | undefined | null) {
+  const value = String(raw || "").trim();
+  if (!value) return null;
+  if (/^(CHANGE_ME|YOUR_DOMAIN|PLACEHOLDER)/i.test(value)) return null;
+  if (/localhost|127\.0\.0\.1/i.test(value)) return null;
+  return value;
+}
+
+function describeUrlTarget(raw: string | null) {
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    return `${url.hostname}${url.port ? `:${url.port}` : ""}`;
+  } catch {
+    return raw;
+  }
+}
+
+function buildAlertingHealth(): OperatorHealthAlerting {
+  const notificationWebhook = normalizeConfiguredUrl(process.env.SOM_NOTIFICATION_WEBHOOK_URL);
+  const smsWebhook = normalizeConfiguredUrl(process.env.SOM_SMS_WEBHOOK_URL);
+  const channels: OperatorHealthAlertChannel[] = [
+    {
+      name: "notifications",
+      configured: Boolean(notificationWebhook),
+      target: describeUrlTarget(notificationWebhook),
+      message: notificationWebhook ? "ready" : "not configured"
+    },
+    {
+      name: "sms",
+      configured: Boolean(smsWebhook),
+      target: describeUrlTarget(smsWebhook),
+      message: smsWebhook ? "ready" : "not configured"
+    }
+  ];
+
+  return {
+    configured: channels.some((channel) => channel.configured),
+    channels
+  };
+}
+
+function checkTcpEndpoint(host: string, port: number, timeoutMs: number) {
+  return new Promise<{ ok: boolean; latencyMs: number; message: string }>((resolve) => {
+    const startedAt = Date.now();
+    const socket = net.createConnection({ host, port });
+    const complete = (ok: boolean, message: string) => {
+      socket.removeAllListeners();
+      socket.destroy();
+      resolve({ ok, latencyMs: Date.now() - startedAt, message });
+    };
+
+    const timeout = setTimeout(() => complete(false, "timeout"), timeoutMs);
+    socket.once("connect", () => {
+      clearTimeout(timeout);
+      complete(true, "reachable");
+    });
+    socket.once("error", () => {
+      clearTimeout(timeout);
+      complete(false, "unreachable");
+    });
+    socket.once("timeout", () => {
+      clearTimeout(timeout);
+      complete(false, "timeout");
+    });
+  });
+}
+
+async function checkHttpEndpoint(url: string, timeoutMs: number) {
+  const startedAt = Date.now();
+  try {
+    const response = await fetch(url, { method: "GET", signal: AbortSignal.timeout(timeoutMs) });
+    return {
+      ok: response.ok,
+      latencyMs: Date.now() - startedAt,
+      statusCode: response.status,
+      message: response.ok ? "reachable" : `HTTP ${response.status}`
+    };
+  } catch {
+    return {
+      ok: false,
+      latencyMs: Date.now() - startedAt,
+      statusCode: null,
+      message: "unreachable"
+    };
+  }
+}
+
+async function checkReplicaEndpoint(raw: string | undefined, timeoutMs: number): Promise<EndpointHealth> {
+  const configured = normalizeConfiguredUrl(raw);
+  if (!configured) {
+    return {
+      configured: false,
+      target: null,
+      ok: false,
+      latencyMs: null,
+      statusCode: null,
+      message: "not configured"
+    };
+  }
+
+  const target = describeUrlTarget(configured);
+  try {
+    const endpoint = new URL(configured);
+    if (endpoint.protocol === "postgres:" || endpoint.protocol === "postgresql:") {
+      const tcpResult = await checkTcpEndpoint(endpoint.hostname, Number(endpoint.port || 5432), timeoutMs);
+      return {
+        configured: true,
+        target,
+        ok: tcpResult.ok,
+        latencyMs: tcpResult.latencyMs,
+        statusCode: null,
+        message: tcpResult.message
+      };
+    }
+
+    const healthUrl = endpoint.pathname && endpoint.pathname !== "/" ? configured : `${configured.replace(/\/$/, "")}/health`;
+    const httpResult = await checkHttpEndpoint(healthUrl, timeoutMs);
+    return {
+      configured: true,
+      target,
+      ok: httpResult.ok,
+      latencyMs: httpResult.latencyMs,
+      statusCode: httpResult.statusCode,
+      message: httpResult.message
+    };
+  } catch {
+    return {
+      configured: true,
+      target,
+      ok: false,
+      latencyMs: null,
+      statusCode: null,
+      message: "invalid endpoint"
+    };
+  }
+}
+
+function buildBackupPolicyHealth(lastBackup: { finishedAt: Date | null } | null): OperatorHealthBackupPolicy {
+  const intervalHoursRaw = Number(process.env.SOM_AUTO_BACKUP_INTERVAL_HOURS || 0);
+  const intervalHours = Number.isFinite(intervalHoursRaw) && intervalHoursRaw > 0 ? intervalHoursRaw : null;
+  const runOnStart = String(process.env.SOM_AUTO_BACKUP_RUN_ON_START || "").toLowerCase() === "true";
+  const automatic = Boolean(intervalHours);
+
+  return {
+    automatic,
+    intervalHours,
+    runOnStart,
+    lastSuccessfulBackupAt: lastBackup?.finishedAt ? lastBackup.finishedAt.toISOString() : null,
+    message: automatic
+      ? `scheduled every ${intervalHours}h${runOnStart ? " and runs on start" : ""}`
+      : "manual backup only"
+  };
+}
+
+async function buildReplicaHealth(): Promise<OperatorHealthReplica> {
+  const mode = process.env.SOM_REDUNDANCY_MODE || "single-region";
+  const [database, backend, license] = await Promise.all([
+    checkReplicaEndpoint(process.env.SOM_REPLICA_DATABASE_URL, 4000),
+    checkReplicaEndpoint(process.env.SOM_REPLICA_API_URL, 4000),
+    checkReplicaEndpoint(process.env.SOM_REPLICA_LICENSE_SERVER_URL, 4000)
+  ]);
+  const configured = [database, backend, license].some((endpoint) => endpoint.configured);
+  const ready = mode === "single-region" ? true : configured && database.ok && backend.ok && license.ok;
+
+  return {
+    mode,
+    configured,
+    ready,
+    message:
+      mode === "single-region"
+        ? "single-region recovery only; configure replicas for active-passive failover"
+        : ready
+          ? "replica endpoints reachable"
+          : "replica endpoints need attention",
+    database,
+    backend,
+    license
+  };
 }
 
 async function checkDatabaseHealth() {
@@ -449,7 +670,7 @@ schoolsRouter.get("/operator-health", async (req, res) => {
   }
 
   try {
-    const [database, license, lastBackup] = await Promise.all([
+    const [database, license, lastBackup, alerting, replica] = await Promise.all([
       checkDatabaseHealth(),
       getLicenseState(schoolId, getRequestDeviceInfo(req)),
       prisma.backupJob.findFirst({
@@ -464,8 +685,12 @@ schoolsRouter.get("/operator-health", async (req, res) => {
           startedAt: true,
           finishedAt: true
         }
-      })
+      }),
+      Promise.resolve(buildAlertingHealth()),
+      buildReplicaHealth()
     ]);
+
+    const backupPolicyWithLastBackup = buildBackupPolicyHealth(lastBackup);
 
     const generatedAt = new Date().toISOString();
     res.json({
@@ -492,6 +717,9 @@ schoolsRouter.get("/operator-health", async (req, res) => {
               finishedAt: lastBackup.finishedAt ? lastBackup.finishedAt.toISOString() : null
             }
           : null,
+        alerting,
+        backupPolicy: backupPolicyWithLastBackup,
+        redundancy: replica,
         version: {
           product: "SOM PRO",
           version: process.env.SOM_VERSION || "0.9.0-rc.1",

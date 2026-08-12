@@ -30,6 +30,7 @@ SOM PRO is a hybrid school operations system with:
 - The migration / upgrade integration path passed.
 - Stress recovery was verified in the login / outage path.
 - Backup and restore are formally closed within the current release scope, but the runbook remains part of the handoff.
+- The compliance and external-review pack is ready for external review and approval, with privacy, retention, deletion, DPA, and decision-log docs aligned.
 
 ## Quick setup
 

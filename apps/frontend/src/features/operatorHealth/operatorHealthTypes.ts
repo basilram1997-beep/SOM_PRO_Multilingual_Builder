@@ -23,6 +23,52 @@ export type OperatorHealthResponse = {
     startedAt: string;
     finishedAt: string | null;
   } | null;
+  alerting: {
+    configured: boolean;
+    channels: {
+      name: string;
+      configured: boolean;
+      target: string | null;
+      message: string;
+    }[];
+  };
+  backupPolicy: {
+    automatic: boolean;
+    intervalHours: number | null;
+    runOnStart: boolean;
+    lastSuccessfulBackupAt: string | null;
+    message: string;
+  };
+  redundancy: {
+    mode: string;
+    configured: boolean;
+    ready: boolean;
+    message: string;
+    database: {
+      configured: boolean;
+      target: string | null;
+      ok: boolean;
+      latencyMs: number | null;
+      statusCode: number | null;
+      message: string;
+    };
+    backend: {
+      configured: boolean;
+      target: string | null;
+      ok: boolean;
+      latencyMs: number | null;
+      statusCode: number | null;
+      message: string;
+    };
+    license: {
+      configured: boolean;
+      target: string | null;
+      ok: boolean;
+      latencyMs: number | null;
+      statusCode: number | null;
+      message: string;
+    };
+  };
   version: {
     product: string;
     version: string;

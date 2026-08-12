@@ -4,6 +4,10 @@ This is the canonical final readiness document for the project. Keep `README.md`
 
 ## Sale readiness: Partial
 
+## External review pack:
+
+Ready for external review and approval.
+
 ## Reason:
 
 SOM PRO is in a strong Release Candidate state. The core product works, the tests pass, and the architecture is organized enough for handoff.  
@@ -256,6 +260,7 @@ This is the canonical production reference for handoff and should stay aligned w
 - Incident reporting is treated as complete within the current scope, with a defined escalation path, evidence preservation, and close-out checklist in `docs/INCIDENT_RESPONSE_POLICY.md`.
 - Penetration test readiness is complete within the current scope, but the actual external PT execution still remains a release requirement before final commercial closure.
 - SAST / DAST / SSDLC and OWASP Top 10 coverage are treated as complete within the current scope, with explicit mapping and release-gate docs in `docs/SECURITY_TESTING.md`, `docs/SECURITY_REQUIREMENTS.md`, and `docs/OWASP_TOP_10_AR.md`.
+- The privacy, retention, deletion, DPA, and decision-log pack is prepared for external review and approval in `docs/EXTERNAL_REVIEW_PACK_AR.md`.
 
 ## Data Export and Data Deletion
 

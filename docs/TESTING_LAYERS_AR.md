@@ -56,8 +56,10 @@ npm run test:matrix
 - `npm run check:release` = build + lint + typecheck + format + audit + smoke + deep
 - `npm run chaos:test` = outage fault injection with recovery verification
 - `npm run redundancy:test` = same outage recovery path with an explicit redundancy label
+- `npm run resilience:test` = chaos + redundancy معًا
 
 ## ملاحظة عملية
 
 الاختبارات الثقيلة مثل `load:test` و`stress:test` و`volume:test` و`scalability:test` و`reliability:test` تُشغّل منفصلة كي تبقى المقارنة واضحة ولا تختلط مع اختبارات الوحدة أو المتصفح.
-اختبارات المرونة المحلية (`chaos:test` و`redundancy:test`) تبقى أيضًا منفصلة إلى أن يكون عندنا failover حقيقي متعدد العقد في staging أو الإنتاج.
+اختبار `chaos:test` صار مناسبًا كفحص CI خفيف، بينما `reliability:test` و`soak` يظلان خارج المسار السريع حتى لا نكسر وقت التنفيذ اليومي.
+اختبارات المرونة المحلية الأخرى تبقى أيضًا منفصلة إلى أن يكون عندنا failover حقيقي متعدد العقد في staging أو الإنتاج.

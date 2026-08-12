@@ -28,6 +28,7 @@
 - يثبت الاعتماديات.
 - يشغّل lint وbuild وtest.
 - يشغّل `test:all`.
+- يشغّل `chaos:test` كفحص خفيف منفصل.
 - يشغّل فحوصات desktop وproduction وrelease.
 - يشغّل audit أمني خفيف.
 
@@ -50,6 +51,7 @@
 - توسيع browser flows الفعلية على متصفح حقيقي.
 - ربط backup/restore بتجربة تنفيذية لا مجرد وثائق.
 - إضافة مراقبة وتنبيهات تشغيل واضحة في بيئة production/staging.
+- إبقاء soak/reliability خارج المسار السريع، لكن إدخال chaos الخفيف في CI اليومي.
 
 ### P2
 
@@ -60,7 +62,7 @@
 ## توصية عملية
 
 - إذا كان الهدف الآن هو التسليم الداخلي أو staging، فـ pipeline الحالي كافٍ كبداية قوية.
-- إذا كان الهدف هو البيع التجاري الكامل، فهناك خطوة إضافية لازمة: تشغيل staging + clean install + signed installer + browser matrix حقيقي.
+- إذا كان الهدف هو البيع التجاري الكامل، فهناك خطوة إضافية لازمة: تشغيل staging + clean install + signed installer + browser matrix حقيقي + backup/restore + replica/failover.
 
 ## الخلاصة
 

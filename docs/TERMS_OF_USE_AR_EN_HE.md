@@ -1,6 +1,7 @@
 # شروط الاستخدام / Terms of Use / תנאי שימוש
 
 ## الحالة النهائية
+Ready for external review and approval together with the privacy policy, DPA template, retention policy, and decision log.
 
 - شروط الاستخدام: مكتملة ضمن النطاق الحالي.
 - يجب قراءتها مع سياسة الخصوصية وDPA كحزمة قانونية واحدة قبل أي نشر رسمي.

@@ -77,6 +77,49 @@ async function main() {
   const license = await isTcpReachable("127.0.0.1", Number(process.env.SOM_LICENSE_PORT || 4100), 1000);
   record("License server", true, license ? "already running on 4100" : "not running; E2E can use local license bypass");
 
+  const alertingChannels = [
+    process.env.SOM_NOTIFICATION_WEBHOOK_URL,
+    process.env.SOM_SMS_WEBHOOK_URL
+  ]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+  record(
+    "Alerting",
+    true,
+    alertingChannels.length
+      ? `${alertingChannels.length} channel(s) configured${alertingChannels.length ? `: ${alertingChannels.join(", ")}` : ""}`
+      : "not configured yet"
+  );
+
+  const autoBackupIntervalHours = Number(process.env.SOM_AUTO_BACKUP_INTERVAL_HOURS || 0);
+  const autoBackupEnabled = Number.isFinite(autoBackupIntervalHours) && autoBackupIntervalHours > 0;
+  const autoBackupRunOnStart = String(process.env.SOM_AUTO_BACKUP_RUN_ON_START || "").toLowerCase() === "true";
+  record(
+    "Backup automation",
+    true,
+    autoBackupEnabled
+      ? `scheduled every ${autoBackupIntervalHours}h${autoBackupRunOnStart ? " and runs on start" : ""}`
+      : "manual only"
+  );
+
+  const redundancyMode = String(process.env.SOM_REDUNDANCY_MODE || "single-region").trim() || "single-region";
+  const configuredReplicaTargets = [
+    process.env.SOM_REPLICA_DATABASE_URL,
+    process.env.SOM_REPLICA_API_URL,
+    process.env.SOM_REPLICA_LICENSE_SERVER_URL
+  ]
+    .map((value) => String(value || "").trim())
+    .filter((value) => value && !/CHANGE_ME|YOUR_DOMAIN|PLACEHOLDER/i.test(value));
+  record(
+    "Redundancy",
+    true,
+    redundancyMode === "single-region"
+      ? "single-region recovery only; add replicas for active-passive failover"
+      : configuredReplicaTargets.length
+        ? `${configuredReplicaTargets.length} replica endpoint(s) configured`
+        : "replica mode selected but endpoints are not configured"
+  );
+
   record("Frontend port", !(await isTcpReachable("127.0.0.1", 4188, 500)), "4188 free for E2E");
   record("Backend port", !(await isTcpReachable("127.0.0.1", 4000, 500)), "4000 free for E2E");
 
@@ -94,6 +137,12 @@ async function main() {
     record("Install doctor", true, "skipped because CI already ran the baseline checks");
     record("Secrets scan", true, "skipped because CI already ran the baseline checks");
   }
+
+  const compliance = npmRun("compliance:test", { timeoutMs: 120_000 });
+  record("Compliance", compliance.ok);
+
+  const destructive = npmRun("destructive:test", { timeoutMs: 120_000 });
+  record("Destructive", destructive.ok);
 
   const lint = npmRun("lint", { timeoutMs: 120_000 });
   record("Lint", lint.ok);

@@ -31,12 +31,16 @@
 - [ ] migration / upgrade.
 - [ ] volume tiny / normal.
 - [ ] stress login / outage recovery.
+- [ ] chaos:test خفيف في CI.
+- [ ] alerting وbackup automation ظاهرين في operator health.
+- [ ] replica / failover موثقين بوضوح أو مذكور أن التشغيل single-region.
 
 ## التحقق من staging
 
 - [ ] نجاح health checks.
 - [ ] نجاح migration على staging.
 - [ ] نجاح backup / restore حسب runbook.
+- [ ] فتح صفحة operator health والتأكد من أن آخر backup والتنبيهات والنسخ الاحتياطي التلقائي ظاهرة.
 - [ ] توثيق أي مشكلة ظهرت.
 
 ## القبول النهائي

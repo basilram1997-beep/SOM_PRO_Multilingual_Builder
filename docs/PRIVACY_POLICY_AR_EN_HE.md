@@ -1,6 +1,7 @@
 # سياسة الخصوصية / Privacy Policy / מדיניות פרטיות
 
 هذه الوثيقة توضّح كيف يتعامل SOM PRO مع بيانات المدرسة والطلاب والمعلمين.  
+Ready for external review and approval together with the terms of use, DPA template, retention policy, and decision log.
 This document explains how SOM PRO handles school, student, and teacher data.  
 מסמך זה מסביר כיצד SOM PRO מטפל בנתוני בית הספר, התלמידים והמורים.
 

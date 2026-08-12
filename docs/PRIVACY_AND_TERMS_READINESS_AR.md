@@ -2,15 +2,18 @@
 
 ## Status
 
-- Privacy policy: complete within the current scope.
-- Terms of use: complete within the current scope.
-- DPA template: available and ready for formal deployment.
+- Retention and deletion policy: available for external review and approval.
+- Decision log template: available for external review and approval.
+
+- Privacy policy: ready for external review and approval.
+- Terms of use: ready for external review and approval.
+- DPA template: available and ready for external review and approval.
 
 ## What this unifies
 
 - The privacy policy, terms of use, and DPA guidance are already present in the repository.
 - This document marks them as one buyer-facing policy set instead of scattered notes.
-- The three documents should be reviewed together before any external deployment.
+- The policy set should be reviewed together before any external deployment or approval decision.
 
 ## Core policy points
 
