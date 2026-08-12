@@ -103,6 +103,25 @@ export function createApp() {
 
   app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     const error = err instanceof Error ? err : new Error("UNKNOWN_SERVER_ERROR");
+    const status = Number((err as { status?: number; statusCode?: number })?.status || (err as { statusCode?: number })?.statusCode);
+    const type = String((err as { type?: string })?.type || "");
+
+    if (type === "entity.parse.failed" || error instanceof SyntaxError) {
+      return res.status(400).json({
+        error: "MALFORMED_JSON",
+        message: "Invalid JSON request body",
+        data: null
+      });
+    }
+
+    if (type === "entity.too.large" || status === 413) {
+      return res.status(413).json({
+        error: "PAYLOAD_TOO_LARGE",
+        message: "Request body is too large",
+        data: null
+      });
+    }
+
     logSafeError("app.unhandled", error);
     res.status(500).json({
       error: "INTERNAL_SERVER_ERROR",
