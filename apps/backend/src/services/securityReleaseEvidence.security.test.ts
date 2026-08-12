@@ -39,8 +39,14 @@ test("package scripts expose SBOM, license, SAST, DAST, and release evidence com
 });
 
 test("SBOM and license scripts generate reviewable release artifacts", () => {
+  const audit = read("../../scripts/runtime/audit-baseline.js");
   const sbom = read("../../scripts/generate-sbom.js");
   const licenses = read("../../scripts/license-report.js");
+
+  assert.match(audit, /npm-audit\.json/, "npm audit should write a release evidence artifact");
+  assert.match(audit, /writeReport\("passed"/, "npm audit report should record successful scans");
+  assert.match(audit, /writeReport\("skipped"/, "npm audit report should record network skips explicitly");
+  assert.match(audit, /writeReport\("failed"/, "npm audit report should record failed scans");
 
   assert.match(sbom, /bomFormat:\s*"CycloneDX"/, "SBOM should use CycloneDX");
   assert.match(sbom, /specVersion:\s*"1\.5"/, "SBOM should declare a stable CycloneDX spec version");
