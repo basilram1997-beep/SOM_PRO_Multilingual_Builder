@@ -52,7 +52,12 @@ export type LicenseDeviceInfo = {
 };
 
 type CentralLicenseResult = {
-  data?: Partial<LicensePayload> & { schoolName?: string; institutionCode?: string };
+  data?: Partial<LicensePayload> & {
+    schoolName?: string;
+    institutionCode?: string;
+    resetToken?: string;
+    resetTokenExpiresAt?: string;
+  };
   status?: LicenseStatus;
   readOnly?: boolean;
   error?: string;
@@ -207,7 +212,7 @@ async function postCentral(path: string, body: unknown): Promise<CentralLicenseR
   try {
     const response = await fetch(CENTRAL_LICENSE_URL.replace(/\/$/, "") + path, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Request-Nonce": crypto.randomBytes(24).toString("hex") },
       body: JSON.stringify(body),
       signal: controller.signal
     });
@@ -388,12 +393,12 @@ export async function recoverLicenseAdminAccess(licenseKey: string, email?: stri
   if (!central?.data) throw new Error("CENTRAL_LICENSE_UNAVAILABLE");
 
   const account = central.data.adminAccount;
-  if (!account?.email || !account?.password) throw new Error("RECOVERY_NOT_AVAILABLE");
+  if (!account?.email || !central.data.resetToken) throw new Error("RECOVERY_NOT_AVAILABLE");
 
-  await ensureLicenseAdminAccount(account, central.data as LicensePayload, true);
   return {
     email: account.email,
-    temporaryPassword: account.password,
+    resetToken: central.data.resetToken,
+    resetTokenExpiresAt: central.data.resetTokenExpiresAt,
     name: account.name || DEFAULT_ADMIN_NAME
   };
 }

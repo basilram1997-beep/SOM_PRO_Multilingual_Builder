@@ -30,8 +30,13 @@ const DEFAULT_LICENSE_SECRET = "change-this-secret-before-selling";
 const LICENSE_SECRET = process.env.SOM_PRO_LICENSE_SECRET || DEFAULT_LICENSE_SECRET;
 const IS_PRODUCTION = process.env.NODE_ENV === "production" || process.env.APP_ENV === "production";
 const CORS_ORIGIN = process.env.LICENSE_CORS_ORIGIN || process.env.PUBLIC_BASE_URL || (IS_PRODUCTION ? "" : "*");
-const DATA_FILE = path.join(__dirname, "..", "data", "licenses.json");
-const ACCOUNTS_FILE = path.join(__dirname, "..", "data", "license-admin-accounts.json");
+const DATA_FILE = process.env.LICENSE_DATA_FILE || path.join(__dirname, "..", "data", "licenses.json");
+const ACCOUNTS_FILE =
+  process.env.LICENSE_ACCOUNTS_FILE || path.join(__dirname, "..", "data", "license-admin-accounts.json");
+const SECURITY_EVENTS_FILE =
+  process.env.LICENSE_SECURITY_EVENTS_FILE || path.join(__dirname, "..", "data", "license-security-events.jsonl");
+const RESET_TOKENS_FILE =
+  process.env.LICENSE_RESET_TOKENS_FILE || path.join(__dirname, "..", "data", "license-reset-tokens.json");
 const PUBLIC_DIR = path.join(__dirname, "..", "public");
 const TOKEN_FILE = path.join(__dirname, "..", "data", "owner-token.txt");
 const ADMIN_TOKEN = process.env.LICENSE_ADMIN_TOKEN || (IS_PRODUCTION ? "" : readLocalAdminToken());
@@ -60,6 +65,9 @@ const RATE_LIMITS = {
   general: { limit: Number(process.env.LICENSE_GENERAL_RATE_LIMIT || 300), windowMs: 60_000 }
 };
 const MAX_BODY_BYTES = Number(process.env.LICENSE_MAX_BODY_BYTES || 32_768);
+const RESET_TOKEN_TTL_MS = Number(process.env.LICENSE_RESET_TOKEN_TTL_MS || 15 * 60_000);
+const REQUEST_NONCE_TTL_MS = Number(process.env.LICENSE_REQUEST_NONCE_TTL_MS || 5 * 60_000);
+const requestNonces = new Map();
 
 function readLocalAdminToken() {
   fs.mkdirSync(path.dirname(TOKEN_FILE), { recursive: true });
@@ -193,6 +201,87 @@ function writeAccounts(accounts) {
   fs.mkdirSync(path.dirname(ACCOUNTS_FILE), { recursive: true });
   if (fs.existsSync(ACCOUNTS_FILE)) fs.copyFileSync(ACCOUNTS_FILE, ACCOUNTS_FILE + ".bak");
   fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accounts, null, 2) + "\n", "utf8");
+}
+
+function recordSecurityEvent(event) {
+  try {
+    fs.mkdirSync(path.dirname(SECURITY_EVENTS_FILE), { recursive: true });
+    const safeEvent = {
+      at: new Date().toISOString(),
+      type: event.type || "UNKNOWN",
+      result: event.result || "UNKNOWN",
+      actor: event.actor || null,
+      licenseId: event.licenseId || null,
+      ip: event.ip || null,
+      details: event.details || {}
+    };
+    fs.appendFileSync(SECURITY_EVENTS_FILE, JSON.stringify(safeEvent) + "\n", "utf8");
+  } catch {
+    // Audit best effort must not expose secrets or break license checks.
+  }
+}
+
+function readResetTokens() {
+  try {
+    const data = JSON.parse(fs.readFileSync(RESET_TOKENS_FILE, "utf8"));
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeResetTokens(tokens) {
+  fs.mkdirSync(path.dirname(RESET_TOKENS_FILE), { recursive: true });
+  fs.writeFileSync(RESET_TOKENS_FILE, JSON.stringify(tokens, null, 2) + "\n", "utf8");
+}
+
+function createResetToken(license, account, ip) {
+  const token = "SOM-RESET-" + crypto.randomBytes(24).toString("hex").toUpperCase();
+  const tokenHash = hash(token);
+  const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS).toISOString();
+  const tokens = readResetTokens().filter((item) => new Date(item.expiresAt || 0).getTime() > Date.now() && !item.usedAt);
+  tokens.push({
+    tokenHash,
+    licenseId: license.id,
+    email: account.email,
+    createdAt: new Date().toISOString(),
+    expiresAt,
+    usedAt: null
+  });
+  writeResetTokens(tokens);
+  recordSecurityEvent({
+    type: "ADMIN_RESET_TOKEN_ISSUED",
+    result: "SUCCESS",
+    actor: account.email,
+    licenseId: license.id,
+    ip
+  });
+  return { token, tokenHash, expiresAt };
+}
+
+function consumeResetToken(token, newPassword, ip) {
+  const tokenHash = hash(token);
+  const tokens = readResetTokens();
+  const reset = tokens.find((item) => item.tokenHash === tokenHash);
+  if (!reset || reset.usedAt || new Date(reset.expiresAt || 0).getTime() <= Date.now()) {
+    recordSecurityEvent({ type: "ADMIN_RESET_TOKEN_CONSUME", result: "DENIED", ip });
+    return null;
+  }
+  const accounts = readAccounts();
+  const index = accounts.findIndex((item) => item.licenseId === reset.licenseId && item.email === reset.email);
+  if (index === -1) return null;
+  accounts[index] = { ...accounts[index], password: String(newPassword || "").trim(), updatedAt: new Date().toISOString() };
+  reset.usedAt = new Date().toISOString();
+  writeAccounts(accounts);
+  writeResetTokens(tokens);
+  recordSecurityEvent({
+    type: "ADMIN_RESET_TOKEN_CONSUME",
+    result: "SUCCESS",
+    actor: reset.email,
+    licenseId: reset.licenseId,
+    ip
+  });
+  return { email: reset.email };
 }
 
 function upsertAdminAccount(license, accountPatch) {
@@ -470,6 +559,24 @@ function isRateLimited(req, url) {
   return current.count > limit.limit;
 }
 
+function checkRequestNonce(req, url) {
+  if (!url.pathname.startsWith("/api/client/") && !url.pathname.startsWith("/api/license/")) return { ok: true };
+  if (req.method !== "POST") return { ok: true };
+  const nonce = String(req.headers["x-request-nonce"] || "").trim();
+  const requireNonce = String(process.env.LICENSE_REQUIRE_CLIENT_NONCE || "").toLowerCase() === "true";
+  if (!nonce) return requireNonce ? { ok: false, error: "MISSING_NONCE" } : { ok: true };
+  if (nonce.length < 16 || nonce.length > 128) return { ok: false, error: "INVALID_NONCE" };
+
+  const now = Date.now();
+  for (const [key, item] of requestNonces.entries()) {
+    if (item.expiresAt <= now) requestNonces.delete(key);
+  }
+  const key = `${routeBucketName(req, url)}:${clientAddress(req)}:${hash(nonce)}`;
+  if (requestNonces.has(key)) return { ok: false, error: "REPLAYED_NONCE" };
+  requestNonces.set(key, { expiresAt: now + REQUEST_NONCE_TTL_MS });
+  return { ok: true };
+}
+
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let data = "";
@@ -634,6 +741,8 @@ async function handle(req, res) {
   if (req.method === "OPTIONS") return json(res, 204, {});
   const url = new URL(req.url, "http://localhost");
   if (isRateLimited(req, url)) return json(res, 429, { error: "RATE_LIMITED" });
+  const nonceCheck = checkRequestNonce(req, url);
+  if (!nonceCheck.ok) return json(res, 409, { error: nonceCheck.error });
 
   if (url.pathname === "/health") return json(res, 200, { ok: true, service: "som-license-server" });
 
@@ -813,16 +922,33 @@ async function handle(req, res) {
       if (!license) return json(res, 404, { error: "LICENSE_NOT_ISSUED", status: "SUSPENDED" });
       const status = effectiveStatus(license);
       if (["SUSPENDED", "CANCELLED"].includes(status)) return json(res, 403, { error: "LICENSE_SUSPENDED", status });
-      const account = upsertAdminAccount(license, {
-        password: uniqueAdminPassword(readAccounts(), license.id),
-        email: body.email || undefined
-      });
+      const account = getAdminAccount(license);
+      const requestedEmail = String(body.email || "")
+        .trim()
+        .toLowerCase();
+      const accountEmail = String(account.email || "")
+        .trim()
+        .toLowerCase();
+      if (requestedEmail && requestedEmail !== accountEmail) {
+        recordSecurityEvent({
+          type: "ADMIN_RESET_TOKEN_ISSUED",
+          result: "DENIED",
+          licenseId: license.id,
+          email: requestedEmail,
+          ip: clientAddress(req),
+          reason: "EMAIL_MISMATCH"
+        });
+        return json(res, 403, { error: "RECOVERY_NOT_AVAILABLE" });
+      }
+      const reset = createResetToken(license, account, clientAddress(req));
       license.updatedAt = new Date().toISOString();
       writeDb(db);
       return json(res, 200, {
         data: {
           ...publicLicense(license),
-          adminAccount: { name: account.name, email: account.email, password: account.password, role: account.role }
+          adminAccount: { name: account.name, email: account.email, role: account.role },
+          resetToken: reset.token,
+          resetTokenExpiresAt: reset.expiresAt
         },
         status,
         readOnly: false
@@ -830,6 +956,16 @@ async function handle(req, res) {
     } catch (error) {
       return json(res, 400, { error: "RECOVERY_FAILED", message: error.message });
     }
+  }
+
+  if (url.pathname === "/api/client/reset-admin-password" && req.method === "POST") {
+    const body = await readBody(req);
+    const token = String(body.resetToken || "").trim();
+    const newPassword = String(body.newPassword || "").trim();
+    if (!token || newPassword.length < 12) return json(res, 400, { error: "INVALID_RESET_REQUEST" });
+    const result = consumeResetToken(token, newPassword, clientAddress(req));
+    if (!result) return json(res, 400, { error: "INVALID_OR_EXPIRED_RESET_TOKEN" });
+    return json(res, 200, { data: { ok: true, email: result.email } });
   }
 
   if (url.pathname === "/api/client/activate" && req.method === "POST") {
@@ -914,26 +1050,41 @@ async function handle(req, res) {
   return serveStatic(req, res);
 }
 
-const server = http.createServer((req, res) =>
-  handle(req, res).catch((error) => {
-    if (error?.message === "BODY_TOO_LARGE") return json(res, 413, { error: "BODY_TOO_LARGE" });
-    return json(res, 500, { error: "INTERNAL_ERROR" });
-  })
-);
+function createLicenseServer() {
+  return http.createServer((req, res) =>
+    handle(req, res).catch((error) => {
+      if (error?.message === "BODY_TOO_LARGE") return json(res, 413, { error: "BODY_TOO_LARGE" });
+      return json(res, 500, { error: "INTERNAL_ERROR" });
+    })
+  );
+}
 
-server.on("error", (error) => {
-  if (error.code === "EADDRINUSE") {
-    console.log("License server is already running on http://localhost:" + PORT);
-    process.exit(0);
-  }
-  console.error(error);
-  process.exit(1);
-});
+const server = createLicenseServer();
 
-server.listen(PORT, () => {
-  console.log("SOM License Server running on http://localhost:" + PORT);
-  console.log("Owner login: http://localhost:" + PORT);
-  if (!process.env.LICENSE_ADMIN_TOKEN) {
-    console.log("Owner token saved in: " + TOKEN_FILE);
-  }
-});
+if (require.main === module) {
+  server.on("error", (error) => {
+    if (error.code === "EADDRINUSE") {
+      console.log("License server is already running on http://localhost:" + PORT);
+      process.exit(0);
+    }
+    console.error(error);
+    process.exit(1);
+  });
+
+  server.listen(PORT, () => {
+    console.log("SOM License Server running on http://localhost:" + PORT);
+    console.log("Owner login: http://localhost:" + PORT);
+    if (!process.env.LICENSE_ADMIN_TOKEN) {
+      console.log("Owner token saved in: " + TOKEN_FILE);
+    }
+  });
+}
+
+module.exports = {
+  createLicenseServer,
+  handle,
+  hash,
+  licenseCodeHash,
+  makeLicenseKey,
+  normalizeLicenseCode
+};

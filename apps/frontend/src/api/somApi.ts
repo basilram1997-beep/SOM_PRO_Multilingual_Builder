@@ -170,10 +170,13 @@ export const somApi = {
         optionalLoginLicenseFields(licenseCode)
       ),
     recover: (licenseCode: string, email?: string) =>
-      api.post<{ data: { email: string; temporaryPassword: string; name: string } }>("/api/auth/recover", {
-        ...optionalLoginLicenseFields(licenseCode),
-        ...(String(email || "").trim() ? { email } : {})
-      }),
+      api.post<{ data: { email: string; resetToken: string; resetTokenExpiresAt?: string; name: string } }>(
+        "/api/auth/recover",
+        {
+          ...optionalLoginLicenseFields(licenseCode),
+          ...(String(email || "").trim() ? { email } : {})
+        }
+      ),
     changePassword: (currentPassword: string, newPassword: string) =>
       api.post<{ data: { ok: boolean } }>("/api/auth/change-password", { currentPassword, newPassword })
   },

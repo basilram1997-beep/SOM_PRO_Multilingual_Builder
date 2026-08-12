@@ -1,4 +1,4 @@
-﻿# Ministry Evidence Index
+# Ministry Evidence Index
 
 Review date: 2026-08-12
 
@@ -41,6 +41,6 @@ Purpose: index evidence that can be presented to a Ministry technical/security c
 | Reliability/chaos report | Partial | `scripts/resilience-test.js`, `.github/workflows/ci.yml` resilience smoke | QA/DevOps | Run Redis/Postgres/license outage drills | Needs staging run |
 | Electron security review | Partial | `apps/desktop/src/window.js`, `apps/desktop/src/securityPolicy.js`, `apps/desktop/preload.js`, `apps/desktop/security.test.js`, `apps/desktop/electron-builder.config.cjs` | Desktop/security | Run `npm run desktop:check`; verify packaged installer signing/update separately | Shell hardening baseline verified 2026-08-12; signing/update evidence still needed |
 | Code signing evidence | Partial | `apps/desktop/electron-builder.config.cjs`, `scripts/desktop-signing-check.js`, generated `reports/security/desktop-signing-report.json` | Release owner | Run `npm run desktop:signing:check`; for final release set `SOM_ENABLE_CODESIGN=true`, build signed installer, and verify with `SOM_DESKTOP_INSTALLER=<path>` | Baseline gate added 2026-08-12; real certificate/signed installer still needed |
-| License server security evidence | Partial | `apps/license-server/src/server.js`, license service tests | Backend/security | Add server-level security tests and storage hardening evidence | Needs hardening |
+| License server security evidence | Partial | `apps/license-server/src/server.js`, `apps/license-server/src/server.security.test.js`, `apps/backend/src/services/licenseService.ts`, license service tests | Backend/security | Run `npm test -w apps/license-server`; run backend license service tests; enable strict nonce policy in staging and archive reset-token/replay evidence | Reset-token recovery and nonce replay baseline verified 2026-08-12; DB/KMS storage and live operational handoff evidence still needed |
 | Ministry integration/data exchange evidence | Missing | Reports/exports exist, official interface spec not obtained | Product/backend | Obtain official interface spec and build conformance tests | Missing |
 | Release manifest | Partial | `CHANGELOG.md`, `SALE_READINESS_REPORT.md`, `docs/RELEASE_CANDIDATE_CHECKLIST_AR.md` | Release owner | Generate signed release manifest with hashes/SBOM/test reports | Needs release run |

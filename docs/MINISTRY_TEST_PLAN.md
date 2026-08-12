@@ -1,4 +1,4 @@
-﻿# Ministry Test Plan
+# Ministry Test Plan
 
 Review date: 2026-08-12
 
@@ -38,6 +38,8 @@ Purpose: define the missing or required tests before SOM PRO can be defended in 
 | Electron | Verify preload API minimality | Desktop app source | Inspect sandboxed preload bridge | Preload uses only `contextBridge`/`ipcRenderer`, exposes one frozen namespace, sanitizes PDF filenames, and does not require `fs`, `path`, or local modules | Automated | `apps/desktop/security.test.js`, `apps/desktop/preload.js` | P1 |
 | Electron | Verify signed installer | Code-signing cert available | Build signed installer with `SOM_ENABLE_CODESIGN=true`, then run `SOM_DESKTOP_INSTALLER=<path> npm run desktop:signing:check` | Signature valid, SHA-256 hash recorded, and `reports/security/desktop-signing-report.json` attached to release pack | Manual/Automated | `scripts/desktop-signing-check.js`, `reports/security/desktop-signing-report.json` | P1 |
 | License Server | Verify admin auth | License server running | Call admin APIs without/with bad token/with valid token | 401/401/200 | Automated | `apps/license-server/src/server.security.test.js` | P0 |
+| License Server | Verify admin recovery secrecy | Issued license with admin account | Call recovery and password reset flow | Recovery returns one-time reset token, never returns plaintext password, stores only token hash, rejects email mismatch and token replay | Automated | `apps/license-server/src/server.security.test.js` | P0 |
+| License Server | Verify client nonce replay protection | Strict nonce policy enabled | Call activation/status/reset with missing, repeated, and unique nonces | Missing/repeated nonce rejected; unique nonce accepted; replay event is auditable without secrets | Automated | `apps/license-server/src/server.security.test.js` | P0 |
 | License Server | Verify license signature tamper resistance | Issued license | Modify payload/signature | Rejected | Automated | `apps/license-server/src/license-signature.test.js` | P0 |
 | License Server | Verify replay/device limits | License with max devices | Activate same/different devices, replay old requests | Same device ok, over-limit denied, replay policy enforced | Automated | `apps/license-server/src/activation.security.test.js` | P1 |
 | License Server | Verify outage behavior | Backend with license server down | Read/write app routes | Behavior matches policy: readable grace/read-only/denied | Automated | `apps/backend/src/services/licenseOutage.test.ts` | P1 |
