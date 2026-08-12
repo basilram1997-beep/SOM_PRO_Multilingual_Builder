@@ -20,7 +20,7 @@ const authInactivityTimeoutMs = Math.max(
 );
 
 function logDeniedAccess(req: Request, reason: string, requiredPermission?: Permission) {
-  recordAuditLog(prisma, {
+  return recordAuditLog(prisma, {
     schoolId: req.user?.schoolId || null,
     userId: req.user?.id || req.user?.userId || null,
     action: "DENIED ACCESS",
@@ -92,13 +92,13 @@ export async function authenticateRequest(req: Request, res: Response, next: Nex
 }
 
 export function requirePermission(permission: Permission) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       logDeniedAccess(req, "missing_user", permission);
       return res.status(401).json({ error: "AUTH_REQUIRED", message: "تسجيل الدخول مطلوب" });
     }
     if (!canRole(req.user.role, permission)) {
-      logDeniedAccess(req, "forbidden_permission", permission);
+      await logDeniedAccess(req, "forbidden_permission", permission);
       return res.status(403).json({ error: "FORBIDDEN", message: "لا تملك صلاحية لتنفيذ هذه العملية" });
     }
     return next();

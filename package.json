@@ -50,6 +50,7 @@
     "security:pentest:prep": "node scripts/runtime/pentest-prep.js",
     "security:sast": "node scripts/runtime/sast-baseline.js",
     "security:dast": "node scripts/runtime/dast-baseline.js",
+    "security:staging-evidence": "node scripts/runtime/staging-evidence-pack.js",
     "security:api-inventory": "node scripts/runtime/api-route-inventory.js",
     "security:release-evidence": "npm run security:baseline && npm run security:sast",
     "security:review": "npm run security:secrets && npm run security:deps && npm run security:sbom && npm run security:licenses && npm run compliance:test && npm run destructive:test && npm run security:sast && npm run test",
