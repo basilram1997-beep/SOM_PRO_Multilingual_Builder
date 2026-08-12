@@ -243,6 +243,61 @@ jobs:
       - name: Run security baseline
         run: npm run security:baseline
 
+  resilience_smoke:
+    name: Resilience Smoke
+    runs-on: ubuntu-latest
+    needs: quick_check
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: som
+          POSTGRES_USER: som_user
+          POSTGRES_PASSWORD: som_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U som_user -d som"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lightweight chaos test
+        env:
+          STRESS_RUN_ID: ci-chaos-${{ github.run_id }}
+          STRESS_SCENARIO: outage
+          STRESS_REQUESTS: "2"
+          STRESS_CONCURRENCY: "1"
+          STRESS_LOGIN_USERS: "2"
+          STRESS_LOGIN_CONCURRENCY: "1"
+          STRESS_OUTAGE_DELAY_MS: "50"
+          SOM_E2E_TIMEOUT_MS: "60000"
+        run: npm run chaos:test
+
   browser_smoke:
     name: Browser Smoke
     runs-on: ubuntu-latest
@@ -434,6 +489,7 @@ jobs:
       - quick_check
       - compatibility_matrix
       - unit_tests
+      - resilience_smoke
       - browser_smoke
       - usability_smoke
       - install_doctor
