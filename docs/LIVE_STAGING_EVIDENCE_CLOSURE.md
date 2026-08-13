@@ -4,6 +4,8 @@ Review date: 2026-08-13
 
 Purpose: close the gap between controls that exist in the repository and evidence that proves those controls ran successfully on a real staging environment.
 
+Execution runbook: use `docs/LIVE_STAGING_EXECUTION_RUNBOOK.md` for the operator sequence, secret-handling rules, failure handling, and final sign-off table.
+
 ## Closure Rule
 
 Do not claim Ministry/security readiness until every `Required for Ministry attachment` item below has a dated artifact, owner, and pass/fail status.
