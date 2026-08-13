@@ -145,6 +145,8 @@
     "release:build:saas": "npm run desktop:build:saas",
     "release:build:trial": "node scripts/build-desktop-trial.js",
     "release:notes": "node scripts/release-notes.js",
+    "staging:prepare-duckdns": "node scripts/runtime/prepare-duckdns-staging-env.js",
+    "staging:diagnose-duckdns": "node scripts/runtime/duckdns-staging-diagnose.js",
     "staging:check": "node scripts/staging-check.js",
     "staging:smoke": "node scripts/staging-smoke.js"
   },

@@ -77,6 +77,8 @@ test("frontend and reverse proxy default web deployments to /api without hard-co
   assert.match(frontend, /return ENV_API_URL \|\| SAME_ORIGIN_API_URL/);
   assert.match(dockerfile, /ARG VITE_API_URL=\/api/);
   assert.match(compose, /VITE_API_URL:\s+\$\{VITE_API_URL:-\/api\}/);
+  assert.match(compose, /profiles:\s*\n\s*-\s+certbot/);
+  assert.match(compose, /--cert-name sompro/);
   assert.match(nginx, /location\s+\/api\//);
   assert.match(nginx, /proxy_pass\s+http:\/\/backend:4000;/);
   assert.match(nginx, /location\s+\/license\//);

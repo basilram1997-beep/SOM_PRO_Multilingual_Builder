@@ -121,6 +121,25 @@
       timeout: 5s
       retries: 10
 
+  certbot:
+    image: certbot/certbot:latest
+    profiles:
+      - certbot
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?set APP_DOMAIN}
+      CERTBOT_EMAIL: ${CERTBOT_EMAIL:-}
+    ports:
+      - "80:80"
+    volumes:
+      - sompro_letsencrypt:/etc/letsencrypt
+      - sompro_certbot_www:/var/www/certbot
+    entrypoint:
+      [
+        "sh",
+        "-c",
+        "if [ -n \"$${CERTBOT_EMAIL}\" ]; then certbot certonly --standalone --non-interactive --agree-tos --cert-name sompro --email \"$${CERTBOT_EMAIL}\" -d \"$${APP_DOMAIN:?set APP_DOMAIN}\"; else certbot certonly --standalone --non-interactive --agree-tos --cert-name sompro --register-unsafely-without-email -d \"$${APP_DOMAIN:?set APP_DOMAIN}\"; fi"
+      ]
+
 volumes:
   sompro_pg_data:
   sompro_redis_data:
