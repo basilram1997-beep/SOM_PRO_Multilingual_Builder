@@ -23,6 +23,7 @@ test("live staging execution runbook preserves operator commands, secret handlin
   assert.match(runbook, /reports\/security\/zap-baseline-report\.html/);
   assert.match(runbook, /reports\/security\/staging-evidence-pack\.json/);
   assert.match(runbook, /reports\/ministry-review\/manifest\.json/);
+  assert.match(runbook, /reports\/ministry-review\/MINISTRY_REVIEW_PACK\.md/);
   assert.match(runbook, /submissionReady/);
 });
 
