@@ -86,6 +86,8 @@ These must never be committed with real values:
 
 Staging and production must receive these values from a deployment secret store, CI secret, Docker secret, or equivalent protected mechanism.
 
+Detailed secret inventory, KMS readiness, and rotation rules are tracked in `docs/SECRETS_AND_KMS_READINESS.md`.
+
 ## 6. Domain Change Procedure
 
 To move from DuckDNS staging to a future professional domain:
