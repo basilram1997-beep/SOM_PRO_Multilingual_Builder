@@ -1,47 +1,80 @@
 # Ministry Official Standards Intake
 
-Review date: 2026-08-12
+Review date: 2026-08-13
 
-Purpose: keep a controlled intake log for official Ministry of Education standards before SOM PRO claims formal compliance. This document separates confirmed public evidence from standards that still require an official supplier-portal PDF, version, date, and archive copy.
+Purpose: maintain a controlled intake register for official Ministry of Education supplier standards from `sapakim.education.gov.il` before SOM PRO claims formal Ministry compliance.
 
-## Current Verification Result
+This document separates two kinds of evidence:
 
-`sapakim.education.gov.il` supplier standards were searched during this review, but the exact supplier standards package was not retrievable from the current environment. SOM PRO must not claim formal Ministry supplier compliance until the official supplier documents are obtained and archived.
+- Security readiness evidence: repository controls, tests, staging checks, DAST/ZAP, audit, backup, tenant isolation, MFA, and release artifacts.
+- Official Ministry compliance evidence: archived official Ministry documents, SHA-256 hashes, exact versions/dates, reviewer approval, and mapped control IDs.
 
-Public Ministry pages found during the review support the following control themes:
+## Compliance Claim Guardrail
+
+SOM PRO must not claim formal Ministry supplier compliance until all applicable official documents are archived, hashed, mapped, and approved.
+
+Allowed wording while intake is incomplete:
+
+`Technical and security readiness evidence exists; formal Ministry supplier compliance requires official standards intake, control mapping, and Ministry/security review.`
+
+Disallowed wording while any required document remains `Missing` or `Downloaded`:
+
+- `Ministry compliant`
+- `Approved by the Ministry`
+- `Fully compliant with Ministry supplier standards`
+- `Certified for Ministry supplier requirements`
+
+## Official Document Intake Register
+
+Allowed status values:
+
+- `Missing`: document has not been obtained.
+- `Downloaded`: original document is archived and hashed, but not mapped.
+- `Mapped`: exact clauses are mapped to controls/tests, but not approved.
+- `Approved`: mapped controls were reviewed and signed off by the owner.
+
+| Control ID | Required official document | Source URL | Document title | Download date | Version / publication date | SHA-256 | Archive path | Review owner | Status | Mapped control IDs |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| MOS-001 | Ministry supplier information security standard | TBD from `sapakim.education.gov.il` | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Product owner + security reviewer | Missing | TBD |
+| MOS-002 | Privacy procedure for technological products | TBD from `sapakim.education.gov.il` | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Legal/privacy owner | Missing | TBD |
+| MOS-003 | Pedagogical management software standard | TBD from `sapakim.education.gov.il` | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Product owner + backend owner | Missing | TBD |
+| MOS-004 | Technology compatibility standard | TBD from `sapakim.education.gov.il` | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | QA/accessibility owner | Missing | TBD |
+| MOS-005 | Scheduling and teaching staff management standard | TBD from `sapakim.education.gov.il` | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Product owner + scheduling owner | Missing | TBD |
+| MOS-006 | Ministry IDM/OIDC/SAML integration requirements | TBD from `sapakim.education.gov.il` or official IdP onboarding source | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Security/identity owner | Missing | TBD |
+| MOS-007 | Official data exchange/API interface specification | TBD from `sapakim.education.gov.il` or official Ministry integration source | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Backend/integration owner | Missing | TBD |
+
+## Public Context Sources
+
+Public Ministry pages may inform readiness work, but they are not a substitute for official supplier standards unless the Ministry explicitly designates them as controlling requirements.
 
 | Source | Status | Relevant themes | Project mapping |
-| ------ | ------ | --------------- | --------------- |
-| Ministry pedagogical portal, information security basics: `https://pop.education.gov.il/sherutey-tiksuv-bachinuch/data-security-e-learning/` | Public page found | Safe digital learning environments, protection of student/teacher privacy, cyber incident reporting, approved technology tools | Security controls, incident response, privacy, audit evidence |
-| Ministry pedagogical portal, school as a digital organization: `https://pop.education.gov.il/sherutey-tiksuv-bachinuch/ict-technology-coordinator-portfolio/school-electronic-organization/` | Public page found | Unified identification, approved digital tools, pedagogical management software functions, information security | SSO/OIDC readiness, pedagogical route inventory, role/access controls |
-| Ministry edu-tech AI call page: `https://edu-tech.education.gov.il/taknot/kol-kore/authorities-genetic-laboratory/` | Public page found | Approved technological suppliers, Ministry security/privacy review, IDM connection references | Supplier approval dependency, SSO/IDM requirement tracking |
-| Israeli government procurement portal examples under `mr.gov.il` | Public tender pages found | Procurement publications and supplier/tender metadata | Procurement context only; not a substitute for supplier security standards |
-
-## Required Official Documents
-
-The product owner/compliance owner must obtain and archive the exact official documents below:
-
-| Required document | Required evidence fields | Current status |
-| ----------------- | ------------------------ | -------------- |
-| Ministry supplier information security standard | Source URL, document title, version, publication/update date, downloaded PDF hash, reviewer, mapped control IDs | Missing |
-| Privacy procedure for technological products | Source URL, version/date, legal/privacy reviewer, mapped retention/export/delete requirements | Missing |
-| Pedagogical management software standard | Source URL, version/date, required data fields/interfaces, test mapping | Missing |
-| Technology compatibility standard | Source URL, browser/device/accessibility criteria, acceptance matrix | Missing |
-| Scheduling and teaching staff management standard | Source URL, version/date, scheduling/teacher workload/interface requirements | Missing |
-| Ministry IDM/OIDC/SAML integration requirements | IdP metadata source, claim mapping, MFA assurance, logout/session rules | Missing |
-| Official data exchange/API interface specification | Interface version, transport/security requirements, conformance examples | Missing |
+| --- | --- | --- | --- |
+| `https://pop.education.gov.il/sherutey-tiksuv-bachinuch/data-security-e-learning/` | Public context only | Safe digital learning environments, privacy, cyber reporting, approved technology tools | Security controls, incident response, privacy, audit evidence |
+| `https://pop.education.gov.il/sherutey-tiksuv-bachinuch/ict-technology-coordinator-portfolio/school-electronic-organization/` | Public context only | Unified identification, approved digital tools, pedagogical management software functions, information security | SSO/OIDC readiness, route inventory, role/access controls |
+| `https://edu-tech.education.gov.il/taknot/kol-kore/authorities-genetic-laboratory/` | Public context only | Approved technological suppliers, Ministry security/privacy review, IDM connection references | Supplier approval dependency, SSO/IDM requirement tracking |
+| `https://www.mr.gov.il/` | Procurement context only | Procurement publications and tender metadata | Procurement context; not a substitute for supplier security standards |
 
 ## Intake Procedure
 
-1. Download the official document from the Ministry or supplier portal.
-2. Store the original file in the controlled evidence archive outside production runtime storage.
-3. Record SHA-256, source URL, retrieval timestamp, document title, version, and reviewer.
-4. Update `docs/MINISTRY_COMPLIANCE_MATRIX.md` from `Needs Verification` to mapped requirement rows only after the exact text is reviewed.
-5. Add or update automated tests for every control that can be verified in code.
-6. Keep a signed/manual evidence item for controls that require staging, legal, procurement, or Ministry approval.
+1. Download the original official document from `sapakim.education.gov.il` or the approved Ministry source.
+2. Store the original unmodified file in `docs/official-ministry-standards/`.
+3. Compute SHA-256 for the archived file and record it in the intake register.
+4. Record source URL, document title, version/publication date, download date, archive path, and review owner.
+5. Change status to `Downloaded` only after URL, archive path, and SHA-256 are recorded.
+6. Map clauses to `docs/MINISTRY_COMPLIANCE_MATRIX.md`, tests, scripts, and manual evidence; then change status to `Mapped`.
+7. Obtain owner/legal/security approval; then change status to `Approved`.
+8. Update `docs/MINISTRY_EVIDENCE_INDEX.md` and `docs/MINISTRY_TEST_PLAN.md`.
 
-## Non-Compliance Guardrail
+## Mapping Rules
 
-Until the official supplier documents are obtained, repository evidence can support technical readiness only. External statements should use wording such as:
+- Every mapped clause must reference a control ID from this register.
+- Every code-verifiable requirement should have an automated test or script.
+- Every staging/infrastructure/legal requirement should have a dated manual evidence artifact.
+- Public context pages may be cited separately, but must not close a `MOS-*` official standard row.
+- If an official document conflicts with current tests/docs, the Ministry document controls and the gap must be added to `docs/MINISTRY_COMPLIANCE_MATRIX.md`.
 
-`Technical readiness baseline exists; formal Ministry supplier compliance requires official standards intake, control mapping, and Ministry/security review.`
+## Current Result
+
+As of 2026-08-13, all official Ministry supplier documents in this register are `Missing`.
+
+Repository evidence supports security readiness tracking, but not formal Ministry compliance certification.
