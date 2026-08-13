@@ -18,6 +18,12 @@ Strict handoff mode for real staging:
 STAGING_URL=https://staging-api.example.invalid STAGING_EVIDENCE_STRICT=true npm run security:staging-evidence
 ```
 
+Run live DAST before strict handoff so the evidence pack can attach OWASP ZAP artifacts:
+
+```bash
+STAGING_URL=https://staging-api.example.invalid ZAP_USE_DOCKER=true npm run security:dast
+```
+
 Strict mode with live DB guardrail probes after `prisma migrate deploy`:
 
 ```bash
@@ -30,6 +36,8 @@ STAGING_URL=https://staging-api.example.invalid STAGING_EVIDENCE_STRICT=true STA
 | -------- | ------- |
 | `reports/security/staging-evidence-pack.json` | Machine-readable evidence for CI/release archive. |
 | `reports/security/staging-evidence-pack.md` | Human-readable summary for Ministry/security review. |
+| `reports/security/dast-baseline.json` | Normalized live DAST/ZAP status, target, threshold, and finding counts. |
+| `reports/security/zap-baseline-report.html` | Human-readable OWASP ZAP baseline report. |
 
 ## Evidence Covered
 
@@ -41,10 +49,12 @@ STAGING_URL=https://staging-api.example.invalid STAGING_EVIDENCE_STRICT=true STA
 | Audit append-only | Live DB mode creates a probe `AuditLog` row and verifies direct update/delete are blocked. |
 | Lifecycle evidence FKs | Live DB mode verifies `reports_exports_school_id_fkey` and `backup_jobs_school_id_fkey` use `ON DELETE RESTRICT`. |
 | Backup encryption env | Verifies `SOM_BACKUP_PASSPHRASE` or `SOM_BACKUP_PASSPHRASE_FILE` is configured without printing the value. |
-| Release artifacts | Checks SBOM, license report, npm audit baseline, SAST baseline, and tracks DAST as required for strict staging handoff. |
+| Release artifacts | Checks SBOM, license report, npm audit baseline, SAST baseline, and requires DAST/ZAP JSON and HTML evidence for strict staging handoff. |
+| OWASP ZAP DAST | `security:dast` rejects HTTP, localhost, and placeholder targets; CI runs ZAP through Docker and archives JSON/HTML evidence. |
 
 ## Handoff Rule
 
 - Local mode may contain `pending` live checks.
+- Run `npm run security:dast` against the real HTTPS staging URL before Ministry handoff.
 - Ministry/staging handoff must run strict mode with a real `STAGING_URL`.
 - After DB migration deployment, run strict mode with `STAGING_EVIDENCE_LIVE_DB=true` and archive the JSON/Markdown outputs.

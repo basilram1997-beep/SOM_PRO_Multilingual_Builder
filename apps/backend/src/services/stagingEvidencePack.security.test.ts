@@ -31,6 +31,8 @@ test("staging evidence pack script verifies live deployment, DB guardrails, back
   assert.match(script, /sbom\.cyclonedx\.json/, "script should require SBOM evidence");
   assert.match(script, /sast-baseline\.json/, "script should require SAST evidence");
   assert.match(script, /dast-baseline\.json/, "script should track DAST evidence");
+  assert.match(script, /zap-baseline-report\.html/, "script should track OWASP ZAP HTML evidence");
+  assert.match(script, /dastReport\.status !== "passed"/, "script should reject failed DAST evidence artifacts");
   assert.match(script, /staging-evidence-pack\.json/, "script should write JSON evidence");
   assert.match(script, /staging-evidence-pack\.md/, "script should write markdown evidence");
 

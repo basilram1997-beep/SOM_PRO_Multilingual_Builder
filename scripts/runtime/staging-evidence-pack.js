@@ -253,6 +253,14 @@ function artifactSummary(relativePath) {
   return { path: relativePath, exists: true, bytes: stat.size, modifiedAt: stat.mtime.toISOString() };
 }
 
+function readJsonArtifact(relativePath) {
+  try {
+    return JSON.parse(read(relativePath));
+  } catch (failure) {
+    return { parseError: failure.message };
+  }
+}
+
 function checkReleaseArtifacts() {
   const alwaysRequired = [
     "reports/security/sbom.cyclonedx.json",
@@ -262,17 +270,27 @@ function checkReleaseArtifacts() {
     "reports/security/sast-baseline.json"
   ];
   const liveRequired = [
-    "reports/security/dast-baseline.json"
+    "reports/security/dast-baseline.json",
+    "reports/security/zap-baseline-report.html"
   ];
   const required = [...alwaysRequired, ...liveRequired];
   const optional = ["reports/security/api-route-inventory.json", "reports/security/desktop-signing-report.json"];
   const artifacts = [...required, ...optional].map(artifactSummary);
   const missingAlways = artifacts.filter((item) => alwaysRequired.includes(item.path) && !item.exists);
   const missingLive = artifacts.filter((item) => liveRequired.includes(item.path) && !item.exists);
+  const dastReport = exists("reports/security/dast-baseline.json") ? readJsonArtifact("reports/security/dast-baseline.json") : null;
+  const failedDast = dastReport && dastReport.status !== "passed";
   if (missingAlways.length) {
     return status(false, "Required release security artifacts are missing", {
       artifacts,
       missingRequired: missingAlways.map((item) => item.path)
+    });
+  }
+  if (failedDast) {
+    return status(false, "Live staging DAST artifact is present but not passing", {
+      artifacts,
+      status: dastReport.status || "unknown",
+      summary: dastReport.summary || dastReport.parseError || "No DAST summary"
     });
   }
   if (missingLive.length) {

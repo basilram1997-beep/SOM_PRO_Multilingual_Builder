@@ -22,7 +22,9 @@ test("CI includes real SAST, release security artifacts, and DAST evidence jobs"
 
   assert.match(ci, /dast_baseline:/, "CI should include a DAST baseline job");
   assert.match(ci, /STAGING_URL:\s*\$\{\{\s*secrets\.STAGING_URL\s*\}\}/, "DAST should target the configured staging URL secret");
+  assert.match(ci, /ZAP_USE_DOCKER:\s*"true"/, "DAST should run OWASP ZAP in CI");
   assert.match(ci, /npm run security:dast/, "DAST job should use the canonical DAST script");
+  assert.match(ci, /zap-baseline-report\.html/, "DAST job should archive the ZAP HTML report");
 });
 
 test("package scripts expose SBOM, license, SAST, DAST, and release evidence commands", () => {
@@ -31,7 +33,8 @@ test("package scripts expose SBOM, license, SAST, DAST, and release evidence com
   assert.equal(pkg.scripts["security:sbom"], "node scripts/generate-sbom.js");
   assert.equal(pkg.scripts["security:licenses"], "node scripts/license-report.js");
   assert.equal(pkg.scripts["security:sast"], "node scripts/runtime/sast-baseline.js");
-  assert.equal(pkg.scripts["security:dast"], "node scripts/runtime/dast-baseline.js");
+  assert.equal(pkg.scripts["security:dast"], "node scripts/runtime/dast-baseline.js && npm run security:zap");
+  assert.equal(pkg.scripts["security:zap"], "node scripts/runtime/zap-baseline.js");
   assert.match(pkg.scripts["security:baseline"], /security:sbom/);
   assert.match(pkg.scripts["security:baseline"], /security:licenses/);
   assert.match(pkg.scripts["security:release-evidence"], /security:baseline/);
@@ -62,6 +65,7 @@ test("SBOM and license scripts generate reviewable release artifacts", () => {
 test("SAST and DAST scripts fail closed for missing controls and unsafe staging targets", () => {
   const sast = read("../../scripts/runtime/sast-baseline.js");
   const dast = read("../../scripts/runtime/dast-baseline.js");
+  const zap = read("../../scripts/runtime/zap-baseline.js");
 
   assert.match(sast, /CodeQL CI workflow is incomplete/, "SAST baseline should require CodeQL init in CI");
   assert.match(sast, /npm run lint/, "SAST baseline should include local lint checks");
@@ -73,4 +77,9 @@ test("SAST and DAST scripts fail closed for missing controls and unsafe staging 
   assert.match(dast, /example\\\.invalid\|your-domain/, "DAST should reject placeholder targets");
   assert.match(dast, /strict-transport-security/, "DAST should verify HSTS");
   assert.match(dast, /dast-baseline\.json/, "DAST should write an evidence artifact");
+
+  assert.match(zap, /STAGING_URL must use https:\/\//, "ZAP should reject non-HTTPS targets");
+  assert.match(zap, /ghcr\.io\/zaproxy\/zaproxy:stable/, "ZAP should support repeatable Docker scans");
+  assert.match(zap, /zap-baseline-report\.html/, "ZAP should write an HTML evidence artifact");
+  assert.match(zap, /highOrCritical/, "ZAP should fail on high or critical findings");
 });
