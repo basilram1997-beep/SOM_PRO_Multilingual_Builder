@@ -56,6 +56,9 @@ function assertRealHttpsUrl(value, key) {
   if (!url) return status(false, `${key} is not a valid URL`);
   if (url.protocol !== "https:") return status(false, `${key} must use https://`, { protocol: url.protocol });
   if (hasPlaceholder(url.hostname)) return status(false, `${key} must not be local or placeholder`, { host: url.hostname });
+  if (strict && /\.trycloudflare\.com$/i.test(url.hostname)) {
+    return status(false, `${key} must use a stable staging hostname in strict mode, not a temporary Quick Tunnel`, { host: url.hostname });
+  }
   return status(true, `${key} is a real HTTPS URL`, { origin: url.origin });
 }
 

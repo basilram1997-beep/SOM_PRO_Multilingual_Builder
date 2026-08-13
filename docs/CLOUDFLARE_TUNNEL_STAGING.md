@@ -63,6 +63,22 @@ npm run e2e:clean
 
 Quick Tunnel must not be used for formal DAST, external pentest sign-off, or Ministry submission because the hostname changes and there is no managed access policy.
 
+Collect temporary demo evidence after a Quick Tunnel is running:
+
+```powershell
+$env:SOM_QUICK_TUNNEL_URL="https://your-random-name.trycloudflare.com"
+npm run staging:tunnel:evidence
+```
+
+This writes:
+
+```text
+reports/security/cloudflare-quick-tunnel-trial.json
+reports/security/cloudflare-quick-tunnel-trial.md
+```
+
+The report is classified as temporary external reachability proof only. Strict staging evidence rejects `*.trycloudflare.com`; use a Named Tunnel or VPS hostname before Ministry submission.
+
 ## Named Tunnel Target
 
 Use a Named Tunnel when a stable staging hostname is available. The hostname can be under a future professional domain, for example:

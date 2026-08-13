@@ -19,6 +19,7 @@ Do not claim Ministry/security readiness until every `Required for Ministry atta
 | Ready in repo | LSE-003 | Ready | Staging evidence pack generator exists. | `scripts/runtime/staging-evidence-pack.js`, `docs/STAGING_EVIDENCE_PACK.md` |
 | Ready in repo | LSE-004 | Ready | DAST/ZAP gates exist and reject unsafe staging targets. | `scripts/runtime/dast-baseline.js`, `scripts/runtime/zap-baseline.js` |
 | Ready in repo | LSE-005 | Ready | External pentest handoff and sign-off templates exist. | `docs/EXTERNAL_PENTEST_HANDOFF_PACK.md`, `docs/EXTERNAL_PENTEST_SIGNOFF_TEMPLATE.md` |
+| Temporary external proof | LSE-TMP-001 | Demo only | Quick Tunnel can prove temporary external reachability, but it is not Ministry submission evidence and strict staging rejects `*.trycloudflare.com`. | `reports/security/cloudflare-quick-tunnel-trial.json`, `reports/security/cloudflare-quick-tunnel-trial.md` |
 | Must run on staging | LSE-101 | Pending live run | Configure a real `STAGING_URL=https://...` that is not localhost, IP-only, or placeholder. | `docs/PHASE_10_STAGING_VERIFICATION_REPORT.md` |
 | Must run on staging | LSE-102 | Pending live run | Run live ZAP/DAST against the real staging URL. | `reports/security/dast-baseline.json`, `reports/security/dast-zap-raw.json`, `reports/security/zap-baseline-report.html` |
 | Must run on staging | LSE-103 | Pending live run | Run strict staging evidence pack after DAST artifacts exist. | `reports/security/staging-evidence-pack.json`, `reports/security/staging-evidence-pack.md` |
@@ -55,6 +56,7 @@ npm run security:pentest:prep
 | Evidence ID | Pass criteria |
 | --- | --- |
 | LSE-101 | `STAGING_URL` is `https://`, externally reachable, not placeholder/local, and points to staging only. |
+| LSE-TMP-001 | Quick Tunnel evidence has `ministrySubmissionEvidence: false` and is used only as temporary external reachability proof. |
 | LSE-102 | `reports/security/dast-baseline.json` has `status: "passed"` and `zap-baseline-report.html` is archived. |
 | LSE-103 | Strict staging evidence exits with code `0` and has no failed checks. |
 | LSE-104 | Live DB mode verifies the audit mutation probe blocks update/delete and FK delete rules are `RESTRICT`. |

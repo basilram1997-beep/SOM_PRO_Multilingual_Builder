@@ -150,6 +150,7 @@
     "staging:tunnel:proxy": "node scripts/runtime/local-cloudflare-proxy.js",
     "staging:tunnel:check": "node scripts/runtime/cloudflare-tunnel-operator.js --check",
     "staging:tunnel:write-config": "node scripts/runtime/cloudflare-tunnel-operator.js --write-config",
+    "staging:tunnel:evidence": "node scripts/runtime/cloudflare-quick-tunnel-evidence.js",
     "staging:check": "node scripts/staging-check.js",
     "staging:smoke": "node scripts/staging-smoke.js"
   },
