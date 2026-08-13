@@ -14,6 +14,8 @@ Required jurisdiction: Israel.
 
 ## What To Request From The VPS Provider
 
+Use `docs/ISRAEL_HOSTING_PROVIDER_REQUEST_CHECKLIST.md` as the provider-facing request and comparison template.
+
 | Requirement | Minimum answer before purchase |
 |---|---|
 | Data center / region | Written statement that the VPS and storage are hosted in Israel |

@@ -83,6 +83,8 @@ Before buying or provisioning hosting, collect:
 6. DPA/security assurance documents.
 7. Whether Cloudflare Named Tunnel or direct HTTPS ingress will be used.
 
+Use `docs/ISRAEL_HOSTING_PROVIDER_REQUEST_CHECKLIST.md` to request and score provider answers consistently.
+
 ## Current Recommendation
 
 Proceed with demos through Quick Tunnel only for fake data. For real staging, choose either:
