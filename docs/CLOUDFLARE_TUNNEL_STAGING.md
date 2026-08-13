@@ -89,6 +89,12 @@ Secret values such as `DATABASE_URL`, `JWT_SECRET`, license secrets, backup pass
 
 ## Named Tunnel Setup
 
+Run the local operator check before creating a tunnel:
+
+```powershell
+npm run staging:tunnel:check
+```
+
 The operator creates the tunnel outside Git:
 
 ```powershell
@@ -107,6 +113,25 @@ ingress:
   - hostname: staging.example.com
     service: http://127.0.0.1:8080
   - service: http_status:404
+```
+
+The repository ships only a safe example template:
+
+```text
+deploy/cloudflare/sompro-staging.tunnel.example.yml
+```
+
+When a real hostname exists, generate a local ignored config:
+
+```powershell
+$env:SOM_CLOUDFLARE_TUNNEL_HOSTNAME="staging.example.com"
+npm run staging:tunnel:write-config
+```
+
+The generated file is intentionally ignored:
+
+```text
+deploy/cloudflare/sompro-staging.tunnel.yml
 ```
 
 The service at `127.0.0.1:8080` may be the local proxy during a temporary Windows staging run, or Nginx/container ingress in a server deployment.

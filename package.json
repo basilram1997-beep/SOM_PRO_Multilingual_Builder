@@ -148,6 +148,8 @@
     "staging:prepare-duckdns": "node scripts/runtime/prepare-duckdns-staging-env.js",
     "staging:diagnose-duckdns": "node scripts/runtime/duckdns-staging-diagnose.js",
     "staging:tunnel:proxy": "node scripts/runtime/local-cloudflare-proxy.js",
+    "staging:tunnel:check": "node scripts/runtime/cloudflare-tunnel-operator.js --check",
+    "staging:tunnel:write-config": "node scripts/runtime/cloudflare-tunnel-operator.js --write-config",
     "staging:check": "node scripts/staging-check.js",
     "staging:smoke": "node scripts/staging-smoke.js"
   },

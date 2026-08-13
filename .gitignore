@@ -48,6 +48,13 @@ apps/*/.env.*
 !apps/*/.env.example
 !apps/*/.env.*.example
 
+# Local Cloudflare Tunnel credentials/config with real tunnel identifiers
+deploy/cloudflare/*.yml
+deploy/cloudflare/*.yaml
+!deploy/cloudflare/*.example.yml
+!deploy/cloudflare/*.example.yaml
+.cloudflared/
+
 # OS/editor files
 .DS_Store
 Thumbs.db

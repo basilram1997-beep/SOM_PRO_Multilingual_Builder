@@ -1,0 +1,10 @@
+# Example only. Copy/generate a local untracked config before use.
+# Do not commit real tunnel IDs, account IDs, tokens, or credentials paths.
+
+tunnel: sompro-staging
+credentials-file: C:\secure\cloudflared\sompro-staging.json
+
+ingress:
+  - hostname: staging.example.com
+    service: http://127.0.0.1:8080
+  - service: http_status:404
