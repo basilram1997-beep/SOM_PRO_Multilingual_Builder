@@ -91,3 +91,5 @@ Proceed with demos through Quick Tunnel only for fake data. For real staging, ch
 - A managed cloud/hosting provider with Israel data residency, managed database, KMS/secret manager, logs, backups, and support evidence.
 
 The repository must continue to mark provider/KMS/data-region evidence as pending until a real provider is selected and documented.
+
+If the selected path is a VPS, provision it using `docs/ISRAEL_VPS_STAGING_PROVISIONING.md`.
