@@ -4,6 +4,8 @@ Review date: 2026-08-12
 
 Purpose: produce one Ministry-reviewable evidence bundle proving that staging is not only configured in code, but checked against live HTTPS, health, database guardrails, backup encryption settings, and release security artifacts.
 
+For final Ministry handoff, close the dated execution checklist in `docs/LIVE_STAGING_EVIDENCE_CLOSURE.md` after generating this pack.
+
 ## Commands
 
 Generate local/static evidence and mark unavailable live checks as pending:
@@ -38,6 +40,15 @@ STAGING_URL=https://staging-api.example.invalid STAGING_EVIDENCE_STRICT=true STA
 | `reports/security/staging-evidence-pack.md` | Human-readable summary for Ministry/security review. |
 | `reports/security/dast-baseline.json` | Normalized live DAST/ZAP status, target, threshold, and finding counts. |
 | `reports/security/zap-baseline-report.html` | Human-readable OWASP ZAP baseline report. |
+
+## Closure Evidence IDs
+
+| Evidence ID | Source |
+| --- | --- |
+| LSE-102 | Live ZAP/DAST output required before strict handoff. |
+| LSE-103 | Strict staging evidence pack output. |
+| LSE-104 | Live DB guardrail probes after migration deployment. |
+| LSE-202 | Ministry attachment for JSON/Markdown staging evidence. |
 
 ## Evidence Covered
 
