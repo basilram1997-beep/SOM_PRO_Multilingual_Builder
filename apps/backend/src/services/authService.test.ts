@@ -180,6 +180,7 @@ test("loginWithPassword returns a token and user on the happy path", async () =>
 
   try {
     const result = await loginWithPassword("admin@example.com", password);
+    assert.ok(result.token);
     assert.ok(result.token.length > 10);
     assert.equal(result.user.id, "admin-1");
     assert.equal(result.user.role, "ADMIN");

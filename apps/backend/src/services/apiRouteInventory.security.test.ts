@@ -1,7 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createRequire } from "node:module";
 
-const { buildApiRouteInventory, renderApiRouteInventoryMarkdown } = require("../../../../scripts/runtime/api-route-inventory.js");
+const requireScript = createRequire(__filename);
+const { buildApiRouteInventory, renderApiRouteInventoryMarkdown } = requireScript(
+  "../../../../scripts/runtime/api-route-inventory.js"
+);
 
 const publicRoutes = new Set([
   "GET /health",

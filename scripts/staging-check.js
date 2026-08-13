@@ -46,7 +46,6 @@ const requiredKeys = [
 ];
 
 const publicUrlKeys = [
-  "VITE_API_URL",
   "SOM_API_URL",
   "SOM_LICENSE_SERVER_URL",
   "SOM_PRO_LICENSE_SERVER_URL",
@@ -89,6 +88,10 @@ function isHttpsUrl(value) {
   }
 }
 
+function isSameOriginApiPath(value) {
+  return value === "/api";
+}
+
 function hasPlaceholder(value) {
   return /CHANGE_ME|your-domain|example\.invalid|localhost|127\.0\.0\.1|placeholder/i.test(value);
 }
@@ -122,7 +125,7 @@ if (/HTTPS placeholder|your-domain\.com|TODO\s+HTTPS/i.test(nginx)) {
 const compose = fs.readFileSync(composePath, "utf8");
 assertContains(compose, /-\s+"443:443"/, "production compose publishes 443");
 assertContains(compose, /https:\/\/127\.0\.0\.1\/healthz/, "nginx healthcheck uses HTTPS health endpoint");
-assertContains(compose, /VITE_API_URL:\s+\$\{VITE_API_URL:\?set VITE_API_URL to the public HTTPS API origin\}/, "frontend build requires explicit HTTPS API URL");
+assertContains(compose, /VITE_API_URL:\s+\$\{VITE_API_URL:-\/api\}/, "frontend build defaults to same-origin /api");
 if (/https:\/\/api\.your-domain\.com/i.test(compose)) {
   fail("production compose must not include a placeholder API URL fallback");
 }
@@ -140,6 +143,8 @@ for (const key of publicUrlKeys) {
     fail(`${key} must not point to localhost or your-domain in staging examples`);
   }
 }
+
+if (!isSameOriginApiPath(exampleEnv.VITE_API_URL)) fail("VITE_API_URL must be /api in .env.staging.example");
 
 if (exampleEnv.SOM_RUNTIME_MODE !== "saas") fail("SOM_RUNTIME_MODE must be saas for staging");
 if (exampleEnv.NODE_ENV !== "production") fail("NODE_ENV must be production for staging");
@@ -163,6 +168,7 @@ if (fs.existsSync(actualEnvPath)) {
     if (!isHttpsUrl(value)) fail(`${key} must use https:// in .env.staging`);
     if (hasPlaceholder(value)) fail(`${key} contains a placeholder or local host in .env.staging`);
   }
+  if (!isSameOriginApiPath(actualEnv.VITE_API_URL)) fail("VITE_API_URL must be /api in .env.staging");
   for (const key of secretLikeKeys) {
     const value = actualEnv[key] || "";
     if (!value || hasPlaceholder(value)) fail(`${key} must be replaced with a real staging secret in .env.staging`);

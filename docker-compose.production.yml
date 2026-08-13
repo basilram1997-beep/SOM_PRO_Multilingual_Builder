@@ -88,7 +88,7 @@
       context: .
       dockerfile: apps/frontend/Dockerfile.production
       args:
-        VITE_API_URL: ${VITE_API_URL:?set VITE_API_URL to the public HTTPS API origin}
+        VITE_API_URL: ${VITE_API_URL:-/api}
     restart: unless-stopped
     expose:
       - "80"

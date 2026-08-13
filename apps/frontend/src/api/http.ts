@@ -2,6 +2,7 @@ import { apiErrorMessage, isLocalApiUrl, readResponseBody } from "./httpUtils";
 import { removeStoredValue } from "../lib/browserStorage";
 
 const LOCAL_API_URL = "http://localhost:4000";
+const SAME_ORIGIN_API_URL = "/api";
 const ENV_API_URL = (import.meta.env.VITE_API_URL || "").trim();
 const DESKTOP_DEVICE = window.somDesktop?.device;
 const REQUEST_TIMEOUT_MS = 20_000;
@@ -75,7 +76,7 @@ function resolveApiUrl() {
   if (desktopApiUrl) return desktopApiUrl;
   if (desktopMode === "local-trial" || desktopMode === "development") return LOCAL_API_URL;
   if (window.location.protocol === "file:" || isLoopbackHost(window.location.hostname)) return LOCAL_API_URL;
-  return ENV_API_URL || LOCAL_API_URL;
+  return ENV_API_URL || SAME_ORIGIN_API_URL;
 }
 
 export const API_URL = resolveApiUrl();

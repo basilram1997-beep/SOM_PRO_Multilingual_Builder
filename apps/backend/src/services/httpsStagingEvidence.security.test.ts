@@ -23,6 +23,10 @@ function assertHttps(value: string, label: string) {
   assert.equal(new URL(value).protocol, "https:", `${label} must use HTTPS`);
 }
 
+function assertSameOriginApi(value: string, label: string) {
+  assert.equal(value, "/api", `${label} must use same-origin /api`);
+}
+
 test("production nginx enforces HTTPS, HSTS, and reverse proxy security headers", () => {
   const nginx = read("../../deploy/nginx/sompro.conf");
 
@@ -47,15 +51,16 @@ test("production compose exposes HTTPS and fails closed on placeholder API origi
   assert.match(compose, /-\s+"80:80"/, "compose should expose HTTP for redirect and ACME challenge");
   assert.match(compose, /-\s+"443:443"/, "compose should expose HTTPS");
   assert.match(compose, /https:\/\/127\.0\.0\.1\/healthz/, "nginx healthcheck should exercise the HTTPS endpoint");
-  assert.match(compose, /VITE_API_URL:\s+\$\{VITE_API_URL:\?set VITE_API_URL to the public HTTPS API origin\}/, "frontend build should require explicit API URL");
+  assert.match(compose, /VITE_API_URL:\s+\$\{VITE_API_URL:-\/api\}/, "frontend build should default to same-origin /api");
   assert.doesNotMatch(compose, /https:\/\/api\.your-domain\.com/i, "compose must not fallback to a placeholder production API");
 });
 
 test("staging environment examples require HTTPS public URLs and avoid local placeholders", () => {
   const rootEnv = parseEnv(read("../../.env.staging.example"));
   const backendEnv = parseEnv(read(".env.staging.example"));
-  const urlKeys = ["VITE_API_URL", "SOM_API_URL", "SOM_LICENSE_SERVER_URL", "CORS_ORIGIN"];
+  const urlKeys = ["SOM_API_URL", "SOM_LICENSE_SERVER_URL", "CORS_ORIGIN"];
 
+  assertSameOriginApi(rootEnv.VITE_API_URL, "root VITE_API_URL");
   for (const key of urlKeys) {
     assertHttps(rootEnv[key], `root ${key}`);
     assert.doesNotMatch(rootEnv[key], /localhost|127\.0\.0\.1|your-domain/i, `root ${key} should not be local or a legacy placeholder`);
@@ -77,11 +82,13 @@ test("staging smoke script validates HTTPS, TLS config, and real env secret repl
 
   assert.match(script, /actualEnvPath/, "script should inspect a real .env.staging when present");
   assert.match(script, /function isHttpsUrl/, "script should parse URLs instead of string-prefix guessing");
+  assert.match(script, /function isSameOriginApiPath/, "script should allow same-origin frontend API paths");
   assert.match(script, /function hasPlaceholder/, "script should centralize placeholder detection");
   assert.match(script, /listen\\s\+443\\s\+ssl\\s\+http2\\s\+default_server/, "script should verify nginx 443");
   assert.match(script, /nginx redirects HTTP to HTTPS/, "script should verify HTTP to HTTPS redirect");
   assert.match(script, /Strict-Transport-Security/, "script should verify HSTS");
   assert.match(script, /nginx healthcheck uses HTTPS health endpoint/, "script should verify HTTPS healthcheck");
   assert.match(script, /example\\\.invalid/, "script should fail real .env.staging when example placeholder domains remain");
+  assert.match(script, /VITE_API_URL must be \/api/, "script should require same-origin VITE API for staging web");
   assert.match(script, /JWT_SECRET.*real staging secret/s, "script should reject placeholder staging secrets");
 });
