@@ -151,6 +151,8 @@
     "staging:tunnel:check": "node scripts/runtime/cloudflare-tunnel-operator.js --check",
     "staging:tunnel:write-config": "node scripts/runtime/cloudflare-tunnel-operator.js --write-config",
     "staging:tunnel:evidence": "node scripts/runtime/cloudflare-quick-tunnel-evidence.js",
+    "staging:tunnel:demo": "node scripts/runtime/cloudflare-external-demo.js",
+    "staging:tunnel:demo:cleanup": "node scripts/runtime/cloudflare-external-demo.js --cleanup",
     "staging:check": "node scripts/staging-check.js",
     "staging:smoke": "node scripts/staging-smoke.js"
   },

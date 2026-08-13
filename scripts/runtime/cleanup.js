@@ -24,12 +24,15 @@ const staleProcessNeedles = [
   "start:license-server",
   "apps/license-server",
   "scripts/e2e-server.js",
+  "scripts/runtime/cloudflare-external-demo.js",
+  "scripts/runtime/local-cloudflare-proxy.js",
   "npm run dev:backend",
   "npm run dev -w apps/backend",
+  "staging:tunnel:proxy",
   "tsx watch src/server.ts",
   "vite --host 0.0.0.0 --port 4188"
 ];
-const stalePorts = [4000, 4100, 4188];
+const stalePorts = [4000, 4100, 4188, 8080];
 
 function resolveInsideProject(target) {
   const resolved = path.resolve(projectRoot, target);

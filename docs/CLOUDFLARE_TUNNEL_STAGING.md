@@ -33,6 +33,18 @@ Cloudflare Tunnel can replace public inbound ports. The application still uses t
 
 Quick Tunnel is useful when the router cannot forward ports. It is public and temporary, so use fake test data only.
 
+Use the one-command external demo runner when you want to start the full local stack, expose it temporarily, and collect demo evidence:
+
+```powershell
+npm.cmd run staging:tunnel:demo
+```
+
+Stop the demo:
+
+```powershell
+npm.cmd run staging:tunnel:demo:cleanup
+```
+
 Start the local same-origin proxy:
 
 ```powershell

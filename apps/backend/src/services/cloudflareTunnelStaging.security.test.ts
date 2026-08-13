@@ -23,6 +23,8 @@ test("Cloudflare tunnel staging document separates quick demo from named evidenc
   assert.match(doc, /npm run staging:tunnel:check/);
   assert.match(doc, /npm run staging:tunnel:write-config/);
   assert.match(doc, /npm run staging:tunnel:evidence/);
+  assert.match(doc, /npm\.cmd run staging:tunnel:demo/);
+  assert.match(doc, /npm\.cmd run staging:tunnel:demo:cleanup/);
   assert.match(doc, /cloudflare-quick-tunnel-trial\.json/);
   assert.match(doc, /deploy\/cloudflare\/sompro-staging\.tunnel\.example\.yml/);
 });
@@ -46,6 +48,8 @@ test("Cloudflare tunnel operator scripts avoid committed secrets and reject unst
   assert.match(packageJson, /"staging:tunnel:check": "node scripts\/runtime\/cloudflare-tunnel-operator\.js --check"/);
   assert.match(packageJson, /"staging:tunnel:write-config": "node scripts\/runtime\/cloudflare-tunnel-operator\.js --write-config"/);
   assert.match(packageJson, /"staging:tunnel:evidence": "node scripts\/runtime\/cloudflare-quick-tunnel-evidence\.js"/);
+  assert.match(packageJson, /"staging:tunnel:demo": "node scripts\/runtime\/cloudflare-external-demo\.js"/);
+  assert.match(packageJson, /"staging:tunnel:demo:cleanup": "node scripts\/runtime\/cloudflare-external-demo\.js --cleanup"/);
   assert.match(gitignore, /deploy\/cloudflare\/\*\.yml/);
   assert.match(gitignore, /!deploy\/cloudflare\/\*\.example\.yml/);
   assert.match(example, /staging\.example\.com/);
@@ -62,6 +66,7 @@ test("Quick Tunnel evidence is classified as demo-only and strict staging reject
   const closure = read("../../docs/LIVE_STAGING_EVIDENCE_CLOSURE.md");
   const evidenceIndex = read("../../docs/MINISTRY_EVIDENCE_INDEX.md");
   const testPlan = read("../../docs/MINISTRY_TEST_PLAN.md");
+  const demoReport = read("../../docs/CLOUDFLARE_QUICK_TUNNEL_DEMO_REPORT.md");
 
   assert.match(evidenceScript, /SOM_QUICK_TUNNEL_URL/);
   assert.match(evidenceScript, /\.trycloudflare\\\.com/);
@@ -71,7 +76,35 @@ test("Quick Tunnel evidence is classified as demo-only and strict staging reject
   assert.match(stagingEvidence, /strict && \/\\\.trycloudflare\\\.com\$/i);
   assert.match(closure, /LSE-TMP-001/);
   assert.match(evidenceIndex, /Cloudflare Quick Tunnel trial evidence/);
+  assert.match(evidenceIndex, /CLOUDFLARE_QUICK_TUNNEL_DEMO_REPORT\.md/);
   assert.match(testPlan, /Cloudflare Quick Tunnel trial evidence/);
+  assert.match(demoReport, /temporary external reachability proof only/i);
+  assert.match(demoReport, /Ministry submission evidence \| No/);
+  assert.match(demoReport, /Registered tunnel connection/);
+});
+
+test("one-command external demo runner starts local stack and remains demo-only", () => {
+  const runner = read("../../scripts/runtime/cloudflare-external-demo.js");
+  const cleanup = read("../../scripts/runtime/cleanup.js");
+  const evidenceIndex = read("../../docs/MINISTRY_EVIDENCE_INDEX.md");
+  const testPlan = read("../../docs/MINISTRY_TEST_PLAN.md");
+
+  assert.match(runner, /npm\.cmd run dev:backend/);
+  assert.match(runner, /npm\.cmd run dev:frontend:e2e/);
+  assert.match(runner, /npm\.cmd run staging:tunnel:proxy/);
+  assert.match(runner, /cloudflare\/cloudflared:latest/);
+  assert.match(runner, /trycloudflare\\\.com/);
+  assert.match(runner, /Registered tunnel connection/);
+  assert.match(runner, /SOM_QUICK_TUNNEL_EVIDENCE_ATTEMPTS/);
+  assert.match(runner, /npm\.cmd run staging:tunnel:evidence/);
+  assert.match(runner, /external demo only: not stable staging and not Ministry submission evidence/);
+  assert.match(runner, /--cleanup/);
+  assert.match(runner, /cleanupDemoPorts/);
+  assert.match(cleanup, /cloudflare-external-demo\.js/);
+  assert.match(cleanup, /local-cloudflare-proxy\.js/);
+  assert.match(cleanup, /8080/);
+  assert.match(evidenceIndex, /One-command external demo runner/);
+  assert.match(testPlan, /One-command external demo runner/);
 });
 
 test("Ministry and environment docs link the Cloudflare tunnel staging option", () => {
