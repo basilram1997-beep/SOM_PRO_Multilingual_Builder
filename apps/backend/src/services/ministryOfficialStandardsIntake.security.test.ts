@@ -16,8 +16,11 @@ function parseRegisterRows(markdown: string) {
 test("official Ministry standards intake register blocks formal compliance claims until archived standards are mapped and approved", () => {
   const intake = read("../../docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md");
   const archiveReadme = read("../../docs/official-ministry-standards/README.md");
+  const packageJson = JSON.parse(read("../../package.json")) as { scripts: Record<string, string> };
+  const script = read("../../scripts/runtime/ministry-standards-intake.js");
 
   assert.ok(existsSync("../../docs/official-ministry-standards/.gitkeep"));
+  assert.equal(packageJson.scripts["ministry:standards:intake"], "node scripts/runtime/ministry-standards-intake.js");
   assert.match(intake, /sapakim\.education\.gov\.il/);
   assert.match(intake, /Security readiness evidence/);
   assert.match(intake, /Official Ministry compliance evidence/);
@@ -52,6 +55,12 @@ test("official Ministry standards intake register blocks formal compliance claim
   assert.match(archiveReadme, /original downloaded files without editing/);
   assert.match(archiveReadme, /SHA-256/);
   assert.match(archiveReadme, /Get-FileHash/);
+  assert.match(archiveReadme, /npm run ministry:standards:intake/);
+  assert.match(intake, /MINISTRY_STANDARDS_INTAKE_STRICT=true npm run ministry:standards:intake/);
+  assert.match(script, /official-standards-intake\.json/);
+  assert.match(script, /SHA-256 does not match archived file/);
+  assert.match(script, /status === "Approved"/);
+  assert.match(script, /Official Ministry standards intake is not submission-ready/);
 });
 
 test("Ministry-facing docs distinguish security readiness from formal official compliance evidence", () => {

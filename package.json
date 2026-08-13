@@ -56,6 +56,7 @@
     "security:release-evidence": "npm run security:baseline && npm run security:sast",
     "security:review": "npm run security:secrets && npm run security:deps && npm run security:sbom && npm run security:licenses && npm run compliance:test && npm run destructive:test && npm run security:sast && npm run test",
     "ministry:review-pack": "node scripts/runtime/ministry-review-pack.js",
+    "ministry:standards:intake": "node scripts/runtime/ministry-standards-intake.js",
     "compliance:test": "npm run test:compliance -w apps/backend",
     "destructive:test": "npm run test:destructive -w apps/backend",
     "acceptance:check": "node scripts/runtime/acceptance-check.js",

@@ -65,6 +65,29 @@ Public Ministry pages may inform readiness work, but they are not a substitute f
 7. Obtain owner/legal/security approval; then change status to `Approved`.
 8. Update `docs/MINISTRY_EVIDENCE_INDEX.md` and `docs/MINISTRY_TEST_PLAN.md`.
 
+## Intake Automation
+
+Generate the archive/register evidence report:
+
+```bash
+npm run ministry:standards:intake
+```
+
+Before any Ministry submission attempt, run strict mode:
+
+```bash
+MINISTRY_STANDARDS_INTAKE_STRICT=true npm run ministry:standards:intake
+```
+
+The script writes:
+
+```text
+reports/ministry-standards/official-standards-intake.json
+reports/ministry-standards/official-standards-intake.md
+```
+
+Strict mode must fail while any `MOS-*` row is not `Approved`, while an archived file is missing, or while a recorded SHA-256 does not match the archived file.
+
 ## Mapping Rules
 
 - Every mapped clause must reference a control ID from this register.

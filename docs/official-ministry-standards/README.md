@@ -23,3 +23,11 @@ sha256sum docs/official-ministry-standards/MOS-001_supplier-information-security
 ```powershell
 Get-FileHash docs\official-ministry-standards\MOS-001_supplier-information-security-standard_YYYY-MM-DD_original.pdf -Algorithm SHA256
 ```
+
+Repository automation:
+
+```bash
+npm run ministry:standards:intake
+```
+
+This command scans this directory, calculates SHA-256 hashes, and validates `docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md`.
