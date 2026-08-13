@@ -6,9 +6,10 @@ This document records the hosting assumptions SOM PRO should meet for regulated 
 
 ## Hosting location
 
-- Production should support hosting in Israel region infrastructure when required by the customer or ministry.
+- Production and Ministry-facing staging should use Israel region infrastructure unless a written legal/compliance approval says otherwise.
 - The deployment should be designed so that sensitive school data can remain inside the required jurisdiction.
 - The chosen region must be documented per deployment, and the production environment must not silently fall back to an unapproved region.
+- Provider selection and evidence requirements are tracked in `docs/HOSTING_PROVIDER_DECISION.md`.
 
 ## Network isolation
 
