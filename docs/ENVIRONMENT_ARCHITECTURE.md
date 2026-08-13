@@ -139,6 +139,8 @@ Nginx must preserve:
 - `X-Forwarded-Host`.
 - `/healthz` at the edge.
 
+Cloudflare Tunnel may sit in front of this same routing model when router port forwarding is blocked. The tunnel is infrastructure, not business logic: Quick Tunnel is acceptable only for temporary demos, while a Named Tunnel with a stable hostname is required before DAST, external tester handoff, or Ministry evidence closure. See `docs/CLOUDFLARE_TUNNEL_STAGING.md`.
+
 ## 9. Electron Configuration
 
 Electron local-trial and development modes may use localhost:
