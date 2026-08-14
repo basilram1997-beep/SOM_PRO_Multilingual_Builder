@@ -629,7 +629,7 @@ function buildCertificatePayload({ studentId, academicYear, issueDate, runId, se
     average: 91,
     grade: "A",
     result: "PASS",
-    approved: true,
+    saved: true,
     published: false,
     subjectRows: []
   };

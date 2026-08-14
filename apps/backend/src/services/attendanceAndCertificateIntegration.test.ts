@@ -426,13 +426,13 @@ test("grade rows can be converted into certificate data and preserved when seria
     behaviorLevel: "VERY_GOOD",
     behaviorNote: "Stable",
     teacherNotes: "Keeps progress",
-    adminNotes: "Approved",
+    adminNotes: "Saved",
     teacherSignature: "Homeroom",
     principalSignature: "Principal",
     average: null,
     grade: "",
     result: "PASS",
-    approved: true,
+    saved: true,
     published: false,
     subjectRows: rows
   } as never);
@@ -457,7 +457,7 @@ test("grade rows can be converted into certificate data and preserved when seria
     average: payload.average,
     grade: payload.grade,
     result: payload.result,
-    approved: payload.approved,
+    saved: payload.saved,
     published: payload.published,
     subjectRows: payload.subjectRows,
     createdAt: new Date("2026-07-20T00:00:00.000Z"),
@@ -484,6 +484,11 @@ test("grade rows can be converted into certificate data and preserved when seria
     "certificate save route should still exist"
   );
   assert.match(certificatesSource, /studentCertificate\.upsert\(/, "certificates should update the same saved row");
+  assert.match(
+    certificatesSource,
+    /LEGACY_CERTIFICATE_APPROVED_FIELD/,
+    "certificate saves should audit legacy clients that still submit approved"
+  );
   assert.match(gradeReportsSource, /reportsRouter\.get\("\/grades"/, "grades report route should exist");
   assert.match(gradeReportsSource, /studentGradeEntry\.findMany\(\{/, "grades report should read stored grade entries");
 });

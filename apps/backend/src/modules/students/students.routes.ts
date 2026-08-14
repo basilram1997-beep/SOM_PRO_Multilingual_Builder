@@ -2110,6 +2110,11 @@ studentsRouter.get("/:id/context", async (req, res) => {
 studentsRouter.post(
   "/certificates",
   requirePermissionForWrite("manageSettings"),
+  (req, res, next) => {
+    res.locals.legacyCertificateApprovedField =
+      req.body && typeof req.body === "object" && Object.prototype.hasOwnProperty.call(req.body, "approved");
+    next();
+  },
   validateBody(StudentCertificateSchema),
   async (req, res) => {
     if (req.user?.role === "TEACHER") return teacherWriteForbidden(res);
@@ -2120,6 +2125,16 @@ studentsRouter.post(
     });
     if (!student) {
       return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
+    }
+    if (res.locals.legacyCertificateApprovedField) {
+      void recordAuditLog(prisma, {
+        schoolId,
+        userId: req.user?.id || req.user?.userId || null,
+        action: "LEGACY_CERTIFICATE_APPROVED_FIELD",
+        entity: "StudentCertificate",
+        entityId: `${student.id}:${req.body.certificateType}:${req.body.academicYear}`,
+        after: { migratedTo: "saved" }
+      });
     }
     const data = buildCertificatePersistenceData(req.body);
     const certificate = await prisma.studentCertificate.upsert({

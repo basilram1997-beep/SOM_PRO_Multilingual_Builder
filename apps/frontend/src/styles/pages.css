@@ -2181,7 +2181,7 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 }
 
 .certificate-top-actions button,
-.certificate-approval-row button,
+.certificate-saving-row button,
 .certificate-table button,
 .certificate-top-actions .secondary {
   display: inline-flex;
@@ -2310,7 +2310,7 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   color: #0f172a;
 }
 
-.certificate-approval-row {
+.certificate-saving-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2323,7 +2323,7 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
 }
 
-.certificate-approval-toggle {
+.certificate-saving-toggle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -2342,7 +2342,7 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   color: #0f172a;
 }
 
-.certificate-status-badge.approved {
+.certificate-status-badge.saved {
   background: #ecfdf5;
   border-color: #86efac;
   color: #166534;

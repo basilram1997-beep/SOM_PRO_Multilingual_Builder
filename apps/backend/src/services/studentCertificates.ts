@@ -105,7 +105,7 @@ export function buildCertificatePersistenceData(
     average,
     grade,
     result,
-    approved: Boolean(input.approved),
+    saved: Boolean(input.saved),
     published: Boolean(input.published),
     subjectRows
   };
@@ -131,7 +131,7 @@ export function serializeCertificate(record: {
   average: number | null;
   grade: string | null;
   result: StudentCertificateResult;
-  approved: boolean;
+  saved: boolean;
   published: boolean;
   subjectRows: unknown;
   createdAt?: Date;
@@ -157,7 +157,7 @@ export function serializeCertificate(record: {
     average: record.average,
     grade: record.grade,
     result: record.result,
-    approved: record.approved,
+    saved: record.saved,
     published: record.published,
     subjectRows: normalizeCertificateRows(record.subjectRows)
   };

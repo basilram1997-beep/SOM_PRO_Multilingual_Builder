@@ -780,7 +780,7 @@ async function seedCertificates({ schoolId, counts, students, subjects, teachers
         average,
         grade: String.fromCharCode(65 + ((studentIndex + yearIndex) % 5)),
         result: CERTIFICATE_RESULTS[(studentIndex + yearIndex) % CERTIFICATE_RESULTS.length],
-        approved: yearIndex % 2 === 0,
+        saved: yearIndex % 2 === 0,
         published: yearIndex % 3 === 0,
         subjectRows: [
           {

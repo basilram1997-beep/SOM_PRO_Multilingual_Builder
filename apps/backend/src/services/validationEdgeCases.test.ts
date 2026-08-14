@@ -481,6 +481,22 @@ test("attendance, grade, and certificate schemas reject boundary violations", ()
   );
 });
 
+test("student certificate schema keeps approved as a stable legacy input for saved", () => {
+  const result = StudentCertificateSchema.safeParse({
+    studentId: "student-a",
+    certificateType: "TERM1_FINAL",
+    academicYear: "2026/2027",
+    issueDate: "2026-08-15",
+    approved: true,
+    subjectRows: []
+  });
+
+  assert.equal(result.success, true);
+  if (!result.success) return;
+  assert.equal(result.data.saved, true);
+  assert.equal("approved" in result.data, false);
+});
+
 test("validateBody returns a validation error for bad data and coerces valid boundary input", () => {
   const schema = z.object({
     count: z.coerce.number().int().min(1).max(3),

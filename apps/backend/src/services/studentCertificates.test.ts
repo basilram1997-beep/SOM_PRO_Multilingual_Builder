@@ -64,7 +64,7 @@ test("certificate persistence data and serialization preserve the saved marks fl
     average: null,
     grade: "",
     result: "PASS_WITH_WARNING",
-    approved: true,
+    saved: true,
     published: false,
     subjectRows: [
       { id: "math", subjectId: "math", subjectName: "Math", mark: "40", maxScore: 40, grade: "", note: "" },
@@ -92,7 +92,7 @@ test("certificate persistence data and serialization preserve the saved marks fl
     average: persistence.average,
     grade: persistence.grade,
     result: persistence.result,
-    approved: persistence.approved,
+    saved: persistence.saved,
     published: persistence.published,
     subjectRows: persistence.subjectRows,
     createdAt: new Date("2026-06-30T00:00:00.000Z"),
@@ -146,7 +146,7 @@ test("student certificate persistence payload normalizes text and computes avera
     average: null,
     grade: "",
     result: "PASS_WITH_WARNING",
-    approved: true,
+    saved: true,
     published: false,
     subjectRows: [
       { id: "row-1", subjectId: "math", subjectName: "Math", mark: "100", maxScore: 100, grade: "", note: "" },
@@ -163,7 +163,7 @@ test("student certificate persistence payload normalizes text and computes avera
   assert.equal(payload.subjectRows[1].subjectName, "Science");
 });
 
-test("student certificate persistence keeps approval and publication flags intact through serialization", () => {
+test("student certificate persistence keeps saving and publication flags intact through serialization", () => {
   const payload = buildCertificatePersistenceData({
     studentId: "student-a",
     certificateType: "TERM2_FINAL",
@@ -176,14 +176,14 @@ test("student certificate persistence keeps approval and publication flags intac
     earlyExitDays: 0,
     behaviorLevel: "VERY_GOOD",
     behaviorNote: "Strong conduct",
-    teacherNotes: "Ready for approval",
+    teacherNotes: "Ready for saving",
     adminNotes: "Reviewed by administration",
     teacherSignature: "Homeroom",
     principalSignature: "Principal",
     average: null,
     grade: "",
     result: "PASS",
-    approved: true,
+    saved: true,
     published: true,
     subjectRows: [
       { id: "math", subjectId: "math", subjectName: "Math", mark: "40", maxScore: 40, grade: "", note: "" },
@@ -211,16 +211,16 @@ test("student certificate persistence keeps approval and publication flags intac
     average: payload.average,
     grade: payload.grade,
     result: payload.result,
-    approved: payload.approved,
+    saved: payload.saved,
     published: payload.published,
     subjectRows: payload.subjectRows,
     createdAt: new Date("2026-07-20T00:00:00.000Z"),
     updatedAt: new Date("2026-07-20T00:00:00.000Z")
   });
 
-  assert.equal(payload.approved, true);
+  assert.equal(payload.saved, true);
   assert.equal(payload.published, true);
-  assert.equal(serialized.approved, true);
+  assert.equal(serialized.saved, true);
   assert.equal(serialized.published, true);
   assert.equal(serialized.result, "PASS");
   assert.equal(serialized.subjectRows.length, 2);

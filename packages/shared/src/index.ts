@@ -426,7 +426,7 @@ export const StudentGradeEntrySchema = z.object({
   rows: StudentGradeEntryRowsSchema
 });
 
-export const StudentCertificateSchema = z.object({
+const StudentCertificateBaseSchema = z.object({
   id: z.string().optional(),
   studentId: z.string().min(1),
   certificateType: StudentCertificateTypeSchema,
@@ -446,10 +446,17 @@ export const StudentCertificateSchema = z.object({
   average: z.number().nullable().optional(),
   grade: z.string().trim().optional().nullable(),
   result: StudentCertificateResultSchema.default("PASS"),
-  approved: z.boolean().default(false),
+  saved: z.boolean().optional(),
+  // Stable backwards compatibility for clients that still send the pre-saved certificate flag.
+  approved: z.boolean().optional(),
   published: z.boolean().default(false),
   subjectRows: z.array(StudentCertificateSubjectRowSchema).default([])
 });
+
+export const StudentCertificateSchema = StudentCertificateBaseSchema.transform(({ approved, saved, ...certificate }) => ({
+  ...certificate,
+  saved: saved ?? approved ?? false
+}));
 
 export const TeacherLessonTodayStatusSchema = z.enum(["NOT_STARTED", "IN_PROGRESS", "COMPLETED"]);
 

@@ -533,7 +533,7 @@ model StudentCertificate {
   average            Float?
   grade              String?
   result             StudentCertificateResult       @default(PASS)
-  approved           Boolean                        @default(false)
+  saved              Boolean                        @default(false)
   published          Boolean                        @default(false)
   subjectRows        Json
   createdAt          DateTime                       @default(now())

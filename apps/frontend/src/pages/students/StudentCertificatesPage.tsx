@@ -212,7 +212,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
   const [teacherSignature, setTeacherSignature] = useState("");
   const [principalSignature, setPrincipalSignature] = useState("");
   const [result, setResult] = useState<CertificateResult>("PASS");
-  const [approved, setApproved] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [published, setPublished] = useState(false);
   const [certificateId, setCertificateId] = useState("");
   const [saving, setSaving] = useState(false);
@@ -336,7 +336,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
 
   useEffect(() => {
     setPublished(false);
-    setApproved(false);
+    setSaved(false);
     setShowPreview(false);
     setShowClassReview(false);
     setClassCertificateReview([]);
@@ -584,7 +584,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     average?: number | null | undefined;
     grade?: string | null | undefined;
     result: CertificateResult;
-    approved: boolean;
+    saved: boolean;
     published: boolean;
     subjectRows: StudentCertificate["subjectRows"];
   }) {
@@ -604,7 +604,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       average: record.average ?? null,
       grade: record.grade || "",
       result: record.result,
-      approved: record.approved,
+      saved: record.saved,
       published: record.published,
       subjectRows: record.subjectRows
         .map((row) => ({
@@ -624,7 +624,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     overrides: Partial<
       Pick<
         StudentCertificate,
-        | "approved"
+        | "saved"
         | "published"
         | "result"
         | "behaviorLevel"
@@ -654,7 +654,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       average,
       grade: gradeKey,
       result: overrides.result ?? result,
-      approved: overrides.approved ?? approved,
+      saved: overrides.saved ?? saved,
       published: overrides.published ?? published,
       subjectRows: certificateRows
         .map((row) => ({
@@ -686,7 +686,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       setTeacherSignature("");
       setPrincipalSignature(schoolInfo?.managerName || "");
       setResult(resultFromAverage(average));
-      setApproved(false);
+      setSaved(false);
       setPublished(false);
       setLegacySubjectRows([]);
       setCertificateStatus("");
@@ -707,7 +707,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
         average: null,
         grade: "",
         result: resultFromAverage(average),
-        approved: false,
+        saved: false,
         published: false,
         subjectRows: []
       });
@@ -726,7 +726,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     setTeacherSignature(record.teacherSignature || "");
     setPrincipalSignature(record.principalSignature || schoolInfo?.managerName || "");
     setResult(record.result || "PASS");
-    setApproved(Boolean(record.approved));
+    setSaved(Boolean(record.saved));
     setPublished(Boolean(record.published));
     setLegacySubjectRows(
       (record.subjectRows as CertificateMarkRow[] | undefined)?.length
@@ -760,7 +760,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       average: record.average ?? null,
       grade: record.grade || "",
       result: record.result || "PASS",
-      approved: Boolean(record.approved),
+      saved: Boolean(record.saved),
       published: Boolean(record.published),
       subjectRows: (record.subjectRows as CertificateMarkRow[] | undefined) || []
     });
@@ -785,13 +785,13 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       teacherSignature.trim() ||
       (currentPrincipalSignature && currentPrincipalSignature !== defaultPrincipalSignature) ||
       result !== "PASS" ||
-      approved ||
+      saved ||
       published
     );
   }
 
   async function saveCertificate(
-    nextFlags: Partial<Pick<StudentCertificate, "approved" | "published" | "result">> = {},
+    nextFlags: Partial<Pick<StudentCertificate, "saved" | "published" | "result">> = {},
     quiet = false,
     force = false
   ) {
@@ -801,7 +801,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     }
 
     const payload = buildCertificateRecord({
-      approved: nextFlags.approved ?? approved,
+      saved: nextFlags.saved ?? saved,
       published: nextFlags.published ?? published,
       result: nextFlags.result ?? result
     });
@@ -813,28 +813,28 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     setSaving(true);
     try {
       const response = await somApi.students.certificate.save(payload);
-      const saved = response.data;
-      hydrateCertificate(saved);
+      const savedCertificate = response.data;
+      hydrateCertificate(savedCertificate);
       lastSavedSnapshotRef.current = certificateStateSnapshot({
-        studentId: saved.studentId,
-        certificateType: saved.certificateType,
-        academicYear: saved.academicYear,
-        issueDate: saved.issueDate,
-        schoolNumber: saved.schoolNumber || selectedStudent?.nationalId || "",
-        presentDays: saved.presentDays ?? 0,
-        absentDays: saved.absentDays ?? 0,
-        lateDays: saved.lateDays ?? 0,
-        earlyExitDays: saved.earlyExitDays ?? 0,
-        behaviorLevel: saved.behaviorLevel || "GOOD",
-        teacherNotes: saved.teacherNotes || "",
-        teacherSignature: saved.teacherSignature || "",
-        principalSignature: saved.principalSignature || schoolInfo?.managerName || "",
-        average: saved.average ?? null,
-        grade: saved.grade || "",
-        result: saved.result || "PASS",
-        approved: Boolean(saved.approved),
-        published: Boolean(saved.published),
-        subjectRows: (saved.subjectRows as CertificateMarkRow[] | undefined) || []
+        studentId: savedCertificate.studentId,
+        certificateType: savedCertificate.certificateType,
+        academicYear: savedCertificate.academicYear,
+        issueDate: savedCertificate.issueDate,
+        schoolNumber: savedCertificate.schoolNumber || selectedStudent?.nationalId || "",
+        presentDays: savedCertificate.presentDays ?? 0,
+        absentDays: savedCertificate.absentDays ?? 0,
+        lateDays: savedCertificate.lateDays ?? 0,
+        earlyExitDays: savedCertificate.earlyExitDays ?? 0,
+        behaviorLevel: savedCertificate.behaviorLevel || "GOOD",
+        teacherNotes: savedCertificate.teacherNotes || "",
+        teacherSignature: savedCertificate.teacherSignature || "",
+        principalSignature: savedCertificate.principalSignature || schoolInfo?.managerName || "",
+        average: savedCertificate.average ?? null,
+        grade: savedCertificate.grade || "",
+        result: savedCertificate.result || "PASS",
+        saved: Boolean(savedCertificate.saved),
+        published: Boolean(savedCertificate.published),
+        subjectRows: (savedCertificate.subjectRows as CertificateMarkRow[] | undefined) || []
       });
       setCertificateStatus(t("certificates.saved"));
       if (!quiet) setPageMessage(t("certificates.saved"));
@@ -890,7 +890,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
 
     const snapshot = certificateStateSnapshot(
       buildCertificateRecord({
-        approved,
+        saved,
         published,
         result
       })
@@ -922,7 +922,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     teacherSignature,
     principalSignature,
     result,
-    approved,
+    saved,
     published,
     average,
     gradeKey,
@@ -1435,7 +1435,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                   />
                 </label>
               </div>
-              <div className="certificate-approval-row">
+              <div className="certificate-saving-row">
                 <button type="button" className="secondary" onClick={handlePreview} disabled={!selectedStudent || loading}>
                   <Eye size={18} />
                   <span>{t("certificates.previewAction")}</span>

@@ -155,7 +155,7 @@ async function explainQuery(name, report) {
         average,
         grade,
         result,
-        approved,
+        saved,
         published,
         "subjectRows"
       ) VALUES (

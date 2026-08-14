@@ -22,7 +22,7 @@
   .student-certificates-page > .card:last-of-type,
   .certificate-controls-column,
   .certificate-top-actions,
-  .certificate-approval-row,
+  .certificate-saving-row,
   .certificate-table button {
     display: none !important;
   }
