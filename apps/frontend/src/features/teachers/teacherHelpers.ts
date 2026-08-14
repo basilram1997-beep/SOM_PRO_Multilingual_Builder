@@ -1,4 +1,4 @@
-import type { Teacher } from "@som/shared";
+﻿import type { Teacher } from "@som/shared";
 import { localizeClassName } from "../../i18n/displayNames.ts";
 import type { AppLanguage, TeacherWithAssignments } from "./teacherTypes";
 
@@ -14,15 +14,7 @@ export const blankTeacher: Teacher = {
   preferredPeriods: []
 };
 
-export const arabicDays = [
-  "Ø§Ù„Ø£Ø­Ø¯",
-  "Ø§Ù„Ø¥Ø«Ù†ÙŠÙ†",
-  "Ø§Ù„Ø«Ù„Ø§Ø«Ø§Ø¡",
-  "Ø§Ù„Ø£Ø±Ø¨Ø¹Ø§Ø¡",
-  "Ø§Ù„Ø®Ù…ÙŠØ³",
-  "Ø§Ù„Ø¬Ù…Ø¹Ø©",
-  "Ø§Ù„Ø³Ø¨Øª"
-];
+export const arabicDays = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
 function normalizeText(value: unknown) {
   if (typeof value !== "string") return "";
@@ -109,7 +101,7 @@ export function assignmentText(
     const className = assignment.class?.name || (assignment.classId ? classNameById.get(assignment.classId) || "" : "");
     return className ? localizeClassName(className, language) : "";
   });
-  return Array.from(new Set(values)).join("ØŒ ");
+  return Array.from(new Set(values)).join("، ");
 }
 
 export function preferredClassText(
@@ -118,7 +110,7 @@ export function preferredClassText(
   language: AppLanguage = "ar"
 ) {
   const selected = classes.filter((item) => (teacher.preferredClasses || []).includes(item.id));
-  return selected.map((item) => localizeClassName(item.name, language)).join("ØŒ ");
+  return selected.map((item) => localizeClassName(item.name, language)).join("، ");
 }
 
 export function effectiveLoad(teacher?: Pick<Teacher, "targetLoad" | "releaseHours"> | null) {
@@ -129,3 +121,5 @@ export function releaseHoursUsed(teacher?: Pick<Teacher, "adminRole" | "releaseH
   if (!teacher?.adminRole?.trim()) return 0;
   return Math.max(0, teacher.releaseHours || 0);
 }
+
+

@@ -1,12 +1,14 @@
 # Ministry Compliance Matrix
 
-Review date: 2026-08-12
+Review date: 2026-08-15
 
 Repository commit reviewed: `0c44347865c83bf8c4450879d73dc55c7455b00b`
 
 SOM PRO version: `0.9.0-rc.1` from root `package.json`
 
 Assessment type: Technical Compliance Assessment. This is not legal advice and is not an official Ministry certification.
+
+Local readiness execution: `npm.cmd run ministry:review-pack`, `npm.cmd run acceptance:check`, `npm.cmd run security:secrets`, and `npm.cmd run build` passed on 2026-08-15. The local evidence package remains intentionally not submission-ready until live staging evidence, official Ministry source documents, and an external signed penetration-test report are attached. See `docs/MINISTRY_LOCAL_READINESS_REPORT_AR.md`.
 
 Evidence distinction: repository controls, tests, DAST/ZAP, staging evidence, and pentest handoff support security readiness evidence. Formal Ministry supplier compliance requires official Ministry compliance evidence: archived source documents from `sapakim.education.gov.il` or another approved Ministry source, SHA-256 hashes, exact versions/dates, mapped control IDs, and owner approval in `docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md`.
 

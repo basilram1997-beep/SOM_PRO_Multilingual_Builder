@@ -14,7 +14,8 @@ const sourceDocuments = [
   "docs/MINISTRY_COMPLIANCE_MATRIX.md",
   "docs/MINISTRY_TEST_PLAN.md",
   "docs/LIVE_STAGING_EVIDENCE_CLOSURE.md",
-  "docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md"
+  "docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md",
+  "docs/MINISTRY_LOCAL_READINESS_REPORT_AR.md"
 ];
 
 function read(relativePath) {

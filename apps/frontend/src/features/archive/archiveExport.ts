@@ -376,10 +376,10 @@ async function recordArchiveExport(title: string) {
   const lang = document.documentElement.lang;
   const privacyWarning =
     lang === "he"
-      ? "×”×™×™×¦×•× ×”×–×” ×¤×¨×˜×™ ×•×ž×•×’×‘×œ ×‘×–×ž×Ÿ."
+      ? "הייצוא הזה פרטי ומוגבל בזמן."
       : lang === "en"
         ? "This export is private and expires automatically."
-        : "Ù‡Ø°Ø§ Ø§Ù„ØªØµØ¯ÙŠØ± Ø®Ø§Øµ ÙˆÙ…Ø¤Ù‚Øª ÙˆÙŠÙ†ØªÙ‡ÙŠ ØªÙ„Ù‚Ø§Ø¦ÙŠÙ‹Ø§ Ø¨Ø¹Ø¯ ÙØªØ±Ø© Ù‚ØµÙŠØ±Ø©.";
+        : "هذا التصدير خاص ومؤقت وينتهي تلقائياً بعد فترة قصيرة.";
 
   try {
     const result = await recordExportAction({
@@ -455,3 +455,5 @@ export async function exportArchiveFile(
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+

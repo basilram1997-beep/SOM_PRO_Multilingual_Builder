@@ -1,4 +1,4 @@
-import { Prisma, type UserRole } from "@prisma/client";
+﻿import { Prisma, type UserRole } from "@prisma/client";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import net from "node:net";
@@ -633,7 +633,7 @@ schoolsRouter.post("/backups", async (req, res) => {
   if (!canManageSchoolOperations(req.user?.role)) {
     return res
       .status(403)
-      .json({ error: "FORBIDDEN", message: "Ù„ÙŠØ³ Ù„Ø¯ÙŠÙƒ ØµÙ„Ø§Ø­ÙŠØ© Ø¥Ù†Ø´Ø§Ø¡ Ù†Ø³Ø®Ø© Ø§Ø­ØªÙŠØ§Ø·ÙŠØ©" });
+      .json({ error: "FORBIDDEN", message: "ليس لديك صلاحية إنشاء نسخة احتياطية" });
   }
 
   const now = new Date();
@@ -717,7 +717,7 @@ schoolsRouter.post("/backups", async (req, res) => {
     res.status(500).json({
       error: "PRODUCT_BACKUP_FAILED",
       message:
-        "ØªØ¹Ø°Ø± Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠØ©. ØªØ£ÙƒØ¯ Ù…Ù† Ø¬Ø§Ù‡Ø²ÙŠØ© PostgreSQL Ø£Ùˆ Docker."
+        "تعذر إنشاء النسخة الاحتياطية. تأكد من جاهزية PostgreSQL أو Docker."
     });
   }
 });
@@ -1205,3 +1205,4 @@ schoolsRouter.post("/:id/delete-data", validateBody(SchoolDeletionSchema), async
     }
   });
 });
+

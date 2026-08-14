@@ -1,4 +1,4 @@
-import { Router, type Request, type Response } from "express";
+﻿import { Router, type Request, type Response } from "express";
 import { Prisma } from "@prisma/client";
 import { ClassSchema, HomeroomAssignmentSchema, sortSchoolClasses } from "@som/shared";
 import { prisma } from "../../db/prisma";
@@ -31,37 +31,21 @@ async function removeClassById(req: Request, res: Response, classId: string) {
   const schoolId = await getRequestSchoolId(req);
   const existing = await prisma.schoolClass.findFirst({ where: { id: classId, schoolId } });
   if (!existing) return res.status(404).json({ error: "NOT_FOUND", message: "الصف غير موجود" });
-  const studentCount = await prisma.student.count({ where: { schoolId, classId } });
-  if (studentCount > 0) {
-    return res.status(409).json({
-      error: "CLASS_HAS_STUDENTS",
-      message: "لا يمكن حذف صف يحتوي على طلاب. انقل الطلاب أو عطّل ملفاتهم أولا."
-    });
-  }
-
   try {
-    await prisma.$transaction([
-      prisma.teacherLessonToday.deleteMany({ where: { schoolId, classId } }),
-      prisma.teacherHomework.deleteMany({ where: { schoolId, classId } }),
-      prisma.teacherExam.deleteMany({ where: { schoolId, classId } }),
-      prisma.studentGradeScheme.deleteMany({ where: { schoolId, classId } }),
-      prisma.studentGradeEntry.deleteMany({ where: { schoolId, classId } }),
-      prisma.dailyEvent.deleteMany({ where: { schoolId, classId } }),
-      prisma.substitution.deleteMany({ where: { schoolId, classId } }),
-      prisma.baseScheduleSlot.deleteMany({ where: { schoolId, classId } }),
-      prisma.teacherAssignment.deleteMany({ where: { schoolId, classId } }),
-      prisma.homeroomAssignment.deleteMany({ where: { schoolId, classId } }),
-      prisma.schoolClass.delete({ where: { id: classId } })
-    ]);
+    const updated = await prisma.schoolClass.update({
+      where: { id: classId },
+      data: { status: "INACTIVE" }
+    });
     invalidateSchoolReferenceData(schoolId);
     invalidateTeacherDirectoryCache(schoolId);
     recordAuditLog(prisma, {
       schoolId,
       userId: req.user?.id || req.user?.userId || null,
-      action: "CLASS_DELETE",
+      action: "CLASS_SOFT_DELETE",
       entity: "SchoolClass",
       entityId: classId,
-      before: existing as Prisma.InputJsonValue
+      before: existing as Prisma.InputJsonValue,
+      after: updated as Prisma.InputJsonValue
     });
     return res.status(204).send();
   } catch (error) {
@@ -69,12 +53,12 @@ async function removeClassById(req: Request, res: Response, classId: string) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
       return res.status(409).json({
         error: "CLASS_DELETE_CONFLICT",
-        message: "لا يمكن حذف الصف بسبب وجود سجلات مرتبطة. عالج الارتباطات أولا ثم أعد المحاولة."
+        message: "لا يمكن تعطيل الصف بسبب وجود سجلات مرتبطة. عالج الارتباطات أولاً ثم أعد المحاولة."
       });
     }
     return res.status(500).json({
       error: "CLASS_DELETE_FAILED",
-      message: "تعذر حذف الصف. حاول مرة أخرى لاحقا."
+      message: "تعذر تعطيل الصف. حاول مرة أخرى لاحقاً."
     });
   }
 }
@@ -331,3 +315,4 @@ classesRouter.post("/:id/deactivate", async (req, res) => removeClassById(req, r
 classesRouter.post("/:id/assign-homeroom-teacher", async (req, res) =>
   saveHomeroomAssignment(req, res, String(req.params.id))
 );
+

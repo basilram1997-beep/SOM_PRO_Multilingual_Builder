@@ -20,7 +20,7 @@ test("school classes sort by grade, then section, then display name", () => {
   assert.equal(compareSchoolClasses({ name: "العاشر أ" }, { name: "العاشر ب" }) < 0, true);
 });
 
-test("class routes reject duplicates and keep homeroom and cleanup wiring", () => {
+test("class routes reject duplicates and keep homeroom and soft-delete wiring", () => {
   const source = readFileSync("src/modules/classes/classes.routes.ts", "utf8");
 
   assert.match(source, /sortSchoolClasses\(classes\)/, "class list should be sorted with the shared order helper");
@@ -37,17 +37,19 @@ test("class routes reject duplicates and keep homeroom and cleanup wiring", () =
     /applyHomeroomsToBaseScheduleFromRules\(schoolId, \{ overwriteConflicts: false, classIds: \[classId\] \}\)/,
     "class updates should refresh homeroom-derived schedule rows"
   );
-  assert.match(source, /teacherLessonToday\.deleteMany\(/, "class deletion should clean lesson today rows");
-  assert.match(source, /teacherHomework\.deleteMany\(/, "class deletion should clean homework rows");
-  assert.match(source, /teacherExam\.deleteMany\(/, "class deletion should clean exam rows");
-  assert.match(source, /studentGradeEntry\.deleteMany\(/, "class deletion should clean grade entries");
-  assert.match(source, /studentGradeScheme\.deleteMany\(/, "class deletion should clean grade schemes");
-  assert.match(source, /dailyEvent\.deleteMany\(/, "class deletion should clean daily events");
-  assert.match(source, /substitution\.deleteMany\(/, "class deletion should clean substitutions");
-  assert.match(source, /baseScheduleSlot\.deleteMany\(/, "class deletion should clean base schedule rows");
-  assert.match(source, /teacherAssignment\.deleteMany\(/, "class deletion should clean teacher assignments");
-  assert.match(source, /homeroomAssignment\.deleteMany\(/, "class deletion should clean homeroom assignments");
-  assert.match(source, /CLASS_HAS_STUDENTS/, "class deletion should refuse to delete classes that still have students");
+  assert.match(source, /status: "INACTIVE"/, "class deletion should soft-disable the class");
+  assert.match(source, /CLASS_SOFT_DELETE/, "class deletion should record a soft-delete audit event");
+  assert.doesNotMatch(source, /teacherLessonToday\.deleteMany\(/, "class deletion must preserve lesson today rows");
+  assert.doesNotMatch(source, /teacherHomework\.deleteMany\(/, "class deletion must preserve homework rows");
+  assert.doesNotMatch(source, /teacherExam\.deleteMany\(/, "class deletion must preserve exam rows");
+  assert.doesNotMatch(source, /studentGradeEntry\.deleteMany\(/, "class deletion must preserve grade entries");
+  assert.doesNotMatch(source, /studentGradeScheme\.deleteMany\(/, "class deletion must preserve grade schemes");
+  assert.doesNotMatch(source, /dailyEvent\.deleteMany\(/, "class deletion must preserve daily events");
+  assert.doesNotMatch(source, /substitution\.deleteMany\(/, "class deletion must preserve substitutions");
+  assert.doesNotMatch(source, /baseScheduleSlot\.deleteMany\(/, "class deletion must preserve base schedule rows");
+  assert.doesNotMatch(source, /teacherAssignment\.deleteMany\(/, "class deletion must preserve teacher assignments");
+  assert.doesNotMatch(source, /homeroomAssignment\.deleteMany\(/, "class deletion must preserve homeroom assignments");
+  assert.doesNotMatch(source, /schoolClass\.delete\(/, "class deletion must not hard-delete class rows");
   assert.doesNotMatch(source, /student\.deleteMany\(\{ where: \{ schoolId, classId \} \}\)/, "class deletion must not delete student files");
   assert.match(source, /P2003/, "class deletion should still guard relational conflicts");
 });

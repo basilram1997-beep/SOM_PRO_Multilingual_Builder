@@ -1,4 +1,4 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import { z } from "zod";
 import {
   StudentAcademicRecordSchema,
@@ -2147,8 +2147,21 @@ studentsRouter.delete("/:id", requirePermissionForWrite("manageSettings"), async
   if (req.user?.role === "TEACHER") return teacherWriteForbidden(res);
   const schoolId = await getRequestSchoolId(req);
   const studentId = String(req.params.id);
-  const result = await prisma.student.deleteMany({ where: { id: studentId, schoolId } });
-  if (result.count === 0) return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
+  const existing = await prisma.student.findFirst({ where: { id: studentId, schoolId } });
+  if (!existing) return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
+  const student = await prisma.student.update({
+    where: { id: studentId },
+    data: { status: "INACTIVE" }
+  });
+  recordAuditLog(prisma, {
+    schoolId,
+    userId: req.user?.userId || null,
+    action: "STUDENT_SOFT_DELETE",
+    entity: "Student",
+    entityId: studentId,
+    before: existing,
+    after: student
+  });
   res.status(204).send();
 });
 

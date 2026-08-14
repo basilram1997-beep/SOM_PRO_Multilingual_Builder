@@ -1,6 +1,6 @@
 # Ministry Official Standards Intake
 
-Review date: 2026-08-13
+Review date: 2026-08-15
 
 Purpose: maintain a controlled intake register for official Ministry of Education supplier standards from `sapakim.education.gov.il` before SOM PRO claims formal Ministry compliance.
 
@@ -65,6 +65,34 @@ Public Ministry pages may inform readiness work, but they are not a substitute f
 7. Obtain owner/legal/security approval; then change status to `Approved`.
 8. Update `docs/MINISTRY_EVIDENCE_INDEX.md` and `docs/MINISTRY_TEST_PLAN.md`.
 
+## Ready-To-Receive Checklist
+
+When an official file or link is provided, close the matching row using this sequence:
+
+| Step | Action | Required field |
+| --- | --- | --- |
+| 1 | Save the original unmodified document. | `Archive path` |
+| 2 | Record the exact official source URL. | `Source URL` |
+| 3 | Record the visible document title and version/publication date. | `Document title`, `Version / publication date` |
+| 4 | Record the local download date. | `Download date` |
+| 5 | Calculate SHA-256 from the archived file. | `SHA-256` |
+| 6 | Change status from `Missing` to `Downloaded`. | `Status` |
+| 7 | Map clauses to controls/tests in `docs/MINISTRY_COMPLIANCE_MATRIX.md`. | `Mapped control IDs` |
+| 8 | Owner signs off and status becomes `Approved`. | `Review owner`, `Status` |
+
+Suggested archive names:
+
+| Standard | Suggested file name |
+| --- | --- |
+| Supplier information security | `MOS-001_supplier-information-security-standard_YYYY-MM-DD_original.pdf` |
+| Privacy procedure | `MOS-002_privacy-procedure-technological-products_YYYY-MM-DD_original.pdf` |
+| Pedagogical management software | `MOS-003_pedagogical-management-software-standard_YYYY-MM-DD_original.pdf` |
+| Technology compatibility | `MOS-004_technology-compatibility-standard_YYYY-MM-DD_original.pdf` |
+| Scheduling and teaching staff | `MOS-005_scheduling-teaching-staff-standard_YYYY-MM-DD_original.pdf` |
+| Ministry identity integration | `MOS-006_ministry-idm-oidc-saml-requirements_YYYY-MM-DD_original.pdf` |
+| Ministry data exchange/API | `MOS-007_ministry-data-exchange-api-spec_YYYY-MM-DD_original.pdf` |
+ 
+
 ## Intake Automation
 
 Generate the archive/register evidence report:
@@ -98,6 +126,6 @@ Strict mode must fail while any `MOS-*` row is not `Approved`, while an archived
 
 ## Current Result
 
-As of 2026-08-13, all official Ministry supplier documents in this register are `Missing`.
+As of 2026-08-15, all official Ministry supplier documents in this register are `Missing`.
 
 Repository evidence supports security readiness tracking, but not formal Ministry compliance certification.
