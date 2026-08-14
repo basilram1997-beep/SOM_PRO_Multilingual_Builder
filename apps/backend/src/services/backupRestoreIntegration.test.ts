@@ -159,9 +159,9 @@ runBackupRestoreTest(
       const school = await prisma.school.create({
         data: {
           id: `school-${runId}`,
-          name: "Ù…Ø¯Ø±Ø³Ø© Ø§Ù„Ù†Ø³Ø® Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠ",
-          address: "Ø§Ù„Ù‚Ø¯Ø³",
-          managerName: "Ù…Ø¯ÙŠØ± Ø§Ù„Ù†Ø³Ø®",
+          name: "مدرسة النسخ الاحتياطي",
+          address: "القدس",
+          managerName: "مدير النسخ",
           institutionCode: `BK${runId.toUpperCase()}`,
           isActive: true
         }
@@ -171,21 +171,21 @@ runBackupRestoreTest(
         data: {
           schoolId: school.id,
           name: "MANAGER",
-          description: "Ù…Ø¯ÙŠØ± Ø§Ù„Ù…Ø¯Ø±Ø³Ø©"
+          description: "مدير المدرسة"
         }
       });
 
       const permission = await prisma.permission.create({
         data: {
           key: `manage_backup_${runId}`,
-          description: "ØµÙ„Ø§Ø­ÙŠØ© Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù†Ø³Ø® Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠ"
+          description: "صلاحية إدارة النسخ الاحتياطي"
         }
       });
 
       const user = await prisma.user.create({
         data: {
           schoolId: school.id,
-          name: "Ø£Ù…ÙŠÙ† Ø§Ù„Ù†Ø¸Ø§Ù…",
+          name: "أمين النظام",
           email: `backup-${runId}@example.com`,
           password: "hashed-password-placeholder",
           role: "MANAGER"
@@ -210,9 +210,9 @@ runBackupRestoreTest(
       const teacher = await prisma.teacher.create({
         data: {
           schoolId: school.id,
-          name: "Ø§Ù„Ù…Ø¹Ù„Ù…Ø© Ù„ÙŠØ§Ù†",
+          name: "المعلمة ليان",
           employeeNumber: `EMP-${runId}`,
-          specialty: "Ø±ÙŠØ§Ø¶ÙŠØ§Øª",
+          specialty: "رياضيات",
           nationalId: `T-${runId}`
         }
       });
@@ -220,9 +220,9 @@ runBackupRestoreTest(
       const schoolClass = await prisma.schoolClass.create({
         data: {
           schoolId: school.id,
-          name: "10 Ø£",
+          name: "10 أ",
           gradeLevel: "10",
-          section: "Ø£",
+          section: "أ",
           homeroomTeacherId: teacher.id,
           maxStudents: 30
         }
@@ -231,7 +231,7 @@ runBackupRestoreTest(
       const subject = await prisma.subject.create({
         data: {
           schoolId: school.id,
-          name: "Ø±ÙŠØ§Ø¶ÙŠØ§Øª",
+          name: "رياضيات",
           code: `MATH-${runId}`,
           maxMark: 100,
           passMark: 50
@@ -251,12 +251,12 @@ runBackupRestoreTest(
         data: {
           schoolId: school.id,
           classId: schoolClass.id,
-          name: "Ø§Ù„Ø·Ø§Ù„Ø¨ Ø£Ø­Ù…Ø¯",
-          firstName: "Ø£Ø­Ù…Ø¯",
-          lastName: "Ø¹Ù„ÙŠ",
+          name: "الطالب أحمد",
+          firstName: "أحمد",
+          lastName: "علي",
           nationalId: `S-${runId}`,
-          fatherName: "Ø¹Ù„ÙŠ",
-          motherName: "Ø³Ù„Ù…Ù‰",
+          fatherName: "علي",
+          motherName: "سلمى",
           guardianPhone: "0501112222",
           studentPhone: "0512223333"
         }
@@ -267,7 +267,7 @@ runBackupRestoreTest(
           schoolId: school.id,
           studentId: student.id,
           date: "2026-07-23",
-          day: "Ø§Ù„Ø®Ù…ÙŠØ³",
+          day: "الخميس",
           status: "PRESENT"
         }
       });
@@ -294,10 +294,10 @@ runBackupRestoreTest(
           classId: schoolClass.id,
           subjectId: subject.id,
           date: "2026-07-23",
-          day: "Ø§Ù„Ø®Ù…ÙŠØ³",
+          day: "الخميس",
           kind: "HOMEWORK",
-          title: "ÙˆØ§Ø¬Ø¨ Ø§Ù„Ø±ÙŠØ§Ø¶ÙŠØ§Øª",
-          description: "Ø­Ù„ Ù…Ø³Ø§Ø¦Ù„ Ø§Ù„ØµÙØ­Ø© 10",
+          title: "واجب الرياضيات",
+          description: "حل مسائل الصفحة 10",
           attachment: "uploads/homework/worksheet-1.pdf"
         }
       });
@@ -309,10 +309,10 @@ runBackupRestoreTest(
           classId: schoolClass.id,
           subjectId: subject.id,
           date: "2026-07-23",
-          day: "Ø§Ù„Ø®Ù…ÙŠØ³",
+          day: "الخميس",
           period: 1,
-          title: "Ø¯Ø±Ø³ Ø§Ù„ÙƒØ³ÙˆØ±",
-          summary: "Ø´Ø±Ø­ Ø§Ù„ÙƒØ³ÙˆØ± Ø§Ù„Ø§Ø¹ØªÙŠØ§Ø¯ÙŠØ©",
+          title: "درس الكسور",
+          summary: "شرح الكسور الاعتيادية",
           status: "COMPLETED",
           attachments: "uploads/lesson/photo-1.png"
         }
@@ -349,7 +349,7 @@ runBackupRestoreTest(
 
       await prisma.student.update({
         where: { id: student.id },
-        data: { name: "Ø§Ù„Ø·Ø§Ù„Ø¨ Ø§Ù„Ù…Ø¹Ø¯Ù„ Ø¨Ø¹Ø¯ Ø§Ù„Ù†Ø³Ø®Ø©" }
+        data: { name: "الطالب المعدل بعد النسخة" }
       });
       await prisma.studentAttendance.update({
         where: {
@@ -381,7 +381,7 @@ runBackupRestoreTest(
       });
       await prisma.teacher.update({
         where: { id: teacher.id },
-        data: { name: "Ø§Ù„Ù…Ø¹Ù„Ù…Ø© Ø§Ù„Ù…Ø¹Ø¯Ù„Ø© Ø¨Ø¹Ø¯ Ø§Ù„Ù†Ø³Ø®Ø©" }
+        data: { name: "المعلمة المعدلة بعد النسخة" }
       });
       await prisma.teacherHomework.update({
         where: { id: homework.id },
@@ -394,7 +394,7 @@ runBackupRestoreTest(
 
       assert.equal(
         (await prisma.student.findUnique({ where: { id: student.id } }))?.name,
-        "Ø§Ù„Ø·Ø§Ù„Ø¨ Ø§Ù„Ù…Ø¹Ø¯Ù„ Ø¨Ø¹Ø¯ Ø§Ù„Ù†Ø³Ø®Ø©"
+        "الطالب المعدل بعد النسخة"
       );
       assert.equal(
         (
@@ -454,14 +454,14 @@ runBackupRestoreTest(
       const restoredReportExport = await prisma.reportExport.findUnique({ where: { id: reportExport.id } });
       const restoredBackupJob = await prisma.backupJob.findUnique({ where: { id: backupJob.id } });
 
-      assert.equal(restoredSchool?.name, "Ù…Ø¯Ø±Ø³Ø© Ø§Ù„Ù†Ø³Ø® Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠ");
-      assert.equal(restoredTeacher?.name, "Ø§Ù„Ù…Ø¹Ù„Ù…Ø© Ù„ÙŠØ§Ù†");
+      assert.equal(restoredSchool?.name, "مدرسة النسخ الاحتياطي");
+      assert.equal(restoredTeacher?.name, "المعلمة ليان");
       assert.equal(restoredClass?.homeroomTeacherId, teacher.id);
-      assert.equal(restoredSubject?.name, "Ø±ÙŠØ§Ø¶ÙŠØ§Øª");
-      assert.equal(restoredStudent?.name, "Ø§Ù„Ø·Ø§Ù„Ø¨ Ø£Ø­Ù…Ø¯");
-      assert.equal(restoredStudent?.fatherName, "Ø¹Ù„ÙŠ");
+      assert.equal(restoredSubject?.name, "رياضيات");
+      assert.equal(restoredStudent?.name, "الطالب أحمد");
+      assert.equal(restoredStudent?.fatherName, "علي");
       assert.equal(restoredAttendance?.status, "PRESENT");
-      assert.equal(restoredAttendance?.day, "Ø§Ù„Ø®Ù…ÙŠØ³");
+      assert.equal(restoredAttendance?.day, "الخميس");
       assert.deepEqual(restoredGradeEntry?.rows, {
         [student.id]: {
           quiz: "18",
@@ -479,8 +479,8 @@ runBackupRestoreTest(
       assert.equal(restoredBackupJob?.createdBy, user.id);
       assert.equal(restoredBackupJob?.encrypted, true);
       assert.equal(restoredBackupJob?.status, "COMPLETED");
-      assert.equal(restoredSchool?.name.includes("Ø§Ù„Ù†Ø³Ø® Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠ"), true);
-      assert.equal(restoredStudent?.name.includes("Ø§Ù„Ù…Ø¹Ø¯Ù„ Ø¨Ø¹Ø¯ Ø§Ù„Ù†Ø³Ø®Ø©"), false);
+      assert.equal(restoredSchool?.name.includes("النسخ الاحتياطي"), true);
+      assert.equal(restoredStudent?.name.includes("المعدل بعد النسخة"), false);
     } finally {
       await prisma.$disconnect().catch(() => null);
       dropTemporaryDatabase(databaseName, true);

@@ -144,9 +144,9 @@ test("generateSubstitutions keeps one substitute teacher from being assigned twi
           teacherId: "absent-teacher",
           classId: "class-10a",
           subjectId: "math",
-          teacher: { id: "absent-teacher", name: "Ø§Ù„Ù…Ø¹Ù„Ù… Ø§Ù„ØºØ§Ø¦Ø¨" },
-          class: { name: "Ø§Ù„Ø¹Ø§Ø´Ø± Ø£" },
-          subject: { name: "Ø±ÙŠØ§Ø¶ÙŠØ§Øª" }
+          teacher: { id: "absent-teacher", name: "المعلم الغائب" },
+          class: { name: "العاشر أ" },
+          subject: { name: "رياضيات" }
         },
         {
           id: "slot-2",
@@ -154,9 +154,9 @@ test("generateSubstitutions keeps one substitute teacher from being assigned twi
           teacherId: "absent-teacher",
           classId: "class-10a",
           subjectId: "math",
-          teacher: { id: "absent-teacher", name: "Ø§Ù„Ù…Ø¹Ù„Ù… Ø§Ù„ØºØ§Ø¦Ø¨" },
-          class: { name: "Ø§Ù„Ø¹Ø§Ø´Ø± Ø£" },
-          subject: { name: "Ø±ÙŠØ§Ø¶ÙŠØ§Øª" }
+          teacher: { id: "absent-teacher", name: "المعلم الغائب" },
+          class: { name: "العاشر أ" },
+          subject: { name: "رياضيات" }
         }
       ]
     },
@@ -164,25 +164,25 @@ test("generateSubstitutions keeps one substitute teacher from being assigned twi
       findMany: async () => [
         {
           id: "teacher-b",
-          name: "Ø§Ù„Ù…Ø¹Ù„Ù… Ø§Ù„Ø¨Ø¯ÙŠÙ„ Ø§Ù„Ø£ÙˆÙ„",
+          name: "المعلم البديل الأول",
           assignments: [
             {
               classId: "class-10a",
               subjectId: "math",
-              class: { name: "Ø§Ù„Ø¹Ø§Ø´Ø± Ø£" },
-              subject: { name: "Ø±ÙŠØ§Ø¶ÙŠØ§Øª" }
+              class: { name: "العاشر أ" },
+              subject: { name: "رياضيات" }
             }
           ]
         },
         {
           id: "teacher-c",
-          name: "Ø§Ù„Ù…Ø¹Ù„Ù… Ø§Ù„Ø¨Ø¯ÙŠÙ„ Ø§Ù„Ø«Ø§Ù†ÙŠ",
+          name: "المعلم البديل الثاني",
           assignments: [
             {
               classId: "class-10a",
               subjectId: "math",
-              class: { name: "Ø§Ù„Ø¹Ø§Ø´Ø± Ø£" },
-              subject: { name: "Ø±ÙŠØ§Ø¶ÙŠØ§Øª" }
+              class: { name: "العاشر أ" },
+              subject: { name: "رياضيات" }
             }
           ]
         }
@@ -202,7 +202,7 @@ test("generateSubstitutions keeps one substitute teacher from being assigned twi
   const result = await generateSubstitutions({
     schoolId: "school-a",
     dailyScheduleId: "daily-a",
-    day: "Ø§Ù„Ø§Ø«Ù†ÙŠÙ†",
+    day: "الاثنين",
     statuses: [{ teacherId: "absent-teacher", type: "ABSENT", fromPeriod: 2, toPeriod: 2 }],
     settings: { periodsPerDay: 7 },
     db: fakeDb
@@ -227,9 +227,9 @@ test("generateSubstitutions leaves a clear no-substitute record when nobody is f
           teacherId: "absent-teacher",
           classId: "class-10a",
           subjectId: "math",
-          teacher: { id: "absent-teacher", name: "Ø§Ù„Ù…Ø¹Ù„Ù… Ø§Ù„ØºØ§Ø¦Ø¨" },
-          class: { name: "Ø§Ù„Ø¹Ø§Ø´Ø± Ø£" },
-          subject: { name: "Ø±ÙŠØ§Ø¶ÙŠØ§Øª" }
+          teacher: { id: "absent-teacher", name: "المعلم الغائب" },
+          class: { name: "العاشر أ" },
+          subject: { name: "رياضيات" }
         }
       ]
     },
@@ -237,13 +237,13 @@ test("generateSubstitutions leaves a clear no-substitute record when nobody is f
       findMany: async () => [
         {
           id: "teacher-b",
-          name: "Ø§Ù„Ù…Ø¹Ù„Ù… Ø§Ù„Ù…ØªØ§Ø­",
+          name: "المعلم المتاح",
           assignments: [
             {
               classId: "class-11a",
               subjectId: "science",
-              class: { name: "Ø§Ù„Ø­Ø§Ø¯ÙŠ Ø¹Ø´Ø± Ø£" },
-              subject: { name: "Ø¹Ù„ÙˆÙ…" }
+              class: { name: "الحادي عشر أ" },
+              subject: { name: "علوم" }
             }
           ]
         }
@@ -263,7 +263,7 @@ test("generateSubstitutions leaves a clear no-substitute record when nobody is f
   const result = await generateSubstitutions({
     schoolId: "school-a",
     dailyScheduleId: "daily-a",
-    day: "Ø§Ù„Ø§Ø«Ù†ÙŠÙ†",
+    day: "الاثنين",
     statuses: [
       { teacherId: "absent-teacher", type: "ABSENT", fromPeriod: 3, toPeriod: 3 },
       { teacherId: "teacher-b", type: "ABSENT", fromPeriod: 3, toPeriod: 3 }

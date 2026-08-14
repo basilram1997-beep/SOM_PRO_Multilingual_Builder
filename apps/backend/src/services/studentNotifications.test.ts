@@ -137,9 +137,9 @@ test("attendance notifications send payloads to an external webhook and persist 
         schoolId: "school-a",
         student: {
           id: "student-a",
-          name: "Ø£Ø­Ù…Ø¯",
-          fatherName: "Ø¨Ø§Ø³Ù„",
-          motherName: "Ø§ÙŠÙ…Ø§Ù†",
+          name: "أحمد",
+          fatherName: "باسل",
+          motherName: "ايمان",
           guardianPhone: "+972500000000",
           fatherPhone: "+972500000001",
           motherPhone: "+972500000002",
@@ -148,7 +148,7 @@ test("attendance notifications send payloads to an external webhook and persist 
         className: "10A",
         attendance: {
           date: "2026-08-09",
-          day: "Ø§Ù„Ø£Ø­Ø¯",
+          day: "الأحد",
           status: "LATE",
           lateAt: "08:10",
           leftAt: null
@@ -191,8 +191,8 @@ test("attendance notifications record failures when the external webhook respond
         schoolId: "school-b",
         student: {
           id: "student-b",
-          name: "ÙØ§Ø·Ù…Ø©",
-          fatherName: "ÙÙˆØ²ÙŠ",
+          name: "فاطمة",
+          fatherName: "فوزي",
           motherName: null,
           guardianPhone: "+972500000010",
           fatherPhone: null,
@@ -202,7 +202,7 @@ test("attendance notifications record failures when the external webhook respond
         className: "11B",
         attendance: {
           date: "2026-08-09",
-          day: "Ø§Ù„Ø£Ø­Ø¯",
+          day: "الأحد",
           status: "PRESENT",
           lateAt: null,
           leftAt: null

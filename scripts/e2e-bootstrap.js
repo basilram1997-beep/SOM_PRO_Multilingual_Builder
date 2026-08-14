@@ -172,7 +172,7 @@ async function upsertSubstituteTeacher() {
       targetLoad: 25,
       notes: "Free substitute teacher for repeatable Playwright daily schedule tests",
       workDays: workingDays,
-      preferredDays: ["Ø§Ù„Ø³Ø¨Øª"],
+      preferredDays: ["السبت"],
       preferredClasses: [],
       preferredPeriods: []
     },
@@ -186,7 +186,7 @@ async function upsertSubstituteTeacher() {
       targetLoad: 25,
       notes: "Free substitute teacher for repeatable Playwright daily schedule tests",
       workDays: workingDays,
-      preferredDays: ["Ø§Ù„Ø³Ø¨Øª"],
+      preferredDays: ["السبت"],
       preferredClasses: [],
       preferredPeriods: []
     }

@@ -98,8 +98,8 @@ export function useSchoolOperations(language: AppLanguage): SchoolOperationsStat
         language === "en"
           ? "Could not create the product backup."
           : language === "he"
-            ? "×œ× × ×™×ª×Ÿ ×œ×™×¦×•×¨ ×’×™×‘×•×™ ×ž×•×¦×¨."
-            : "ØªØ¹Ø°Ø± Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠØ©."
+            ? "לא ניתן ליצור גיבוי מוצר."
+            : "تعذر إنشاء النسخة الاحتياطية."
       );
     } finally {
       setCreatingBackup(false);

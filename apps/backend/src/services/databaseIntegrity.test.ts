@@ -307,12 +307,12 @@ test("attendance CRUD keeps create, read, update, and delete behavior aligned", 
         schoolId,
         studentId: student.id,
         date: "2026-07-24",
-        day: "Ø§Ù„Ø®Ù…ÙŠØ³",
+        day: "الخميس",
         status: "ABSENT_EXCUSED",
         note: "medical leave"
       },
       update: {
-        day: "Ø§Ù„Ø®Ù…ÙŠØ³",
+        day: "الخميس",
         status: "ABSENT_EXCUSED",
         note: "medical leave"
       }
@@ -345,11 +345,11 @@ test("attendance CRUD keeps create, read, update, and delete behavior aligned", 
         schoolId,
         studentId: student.id,
         date: "2026-07-24",
-        day: "Ø§Ù„Ø®Ù…ÙŠØ³",
+        day: "الخميس",
         status: "PRESENT"
       },
       update: {
-        day: "Ø§Ù„Ø®Ù…ÙŠØ³",
+        day: "الخميس",
         status: "LATE",
         lateAt: "08:12",
         note: "late arrival"
