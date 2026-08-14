@@ -483,6 +483,7 @@ async function gradeSchemeBelongsToTeacher(
   const teacherScope = await getTeacherScopeForRequest(req, schoolId);
   if (teacherScope && !teacherCanAccessAssignment(teacherScope, classId, subjectId)) {
     logGradeAccessDenial(req, schoolId, classId, subjectId, "teacher_assignment_scope");
+    return false;
   }
   return true;
 }
@@ -1144,6 +1145,7 @@ studentsRouter.get("/", async (req, res) => {
   const students = await prisma.student.findMany({
     where: {
       schoolId,
+      status: { not: "INACTIVE" },
       ...(teacherScope
         ? classId
           ? { classId }
@@ -1992,7 +1994,7 @@ studentsRouter.post(
         logGradeAccessDenial(req, schoolId, req.body.classId, req.body.subjectId, "missing_manageLessons");
         return res.status(403).json({
           error: "FORBIDDEN",
-          message: "لا تملك صلاحية تعديل ?????????"
+          message: "لا تملك صلاحية تعديل العلامات"
         });
       }
       const teacherScope = await getTeacherScopeForRequest(req, schoolId);
@@ -2010,7 +2012,7 @@ studentsRouter.post(
         logGradeAccessDenial(req, schoolId, classId, subjectId, "teacher_assignment_scope");
         return res.status(403).json({
           error: "FORBIDDEN",
-          message: "لا تملك صلاحية تعديل ??????? هذا ????? ??? ???????"
+          message: "لا تملك صلاحية تعديل علامات هذا الصف أو المادة"
         });
       }
       const existingEntry = await prisma.studentGradeEntry.findUnique({
@@ -2149,11 +2151,25 @@ studentsRouter.delete("/:id", requirePermissionForWrite("manageSettings"), async
   if (result.count === 0) return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
   res.status(204).send();
 });
+
 studentsRouter.post("/:id/deactivate", requirePermissionForWrite("manageSettings"), async (req, res) => {
   if (req.user?.role === "TEACHER") return teacherWriteForbidden(res);
   const schoolId = await getRequestSchoolId(req);
   const studentId = String(req.params.id);
-  const result = await prisma.student.deleteMany({ where: { id: studentId, schoolId } });
-  if (result.count === 0) return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
-  res.status(204).send();
+  const existing = await prisma.student.findFirst({ where: { id: studentId, schoolId } });
+  if (!existing) return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
+  const student = await prisma.student.update({
+    where: { id: studentId },
+    data: { status: "INACTIVE" }
+  });
+  recordAuditLog(prisma, {
+    schoolId,
+    userId: req.user?.userId || null,
+    action: "STUDENT_DEACTIVATE",
+    entity: "Student",
+    entityId: studentId,
+    before: existing,
+    after: student
+  });
+  res.json({ data: student });
 });

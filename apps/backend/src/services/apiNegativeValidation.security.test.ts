@@ -70,7 +70,10 @@ async function seedNegativeApiUsers(runId: string) {
   const schoolBId = `negative-b-school-${runId}`;
   const classAId = `negative-a-class-${runId}`;
   const classBId = `negative-b-class-${runId}`;
+  const subjectAId = `negative-a-subject-${runId}`;
+  const subjectBId = `negative-b-subject-${runId}`;
   const teacherId = `negative-teacher-${runId}`;
+  const teacherProfileId = `negative-teacher-profile-${runId}`;
   const managerId = `negative-manager-${runId}`;
   const studentUserId = `negative-student-user-${runId}`;
   const password = "Negative-Api-123!";
@@ -110,6 +113,13 @@ async function seedNegativeApiUsers(runId: string) {
     ]
   });
 
+  await prisma.subject.createMany({
+    data: [
+      { id: subjectAId, schoolId: schoolAId, name: "Negative Math" },
+      { id: subjectBId, schoolId: schoolAId, name: "Negative Science" }
+    ]
+  });
+
   await prisma.user.createMany({
     data: [
       {
@@ -139,16 +149,37 @@ async function seedNegativeApiUsers(runId: string) {
     ]
   });
 
+  await prisma.teacher.create({
+    data: {
+      id: teacherProfileId,
+      schoolId: schoolAId,
+      name: "Negative Teacher",
+      assignments: {
+        create: {
+          schoolId: schoolAId,
+          classId: classAId,
+          subjectId: subjectAId,
+          weeklyPeriods: 4
+        }
+      }
+    }
+  });
+
   const managerToken = createAuthToken({ userId: managerId, schoolId: schoolAId, role: "MANAGER", tokenVersion: 0 });
   const teacherToken = createAuthToken({ userId: teacherId, schoolId: schoolAId, role: "TEACHER", tokenVersion: 0 });
   const studentToken = createAuthToken({ userId: studentUserId, schoolId: schoolAId, role: "STUDENT", tokenVersion: 0 });
 
-  return { schoolAId, schoolBId, classAId, classBId, managerToken, teacherToken, studentToken, runId };
+  return { schoolAId, schoolBId, classAId, classBId, subjectAId, subjectBId, managerToken, teacherToken, studentToken, runId };
 }
 
 async function cleanupNegativeApi(runId: string) {
   const schoolIds = [`negative-a-school-${runId}`, `negative-b-school-${runId}`];
   await prisma.auditLog.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
+  await prisma.studentGradeScheme.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
+  await prisma.studentGradeEntry.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
+  await prisma.teacherAssignment.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
+  await prisma.teacher.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
+  await prisma.subject.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
   await prisma.student.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
   await prisma.user.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
   await prisma.schoolClass.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
@@ -206,6 +237,20 @@ test("API rejects mass assignment, privilege escalation, malformed bodies, and u
     const injectedAdmin = await prisma.user.findFirst({ where: { email: `injected-admin-${runId}@example.test` } });
     assert.equal(injectedAdmin, null, "public registration must not create elevated users");
 
+    const publicTeacherRegistration = await requestJson(baseUrl, "/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        name: "Public Teacher",
+        email: `public-teacher-${runId}@example.test`,
+        password: "Public-Teacher-123!",
+        role: "TEACHER"
+      })
+    });
+    assert.equal(publicTeacherRegistration.response.status, 400, publicTeacherRegistration.text);
+    assertNoLeak(publicTeacherRegistration.body, forbidden);
+    const publicTeacher = await prisma.user.findFirst({ where: { email: `public-teacher-${runId}@example.test` } });
+    assert.equal(publicTeacher, null, "public registration must not create teacher accounts");
+
     const massAssignedStudent = await requestJson(baseUrl, "/api/students", {
       method: "POST",
       headers: { Authorization: `Bearer ${seeded.managerToken}` },
@@ -241,6 +286,25 @@ test("API rejects mass assignment, privilege escalation, malformed bodies, and u
     assertNoLeak(teacherSettingsEscalation.body, forbidden);
     const teacherElevated = await prisma.user.findFirst({ where: { email: `teacher-elevated-${runId}@example.test` } });
     assert.equal(teacherElevated, null, "teacher must not create elevated settings users");
+
+    const teacherGradeSchemeEscalation = await requestJson(baseUrl, "/api/students/grade-schemes", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${seeded.teacherToken}` },
+      body: JSON.stringify({
+        classId: seeded.classAId,
+        subjectId: seeded.subjectBId,
+        certificateType: "TERM1_FINAL",
+        title: "Unauthorized scheme",
+        maxScore: 100,
+        sections: [{ id: "exam", name: "Exam", percentage: 100, outOf: 100 }]
+      })
+    });
+    assert.equal(teacherGradeSchemeEscalation.response.status, 403, teacherGradeSchemeEscalation.text);
+    assertNoLeak(teacherGradeSchemeEscalation.body, forbidden);
+    const unauthorizedScheme = await prisma.studentGradeScheme.findFirst({
+      where: { schoolId: seeded.schoolAId, classId: seeded.classAId, subjectId: seeded.subjectBId }
+    });
+    assert.equal(unauthorizedScheme, null, "teacher must not create grade schemes for unassigned subjects");
 
     const studentAdminRead = await requestJson(baseUrl, "/api/audit-logs?limit=5", {
       headers: { Authorization: `Bearer ${seeded.studentToken}` }

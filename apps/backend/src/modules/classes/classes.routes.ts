@@ -1,4 +1,4 @@
-﻿import { Router, type Request, type Response } from "express";
+import { Router, type Request, type Response } from "express";
 import { Prisma } from "@prisma/client";
 import { ClassSchema, HomeroomAssignmentSchema, sortSchoolClasses } from "@som/shared";
 import { prisma } from "../../db/prisma";
@@ -25,12 +25,19 @@ async function removeClassById(req: Request, res: Response, classId: string) {
       entityId: classId,
       after: { path: req.path, method: req.method, reason: "teacher_delete_class" } as Prisma.InputJsonValue
     });
-    return res.status(403).json({ error: "FORBIDDEN", message: "?? ???? ?????? ???? ??????" });
+    return res.status(403).json({ error: "FORBIDDEN", message: "لا تملك صلاحية تنفيذ هذه العملية" });
   }
 
   const schoolId = await getRequestSchoolId(req);
   const existing = await prisma.schoolClass.findFirst({ where: { id: classId, schoolId } });
-  if (!existing) return res.status(404).json({ error: "NOT_FOUND", message: "???? ??????? ??? ?????" });
+  if (!existing) return res.status(404).json({ error: "NOT_FOUND", message: "الصف غير موجود" });
+  const studentCount = await prisma.student.count({ where: { schoolId, classId } });
+  if (studentCount > 0) {
+    return res.status(409).json({
+      error: "CLASS_HAS_STUDENTS",
+      message: "لا يمكن حذف صف يحتوي على طلاب. انقل الطلاب أو عطّل ملفاتهم أولا."
+    });
+  }
 
   try {
     await prisma.$transaction([
@@ -44,7 +51,6 @@ async function removeClassById(req: Request, res: Response, classId: string) {
       prisma.baseScheduleSlot.deleteMany({ where: { schoolId, classId } }),
       prisma.teacherAssignment.deleteMany({ where: { schoolId, classId } }),
       prisma.homeroomAssignment.deleteMany({ where: { schoolId, classId } }),
-      prisma.student.deleteMany({ where: { schoolId, classId } }),
       prisma.schoolClass.delete({ where: { id: classId } })
     ]);
     invalidateSchoolReferenceData(schoolId);
@@ -63,12 +69,12 @@ async function removeClassById(req: Request, res: Response, classId: string) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
       return res.status(409).json({
         error: "CLASS_DELETE_CONFLICT",
-        message: "?? ???? ??? ???? ???? ??? ???? ?????? ?????? ??. ??? ?????????? ????? ?? ??? ????????."
+        message: "لا يمكن حذف الصف بسبب وجود سجلات مرتبطة. عالج الارتباطات أولا ثم أعد المحاولة."
       });
     }
     return res.status(500).json({
       error: "CLASS_DELETE_FAILED",
-      message: "???? ??? ???? ????. ???? ??? ???? ??? ????."
+      message: "تعذر حذف الصف. حاول مرة أخرى لاحقا."
     });
   }
 }
@@ -83,7 +89,7 @@ async function saveHomeroomAssignment(req: Request, res: Response, classId: stri
       entityId: classId,
       after: { path: req.path, method: req.method, reason: "teacher_assign_homeroom" } as Prisma.InputJsonValue
     });
-    return res.status(403).json({ error: "FORBIDDEN", message: "ØºÙŠØ± Ù…Ø³Ù…ÙˆØ­ Ø¨Ø¥Ø³Ù†Ø§Ø¯ Ù…Ø±Ø¨ÙŠ Ø§Ù„ØµÙ" });
+    return res.status(403).json({ error: "FORBIDDEN", message: "غير مسموح بإسناد مربي الصف" });
   }
 
   const schoolId = await getRequestSchoolId(req);
@@ -94,7 +100,7 @@ async function saveHomeroomAssignment(req: Request, res: Response, classId: stri
   if (!parsed.success) {
     return res
       .status(400)
-      .json({ error: "INVALID_HOMEROOM_ASSIGNMENT", message: "Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø±Ø¨ÙŠ ØºÙŠØ± ØµØ­ÙŠØ­Ø©" });
+      .json({ error: "INVALID_HOMEROOM_ASSIGNMENT", message: "بيانات المربي غير صحيحة" });
   }
   const data = parsed.data;
   if (data.weeklyDay && data.weeklyPeriod) {
@@ -147,7 +153,7 @@ classesRouter.post("/", validateBody(ClassSchema), async (req, res) => {
       entity: "SchoolClass",
       after: { path: req.path, method: req.method, reason: "teacher_create_class" } as Prisma.InputJsonValue
     });
-    return res.status(403).json({ error: "FORBIDDEN", message: "?? ???? ?????? ?????? ????" });
+    return res.status(403).json({ error: "FORBIDDEN", message: "لا تملك صلاحية تنفيذ هذه العملية" });
   }
 
   const schoolId = await getRequestSchoolId(req);
@@ -195,13 +201,13 @@ classesRouter.patch("/:id", validateBody(ClassSchema.partial()), async (req, res
       entityId: String(req.params.id),
       after: { path: req.path, method: req.method, reason: "teacher_update_class" } as Prisma.InputJsonValue
     });
-    return res.status(403).json({ error: "FORBIDDEN", message: "?? ???? ?????? ?????? ??????" });
+    return res.status(403).json({ error: "FORBIDDEN", message: "لا تملك صلاحية تنفيذ هذه العملية" });
   }
 
   const schoolId = await getRequestSchoolId(req);
   const classId = String(req.params.id);
   const existing = await prisma.schoolClass.findFirst({ where: { id: classId, schoolId } });
-  if (!existing) return res.status(404).json({ error: "NOT_FOUND", message: "???? ??????? ??? ?????" });
+  if (!existing) return res.status(404).json({ error: "NOT_FOUND", message: "الصف غير موجود" });
 
   const data = req.body as {
     name?: string;
@@ -262,7 +268,7 @@ classesRouter.put("/:id", validateBody(ClassSchema.partial()), async (req, res) 
   const schoolId = await getRequestSchoolId(req);
   const classId = String(req.params.id);
   const existing = await prisma.schoolClass.findFirst({ where: { id: classId, schoolId } });
-  if (!existing) return res.status(404).json({ error: "NOT_FOUND", message: "Ø§Ù„ØµÙ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯" });
+  if (!existing) return res.status(404).json({ error: "NOT_FOUND", message: "الصف غير موجود" });
 
   const data = req.body as {
     name?: string;

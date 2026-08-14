@@ -114,7 +114,7 @@ const RegisterSchema = z.object({
   name: z.string().trim().min(1, "NAME_REQUIRED"),
   email: z.string().trim().min(1, "USERNAME_REQUIRED"),
   password: z.string().min(6, "PASSWORD_TOO_SHORT"),
-  role: z.enum(["STUDENT", "PARENT", "TEACHER"]).default("PARENT")
+  role: z.enum(["STUDENT", "PARENT"]).default("PARENT")
 });
 
 const RecoverSchema = z
@@ -374,7 +374,7 @@ authRouter.post("/register", registerRateLimit, validateBody(RegisterSchema), as
     const name = String(req.body.name || "").trim();
     const existing = await findUsersByLoginIdentifier(String(req.body.email || ""));
     if (existing.length) {
-      return res.status(409).json({ error: "USERNAME_EXISTS", message: "اسم المستخدم موجود مسبقًا" });
+      return res.status(409).json({ error: "USERNAME_EXISTS", message: "اسم المستخدم موجود مسبقا" });
     }
 
     const linkedStudents = await prisma.student.findMany({

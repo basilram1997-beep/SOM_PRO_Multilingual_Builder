@@ -47,7 +47,8 @@ test("class routes reject duplicates and keep homeroom and cleanup wiring", () =
   assert.match(source, /baseScheduleSlot\.deleteMany\(/, "class deletion should clean base schedule rows");
   assert.match(source, /teacherAssignment\.deleteMany\(/, "class deletion should clean teacher assignments");
   assert.match(source, /homeroomAssignment\.deleteMany\(/, "class deletion should clean homeroom assignments");
-  assert.match(source, /student\.deleteMany\(/, "class deletion should clear class students");
+  assert.match(source, /CLASS_HAS_STUDENTS/, "class deletion should refuse to delete classes that still have students");
+  assert.doesNotMatch(source, /student\.deleteMany\(\{ where: \{ schoolId, classId \} \}\)/, "class deletion must not delete student files");
   assert.match(source, /P2003/, "class deletion should still guard relational conflicts");
 });
 
