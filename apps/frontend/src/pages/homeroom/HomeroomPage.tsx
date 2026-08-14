@@ -12,7 +12,6 @@ export function HomeroomPage() {
     <div className="page homeroom-page">
       <h2>{t("homeroom.title")}</h2>
       <Card title={t("homeroom.cardTitle")}>
-        <p className="muted">{t("homeroom.info")}</p>
         <div className="system-note">{t("system.homeroomPriority")}</div>
         <HomeroomEditorPanel
           t={t}

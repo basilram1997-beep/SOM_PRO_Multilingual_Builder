@@ -42,7 +42,6 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
     () => ({
       title: t("login.title"),
       heroAriaLabel: t("login.heroAriaLabel"),
-      heroWelcome: t("login.heroWelcome"),
       systemStatus: t("login.systemStatus"),
       systemOnline: t("login.systemOnline"),
       systemOffline: t("login.systemOffline"),

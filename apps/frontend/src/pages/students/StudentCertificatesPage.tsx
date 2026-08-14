@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
-import { Download, FileCheck2, Printer, Save, ShieldCheck } from "lucide-react";
+import { Eye, Printer, Save } from "lucide-react";
 import type { SchoolClass, Student, StudentCertificate, StudentCertificateBehaviorLevel, Subject } from "@som/shared";
 import { sortSchoolClasses } from "@som/shared";
 import { somApi } from "../../api/somApi";
@@ -25,6 +25,7 @@ import {
   type CertificateResult,
   type CertificateType
 } from "../../features/students/studentCertificateTypes";
+import type { TeacherWithAssignments } from "../../features/teachers/teacherTypes";
 
 type Props = {
   currentUser: AuthUser;
@@ -32,6 +33,7 @@ type Props = {
 };
 
 type BehaviorLevel = StudentCertificateBehaviorLevel;
+type CurriculumType = "PALESTINIAN" | "BAGRUT";
 
 type CertificateReviewItem = {
   studentId: string;
@@ -55,6 +57,29 @@ const behaviorOptions: Array<{ value: BehaviorLevel; labelKey: string }> = [
   { value: "GOOD", labelKey: "certificates.behavior.good" },
   { value: "NEEDS_ATTENTION", labelKey: "certificates.behavior.needsAttention" }
 ];
+
+const curriculumOptions: Array<{ value: CurriculumType; labelKey: string }> = [
+  { value: "PALESTINIAN", labelKey: "certificates.curriculum.palestinian" },
+  { value: "BAGRUT", labelKey: "certificates.curriculum.bagrut" }
+];
+
+function normalizedSubjectName(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[إأآا]/g, "ا")
+    .replace(/[ة]/g, "ه")
+    .replace(/[ى]/g, "ي")
+    .replace(/[^\u0600-\u06ffa-z0-9]+/g, " ");
+}
+
+function isSubjectAllowedForCurriculum(subjectName: string, curriculumType: CurriculumType) {
+  const normalized = normalizedSubjectName(subjectName);
+  if (curriculumType === "PALESTINIAN") {
+    return !normalized.includes("مدنيات") && !normalized.includes("civics");
+  }
+  return !normalized.includes("دراسات اجتماعيه") && !normalized.includes("دراسات اجتماعية") && !normalized.includes("social studies");
+}
 
 function behaviorLabelKey(value: BehaviorLevel) {
   return behaviorOptions.find((option) => option.value === value)?.labelKey || "certificates.behavior.good";
@@ -82,14 +107,6 @@ function escapeHtml(value: string) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
-}
-
-function safeFileName(value: string) {
-  return value
-    .replace(/[\\/:*?"<>|]+/g, "-")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\s+/g, "-");
 }
 
 type PrintableCertificateRow = {
@@ -173,6 +190,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [teachers, setTeachers] = useState<TeacherWithAssignments[]>([]);
   const [gradeSchemes, setGradeSchemes] = useState<GradeScheme[]>([]);
   const [savedGradeEntries, setSavedGradeEntries] = useState<GradeEntry[]>([]);
   const [comparisonGradeSchemes, setComparisonGradeSchemes] = useState<GradeScheme[]>([]);
@@ -181,6 +199,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [certificateType, setCertificateType] = useState<CertificateType>("TERM1_BIMONTHLY");
+  const [curriculumType, setCurriculumType] = useState<CurriculumType>("PALESTINIAN");
   const [academicYear, setAcademicYear] = useState(currentAcademicYear());
   const [issueDate, setIssueDate] = useState(todayISO());
   const [schoolNumber, setSchoolNumber] = useState("");
@@ -215,12 +234,13 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
 
   useEffect(() => {
     let active = true;
-    Promise.all([somApi.settings.get(), somApi.classes.list(), somApi.subjects.list()])
-      .then(([settingsResponse, classesResponse, subjectsResponse]) => {
+    Promise.all([somApi.settings.get(), somApi.classes.list(), somApi.subjects.list(), somApi.teachers.list()])
+      .then(([settingsResponse, classesResponse, subjectsResponse, teachersResponse]) => {
         if (!active) return;
         setSchoolInfo(settingsResponse.data.school);
         setClasses(sortSchoolClasses((classesResponse.data || []) as SchoolClass[]));
         setSubjects(subjectsResponse.data || []);
+        setTeachers((teachersResponse.data || []) as TeacherWithAssignments[]);
         setSelectedClassId((previous) => previous || classesResponse.data?.[0]?.id || "");
       })
       .catch(() => {
@@ -283,6 +303,22 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     () => students.filter((item) => Boolean(item.id) && selectedStudentIds.includes(item.id || "")),
     [students, selectedStudentIds]
   );
+
+  const certificateSubjects = useMemo(() => {
+    const assignedSubjectIds = new Set<string>();
+    for (const teacher of teachers) {
+      for (const assignment of teacher.assignments || []) {
+        if (assignment.classId === selectedClassId && assignment.subjectId) {
+          assignedSubjectIds.add(assignment.subjectId);
+        }
+      }
+    }
+
+    const classSubjects = assignedSubjectIds.size > 0 ? subjects.filter((subject) => subject.id && assignedSubjectIds.has(subject.id)) : subjects;
+    return classSubjects.filter((subject) =>
+      isSubjectAllowedForCurriculum(localizeSubjectName(subject.name || "", language), curriculumType)
+    );
+  }, [curriculumType, language, selectedClassId, subjects, teachers]);
 
   useEffect(() => {
     if (selectedStudent?.nationalId) {
@@ -442,11 +478,6 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
   const selectedClassName = selectedClass ? localizeClassName(selectedClass.name, language) : t("common.none");
   const selectedClassSection = selectedClass?.section?.trim() || t("common.none");
   const selectedStudentName = selectedStudent?.name?.trim() || t("common.none");
-  const selectedClassStudentsLabel =
-    selectedClassStudents.length > 1
-      ? `${selectedClassStudents.length} ${t("certificates.selectedStudents")}`
-      : selectedStudentName;
-
   useEffect(() => {
     if (!selectedClassId) {
       setGradeSchemes([]);
@@ -461,7 +492,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     Promise.all(
       relevantTypes.map((type) =>
         Promise.allSettled(
-          subjects
+          certificateSubjects
             .filter((subject) => Boolean(subject.id))
             .map((subject) => somApi.students.gradeSchemes.get(selectedClassId, subject.id as string, type))
         ).then((results) => ({
@@ -489,7 +520,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     return () => {
       active = false;
     };
-  }, [selectedClassId, certificateType, subjects]);
+  }, [selectedClassId, certificateType, certificateSubjects]);
 
   useEffect(() => {
     if (!selectedClassId) {
@@ -505,7 +536,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     Promise.all(
       relevantTypes.map((type) =>
         Promise.allSettled(
-          subjects
+          certificateSubjects
             .filter((subject) => Boolean(subject.id))
             .map((subject) => somApi.students.gradeEntries.get(selectedClassId, subject.id as string, type))
         ).then((results) => ({
@@ -534,7 +565,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     return () => {
       active = false;
     };
-  }, [selectedClassId, certificateType, subjects]);
+  }, [selectedClassId, certificateType, certificateSubjects]);
 
   function certificateStateSnapshot(record: {
     studentId: string;
@@ -919,81 +950,14 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     []
   );
 
-  async function markSelectedCertificateApproved() {
+  async function handleSaveSelectedCertificate() {
     if (!selectedStudent) {
       setPageMessage(t("certificates.selectStudentFirst"));
       return;
     }
-    const saved = await saveCertificate({ approved: true }, false, true);
+    const saved = await saveCertificate({}, false, true);
     if (saved) {
-      setPageMessage(t("certificates.approved"));
-      setApproved(true);
-      setShowClassReview(true);
-      setClassReviewLoading(true);
-      setClassReviewError("");
-      try {
-        const reviewItems = await Promise.all(
-          students.map(async (student) => {
-            const studentId = student.id || "";
-            const [certificateResult, contextResult] = await Promise.allSettled([
-              somApi.students.certificate.get(studentId, certificateType, academicYear),
-              somApi.students.certificate.context(studentId)
-            ]);
-            const certificate = certificateResult.status === "fulfilled" ? certificateResult.value.data : null;
-            const context = contextResult.status === "fulfilled" ? contextResult.value.data : null;
-            const rows = buildPrintableRowsForStudent(studentId);
-            const rowMarks = rows
-              .map((row) => row.average)
-              .filter((mark): mark is number => typeof mark === "number" && Number.isFinite(mark));
-            const rowAverage =
-              rowMarks.length > 0
-                ? Math.round((rowMarks.reduce((sum, mark) => sum + mark, 0) / rowMarks.length) * 10) / 10
-                : null;
-
-            return {
-              studentId,
-              studentName: student.name || t("common.none"),
-              className: selectedClassName,
-              section: selectedClassSection,
-              nationalId: student.nationalId || "-",
-              rows,
-              average: rowAverage,
-              result: certificate?.result || resultFromAverage(rowAverage),
-              behaviorLevel: certificate?.behaviorLevel || context?.behaviorSummary.suggestedLevel || "GOOD",
-              attendanceSummary: context?.attendanceSummary || {
-                presentDays: 0,
-                absentDays: 0,
-                lateDays: 0,
-                earlyExitDays: 0,
-                totalDays: 0
-              },
-              teacherNotes: certificate?.teacherNotes || context?.behaviorSummary.noteSuggestions[0] || "",
-              teacherSignature: certificate?.teacherSignature || teacherSignature || "",
-              principalSignature: certificate?.principalSignature || principalSignature || schoolInfo?.managerName || ""
-            };
-          })
-        );
-        setClassCertificateReview(reviewItems);
-      } catch {
-        setClassReviewError(t("certificates.loadFailed"));
-      } finally {
-        setClassReviewLoading(false);
-      }
-    }
-  }
-
-  async function publishCertificate() {
-    if (!approved) {
-      setPageMessage(t("certificates.approveFirst"));
-      return;
-    }
-    if (!selectedStudent) {
-      setPageMessage(t("certificates.selectStudentFirst"));
-      return;
-    }
-    const saved = await saveCertificate({ approved: true, published: true }, false, true);
-    if (saved) {
-      setPageMessage(t("certificates.published"));
+      setPageMessage(t("certificates.saved"));
     }
   }
 
@@ -1005,15 +969,24 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     };
 
     const typeLabel = certificateTypeLabel(t, language, certificateType);
+    const curriculumLabel = t(
+      curriculumOptions.find((option) => option.value === curriculumType)?.labelKey ||
+        "certificates.curriculum.palestinian"
+    );
     const verbalEvaluationLabel = translateWithFallback("certificates.verbalEvaluation", {
-      ar: "تقييم كلامي",
-      he: "הערכה מילולית",
-      en: "Verbal evaluation"
+      ar: "التقييم",
+      he: "הערכה",
+      en: "Evaluation"
     });
     const noSubjectsLabel = translateWithFallback("certificates.noSubjects", {
       ar: "لا توجد مواد بعد",
       he: "אין מקצועות עדיין",
       en: "No subjects yet"
+    });
+    const noNotesLabel = translateWithFallback("certificates.noTeacherNotes", {
+      ar: "لا توجد ملاحظات",
+      he: "אין הערות",
+      en: "No notes"
     });
     const presentDaysLabel = translateWithFallback("certificates.presentDays", {
       ar: "أيام الحضور",
@@ -1035,34 +1008,16 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       he: "ימי יציאה מוקדמת",
       en: "Early exit days"
     });
-    const isTerm2Final = certificateType === "TERM2_FINAL";
     const rows = certificatePrintableRows
-      .map((row) =>
-        isTerm2Final
-          ? `
+      .map(
+        (row) => `
         <tr>
           <td>${escapeHtml(row.subjectName || subjects.find((item) => item.id === row.subjectId)?.name || t("certificates.subjectPlaceholder"))}</td>
-          <td>${escapeHtml(row.currentMark || "-")}</td>
-          <td>${escapeHtml(row.comparisonMark || "-")}</td>
-          <td>${escapeHtml(t(row.grade || gradeKey))}</td>
-        </tr>
-      `
-          : `
-        <tr>
-          <td>${escapeHtml(row.subjectName || subjects.find((item) => item.id === row.subjectId)?.name || t("certificates.subjectPlaceholder"))}</td>
-          <td>${escapeHtml(row.currentMark || "-")}</td>
+          <td>${escapeHtml(row.currentMark || row.comparisonMark || "-")}</td>
           <td>${escapeHtml(t(row.grade || gradeKey))}</td>
         </tr>
       `
       )
-      .join("");
-
-    const noteRows = [
-      teacherNotes.trim()
-        ? `<section class="certificate-print-note"><strong>${escapeHtml(t("certificates.homeroomNotes"))}</strong><p>${escapeHtml(teacherNotes.trim())}</p></section>`
-        : ""
-    ]
-      .filter(Boolean)
       .join("");
 
     const attendanceTotal = certificateContext?.attendanceSummary.totalDays ?? 0;
@@ -1076,62 +1031,89 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       0
     );
     const displayedEarlyExitDays = Number.isFinite(parsedEarlyExitDays) ? parsedEarlyExitDays : inferredLeaveDays;
-    const finalResultText = result === "PASS" || result === "PASS_WITH_WARNING" ? "ناجح" : "غير ناجح";
     const averageText = average === null ? "-" : average.toFixed(1);
+    const finalResultText = t(resultLabelKey(result));
+    const behaviorText = t(behaviorLabelKey(behaviorLevel));
 
     return `
       <section class="certificate-print-sheet" dir="${language === "en" ? "ltr" : "rtl"}">
         <header class="certificate-print-header">
-          <div class="certificate-print-side certificate-print-side-right">
-            <div><span>${escapeHtml(t("certificates.studentName"))}</span><strong>${escapeHtml(selectedStudentName)}</strong></div>
-            <div><span>${escapeHtml(t("students.nationalId"))}</span><strong>${escapeHtml(selectedStudent?.nationalId || "-")}</strong></div>
+          <div class="certificate-ministry-text">
+            <strong>${escapeHtml(t("certificates.schoolLabel"))}</strong>
+            <span>${escapeHtml(schoolInfo?.institutionCode || "")}</span>
           </div>
-          <div class="certificate-print-center">
+          <div class="certificate-school-brand">
+            <div class="certificate-school-emblem" aria-hidden="true">SOM</div>
             <h1>${escapeHtml(schoolName)}</h1>
-            <p>${escapeHtml(typeLabel)}</p>
+            <p>${escapeHtml(schoolInfo?.address || "")}</p>
           </div>
-          <div class="certificate-print-side certificate-print-side-left">
-            <div><span>${escapeHtml(t("common.class"))}</span><strong>${escapeHtml(selectedClassName)}</strong></div>
-            <div><span>${escapeHtml(t("certificates.sectionLabel"))}</span><strong>${escapeHtml(selectedClassSection)}</strong></div>
+          <div class="certificate-ministry-text certificate-ministry-text--left">
+            <strong>${escapeHtml(t("certificates.issueDate"))}</strong>
+            <span>${escapeHtml(issueDate)}</span>
           </div>
         </header>
 
+        <div class="certificate-title-ribbon">${escapeHtml(typeLabel)}</div>
+
+        <section class="certificate-student-data">
+          <div class="certificate-avatar" aria-hidden="true"></div>
+          <div class="certificate-data-grid">
+            <div><span>${escapeHtml(t("certificates.studentName"))}</span><strong>${escapeHtml(selectedStudentName)}</strong></div>
+            <div><span>${escapeHtml(t("students.nationalId"))}</span><strong>${escapeHtml(selectedStudent?.nationalId || "-")}</strong></div>
+            <div><span>${escapeHtml(t("common.class"))}</span><strong>${escapeHtml(selectedClassName)}</strong></div>
+            <div><span>${escapeHtml(t("certificates.sectionLabel"))}</span><strong>${escapeHtml(selectedClassSection)}</strong></div>
+            <div><span>${escapeHtml(t("certificates.curriculumType"))}</span><strong>${escapeHtml(curriculumLabel)}</strong></div>
+            <div><span>${escapeHtml(t("certificates.academicYear"))}</span><strong>${escapeHtml(academicYear)}</strong></div>
+          </div>
+        </section>
+
         <table class="certificate-print-table">
           <thead>
-          <tr>
+            <tr>
               <th>${escapeHtml(t("common.subject"))}</th>
-              ${isTerm2Final ? `<th>علامة الفصل الأول</th><th>علامة الفصل الثاني</th>` : `<th>${escapeHtml(t("certificates.mark"))}</th>`}
+              <th>${escapeHtml(t("certificates.mark"))}</th>
               <th>${escapeHtml(verbalEvaluationLabel)}</th>
             </tr>
           </thead>
-          <tbody>${rows || `<tr><td colspan="${isTerm2Final ? "4" : "3"}">${escapeHtml(noSubjectsLabel)}</td></tr>`}</tbody>
+          <tbody>${rows || `<tr><td colspan="3">${escapeHtml(noSubjectsLabel)}</td></tr>`}</tbody>
         </table>
 
-        <div class="certificate-print-summary">
-          <div><span>معدل الطالب</span><strong>${escapeHtml(averageText)}</strong></div>
-          <div><span>النتيجة</span><strong>${escapeHtml(finalResultText)}</strong></div>
-        </div>
+        <section class="certificate-result-panel">
+          <div>
+            <span>${escapeHtml(t("certificates.average"))}</span>
+            <strong>${escapeHtml(averageText)}</strong>
+          </div>
+          <div>
+            <span>${escapeHtml(t("certificates.result"))}</span>
+            <strong class="${result === "INCOMPLETE" || result === "REVIEW" ? "is-review" : "is-pass"}">${escapeHtml(finalResultText)}</strong>
+          </div>
+        </section>
 
+        <h3 class="certificate-section-ribbon">${escapeHtml(t("certificates.attendanceTitle"))}</h3>
         <table class="certificate-print-attendance">
           <thead>
             <tr>
               <th>${escapeHtml(presentDaysLabel)}</th>
-              <th>${escapeHtml(lateDaysLabel)}</th>
               <th>${escapeHtml(absentDaysLabel)}</th>
+              <th>${escapeHtml(lateDaysLabel)}</th>
               <th>${escapeHtml(earlyExitDaysLabel)}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>${escapeHtml(String(Number.parseInt(presentDays, 10) || 0))}</td>
-              <td>${escapeHtml(String(Number.parseInt(lateDays, 10) || 0))}</td>
               <td>${escapeHtml(String(Number.parseInt(absentDays, 10) || 0))}</td>
+              <td>${escapeHtml(String(Number.parseInt(lateDays, 10) || 0))}</td>
               <td>${escapeHtml(String(displayedEarlyExitDays))}</td>
             </tr>
           </tbody>
         </table>
 
-        ${noteRows ? `<div class="certificate-print-notes">${noteRows}</div>` : ""}
+        <h3 class="certificate-section-ribbon">${escapeHtml(t("certificates.notesTitle"))}</h3>
+        <section class="certificate-print-notes">
+          <section class="certificate-print-note"><strong>${escapeHtml(t("certificates.homeroomNotes"))}</strong><p>${escapeHtml(teacherNotes.trim() || noNotesLabel)}</p></section>
+          <section class="certificate-print-note"><strong>${escapeHtml(t("certificates.behaviorEvaluation"))}</strong><p>${escapeHtml(behaviorText)}</p></section>
+        </section>
 
         <div class="certificate-print-signatures">
           <div><span>توقيع مربي/ة الصف</span><strong>${escapeHtml(teacherSignature || t("common.notSet"))}</strong></div>
@@ -1141,193 +1123,17 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     `;
   }
 
+  function handlePreview() {
+    setShowPreview(true);
+  }
+
   function buildPrintableHtml() {
     return `<!doctype html>
 <html lang="${language}" dir="${language === "en" ? "ltr" : "rtl"}">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${escapeHtml(t("certificates.title"))}</title>
-  <style>
-    @page { size: A4 portrait; margin: 10mm; }
-    body { margin: 0; font-family: "Arial", sans-serif; color: #0f172a; background: #f8fafc; }
-    * { box-sizing: border-box; }
-    .certificate-print-sheet {
-      width: 100%;
-      min-height: calc(297mm - 20mm);
-      background: #fff;
-      border: 2px solid #8597ac;
-      border-radius: 16px;
-      padding: 20px 22px 18px;
-      box-shadow: 0 14px 34px rgba(15, 23, 42, .08);
-      display: grid;
-      gap: 14px;
-    }
-    .certificate-print-header {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(240px, 1.15fr) minmax(0, 1fr);
-      gap: 14px;
-      align-items: stretch;
-      border-bottom: 2px solid #dbe4f0;
-      padding-bottom: 14px;
-    }
-    .certificate-print-center {
-      text-align: center;
-      padding: 4px 10px 0;
-      display: grid;
-      align-content: center;
-    }
-    .certificate-print-center h1 {
-      margin: 0;
-      font-size: 31px;
-      line-height: 1.2;
-      color: #0f172a;
-      letter-spacing: .3px;
-    }
-    .certificate-print-center p {
-      margin: 8px 0 0;
-      font-size: 15px;
-      color: #334155;
-      font-weight: 800;
-      letter-spacing: .15px;
-    }
-    .certificate-print-side {
-      border: 1.5px solid #94a3b8;
-      border-radius: 14px;
-      background: linear-gradient(180deg, #ffffff, #f8fbff);
-      padding: 13px 14px;
-      display: grid;
-      gap: 10px;
-      align-self: stretch;
-      min-height: 100%;
-    }
-    .certificate-print-side div {
-      display: grid;
-      gap: 4px;
-    }
-    .certificate-print-side span,
-    .certificate-print-meta span,
-    .certificate-print-summary span,
-    .certificate-print-attendance th,
-    .certificate-print-signatures span,
-    .certificate-print-note strong {
-      color: #1e3a8a;
-      font-size: 12px;
-      font-weight: 800;
-    }
-    .certificate-print-side strong,
-    .certificate-print-meta strong,
-    .certificate-print-summary strong,
-    .certificate-print-attendance td,
-    .certificate-print-signatures strong,
-    .certificate-print-note p {
-      color: #0f172a;
-      font-size: 14px;
-      font-weight: 700;
-      margin: 0;
-    }
-    .certificate-print-meta,
-    .certificate-print-summary {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-    }
-    .certificate-print-meta span,
-    .certificate-print-summary div,
-    .certificate-print-attendance,
-    .certificate-print-note {
-      border: 1.5px solid #cbd5e1;
-      border-radius: 14px;
-      background: #f8fafc;
-      padding: 10px 12px;
-    }
-    .certificate-print-summary div {
-      min-height: 64px;
-      align-content: center;
-    }
-    .certificate-print-table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-    .certificate-print-table th,
-    .certificate-print-table td {
-      border: 1.5px solid #cbd5e1;
-      padding: 9px 10px;
-      text-align: start;
-      vertical-align: top;
-      word-break: break-word;
-      font-size: 12px;
-    }
-    .certificate-print-table th {
-      background: #eaf2ff;
-      color: #0f172a;
-      font-weight: 900;
-      letter-spacing: .1px;
-    }
-    .certificate-print-table td:nth-child(2),
-    .certificate-print-table td:nth-child(3),
-    .certificate-print-table td:nth-child(4) {
-      text-align: center;
-      font-weight: 800;
-    }
-    .certificate-print-table tbody tr:nth-child(even),
-    .certificate-print-attendance tbody tr:nth-child(even) {
-      background: #f8fafc;
-    }
-    .certificate-print-notes {
-      display: grid;
-      gap: 10px;
-    }
-    .certificate-print-note {
-      display: grid;
-      gap: 6px;
-    }
-    .certificate-print-attendance {
-      width: 100%;
-      border-collapse: collapse;
-      padding: 0;
-      overflow: hidden;
-    }
-    .certificate-print-attendance th,
-    .certificate-print-attendance td {
-      border: 1.5px solid #cbd5e1;
-      padding: 8px 10px;
-      text-align: center;
-      font-size: 12px;
-    }
-    .certificate-print-attendance th {
-      background: #eff6ff;
-    }
-    .certificate-print-signatures {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-      margin-top: 6px;
-    }
-    .certificate-print-signatures div {
-      border-top: 2px solid #1e3a8a;
-      padding-top: 8px;
-      display: grid;
-      gap: 4px;
-      min-height: 72px;
-      align-content: end;
-    }
-    .certificate-print-signatures strong {
-      color: #1e3a8a;
-      font-size: 15px;
-    }
-    @media print {
-      body { background: #fff; }
-      .certificate-print-sheet { box-shadow: none; border-radius: 0; min-height: auto; }
-      .certificate-print-header,
-      .certificate-print-table,
-      .certificate-print-summary,
-      .certificate-print-attendance,
-      .certificate-print-notes,
-      .certificate-print-signatures { break-inside: avoid; page-break-inside: avoid; }
-    }
-  </style>
+  <style>@page { size: A4 portrait; margin: 10mm; }</style>
 </head>
 <body>${buildPrintableBody()}</body>
 </html>`;
@@ -1335,141 +1141,22 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
 
   async function handlePrint() {
     setShowPreview(true);
+    void buildPrintableHtml();
     await saveCertificate({}, true);
-    const printWindow = window.open("", "_blank", "noopener,noreferrer,width=1200,height=900");
-    if (!printWindow) {
-      setPageMessage(t("certificates.downloadFailed"));
-      return;
-    }
-    printWindow.document.open();
-    printWindow.document.write(buildPrintableHtml());
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      try {
-        printWindow.print();
-      } catch {
-        setPageMessage(t("certificates.downloadFailed"));
-      }
-    }, 500);
-  }
-
-  async function handleDownload() {
-    setShowPreview(true);
-    await saveCertificate({}, true);
-    const html = buildPrintableHtml();
-    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${safeFileName(schoolName || "certificate")}-${safeFileName(selectedStudentName || "student")}-${issueDate}.html`;
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setPageMessage(t("certificates.downloaded"));
+    window.setTimeout(() => window.print(), 120);
   }
 
   return (
     <div className="page student-certificates-page" data-e2e="student-certificates-page">
       <h2>{t("certificates.title")}</h2>
 
-      <Card
-        actions={
-          <div className="certificate-top-actions no-print">
-            <button
-              data-e2e="certificate-save"
-              type="button"
-              className="secondary"
-              onClick={() => void saveCertificate({}, false, true)}
-              disabled={readOnly || !selectedStudent || loading || saving}
-            >
-              <Save size={18} />
-              <span>{t("certificates.save")}</span>
-            </button>
-            <button
-              data-e2e="certificate-approve"
-              type="button"
-              onClick={() => void markSelectedCertificateApproved()}
-              disabled={readOnly || !selectedStudent || loading || saving}
-            >
-              <ShieldCheck size={18} />
-              <span>{t("certificates.approve")}</span>
-            </button>
-            <button
-              data-e2e="certificate-publish"
-              type="button"
-              className="secondary"
-              onClick={() => void publishCertificate()}
-              disabled={readOnly || !approved || !selectedStudent || loading || saving}
-            >
-              <FileCheck2 size={18} />
-              <span>{t("certificates.publish")}</span>
-            </button>
-            <button
-              data-e2e="certificate-print"
-              type="button"
-              onClick={() => void handlePrint()}
-              disabled={!selectedStudent || loading || saving}
-            >
-              <Printer size={18} />
-              <span>{t("certificates.printPdf")}</span>
-            </button>
-            <button
-              data-e2e="certificate-export"
-              type="button"
-              className="secondary"
-              onClick={() => void handleDownload()}
-              disabled={!selectedStudent || loading || saving}
-            >
-              <Download size={18} />
-              <span>{t("certificates.exportCertificate")}</span>
-            </button>
-          </div>
-        }
-      >
-        <div className="certificate-info-grid">
-          <div className="certificate-info-chip">
-            <strong>{t("certificates.schoolLabel")}</strong>
-            <span>{schoolName}</span>
-          </div>
-          <div className="certificate-info-chip">
-            <strong>{t("certificates.studentLabel")}</strong>
-            <span>{selectedClassStudentsLabel}</span>
-          </div>
-          <div className="certificate-info-chip">
-            <strong>{t("certificates.classLabel")}</strong>
-            <span>{selectedClassName}</span>
-          </div>
-          <div className="certificate-info-chip">
-            <strong>{t("certificates.stateLabel")}</strong>
-            <span>{showClassReview ? t("certificates.classReviewOpen") : t("certificates.classReviewHint")}</span>
-          </div>
-        </div>
-        {saving && (
-          <div className="form-message" role="status">
-            {t("certificates.saving")}
-          </div>
-        )}
-        {!saving && certificateStatus && (
-          <div className="form-message" role="status">
-            {certificateStatus}
-          </div>
-        )}
-        {loading && (
-          <div className="form-message" role="status">
-            {t("common.loading")}
-          </div>
-        )}
-        {pageMessage && (
-          <div className="form-message" role="status">
-            {pageMessage}
-          </div>
-        )}
-        {readOnly && (
-          <div className="form-message certificate-warning" role="status">
-            {t("users.readOnly")}
-          </div>
-        )}
-      </Card>
+      <div className="certificate-page-status no-print">
+        {saving ? <div className="form-message" role="status">{t("certificates.saving")}</div> : null}
+        {!saving && certificateStatus ? <div className="form-message" role="status">{certificateStatus}</div> : null}
+        {loading ? <div className="form-message" role="status">{t("common.loading")}</div> : null}
+        {pageMessage ? <div className="form-message" role="status">{pageMessage}</div> : null}
+        {readOnly ? <div className="form-message certificate-warning" role="status">{t("users.readOnly")}</div> : null}
+      </div>
 
       <div
         className={
@@ -1484,8 +1171,8 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
             disabled={readOnly}
             style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
           >
-            <Card title={t("certificates.selectTitle")}>
-              <div className="certificate-grid certificate-grid--three">
+            <Card title={t("certificates.classDetailsTitle")}>
+              <div className="certificate-grid certificate-grid--certificate-details">
                 <label>
                   <span>{t("common.class")}</span>
                   <select
@@ -1502,6 +1189,20 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                   </select>
                 </label>
                 <label>
+                  <span>{t("certificates.curriculumType")}</span>
+                  <select
+                    data-e2e="certificate-curriculum-select"
+                    value={curriculumType}
+                    onChange={(event) => setCurriculumType(event.target.value as CurriculumType)}
+                  >
+                    {curriculumOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {t(option.labelKey)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="certificate-type-field">
                   <span>{t("certificates.type")}</span>
                   <select
                     data-e2e="certificate-type-select"
@@ -1516,7 +1217,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                   </select>
                 </label>
               </div>
-              <div className="certificate-grid certificate-grid--three">
+              <div className="certificate-grid certificate-grid--two">
                 <label>
                   <span>{t("certificates.academicYear")}</span>
                   <input value={academicYear} onChange={(event) => setAcademicYear(event.target.value)} />
@@ -1528,7 +1229,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
               </div>
             </Card>
 
-            <Card title={t("certificates.studentSelectionTitle")}>
+            <Card title={t("certificates.studentsSelectionTitle")}>
               <div className="certificate-selection-summary">
                 <span>
                   {t("certificates.selectedStudentsCount")}: {selectedClassStudents.length}
@@ -1620,7 +1321,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
             </Card>
 
             <Card title={t("certificates.attendanceTitle")}>
-              <div className="certificate-grid certificate-grid--three">
+              <div className="certificate-grid certificate-attendance-strip">
                 <label>
                   <span>{t("certificates.presentDays")}</span>
                   <input
@@ -1653,7 +1354,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                   />
                 </label>
               </div>
-              <div className="certificate-grid certificate-grid--two">
+              <div className="certificate-grid certificate-attendance-strip certificate-attendance-strip--wide">
                 <label>
                   <span>{t("certificates.behaviorEvaluation")}</span>
                   <select
@@ -1715,7 +1416,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
               </div>
             </Card>
 
-            <Card title={t("certificates.signatureTitle")}>
+            <Card title={t("certificates.signaturesTitle")}>
               <div className="certificate-grid certificate-grid--two">
                 <label>
                   <span>{t("certificates.teacherSignature")}</span>
@@ -1735,18 +1436,23 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                 </label>
               </div>
               <div className="certificate-approval-row">
+                <button type="button" className="secondary" onClick={handlePreview} disabled={!selectedStudent || loading}>
+                  <Eye size={18} />
+                  <span>{t("certificates.previewAction")}</span>
+                </button>
                 <button
                   type="button"
                   className="primary"
-                  onClick={() => void markSelectedCertificateApproved()}
+                  onClick={() => void handleSaveSelectedCertificate()}
                   disabled={readOnly || !selectedStudent || loading || saving || classReviewLoading}
                 >
-                  <ShieldCheck size={18} />
+                  <Save size={18} />
                   <span>{t("certificates.approve")}</span>
                 </button>
-                <span className="certificate-section-hint">
-                  {showClassReview ? t("certificates.classReviewOpen") : t("certificates.classReviewHint")}
-                </span>
+                <button type="button" onClick={() => void handlePrint()} disabled={!selectedStudent || loading || saving}>
+                  <Printer size={18} />
+                  <span>{t("certificates.printPdf")}</span>
+                </button>
               </div>
             </Card>
           </fieldset>

@@ -309,6 +309,62 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   align-items: stretch;
 }
 
+[data-e2e="reports-page"] {
+  gap: 20px;
+}
+
+[data-e2e="reports-page"] > .card {
+  border: 2px solid #cbd5e1;
+  box-shadow:
+    0 18px 36px rgba(15, 23, 42, 0.11),
+    0 2px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+[data-e2e="reports-page"] > .card::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 4px;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(90deg, #2563eb, #14b8a6, #f59e0b);
+}
+
+[data-e2e="reports-page"] .card-header {
+  margin: -4px -2px 16px;
+  padding: 16px 18px 14px;
+  border-bottom: 2px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+[data-e2e="reports-page"] .report-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.09);
+}
+
+[data-e2e="reports-page"] .report-tabs button {
+  border: 1.5px solid #94a3b8;
+}
+
+[data-e2e="reports-page"] .report-tabs button.active {
+  border-color: #1d4ed8;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+}
+
+[data-e2e="reports-page"] .report-filter-grid {
+  padding: 12px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
 .report-filter-grid > label {
   display: grid;
   gap: 6px;
@@ -335,6 +391,69 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 .report-filter-grid > button {
   align-self: stretch;
   min-height: 46px;
+}
+
+[data-e2e="reports-page"] .report-stack,
+[data-e2e="reports-page"] #daily-report-print {
+  display: grid;
+  gap: 16px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+[data-e2e="reports-page"] .report-header,
+[data-e2e="reports-page"] .report-text,
+[data-e2e="reports-page"] .small-table,
+[data-e2e="reports-page"] .report-chart {
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.07);
+}
+
+[data-e2e="reports-page"] .report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+}
+
+[data-e2e="reports-page"] .report-text {
+  margin: 0;
+}
+
+[data-e2e="reports-page"] .report-chart {
+  padding: 12px;
+}
+
+[data-e2e="reports-page"] .small-table {
+  overflow: auto;
+}
+
+[data-e2e="reports-page"] .small-table table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+[data-e2e="reports-page"] .small-table th,
+[data-e2e="reports-page"] .small-table td {
+  border-color: #cbd5e1;
+}
+
+[data-e2e="reports-page"] .small-table th {
+  background: #eaf1ff;
+  color: #0f172a;
+}
+
+[data-e2e="reports-page"] .teacher-kpis .metric-card {
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
 }
 
 .report-filter-grid .wide-input {
@@ -1287,6 +1406,8 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 .student-certificates-page {
   display: grid;
   gap: 16px;
+  width: 100%;
+  max-width: none;
 }
 
 .student-certificates-page .card {
@@ -1295,23 +1416,46 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
 }
 
+.student-certificates-page .certificate-page-status {
+  display: grid;
+  gap: 8px;
+}
+
+.student-certificates-page .certificate-controls-column .card {
+  border: 2px solid #b8c4d6;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+}
+
+.student-certificates-page .certificate-controls-column .card-header {
+  margin: -18px -18px 16px;
+  padding: 14px 18px;
+  border-bottom: 2px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 8px 8px 0 0;
+}
+
 .certificate-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   gap: 16px;
   align-items: start;
+  width: 100%;
 }
 
 .certificate-controls-column,
 .certificate-preview-column {
   display: grid;
   gap: 16px;
+  min-width: 0;
 }
 
 .certificate-grid {
   display: grid;
   gap: 12px;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
 .certificate-grid--two {
@@ -1322,12 +1466,47 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.certificate-grid--certificate-details {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.certificate-type-field select {
+  min-width: 0;
+  min-height: 48px;
+  padding-inline: 14px;
+  font-weight: 800;
+}
+
+.certificate-attendance-strip {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.certificate-attendance-strip--wide {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .certificate-grid label,
 .certificate-textarea-field {
   display: grid;
   gap: 6px;
+  min-width: 0;
   font-weight: 800;
   color: #334155;
+}
+
+.certificate-attendance-strip label {
+  grid-template-columns: minmax(0, 1fr) minmax(78px, 0.7fr);
+  align-items: center;
+  min-height: 58px;
+  padding: 10px 12px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.07);
+}
+
+.certificate-attendance-strip label span {
+  line-height: 1.35;
 }
 
 .certificate-section-hint {
@@ -1344,11 +1523,17 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 .certificate-textarea-field select,
 .certificate-textarea-field textarea {
   width: 100%;
+  min-width: 0;
   min-height: 42px;
   border: 1.5px solid #94a3b8;
   border-radius: 10px;
   background: #fff;
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.certificate-attendance-strip input,
+.certificate-attendance-strip select {
+  min-height: 38px;
 }
 
 .certificate-textarea-field textarea {
@@ -2319,12 +2504,18 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 }
 
 .certificate-layout--preview-closed {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1120px);
+  justify-content: center;
 }
 
 .certificate-layout {
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: 18px;
+}
+
+.certificate-layout.certificate-layout--preview-closed {
+  grid-template-columns: minmax(0, 1120px);
+  justify-content: center;
 }
 
 .certificate-layout--preview-open {
@@ -2336,6 +2527,348 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   border: 1.5px solid #cbd5e1;
   border-radius: 14px;
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+}
+
+.certificate-print-sheet {
+  --certificate-navy: #062b4f;
+  --certificate-gold: #c9973a;
+  --certificate-line: #d7bd86;
+  width: min(100%, 210mm);
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 14mm 12mm;
+  color: #071d36;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 252, 245, 0.96)),
+    #fffaf0;
+  border: 8px solid var(--certificate-navy);
+  outline: 2px solid var(--certificate-gold);
+  outline-offset: -12px;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
+  display: grid;
+  gap: 14px;
+  font-family: Tahoma, Arial, sans-serif;
+}
+
+.certificate-print-header {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.8fr) minmax(260px, 1.7fr) minmax(130px, 0.8fr);
+  gap: 16px;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--certificate-gold);
+}
+
+.certificate-school-brand {
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.certificate-school-brand h1 {
+  margin: 0;
+  color: var(--certificate-navy);
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.certificate-school-brand p,
+.certificate-ministry-text span {
+  margin: 0;
+  color: #9a6a19;
+  font-weight: 800;
+  min-height: 18px;
+}
+
+.certificate-school-emblem {
+  width: 74px;
+  height: 74px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: var(--certificate-navy);
+  color: #fff;
+  border: 4px solid var(--certificate-gold);
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.certificate-ministry-text {
+  display: grid;
+  gap: 6px;
+  align-content: center;
+  color: var(--certificate-navy);
+  font-weight: 900;
+  line-height: 1.6;
+}
+
+.certificate-ministry-text--left {
+  text-align: end;
+}
+
+.certificate-title-ribbon,
+.certificate-section-ribbon {
+  justify-self: center;
+  min-width: 190px;
+  margin: -2px 0 0;
+  padding: 8px 28px;
+  color: #fff;
+  background: var(--certificate-navy);
+  border: 2px solid #0b3d70;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 900;
+  box-shadow: 0 8px 16px rgba(6, 43, 79, 0.18);
+}
+
+.certificate-section-ribbon {
+  min-width: 160px;
+  padding-block: 6px;
+  font-size: 16px;
+}
+
+.certificate-student-data {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 18px;
+  padding: 14px;
+  border: 1.8px solid var(--certificate-gold);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.certificate-avatar {
+  width: 112px;
+  min-height: 128px;
+  border: 1.5px solid #b8c4d6;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 50% 36%, var(--certificate-navy) 0 19px, transparent 20px),
+    radial-gradient(ellipse at 50% 78%, var(--certificate-navy) 0 36px, transparent 37px),
+    #f8fafc;
+}
+
+.certificate-data-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 26px;
+}
+
+.certificate-data-grid div {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 38px;
+  border-bottom: 1.4px solid #e7d2a6;
+}
+
+.certificate-data-grid span,
+.certificate-result-panel span,
+.certificate-attendance-cards span,
+.certificate-print-note strong,
+.certificate-print-signatures span {
+  color: var(--certificate-navy);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.certificate-data-grid strong {
+  color: #071d36;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.certificate-print-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 2px solid var(--certificate-navy);
+  background: #fff;
+}
+
+.certificate-print-table th,
+.certificate-print-table td {
+  border: 1.6px solid #c9ab72;
+  padding: 9px 12px;
+  text-align: center;
+  vertical-align: middle;
+  color: #071d36;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.certificate-print-table th {
+  background: var(--certificate-navy);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.certificate-print-table th:first-child,
+.certificate-print-table td:first-child {
+  width: 52%;
+  text-align: start;
+  font-weight: 900;
+}
+
+.certificate-print-table th:nth-child(2),
+.certificate-print-table td:nth-child(2) {
+  width: 20%;
+  font-weight: 900;
+}
+
+.certificate-print-table th:nth-child(3),
+.certificate-print-table td:nth-child(3) {
+  width: 28%;
+}
+
+.certificate-print-table tbody tr:nth-child(even) td {
+  background: #fff8ea;
+}
+
+.certificate-result-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border: 1.8px solid var(--certificate-gold);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.certificate-result-panel div {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  min-height: 82px;
+  padding: 12px;
+}
+
+.certificate-result-panel div + div {
+  border-inline-start: 1.6px solid var(--certificate-gold);
+}
+
+.certificate-result-panel strong {
+  color: var(--certificate-navy);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.certificate-result-panel strong.is-pass {
+  color: #15803d;
+}
+
+.certificate-result-panel strong.is-review {
+  color: #b45309;
+}
+
+.certificate-attendance-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+  border: 1.8px solid var(--certificate-gold);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.certificate-print-attendance {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1.8px solid var(--certificate-gold);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.certificate-print-attendance th,
+.certificate-print-attendance td {
+  border: 1.5px solid #d8bf8c;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.certificate-print-attendance th {
+  background: #fff8ea;
+  color: var(--certificate-navy);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.certificate-print-attendance td {
+  color: var(--certificate-navy);
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.certificate-attendance-cards div {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  min-height: 76px;
+  padding: 10px;
+  border: 1.5px solid #d8bf8c;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.certificate-attendance-cards strong {
+  color: var(--certificate-navy);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.certificate-print-notes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 14px;
+  border: 1.8px solid var(--certificate-gold);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.certificate-print-note {
+  display: grid;
+  gap: 8px;
+  min-height: 110px;
+  padding: 14px;
+  border: 1.4px solid #d7dfeb;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.certificate-print-note p {
+  margin: 0;
+  color: #071d36;
+  line-height: 1.8;
+  font-weight: 700;
+}
+
+.certificate-print-signatures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 90px;
+  margin-top: 8px;
+  padding-inline: 70px;
+}
+
+.certificate-print-signatures div {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  min-height: 76px;
+  align-content: end;
+  border-top: 2px solid var(--certificate-navy);
+  padding-top: 8px;
+}
+
+.certificate-print-signatures strong {
+  color: #071d36;
+  font-weight: 900;
 }
 
 .certificate-preview-shell {
@@ -3604,6 +4137,9 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   .lesson-controls,
   .certificate-grid--two,
   .certificate-grid--three,
+  .certificate-grid--certificate-details,
+  .certificate-attendance-strip,
+  .certificate-attendance-strip--wide,
   .certificate-layout,
   .certificate-preview-signatures,
   .lesson-row--two,

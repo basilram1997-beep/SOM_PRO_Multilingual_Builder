@@ -30,8 +30,7 @@ export function HomeroomEditorPanel(props: Props) {
   return (
     <>
       <div className="homeroom-editor-layout">
-        <div className="form homeroom-editor-row">
-          <div className="homeroom-editor-row-title">{t("homeroom.weeklyDay")}</div>
+        <div className="form homeroom-editor-row homeroom-time-section">
           <label>
             {t("homeroom.weeklyDay")}
             <select value={form.weeklyDay} onChange={(e) => props.onFormChange({ ...form, weeklyDay: e.target.value })}>
@@ -57,8 +56,7 @@ export function HomeroomEditorPanel(props: Props) {
           </label>
         </div>
 
-        <div className="form homeroom-editor-row">
-          <div className="homeroom-editor-row-title">{t("common.teacher")}</div>
+        <div className="form homeroom-editor-row homeroom-assignment-section">
           <label>
             {t("common.teacher")}
             <select value={form.teacherId} onChange={(e) => props.onFormChange({ ...form, teacherId: e.target.value })}>
@@ -98,7 +96,6 @@ export function HomeroomEditorPanel(props: Props) {
 
         <div className="form bulk-box">
           <h3>{t("homeroom.autoTitle")}</h3>
-          <p className="muted">{t("homeroom.autoInfo")}</p>
           <label>
             {t("common.day")}
             <select value={bulkDay} onChange={(e) => props.onBulkDayChange(e.target.value)}>

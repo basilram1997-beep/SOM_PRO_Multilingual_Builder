@@ -77,7 +77,14 @@ Object.assign(he, {
   "login.createSaved": "החשבון נוצר ואפשר להתחבר כעת",
   "login.createFailed": "לא ניתן ליצור את החשבון",
   "login.createRequired": "יש להשלים תחילה את פרטי החשבון",
-  "certificates.printPdf": "הדפסה / שמירת PDF",
+  "certificates.printPdf": "הדפסה",
+  "certificates.previewAction": "הצגת תעודות",
+  "certificates.classDetailsTitle": "בחירת כיתה ופרטי תעודה",
+  "certificates.studentsSelectionTitle": "בחירת תלמידים",
+  "certificates.curriculumType": "סוג תוכנית לימודים",
+  "certificates.curriculum.palestinian": "תוכנית לימודים פלסטינית",
+  "certificates.curriculum.bagrut": "תוכנית בגרות",
+  "certificates.signaturesTitle": "חתימות",
   "nav.mainContent": "תוכן ראשי"
 });
 

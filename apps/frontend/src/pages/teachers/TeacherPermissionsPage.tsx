@@ -108,10 +108,6 @@ export function TeacherPermissionsPage({ currentUser }: { currentUser: AuthUser 
             <span>{t("teacherPermissions.teacherName")}:</span>
             <strong>{teacherName}</strong>
           </div>
-          <div>
-            <span>{t("teacherPermissions.currentRole")}:</span>
-            <strong>{currentUser.role}</strong>
-          </div>
         </div>
         <div className="student-invitation-form">
           <label>

@@ -63,9 +63,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         <section className="login-hero-panel" aria-label={labels.heroAriaLabel}>
           <div className="login-hero-brand">
             <div className="login-hero-mark">SOM PRO</div>
-            <div>
-              <h2>{labels.heroWelcome}</h2>
-            </div>
           </div>
 
           <div className="login-hero-status" role="status" aria-live="polite" data-e2e="login-system-status">

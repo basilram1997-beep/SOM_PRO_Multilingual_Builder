@@ -1,4 +1,8 @@
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
   body {
     background: #fff;
   }
@@ -39,6 +43,31 @@
   }
   .certificate-preview-header {
     break-inside: avoid;
+  }
+  .certificate-print-sheet {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    break-after: page;
+    page-break-after: always;
+  }
+  .certificate-print-header,
+  .certificate-student-data,
+  .certificate-result-panel,
+  .certificate-attendance-cards,
+  .certificate-print-notes,
+  .certificate-print-signatures {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .certificate-print-table {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+  .certificate-print-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
   .shell {
     display: block;
