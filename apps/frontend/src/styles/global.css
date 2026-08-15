@@ -2978,21 +2978,124 @@ html[dir="ltr"] .login-card label.login-remember {
 }
 
 .teachers-page .teacher-weekly-load {
+  display: grid;
+  gap: 14px;
   margin-top: 16px;
+  padding: 16px;
+  border: 2px solid #b8c4d6;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
 }
 .teachers-page .teacher-weekly-load h3 {
-  margin-bottom: 6px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 900;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.teachers-page .teacher-weekly-load > .muted {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #fbfdff;
+  color: #475569;
+  line-height: 1.7;
+  font-weight: 700;
+}
+.teachers-page .teacher-assignment-add-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+  margin: 0;
+  padding: 14px;
+  border: 2px solid #d5deeb;
+  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 7px 18px rgba(15, 23, 42, 0.06);
+}
+.teachers-page .teacher-assignment-add-row label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 5px 13px rgba(15, 23, 42, 0.05);
+  color: #334155;
+  font-weight: 900;
+}
+.teachers-page .teacher-assignment-add-row select,
+.teachers-page .teacher-assignment-add-row input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  border: 2px solid #b8c4d6;
+  background: #ffffff;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+.teachers-page .teacher-assignment-add-row select:focus,
+.teachers-page .teacher-assignment-add-row input:focus {
+  outline: 0;
+  border-color: #2563eb;
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.18),
+    inset 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+.teachers-page .teacher-assignment-add-row button {
+  min-height: 44px;
+  align-self: stretch;
+  white-space: nowrap;
+}
+.teachers-page .teacher-weekly-load-table {
+  border: 2px solid #94a3b8;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+}
+.teachers-page .teacher-weekly-load-table table {
+  min-width: 840px;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 .teachers-page .teacher-weekly-load-table th,
 .teachers-page .teacher-weekly-load-table td {
+  border-inline-end: 1.5px solid #94a3b8;
+  border-bottom: 1.5px solid #94a3b8;
   text-align: center;
   vertical-align: middle;
+  background-clip: padding-box;
+}
+.teachers-page .teacher-weekly-load-table thead th {
+  border-top: 1.5px solid #94a3b8;
+  background: #dbeafe;
+  color: #0f172a;
+  font-weight: 900;
+}
+.teachers-page .teacher-weekly-load-table th:first-child,
+.teachers-page .teacher-weekly-load-table td:first-child {
+  border-inline-start: 1.5px solid #94a3b8;
 }
 .teachers-page .teacher-weekly-load-table th:nth-child(1),
 .teachers-page .teacher-weekly-load-table td:nth-child(1),
 .teachers-page .teacher-weekly-load-table th:nth-child(2),
 .teachers-page .teacher-weekly-load-table td:nth-child(2) {
   min-width: 170px;
+}
+.teachers-page .teacher-weekly-load-table tbody tr:nth-child(even) td {
+  background: #f8fafc;
+}
+.teachers-page .teacher-weekly-load-table tbody tr:hover td {
+  background: #eff6ff;
 }
 .teachers-page .teacher-weekly-total-row td {
   background: #e0f2fe !important;
@@ -3020,6 +3123,16 @@ html[dir="ltr"] .login-card label.login-remember {
 .teachers-page .weekly-periods-input:focus {
   outline: 2px solid #bfdbfe;
   border-color: #2563eb;
+}
+
+@media (max-width: 700px) {
+  .teachers-page .teacher-assignment-add-row {
+    grid-template-columns: 1fr;
+  }
+
+  .teachers-page .teacher-assignment-add-row button {
+    width: 100%;
+  }
 }
 
 .users-page .username-field {
@@ -3085,11 +3198,41 @@ html[dir="ltr"] .login-card label.login-remember {
   width: 100%;
   min-width: 0;
 }
+.users-page .users-parent-students-list {
+  display: grid;
+  gap: 8px;
+  max-height: 170px;
+  overflow: auto;
+  padding: 10px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+.users-page .users-parent-student-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-weight: 800;
+}
+.users-page .users-parent-student-option input {
+  width: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0;
+}
 .users-page .username-field {
   width: 100%;
 }
 .users-page .users-save-button {
-  align-self: stretch;
+  align-self: end;
+  justify-self: start;
+  min-height: 42px;
+  min-width: 132px;
+  padding: 9px 14px;
   white-space: nowrap;
 }
 .users-page button:disabled {
@@ -3103,6 +3246,7 @@ html[dir="ltr"] .login-card label.login-remember {
   }
   .users-page .users-save-button {
     grid-column: 1 / -1;
+    justify-self: start;
   }
 }
 @media (max-width: 700px) {
@@ -3112,6 +3256,8 @@ html[dir="ltr"] .login-card label.login-remember {
   }
   .users-page .users-save-button {
     grid-column: auto;
+    justify-self: stretch;
+    width: 100%;
   }
 }
 

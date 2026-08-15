@@ -8,6 +8,7 @@ import {
   userRequiresMfa,
   verifyUserSecondFactor
 } from "./mfaService";
+import { getParentStudentIds, uniqueNonEmpty } from "./accountLinking";
 
 const DEFAULT_AUTH_SECRET = "change-this-auth-secret-before-selling";
 const AUTH_SECRET = process.env.SOM_PRO_AUTH_SECRET || process.env.SOM_PRO_LICENSE_SECRET || DEFAULT_AUTH_SECRET;
@@ -44,6 +45,11 @@ export async function findUsersByLoginIdentifier(value: string) {
     },
     include: { school: { select: { isActive: true } } }
   });
+}
+
+async function linkedStudentIdsForUser(user: { id: string; schoolId: string; studentId?: string | null; role?: UserRole }) {
+  if (user.role !== "PARENT") return uniqueNonEmpty([user.studentId]);
+  return uniqueNonEmpty([user.studentId, ...(await getParentStudentIds(prisma, user.schoolId, user.id))]);
 }
 
 export type LicenseAdminAccount = {
@@ -224,6 +230,7 @@ export async function loginWithPassword(email: string, password: string, secondF
           id: user.id,
           schoolId: user.schoolId,
           studentId: user.studentId,
+          studentIds: await linkedStudentIdsForUser(user),
           name: user.name,
           email: user.email,
           role: user.role
@@ -243,6 +250,7 @@ export async function loginWithPassword(email: string, password: string, secondF
           id: user.id,
           schoolId: user.schoolId,
           studentId: user.studentId,
+          studentIds: await linkedStudentIdsForUser(user),
           name: user.name,
           email: user.email,
           role: user.role
@@ -269,6 +277,7 @@ export async function loginWithPassword(email: string, password: string, secondF
       id: user.id,
       schoolId: user.schoolId,
       studentId: user.studentId,
+      studentIds: await linkedStudentIdsForUser(user),
       name: user.name,
       email: user.email,
       role: user.role

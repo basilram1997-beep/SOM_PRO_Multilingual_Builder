@@ -9,11 +9,13 @@ import { hashPassword } from "../../services/authService";
 import { recordAuditLog } from "../../services/auditLog";
 import { canRole, permissionsForRole } from "../../services/accessPolicy";
 import { z } from "zod";
+import { getParentStudentIds, primaryStudentId, replaceParentStudentLinks, uniqueNonEmpty } from "../../services/accountLinking";
 
 export const settingsRouter = Router();
 
 const UserRoleSchema = z.enum(["ADMIN", "SCHEDULER", "TEACHER", "STUDENT", "PARENT"]);
 const LinkedStudentIdSchema = z.string().trim().min(1).optional().nullable();
+const LinkedStudentIdsSchema = z.array(z.string().trim().min(1)).max(12).optional();
 const UserIdentifierSchema = z.string().trim().min(3);
 const UserCreateSchema = z
   .object({
@@ -21,17 +23,19 @@ const UserCreateSchema = z
     email: UserIdentifierSchema,
     password: z.string().min(6, "PASSWORD_TOO_SHORT"),
     role: UserRoleSchema,
-    studentId: LinkedStudentIdSchema
+    studentId: LinkedStudentIdSchema,
+    studentIds: LinkedStudentIdsSchema
   })
   .superRefine((value, context) => {
-    if ((value.role === "STUDENT" || value.role === "PARENT") && !value.studentId) {
+    const linkedCount = uniqueNonEmpty([value.studentId, ...(value.studentIds || [])]).length;
+    if ((value.role === "STUDENT" || value.role === "PARENT") && linkedCount === 0) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["studentId"],
         message: "STUDENT_LINK_REQUIRED"
       });
     }
-    if (value.role !== "STUDENT" && value.role !== "PARENT" && value.studentId) {
+    if (value.role && value.role !== "STUDENT" && value.role !== "PARENT" && linkedCount > 0) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["studentId"],
@@ -46,20 +50,22 @@ const UserUpdateSchema = z
     email: UserIdentifierSchema.optional(),
     password: z.string().min(6, "PASSWORD_TOO_SHORT").optional(),
     role: UserRoleSchema.optional(),
-    studentId: LinkedStudentIdSchema
+    studentId: LinkedStudentIdSchema,
+    studentIds: LinkedStudentIdsSchema
   })
   .refine((value) => Object.keys(value).length > 0, {
     message: "USER_UPDATE_REQUIRED"
   })
   .superRefine((value, context) => {
-    if ((value.role === "STUDENT" || value.role === "PARENT") && !value.studentId) {
+    const linkedCount = uniqueNonEmpty([value.studentId, ...(value.studentIds || [])]).length;
+    if ((value.role === "STUDENT" || value.role === "PARENT") && linkedCount === 0) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["studentId"],
         message: "STUDENT_LINK_REQUIRED"
       });
     }
-    if (value.role !== "STUDENT" && value.role !== "PARENT" && value.studentId) {
+    if (value.role && value.role !== "STUDENT" && value.role !== "PARENT" && linkedCount > 0) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["studentId"],
@@ -71,17 +77,19 @@ const UserUpdateSchema = z
 const UserRoleUpdateSchema = z
   .object({
     role: UserRoleSchema,
-    studentId: LinkedStudentIdSchema
+    studentId: LinkedStudentIdSchema,
+    studentIds: LinkedStudentIdsSchema
   })
   .superRefine((value, context) => {
-    if ((value.role === "STUDENT" || value.role === "PARENT") && !value.studentId) {
+    const linkedCount = uniqueNonEmpty([value.studentId, ...(value.studentIds || [])]).length;
+    if ((value.role === "STUDENT" || value.role === "PARENT") && linkedCount === 0) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["studentId"],
         message: "STUDENT_LINK_REQUIRED"
       });
     }
-    if (value.role !== "STUDENT" && value.role !== "PARENT" && value.studentId) {
+    if (value.role !== "STUDENT" && value.role !== "PARENT" && linkedCount > 0) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["studentId"],
@@ -127,11 +135,28 @@ async function generateSuggestedUsername(schoolId: string, role: z.infer<typeof 
   return `${base}-${String(next).padStart(2, "0")}`;
 }
 
-async function getSchoolStudentOr404(schoolId: string, studentId: string) {
-  return prisma.student.findFirst({
-    where: { id: studentId, schoolId },
+function linkedStudentIdsFromBody(body: { studentId?: string | null; studentIds?: string[] | null }) {
+  return uniqueNonEmpty([body.studentId, ...((body.studentIds || []) as string[])]);
+}
+
+async function assertSchoolStudentsExist(schoolId: string, studentIds: string[]) {
+  const uniqueIds = uniqueNonEmpty(studentIds);
+  if (!uniqueIds.length) return [];
+  const students = await prisma.student.findMany({
+    where: { id: { in: uniqueIds }, schoolId, status: "ACTIVE" },
     select: { id: true, name: true, classId: true }
   });
+  if (students.length !== uniqueIds.length) {
+    throw new Error("STUDENT_NOT_FOUND");
+  }
+  return students;
+}
+
+async function existingLinkedStudentIdsForUser(schoolId: string, user: { id: string; role: string; studentId?: string | null }) {
+  if (user.role === "PARENT") {
+    return uniqueNonEmpty([user.studentId, ...(await getParentStudentIds(prisma, schoolId, user.id))]);
+  }
+  return uniqueNonEmpty([user.studentId]);
 }
 
 settingsRouter.get("/", async (req, res) => {
@@ -149,10 +174,27 @@ settingsRouter.get("/users", async (req, res) => {
   const schoolId = await getRequestSchoolId(req);
   const users = await prisma.user.findMany({
     where: { schoolId },
-    select: { id: true, name: true, email: true, role: true, studentId: true, createdAt: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      studentId: true,
+      createdAt: true
+    },
     orderBy: { createdAt: "asc" }
   });
-  res.json({ data: users });
+  res.json({
+    data: await Promise.all(
+      users.map(async (user) => ({
+        ...user,
+        studentIds:
+          user.role === "PARENT"
+            ? uniqueNonEmpty([user.studentId, ...(await getParentStudentIds(prisma, schoolId, user.id))])
+            : uniqueNonEmpty([user.studentId])
+      }))
+    )
+  });
 });
 
 settingsRouter.get("/users/suggest-username", async (req, res) => {
@@ -170,13 +212,15 @@ settingsRouter.post("/users", validateBody(UserCreateSchema), async (req, res) =
     return res.status(409).json({ error: "USERNAME_EXISTS", message: "اسم المستخدم موجود مسبقًا" });
   }
 
-  const studentId = typeof req.body.studentId === "string" ? req.body.studentId.trim() : "";
+  const linkedStudentIds = linkedStudentIdsFromBody(req.body);
+  const studentId = primaryStudentId(linkedStudentIds);
   if ((req.body.role === "STUDENT" || req.body.role === "PARENT") && !studentId) {
     return res.status(400).json({ error: "STUDENT_LINK_REQUIRED", message: "يجب ربط الحساب بالطالب" });
   }
-  if (studentId) {
-    const student = await getSchoolStudentOr404(schoolId, studentId);
-    if (!student) {
+  if (linkedStudentIds.length) {
+    try {
+      await assertSchoolStudentsExist(schoolId, req.body.role === "STUDENT" ? [studentId!] : linkedStudentIds);
+    } catch {
       return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
     }
   }
@@ -193,6 +237,9 @@ settingsRouter.post("/users", validateBody(UserCreateSchema), async (req, res) =
       },
       select: { id: true, name: true, email: true, role: true, studentId: true, createdAt: true }
     });
+    if (req.body.role === "PARENT") {
+      await replaceParentStudentLinks(prisma, schoolId, user.id, linkedStudentIds, "ADMIN");
+    }
     recordAuditLog(prisma, {
       schoolId,
       userId: req.user?.id || req.user?.userId || null,
@@ -201,7 +248,7 @@ settingsRouter.post("/users", validateBody(UserCreateSchema), async (req, res) =
       entityId: user.id,
       after: user as Prisma.InputJsonValue
     });
-    res.status(201).json({ data: user });
+    res.status(201).json({ data: { ...user, studentIds: req.body.role === "PARENT" ? linkedStudentIds : [studentId].filter(Boolean) } });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return res.status(409).json({ error: "USERNAME_EXISTS", message: "اسم المستخدم موجود مسبقًا" });
@@ -247,9 +294,13 @@ settingsRouter.put("/users/:id", validateBody(UserUpdateSchema), async (req, res
     return res.status(404).json({ error: "NOT_FOUND", message: "لم يتم العثور على المستخدم" });
   }
 
-  const studentId =
-    typeof req.body.studentId === "string" ? req.body.studentId.trim() : req.body.studentId === null ? null : undefined;
   const nextRole = req.body.role || user.role;
+  const linkFieldsProvided = req.body.studentId !== undefined || req.body.studentIds !== undefined;
+  const linkedStudentIds =
+    linkFieldsProvided
+      ? linkedStudentIdsFromBody(req.body)
+      : await existingLinkedStudentIdsForUser(schoolId, user);
+  const studentId = primaryStudentId(linkedStudentIds);
   const email = req.body.email ? req.body.email.trim().toLowerCase() : user.email;
   if (email !== user.email) {
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -258,12 +309,13 @@ settingsRouter.put("/users/:id", validateBody(UserUpdateSchema), async (req, res
     }
   }
 
-  if ((nextRole === "STUDENT" || nextRole === "PARENT") && !studentId && !user.studentId) {
+  if ((nextRole === "STUDENT" || nextRole === "PARENT") && !studentId) {
     return res.status(400).json({ error: "STUDENT_LINK_REQUIRED", message: "يجب ربط الحساب بالطالب" });
   }
-  if (studentId) {
-    const student = await getSchoolStudentOr404(schoolId, studentId);
-    if (!student) {
+  if (linkedStudentIds.length) {
+    try {
+      await assertSchoolStudentsExist(schoolId, nextRole === "STUDENT" ? [studentId!] : linkedStudentIds);
+    } catch {
       return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
     }
   }
@@ -275,7 +327,7 @@ settingsRouter.put("/users/:id", validateBody(UserUpdateSchema), async (req, res
       ...(req.body.email ? { email } : {}),
       ...(req.body.password ? { password: hashPassword(req.body.password) } : {}),
       ...(req.body.role ? { role: req.body.role } : {}),
-      ...(req.body.studentId !== undefined
+      ...(req.body.studentId !== undefined || req.body.studentIds !== undefined
         ? { studentId: studentId || null }
         : req.body.role && nextRole !== "STUDENT" && nextRole !== "PARENT"
           ? { studentId: null }
@@ -283,6 +335,12 @@ settingsRouter.put("/users/:id", validateBody(UserUpdateSchema), async (req, res
     },
     select: { id: true, name: true, email: true, role: true, studentId: true, createdAt: true }
   });
+
+  if (nextRole === "PARENT" && linkFieldsProvided) {
+    await replaceParentStudentLinks(prisma, schoolId, updated.id, linkedStudentIds, "ADMIN");
+  } else if (req.body.role && nextRole !== "PARENT") {
+    await replaceParentStudentLinks(prisma, schoolId, updated.id, [], "ADMIN");
+  }
 
   recordAuditLog(prisma, {
     schoolId,
@@ -293,7 +351,12 @@ settingsRouter.put("/users/:id", validateBody(UserUpdateSchema), async (req, res
     before: user as Prisma.InputJsonValue,
     after: updated as Prisma.InputJsonValue
   });
-  res.json({ data: updated });
+  res.json({
+    data: {
+      ...updated,
+      studentIds: nextRole === "PARENT" ? linkedStudentIds : uniqueNonEmpty([updated.studentId])
+    }
+  });
 });
 
 settingsRouter.post("/users/:id/roles", validateBody(UserRoleUpdateSchema), async (req, res) => {
@@ -303,14 +366,18 @@ settingsRouter.post("/users/:id/roles", validateBody(UserRoleUpdateSchema), asyn
     return res.status(404).json({ error: "NOT_FOUND", message: "لم يتم العثور على المستخدم" });
   }
 
-  const studentId =
-    typeof req.body.studentId === "string" ? req.body.studentId.trim() : req.body.studentId === null ? null : undefined;
-  if ((req.body.role === "STUDENT" || req.body.role === "PARENT") && !studentId && !user.studentId) {
+  const linkedStudentIds =
+    req.body.studentId !== undefined || req.body.studentIds !== undefined
+      ? linkedStudentIdsFromBody(req.body)
+      : await existingLinkedStudentIdsForUser(schoolId, user);
+  const studentId = primaryStudentId(linkedStudentIds);
+  if ((req.body.role === "STUDENT" || req.body.role === "PARENT") && !studentId) {
     return res.status(400).json({ error: "STUDENT_LINK_REQUIRED", message: "يجب ربط الحساب بالطالب" });
   }
-  if (studentId) {
-    const student = await getSchoolStudentOr404(schoolId, studentId);
-    if (!student) {
+  if (linkedStudentIds.length) {
+    try {
+      await assertSchoolStudentsExist(schoolId, req.body.role === "STUDENT" ? [studentId!] : linkedStudentIds);
+    } catch {
       return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "الطالب غير موجود" });
     }
   }
@@ -319,7 +386,7 @@ settingsRouter.post("/users/:id/roles", validateBody(UserRoleUpdateSchema), asyn
     where: { id: user.id },
     data: {
       role: req.body.role,
-      ...(req.body.studentId !== undefined
+      ...(req.body.studentId !== undefined || req.body.studentIds !== undefined
         ? { studentId: studentId || null }
         : req.body.role !== "STUDENT" && req.body.role !== "PARENT"
           ? { studentId: null }
@@ -327,6 +394,11 @@ settingsRouter.post("/users/:id/roles", validateBody(UserRoleUpdateSchema), asyn
     },
     select: { id: true, name: true, email: true, role: true, studentId: true, createdAt: true }
   });
+  if (req.body.role === "PARENT") {
+    await replaceParentStudentLinks(prisma, schoolId, updated.id, linkedStudentIds, "ADMIN");
+  } else {
+    await replaceParentStudentLinks(prisma, schoolId, updated.id, [], "ADMIN");
+  }
   recordAuditLog(prisma, {
     schoolId,
     userId: req.user?.id || req.user?.userId || null,
@@ -336,7 +408,12 @@ settingsRouter.post("/users/:id/roles", validateBody(UserRoleUpdateSchema), asyn
     before: user as Prisma.InputJsonValue,
     after: updated as Prisma.InputJsonValue
   });
-  res.json({ data: updated });
+  res.json({
+    data: {
+      ...updated,
+      studentIds: req.body.role === "PARENT" ? linkedStudentIds : uniqueNonEmpty([updated.studentId])
+    }
+  });
 });
 
 settingsRouter.post("/users/:id/deactivate", async (req, res) => {

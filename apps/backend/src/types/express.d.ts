@@ -5,6 +5,7 @@ export type AuthenticatedUser = {
   userId: string;
   schoolId: string;
   studentId?: string | null;
+  studentIds?: string[];
   name: string;
   email: string;
   role: UserRole;

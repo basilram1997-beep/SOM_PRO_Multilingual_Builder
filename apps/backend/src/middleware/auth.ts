@@ -5,6 +5,7 @@ import { prisma } from "../db/prisma";
 import { canRole, Permission } from "../services/accessPolicy";
 import { verifyAuthToken } from "../services/authService";
 import { recordAuditLog } from "../services/auditLog";
+import { getParentStudentIds, uniqueNonEmpty } from "../services/accountLinking";
 
 const publicPaths = new Set([
   "/health",
@@ -75,11 +76,16 @@ export async function authenticateRequest(req: Request, res: Response, next: Nex
       logDeniedAccess(req, "invalid_session");
       return res.status(401).json({ error: "AUTH_INVALID", message: "جلسة الدخول غير صالحة" });
     }
+    const studentIds =
+      user.role === "PARENT"
+        ? uniqueNonEmpty([user.studentId, ...(await getParentStudentIds(prisma, user.schoolId, user.id))])
+        : uniqueNonEmpty([user.studentId]);
     req.user = {
       id: user.id,
       userId: user.id,
       schoolId: user.schoolId,
       studentId: user.studentId,
+      studentIds,
       name: user.name,
       email: user.email,
       role: user.role

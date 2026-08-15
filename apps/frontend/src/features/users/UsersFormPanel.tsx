@@ -9,6 +9,7 @@ type UserForm = {
   password: string;
   role: UserRole;
   studentId: string;
+  studentIds: string[];
 };
 
 type StudentOption = { id: string; name: string };
@@ -36,6 +37,11 @@ type Props = {
 
 function needsStudentLink(role: UserRole) {
   return role === "STUDENT" || role === "PARENT";
+}
+
+function toggleStudentId(current: string[], studentId: string, checked: boolean) {
+  if (checked) return current.includes(studentId) ? current : [...current, studentId];
+  return current.filter((id) => id !== studentId);
 }
 
 export function UsersFormPanel({
@@ -66,7 +72,8 @@ export function UsersFormPanel({
               setForm((previous) => ({
                 ...previous,
                 role,
-                studentId: needsStudentLink(role) ? previous.studentId : ""
+                studentId: needsStudentLink(role) ? previous.studentId : "",
+                studentIds: role === "PARENT" ? previous.studentIds : []
               }));
               suggestUsername(role);
             }}
@@ -78,7 +85,7 @@ export function UsersFormPanel({
             ))}
           </select>
         </label>
-        {needsStudentLink(form.role) && (
+        {form.role === "STUDENT" && (
           <label className="users-field users-student-field">
             {labels.linkedStudent}
             <select value={form.studentId} onChange={(e) => setForm({ ...form, studentId: e.target.value })}>
@@ -90,6 +97,29 @@ export function UsersFormPanel({
               ))}
             </select>
           </label>
+        )}
+        {form.role === "PARENT" && (
+          <div className="users-field users-student-field users-parent-students-field">
+            <span>{labels.linkedStudent}</span>
+            <div className="users-parent-students-list">
+              {students.map((student) => (
+                <label key={student.id} className="users-parent-student-option">
+                  <input
+                    type="checkbox"
+                    checked={form.studentIds.includes(student.id)}
+                    onChange={(event) =>
+                      setForm({
+                        ...form,
+                        studentId: event.target.checked && !form.studentId ? student.id : form.studentId,
+                        studentIds: toggleStudentId(form.studentIds, student.id, event.target.checked)
+                      })
+                    }
+                  />
+                  <span>{student.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
         )}
         <label className="users-field users-password-field">
           {labels.password}

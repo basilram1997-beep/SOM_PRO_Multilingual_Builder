@@ -1,7 +1,7 @@
 import { Card } from "../../components/ui/Card";
 
 type UserRole = "ADMIN" | "SCHEDULER" | "TEACHER" | "STUDENT" | "PARENT";
-type UserRow = { id: string; name: string; email: string; role: UserRole | string; studentId?: string | null };
+type UserRow = { id: string; name: string; email: string; role: UserRole | string; studentId?: string | null; studentIds?: string[] };
 type StudentOption = { id: string; name: string };
 
 type Props = {
@@ -56,7 +56,11 @@ export function UsersTablePanel({
                 <td>{user.name}</td>
                 <td dir="ltr">{user.email}</td>
                 <td>{roleLabels[user.role as UserRole] || user.role}</td>
-                <td>{user.studentId ? studentNameById.get(user.studentId) || user.studentId : labels.none}</td>
+                <td>
+                  {(user.studentIds?.length ? user.studentIds : user.studentId ? [user.studentId] : [])
+                    .map((studentId) => studentNameById.get(studentId) || studentId)
+                    .join("، ") || labels.none}
+                </td>
                 <td>
                   <button
                     className="danger"

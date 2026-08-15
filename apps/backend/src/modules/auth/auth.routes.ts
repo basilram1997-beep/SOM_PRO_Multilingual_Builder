@@ -29,6 +29,15 @@ import { getRequestDeviceInfo } from "../../services/deviceContext";
 import { createRateLimitMiddleware, rejectMultipartContent } from "../../middleware/requestProtections";
 import { recordAuditLog } from "../../services/auditLog";
 import { logSafeError } from "../../lib/safeLog";
+import {
+  findActiveStudentByNationalId,
+  parentPhoneMatchesStudent,
+  primaryStudentId,
+  replaceParentStudentLinks,
+  resolveActiveStudentsByNationalIds,
+  studentNameMatches,
+  uniqueNonEmpty
+} from "../../services/accountLinking";
 
 export const authRouter = Router();
 authRouter.use(rejectMultipartContent);
@@ -114,7 +123,10 @@ const RegisterSchema = z.object({
   name: z.string().trim().min(1, "NAME_REQUIRED"),
   email: z.string().trim().min(1, "USERNAME_REQUIRED"),
   password: z.string().min(6, "PASSWORD_TOO_SHORT"),
-  role: z.enum(["STUDENT", "PARENT"]).default("PARENT")
+  role: z.enum(["STUDENT", "PARENT"]).default("PARENT"),
+  studentNationalId: optionalNonEmptyString(),
+  studentNationalIds: z.array(z.string().trim().min(1)).max(8).optional(),
+  guardianPhone: optionalNonEmptyString()
 });
 
 const RecoverSchema = z
@@ -372,21 +384,64 @@ authRouter.post("/register", registerRateLimit, validateBody(RegisterSchema), as
     const schoolId = await getDefaultSchoolId();
     const email = normalizeLoginIdentifier(String(req.body.email || ""));
     const name = String(req.body.name || "").trim();
+    const role = req.body.role as "STUDENT" | "PARENT";
     const existing = await findUsersByLoginIdentifier(String(req.body.email || ""));
     if (existing.length) {
       return res.status(409).json({ error: "USERNAME_EXISTS", message: "اسم المستخدم موجود مسبقا" });
     }
 
-    const linkedStudents = await prisma.student.findMany({
-      where: {
-        schoolId,
-        name,
-        status: "ACTIVE"
-      },
-      select: { id: true },
-      take: 2
-    });
-    const linkedStudentId = linkedStudents.length === 1 ? linkedStudents[0]?.id || null : null;
+    let linkedStudentIds: string[] = [];
+
+    if (role === "STUDENT") {
+      const studentNationalId = String(req.body.studentNationalId || req.body.studentNationalIds?.[0] || "").trim();
+      const student = await findActiveStudentByNationalId(prisma, schoolId, studentNationalId);
+      if (!student || !studentNameMatches(student.name, name)) {
+        await recordAuditLog(prisma, {
+          schoolId,
+          userId: null,
+          action: "STUDENT_SELF_REGISTER_DENIED",
+          entity: "SchoolUser",
+          after: { reason: "student_identity_not_matched", nationalIdProvided: Boolean(studentNationalId) } as Prisma.InputJsonValue
+        });
+        return res.status(403).json({
+          error: "STUDENT_VERIFICATION_REQUIRED",
+          message: "لا يمكن إنشاء حساب طالب إلا لطالب مسجل في إدارة الطلاب وبنفس رقم الهوية والاسم"
+        });
+      }
+      linkedStudentIds = [student.id];
+    }
+
+    if (role === "PARENT") {
+      const requestedNationalIds = uniqueNonEmpty([
+        ...(Array.isArray(req.body.studentNationalIds) ? req.body.studentNationalIds : []),
+        req.body.studentNationalId
+      ]);
+      const guardianPhone = String(req.body.guardianPhone || "").trim();
+      const { students, missingNationalIds } = await resolveActiveStudentsByNationalIds(prisma, schoolId, requestedNationalIds);
+      const hasUnverifiedStudent = students.some((student) => !parentPhoneMatchesStudent(student, guardianPhone));
+
+      if (requestedNationalIds.length === 0 || missingNationalIds.length > 0 || hasUnverifiedStudent) {
+        await recordAuditLog(prisma, {
+          schoolId,
+          userId: null,
+          action: "PARENT_SELF_REGISTER_DENIED",
+          entity: "SchoolUser",
+          after: {
+            reason: "parent_student_link_not_verified",
+            requestedCount: requestedNationalIds.length,
+            missingCount: missingNationalIds.length,
+            hasGuardianPhone: Boolean(guardianPhone)
+          } as Prisma.InputJsonValue
+        });
+        return res.status(403).json({
+          error: "PARENT_VERIFICATION_REQUIRED",
+          message: "يجب ربط ولي الأمر بطالب مسجل والتحقق من رقم هاتف ولي الأمر الموجود في ملف الطالب"
+        });
+      }
+      linkedStudentIds = students.map((student) => student.id);
+    }
+
+    const linkedStudentId = primaryStudentId(linkedStudentIds);
 
     const created = await prisma.user.create({
       data: {
@@ -394,11 +449,14 @@ authRouter.post("/register", registerRateLimit, validateBody(RegisterSchema), as
         name,
         email,
         password: hashPassword(String(req.body.password || "")),
-        role: req.body.role,
+        role,
         ...(linkedStudentId ? { studentId: linkedStudentId } : {})
       },
       select: { id: true, schoolId: true, studentId: true, name: true, email: true, role: true, tokenVersion: true }
     });
+    if (role === "PARENT") {
+      await replaceParentStudentLinks(prisma, schoolId, created.id, linkedStudentIds, "SELF_SERVICE_PHONE");
+    }
 
     recordAuditLog(prisma, {
       schoolId,
@@ -422,6 +480,7 @@ authRouter.post("/register", registerRateLimit, validateBody(RegisterSchema), as
           id: created.id,
           schoolId: created.schoolId,
           studentId: created.studentId,
+          studentIds: linkedStudentIds,
           name: created.name,
           email: created.email,
           role: created.role

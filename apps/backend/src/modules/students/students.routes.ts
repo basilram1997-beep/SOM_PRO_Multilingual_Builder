@@ -276,13 +276,21 @@ async function getTeacherScopeForRequest(req: any, schoolId: string): Promise<Te
 function isStudentOrParentViewer(req: any): boolean {
   return req.user?.role === "STUDENT" || req.user?.role === "PARENT";
 }
+function linkedStudentIdsForRequest(req: any): string[] {
+  return Array.from(new Set([req.user?.studentId || "", ...((req.user?.studentIds as string[] | undefined) || [])].filter(Boolean)));
+}
+function canViewStudent(req: any, studentId: string) {
+  if (!isStudentOrParentViewer(req)) return true;
+  return linkedStudentIdsForRequest(req).includes(studentId);
+}
 async function resolveLinkedStudentForRequest(req: any, schoolId: string): Promise<any> {
-  if (!isStudentOrParentViewer(req) || !req.user?.studentId) {
+  const linkedStudentIds = linkedStudentIdsForRequest(req);
+  if (!isStudentOrParentViewer(req) || linkedStudentIds.length === 0) {
     return null;
   }
   return prisma.student.findFirst({
     where: {
-      id: req.user.studentId,
+      id: { in: linkedStudentIds },
       schoolId
     },
     include: {
@@ -2076,10 +2084,7 @@ studentsRouter.get("/:id/context", async (req, res) => {
       message: "الطالب غير موجود"
     });
   }
-  if (
-    (req.user?.role === "STUDENT" || req.user?.role === "PARENT") &&
-    (!req.user?.studentId || req.user.studentId !== student.id)
-  ) {
+  if (!canViewStudent(req, student.id)) {
     return res.status(403).json({
       error: "FORBIDDEN",
       message: "لا تملك صلاحية الوصول إلى هذا الطالب"

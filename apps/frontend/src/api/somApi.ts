@@ -153,7 +153,10 @@ export const somApi = {
       name: string;
       email: string;
       password: string;
-      role: "STUDENT" | "PARENT" | "TEACHER";
+      role: "STUDENT" | "PARENT";
+      studentNationalId?: string;
+      studentNationalIds?: string[];
+      guardianPhone?: string;
       licenseCode?: string;
     }) =>
       api.post<{ data: { token: string; user: AuthUser } }>("/api/auth/register", {
@@ -161,6 +164,9 @@ export const somApi = {
         email: data.email,
         password: data.password,
         role: data.role,
+        studentNationalId: data.studentNationalId,
+        studentNationalIds: data.studentNationalIds,
+        guardianPhone: data.guardianPhone,
         ...optionalLoginLicenseFields(data.licenseCode)
       }),
     me: () => api.get<{ data: { user: AuthUser } }>("/api/auth/me"),
@@ -198,7 +204,7 @@ export const somApi = {
       api.get<{ data: { username: string; role: string } }>(
         `/api/settings/users/suggest-username?role=${encodeURIComponent(role)}`
       ),
-    createUser: (data: { name: string; email: string; password: string; role: string; studentId?: string | null }) =>
+    createUser: (data: { name: string; email: string; password: string; role: string; studentId?: string | null; studentIds?: string[] }) =>
       api.post<{ data: UserRow }>("/api/settings/users", data),
     removeUser: (id: string) => api.delete<void>(`/api/settings/users/${id}`)
   },

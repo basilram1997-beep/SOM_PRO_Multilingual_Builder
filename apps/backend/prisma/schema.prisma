@@ -149,6 +149,7 @@ model School {
   classroomLogs      ClassroomLog[]
   roles              Role[]
   userRoleAssignments UserRoleAssignment[]
+  parentStudentLinks ParentStudentLink[]
   auditLogs          AuditLog[]
 
   settings            SchoolSettings?
@@ -200,6 +201,7 @@ model User {
   teacher                Teacher?
   recordedAttendance     AttendanceRecord[]
   userRoleAssignments   UserRoleAssignment[]
+  parentStudentLinks    ParentStudentLink[]
   reportedSecurityIncidents SecurityIncident[] @relation("SecurityIncidentReportedBy")
   reviewedSecurityIncidents SecurityIncident[] @relation("SecurityIncidentReviewedBy")
   auditLogs AuditLog[]
@@ -401,6 +403,7 @@ model Student {
   school      School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   class       SchoolClass         @relation(fields: [classId], references: [id])
   accounts    User[]              @relation("StudentUserAccounts")
+  parentLinks ParentStudentLink[]
   attendances StudentAttendance[]
   attendanceRecords AttendanceRecord[]
   academicRecords StudentAcademicRecord[]
@@ -414,6 +417,25 @@ model Student {
   @@index([schoolId, name])
   @@index([schoolId, internalStudentNumber])
   @@index([schoolId, nationalId])
+}
+
+model ParentStudentLink {
+  id         String   @id @default(cuid())
+  schoolId   String   @map("school_id")
+  parentId   String   @map("parent_id")
+  studentId  String   @map("student_id")
+  verifiedBy String   @default("ADMIN") @map("verified_by")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  school  School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  parent  User    @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("parent_student_links")
+  @@unique([schoolId, parentId, studentId])
+  @@index([schoolId, parentId])
+  @@index([schoolId, studentId])
 }
 
 model StudentAttendance {

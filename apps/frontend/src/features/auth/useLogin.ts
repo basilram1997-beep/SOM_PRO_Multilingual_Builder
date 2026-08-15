@@ -7,7 +7,7 @@ import { useI18n } from "../../i18n/i18n";
 let rememberedLoginEmail = "";
 let rememberedLoginEnabled = false;
 
-type CreateRole = "STUDENT" | "PARENT" | "TEACHER" | "HOMEROOM_TEACHER";
+type CreateRole = "STUDENT" | "PARENT";
 
 function normalizeCode(value: string) {
   return String(value || "")
@@ -26,13 +26,22 @@ function installLicenseCode() {
   return window.somDesktop?.licenseSetup?.licenseCode?.trim() || "";
 }
 
-async function createAccount(name: string, email: string, password: string, role: CreateRole) {
-  const backendRole = role === "HOMEROOM_TEACHER" ? "TEACHER" : role;
+async function createAccount(
+  name: string,
+  email: string,
+  password: string,
+  role: CreateRole,
+  studentNationalIds: string[],
+  guardianPhone: string
+) {
   return somApi.auth.register({
     name,
     email,
     password,
-    role: backendRole
+    role,
+    studentNationalId: studentNationalIds[0] || "",
+    studentNationalIds,
+    guardianPhone
   });
 }
 
@@ -67,6 +76,9 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
       createName: t("login.createName"),
       createUsername: t("login.createUsername"),
       createPassword: t("login.createPassword"),
+      createStudentNationalId: t("login.createStudentNationalId"),
+      createStudentNationalIds: t("login.createStudentNationalIds"),
+      createGuardianPhone: t("login.createGuardianPhone"),
       createAccount: t("login.createAccount"),
       createCreating: t("login.createCreating"),
       createSaved: t("login.createSaved"),
@@ -86,6 +98,8 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
   const [createName, setCreateName] = useState("");
   const [createUsername, setCreateUsername] = useState("");
   const [createPassword, setCreatePassword] = useState("");
+  const [createStudentNationalIds, setCreateStudentNationalIds] = useState("");
+  const [createGuardianPhone, setCreateGuardianPhone] = useState("");
   const [createMessage, setCreateMessage] = useState("");
   const [createSaving, setCreateSaving] = useState(false);
 
@@ -139,7 +153,15 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
   }
 
   async function createLinkedAccount() {
-    if (!createName.trim() || !createUsername.trim() || !createPassword.trim()) {
+    const studentNationalIds = createStudentNationalIds
+      .split(/[\n,،]+/)
+      .map((value) => value.trim())
+      .filter(Boolean);
+    if (!createName.trim() || !createUsername.trim() || !createPassword.trim() || studentNationalIds.length === 0) {
+      setCreateMessage(labels.createRequired);
+      return;
+    }
+    if (createRole === "PARENT" && !createGuardianPhone.trim()) {
       setCreateMessage(labels.createRequired);
       return;
     }
@@ -152,7 +174,14 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
     setCreateMessage("");
 
     try {
-      const response = await createAccount(createName.trim(), createUsername.trim(), createPassword, createRole);
+      const response = await createAccount(
+        createName.trim(),
+        createUsername.trim(),
+        createPassword,
+        createRole,
+        studentNationalIds,
+        createGuardianPhone.trim()
+      );
       if (response?.data?.token) {
         setAuthToken(response.data.token);
       }
@@ -165,6 +194,8 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
       setCreateName("");
       setCreateUsername("");
       setCreatePassword("");
+      setCreateStudentNationalIds("");
+      setCreateGuardianPhone("");
     } catch (error) {
       const fallbackMessage = error instanceof Error && error.message ? error.message : labels.createFailed;
       setCreateMessage(fallbackMessage || labels.createFailed);
@@ -197,6 +228,10 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
     setCreateUsername,
     createPassword,
     setCreatePassword,
+    createStudentNationalIds,
+    setCreateStudentNationalIds,
+    createGuardianPhone,
+    setCreateGuardianPhone,
     createMessage,
     createSaving,
     createLinkedAccount

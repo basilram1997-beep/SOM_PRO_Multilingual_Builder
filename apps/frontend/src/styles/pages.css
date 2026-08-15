@@ -1485,6 +1485,10 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.certificate-certificate-status-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .certificate-grid label,
 .certificate-textarea-field {
   display: grid;
@@ -1507,6 +1511,110 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 
 .certificate-attendance-strip label span {
   line-height: 1.35;
+}
+
+.certificate-attendance-source {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.certificate-attendance-source.is-auto {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.certificate-attendance-source.is-manual {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.certificate-attendance-source strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.certificate-attendance-source span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.certificate-attendance-readonly-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.certificate-attendance-readonly-grid div,
+.certificate-attendance-manual-note {
+  display: grid;
+  gap: 6px;
+  min-height: 74px;
+  padding: 12px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.07);
+}
+
+.certificate-attendance-readonly-grid span,
+.certificate-attendance-manual-note {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.certificate-attendance-readonly-grid strong {
+  color: #0f172a;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.certificate-attendance-manual-note {
+  min-height: auto;
+  margin-bottom: 12px;
+  color: #92400e;
+}
+
+.certificate-certificate-status-grid label,
+.certificate-student-note-header {
+  padding: 12px 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.07);
+}
+
+.certificate-student-note-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.certificate-student-note-header strong {
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.certificate-student-note-header span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .certificate-section-hint {
@@ -4140,6 +4248,8 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   .certificate-grid--certificate-details,
   .certificate-attendance-strip,
   .certificate-attendance-strip--wide,
+  .certificate-attendance-readonly-grid,
+  .certificate-certificate-status-grid,
   .certificate-layout,
   .certificate-preview-signatures,
   .lesson-row--two,

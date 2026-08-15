@@ -33,6 +33,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     setCreateUsername,
     createPassword,
     setCreatePassword,
+    createStudentNationalIds,
+    setCreateStudentNationalIds,
+    createGuardianPhone,
+    setCreateGuardianPhone,
     createMessage,
     createSaving,
     createLinkedAccount
@@ -171,24 +175,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     />
                     <span>{labels.createParent}</span>
                   </label>
-                  <label className="login-radio-option">
-                    <input
-                      type="radio"
-                      name="create-role"
-                      checked={createRole === "TEACHER"}
-                      onChange={() => setCreateRole("TEACHER")}
-                    />
-                    <span>{labels.createTeacher}</span>
-                  </label>
-                  <label className="login-radio-option">
-                    <input
-                      type="radio"
-                      name="create-role"
-                      checked={createRole === "HOMEROOM_TEACHER"}
-                      onChange={() => setCreateRole("HOMEROOM_TEACHER")}
-                    />
-                    <span>{labels.createHomeroomTeacher}</span>
-                  </label>
                 </div>
               </div>
 
@@ -222,6 +208,30 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   autoComplete="new-password"
                 />
               </label>
+              <label htmlFor="create-student-national-ids-input">
+                <span>
+                  {createRole === "PARENT" ? labels.createStudentNationalIds : labels.createStudentNationalId}
+                </span>
+                <textarea
+                  id="create-student-national-ids-input"
+                  value={createStudentNationalIds}
+                  onChange={(event) => setCreateStudentNationalIds(event.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+              </label>
+              {createRole === "PARENT" && (
+                <label htmlFor="create-guardian-phone-input">
+                  <span>{labels.createGuardianPhone}</span>
+                  <input
+                    id="create-guardian-phone-input"
+                    value={createGuardianPhone}
+                    onChange={(event) => setCreateGuardianPhone(event.target.value)}
+                    autoComplete="tel"
+                    spellCheck={false}
+                  />
+                </label>
+              )}
 
               <button type="submit" disabled={createSaving}>
                 <span>{createSaving ? labels.createCreating : labels.createAccount}</span>

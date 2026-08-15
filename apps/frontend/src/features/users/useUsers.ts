@@ -3,14 +3,19 @@ import { somApi } from "../../api/somApi";
 import type { Translate } from "../teachers/teacherTypes";
 
 type UserRole = "ADMIN" | "SCHEDULER" | "TEACHER" | "STUDENT" | "PARENT";
-type UserRow = { id: string; name: string; email: string; role: UserRole | string; studentId?: string | null };
+type UserRow = { id: string; name: string; email: string; role: UserRole | string; studentId?: string | null; studentIds?: string[] };
 type StudentOption = { id: string; name: string };
-type UserForm = { name: string; email: string; password: string; role: UserRole; studentId: string };
+type UserForm = { name: string; email: string; password: string; role: UserRole; studentId: string; studentIds: string[] };
 
-const emptyForm: UserForm = { name: "", email: "", password: "", role: "TEACHER", studentId: "" };
+const emptyForm: UserForm = { name: "", email: "", password: "", role: "TEACHER", studentId: "", studentIds: [] };
 
 function needsStudentLink(role: UserRole) {
   return role === "STUDENT" || role === "PARENT";
+}
+
+function linkedStudentIdsForForm(form: UserForm) {
+  if (form.role === "PARENT") return form.studentIds.length ? form.studentIds : form.studentId ? [form.studentId] : [];
+  return form.studentId ? [form.studentId] : [];
 }
 
 function buildLabels(t: Translate) {
@@ -47,7 +52,7 @@ function buildLabels(t: Translate) {
 function roleOptions(labels: ReturnType<typeof buildLabels>) {
   return [
     { value: "ADMIN" as const, label: labels.fullAdmin },
-    { value: "TEACHER" as const, label: labels.homeroomTeacher },
+    { value: "TEACHER" as const, label: labels.teacher },
     { value: "STUDENT" as const, label: labels.student },
     { value: "PARENT" as const, label: labels.parent }
   ];
@@ -59,11 +64,11 @@ export function useUsers(t: Translate) {
     () => ({
       ADMIN: labels.fullAdmin,
       SCHEDULER: labels.scheduler,
-      TEACHER: labels.homeroomTeacher,
+      TEACHER: labels.teacher,
       STUDENT: labels.student,
       PARENT: labels.parent
     }),
-    [labels.fullAdmin, labels.scheduler, labels.homeroomTeacher, labels.student, labels.parent]
+    [labels.fullAdmin, labels.scheduler, labels.teacher, labels.student, labels.parent]
   );
   const roles = useMemo(() => roleOptions(labels), [labels]);
 
@@ -89,6 +94,7 @@ export function useUsers(t: Translate) {
         ...previous,
         role,
         studentId: needsStudentLink(role) ? previous.studentId : "",
+        studentIds: role === "PARENT" ? previous.studentIds : [],
         email: res.data.username
       }));
     } catch {
@@ -126,7 +132,7 @@ export function useUsers(t: Translate) {
       setMessage(labels.required);
       return;
     }
-    if (needsStudentLink(form.role) && !form.studentId) {
+    if (needsStudentLink(form.role) && linkedStudentIdsForForm(form).length === 0) {
       setMessage(labels.requiredStudent);
       return;
     }
@@ -140,14 +146,16 @@ export function useUsers(t: Translate) {
       await somApi.settings.createUser({
         ...form,
         email: username,
-        studentId: needsStudentLink(form.role) ? form.studentId : null
+        studentId: needsStudentLink(form.role) ? linkedStudentIdsForForm(form)[0] || null : null,
+        studentIds: form.role === "PARENT" ? linkedStudentIdsForForm(form) : undefined
       });
       setMessage(labels.saved);
       setForm({
         ...emptyForm,
         role: form.role,
         password: "",
-        studentId: needsStudentLink(form.role) ? form.studentId : ""
+        studentId: form.role === "STUDENT" ? form.studentId : "",
+        studentIds: form.role === "PARENT" ? form.studentIds : []
       });
       await load();
       await suggestUsername(form.role);

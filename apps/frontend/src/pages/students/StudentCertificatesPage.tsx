@@ -475,9 +475,37 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
 
   const schoolName = schoolInfo?.name?.trim() || t("certificates.schoolNameFallback");
   const readOnly = currentUser.role === "TEACHER" && !canEditCertificates;
+  const hasAutomaticAttendance = (certificateContext?.attendanceSummary.totalDays ?? 0) > 0;
+  const canManuallyEditAttendance =
+    currentUser.role === "ADMIN" || currentUser.role === "MANAGER" || canEditCertificates;
   const selectedClassName = selectedClass ? localizeClassName(selectedClass.name, language) : t("common.none");
   const selectedClassSection = selectedClass?.section?.trim() || t("common.none");
   const selectedStudentName = selectedStudent?.name?.trim() || t("common.none");
+  const attendanceCardTitle =
+    t("certificates.attendanceDays") === "certificates.attendanceDays"
+      ? language === "he"
+        ? "נוכחות והיעדרות"
+        : language === "en"
+          ? "Attendance"
+          : "الحضور والغياب"
+      : t("certificates.attendanceDays");
+  const attendanceSourceLabel = hasAutomaticAttendance
+    ? language === "he"
+      ? "מחושב אוטומטית מרישומי הנוכחות"
+      : language === "en"
+        ? "Calculated automatically from attendance records"
+        : "محسوب تلقائيًا من سجلات الحضور"
+    : language === "he"
+      ? "אין רישומי נוכחות، ניתן להזין ידנית"
+      : language === "en"
+        ? "No attendance records found, manual entry is available"
+        : "لا توجد سجلات حضور، يمكن الإدخال يدويًا";
+  const manualAttendanceBlockedLabel =
+    language === "he"
+      ? "הזנה ידנית זמינה למנהל או למחנך הכיתה בלבד"
+      : language === "en"
+        ? "Manual entry is available only to the principal or homeroom teacher"
+        : "الإدخال اليدوي متاح للمدير أو مربي الصف فقط";
   useEffect(() => {
     if (!selectedClassId) {
       setGradeSchemes([]);
@@ -597,6 +625,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       presentDays: record.presentDays,
       absentDays: record.absentDays,
       lateDays: record.lateDays,
+      earlyExitDays: record.earlyExitDays,
       behaviorLevel: record.behaviorLevel,
       teacherNotes: record.teacherNotes || "",
       teacherSignature: record.teacherSignature || "",
@@ -715,12 +744,19 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       return;
     }
 
+    const contextAttendance = context?.attendanceSummary;
+    const hasContextAttendance = (contextAttendance?.totalDays ?? 0) > 0;
+    const nextPresentDays = hasContextAttendance ? contextAttendance?.presentDays ?? 0 : record.presentDays ?? 0;
+    const nextAbsentDays = hasContextAttendance ? contextAttendance?.absentDays ?? 0 : record.absentDays ?? 0;
+    const nextLateDays = hasContextAttendance ? contextAttendance?.lateDays ?? 0 : record.lateDays ?? 0;
+    const nextEarlyExitDays = hasContextAttendance ? contextAttendance?.earlyExitDays ?? 0 : record.earlyExitDays ?? 0;
+
     setCertificateId(record.id || "");
     setSchoolNumber(record.schoolNumber || selectedStudent?.nationalId || "");
-    setPresentDays(String(record.presentDays ?? 0));
-    setAbsentDays(String(record.absentDays ?? 0));
-    setLateDays(String(record.lateDays ?? 0));
-    setEarlyExitDays(String(record.earlyExitDays ?? 0));
+    setPresentDays(String(nextPresentDays));
+    setAbsentDays(String(nextAbsentDays));
+    setLateDays(String(nextLateDays));
+    setEarlyExitDays(String(nextEarlyExitDays));
     setBehaviorLevel(record.behaviorLevel || "GOOD");
     setTeacherNotes(record.teacherNotes || "");
     setTeacherSignature(record.teacherSignature || "");
@@ -749,10 +785,10 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       academicYear: record.academicYear,
       issueDate: record.issueDate,
       schoolNumber: record.schoolNumber || selectedStudent?.nationalId || "",
-      presentDays: record.presentDays ?? 0,
-      absentDays: record.absentDays ?? 0,
-      lateDays: record.lateDays ?? 0,
-      earlyExitDays: record.earlyExitDays ?? 0,
+      presentDays: nextPresentDays,
+      absentDays: nextAbsentDays,
+      lateDays: nextLateDays,
+      earlyExitDays: nextEarlyExitDays,
       behaviorLevel: record.behaviorLevel || "GOOD",
       teacherNotes: record.teacherNotes || "",
       teacherSignature: record.teacherSignature || "",
@@ -988,23 +1024,28 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       he: "אין הערות",
       en: "No notes"
     });
+    const attendanceTitleLabel = translateWithFallback("certificates.attendanceDays", {
+      ar: "الحضور والغياب",
+      he: "נוכחות והיעדרות",
+      en: "Attendance"
+    });
     const presentDaysLabel = translateWithFallback("certificates.presentDays", {
       ar: "أيام الحضور",
       he: "ימי נוכחות",
       en: "Present days"
-    });
-    const lateDaysLabel = translateWithFallback("certificates.lateDays", {
-      ar: "أيام التأخر",
-      he: "ימי איחור",
-      en: "Late days"
     });
     const absentDaysLabel = translateWithFallback("certificates.absentDays", {
       ar: "أيام الغياب",
       he: "ימי היעדרות",
       en: "Absent days"
     });
+    const lateDaysLabel = translateWithFallback("certificates.lateDays", {
+      ar: "أيام التأخر",
+      he: "ימי איחור",
+      en: "Late days"
+    });
     const earlyExitDaysLabel = translateWithFallback("certificates.earlyExitDays", {
-      ar: "أيام المغادرة المبكرة",
+      ar: "أيام الانصراف المبكر",
       he: "ימי יציאה מוקדמת",
       en: "Early exit days"
     });
@@ -1020,17 +1061,6 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       )
       .join("");
 
-    const attendanceTotal = certificateContext?.attendanceSummary.totalDays ?? 0;
-    const parsedEarlyExitDays = Number.parseInt(earlyExitDays, 10);
-    const inferredLeaveDays = Math.max(
-      attendanceTotal -
-        Number.parseInt(presentDays, 10) -
-        Number.parseInt(absentDays, 10) -
-        Number.parseInt(lateDays, 10) -
-        (Number.isFinite(parsedEarlyExitDays) ? parsedEarlyExitDays : 0),
-      0
-    );
-    const displayedEarlyExitDays = Number.isFinite(parsedEarlyExitDays) ? parsedEarlyExitDays : inferredLeaveDays;
     const averageText = average === null ? "-" : average.toFixed(1);
     const finalResultText = t(resultLabelKey(result));
     const behaviorText = t(behaviorLabelKey(behaviorLevel));
@@ -1089,7 +1119,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
           </div>
         </section>
 
-        <h3 class="certificate-section-ribbon">${escapeHtml(t("certificates.attendanceTitle"))}</h3>
+        <h3 class="certificate-section-ribbon">${escapeHtml(attendanceTitleLabel)}</h3>
         <table class="certificate-print-attendance">
           <thead>
             <tr>
@@ -1104,7 +1134,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
               <td>${escapeHtml(String(Number.parseInt(presentDays, 10) || 0))}</td>
               <td>${escapeHtml(String(Number.parseInt(absentDays, 10) || 0))}</td>
               <td>${escapeHtml(String(Number.parseInt(lateDays, 10) || 0))}</td>
-              <td>${escapeHtml(String(displayedEarlyExitDays))}</td>
+              <td>${escapeHtml(String(Number.parseInt(earlyExitDays, 10) || 0))}</td>
             </tr>
           </tbody>
         </table>
@@ -1320,41 +1350,83 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
               </div>
             </Card>
 
-            <Card title={t("certificates.attendanceTitle")}>
-              <div className="certificate-grid certificate-attendance-strip">
-                <label>
-                  <span>{t("certificates.presentDays")}</span>
-                  <input
-                    type="number"
-                    min="0"
-                    value={presentDays}
-                    onChange={(event) => setPresentDays(event.target.value)}
-                  />
-                </label>
-                <label>
-                  <span>{t("certificates.absentDays")}</span>
-                  <input
-                    type="number"
-                    min="0"
-                    value={absentDays}
-                    onChange={(event) => setAbsentDays(event.target.value)}
-                  />
-                </label>
-                <label>
-                  <span>{t("certificates.lateDays")}</span>
-                  <input type="number" min="0" value={lateDays} onChange={(event) => setLateDays(event.target.value)} />
-                </label>
-                <label>
-                  <span>{t("certificates.earlyExitDays")}</span>
-                  <input
-                    type="number"
-                    min="0"
-                    value={earlyExitDays}
-                    onChange={(event) => setEarlyExitDays(event.target.value)}
-                  />
-                </label>
+            <Card title={attendanceCardTitle}>
+              <div className={hasAutomaticAttendance ? "certificate-attendance-source is-auto" : "certificate-attendance-source is-manual"}>
+                <strong>{attendanceSourceLabel}</strong>
+                <span>{selectedStudentName}</span>
               </div>
-              <div className="certificate-grid certificate-attendance-strip certificate-attendance-strip--wide">
+              {hasAutomaticAttendance ? (
+                <div className="certificate-attendance-readonly-grid">
+                  <div>
+                    <span>{t("certificates.presentDays")}</span>
+                    <strong>{Number.parseInt(presentDays, 10) || 0}</strong>
+                  </div>
+                  <div>
+                    <span>{t("certificates.absentDays")}</span>
+                    <strong>{Number.parseInt(absentDays, 10) || 0}</strong>
+                  </div>
+                  <div>
+                    <span>{t("certificates.lateDays")}</span>
+                    <strong>{Number.parseInt(lateDays, 10) || 0}</strong>
+                  </div>
+                  <div>
+                    <span>{t("certificates.earlyExitDays")}</span>
+                    <strong>{Number.parseInt(earlyExitDays, 10) || 0}</strong>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {!canManuallyEditAttendance && (
+                    <div className="certificate-attendance-manual-note">{manualAttendanceBlockedLabel}</div>
+                  )}
+                  <div className="certificate-grid certificate-attendance-strip certificate-manual-attendance">
+                    <label>
+                      <span>{t("certificates.presentDays")}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={presentDays}
+                        disabled={!canManuallyEditAttendance}
+                        onChange={(event) => setPresentDays(event.target.value)}
+                      />
+                    </label>
+                    <label>
+                      <span>{t("certificates.absentDays")}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={absentDays}
+                        disabled={!canManuallyEditAttendance}
+                        onChange={(event) => setAbsentDays(event.target.value)}
+                      />
+                    </label>
+                    <label>
+                      <span>{t("certificates.lateDays")}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={lateDays}
+                        disabled={!canManuallyEditAttendance}
+                        onChange={(event) => setLateDays(event.target.value)}
+                      />
+                    </label>
+                    <label>
+                      <span>{t("certificates.earlyExitDays")}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={earlyExitDays}
+                        disabled={!canManuallyEditAttendance}
+                        onChange={(event) => setEarlyExitDays(event.target.value)}
+                      />
+                    </label>
+                  </div>
+                </>
+              )}
+            </Card>
+
+            <Card title={t("certificates.summaryTitle")}>
+              <div className="certificate-grid certificate-certificate-status-grid">
                 <label>
                   <span>{t("certificates.behaviorEvaluation")}</span>
                   <select
@@ -1387,6 +1459,13 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                     ))}
                   </select>
                 </label>
+              </div>
+            </Card>
+
+            <Card title={t("certificates.homeroomNotes")}>
+              <div className="certificate-student-note-header">
+                <strong>{selectedStudentName}</strong>
+                <span>{certificateTypeLabel(t, language, certificateType)}</span>
               </div>
               <div className="behavior-template-section certificate-note-bank">
                 <div className="behavior-template-title">
@@ -1552,23 +1631,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                       <span>{item.teacherNotes || t("common.none")}</span>
                     </div>
                   </div>
-                  <div className="certificate-review-meta certificate-review-meta--attendance">
-                    <div>
-                      <strong>{t("certificates.presentDays")}</strong>
-                      <span>{item.attendanceSummary.presentDays}</span>
-                    </div>
-                    <div>
-                      <strong>{t("certificates.absentDays")}</strong>
-                      <span>{item.attendanceSummary.absentDays}</span>
-                    </div>
-                    <div>
-                      <strong>{t("certificates.lateDays")}</strong>
-                      <span>{item.attendanceSummary.lateDays}</span>
-                    </div>
-                    <div>
-                      <strong>{t("certificates.earlyExitDays")}</strong>
-                      <span>{item.attendanceSummary.earlyExitDays}</span>
-                    </div>
+                  <div className="certificate-review-meta">
                     <div>
                       <strong>{t("certificates.teacherSignature")}</strong>
                       <span>{item.teacherSignature || t("common.none")}</span>
