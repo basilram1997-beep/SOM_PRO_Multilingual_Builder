@@ -103,6 +103,17 @@ type LicenseState = {
   serverTime?: string | null;
 };
 
+export type CertificateHomeroomNoteRow = {
+  studentId: string;
+  studentName: string;
+  nationalId?: string | null;
+  certificateId?: string | null;
+  teacherNotes: string;
+  behaviorNote: string;
+  behaviorLevel: string;
+  behaviorSummary: string;
+};
+
 type ScheduleSlot = DailyBaseSlot;
 type ScheduleSwapPreview = {
   ok: boolean;
@@ -317,7 +328,27 @@ export const somApi = {
         api.get<{ data: CertificateStudentContext }>(
           `/api/students/certificates/context?studentId=${encodeURIComponent(studentId)}`
         ),
-      save: (data: StudentCertificate) => api.post<{ data: StudentCertificate }>("/api/students/certificates", data)
+      save: (data: StudentCertificate) => api.post<{ data: StudentCertificate }>("/api/students/certificates", data),
+      homeroomNotes: {
+        list: (classId: string, certificateType: string, academicYear: string) =>
+          api.get<{ data: { rows: CertificateHomeroomNoteRow[] } }>(
+            `/api/students/certificates/homeroom-notes?classId=${encodeURIComponent(classId)}&certificateType=${encodeURIComponent(certificateType)}&academicYear=${encodeURIComponent(academicYear)}`
+          ),
+        save: (data: {
+          classId: string;
+          certificateType: string;
+          academicYear: string;
+          notes: Array<{
+            studentId: string;
+            teacherNotes: string;
+            showBehaviorOnCertificate: boolean;
+            behaviorNote?: string | null;
+          }>;
+        }) => api.post<{ data: { rows: Array<{ id: string; studentId: string; teacherNotes: string | null }> } }>(
+          "/api/students/certificates/homeroom-notes",
+          data
+        )
+      }
     },
     gradeSchemes: {
       context: () => api.get<{ data: GradeSchemeContextResponse }>("/api/students/grade-schemes/context"),

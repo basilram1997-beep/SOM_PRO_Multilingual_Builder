@@ -35,22 +35,6 @@ type Props = {
 type BehaviorLevel = StudentCertificateBehaviorLevel;
 type CurriculumType = "PALESTINIAN" | "BAGRUT";
 
-type CertificateReviewItem = {
-  studentId: string;
-  studentName: string;
-  className: string;
-  section: string;
-  nationalId: string;
-  rows: PrintableCertificateRow[];
-  average: number | null;
-  result: CertificateResult;
-  behaviorLevel: BehaviorLevel;
-  attendanceSummary: CertificateStudentContext["attendanceSummary"];
-  teacherNotes: string;
-  teacherSignature: string;
-  principalSignature: string;
-};
-
 const behaviorOptions: Array<{ value: BehaviorLevel; labelKey: string }> = [
   { value: "EXCELLENT", labelKey: "certificates.behavior.excellent" },
   { value: "VERY_GOOD", labelKey: "certificates.behavior.veryGood" },
@@ -89,6 +73,14 @@ function resultLabelKey(value: CertificateResult) {
   return (
     certificateResultOptions.find((option) => option.value === value)?.labelKey || "certificates.results.incomplete"
   );
+}
+
+function printableRowsAverage(rows: PrintableCertificateRow[]) {
+  const marks = rows
+    .map((row) => row.average)
+    .filter((mark): mark is number => typeof mark === "number" && Number.isFinite(mark));
+  if (marks.length === 0) return null;
+  return Math.round((marks.reduce((sum, mark) => sum + mark, 0) / marks.length) * 10) / 10;
 }
 
 function todayISO() {
@@ -208,6 +200,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
   const [lateDays, setLateDays] = useState("0");
   const [earlyExitDays, setEarlyExitDays] = useState("0");
   const [behaviorLevel, setBehaviorLevel] = useState<BehaviorLevel>("GOOD");
+  const [behaviorNote, setBehaviorNote] = useState("");
   const [teacherNotes, setTeacherNotes] = useState("");
   const [teacherSignature, setTeacherSignature] = useState("");
   const [principalSignature, setPrincipalSignature] = useState("");
@@ -222,10 +215,6 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
   const [loading, setLoading] = useState(true);
   const [certificateContext, setCertificateContext] = useState<CertificateStudentContext | null>(null);
   const [legacySubjectRows, setLegacySubjectRows] = useState<CertificateMarkRow[]>([]);
-  const [showClassReview, setShowClassReview] = useState(false);
-  const [classReviewLoading] = useState(false);
-  const [classReviewError, setClassReviewError] = useState("");
-  const [classCertificateReview, setClassCertificateReview] = useState<CertificateReviewItem[]>([]);
   const isHydratingRef = useRef(false);
   const lastSavedSnapshotRef = useRef("");
   const saveTimeoutRef = useRef<number | null>(null);
@@ -338,9 +327,6 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     setPublished(false);
     setSaved(false);
     setShowPreview(false);
-    setShowClassReview(false);
-    setClassCertificateReview([]);
-    setClassReviewError("");
   }, [selectedStudentId, selectedClassId, certificateType]);
 
   const certificateRows = useMemo(() => {
@@ -459,11 +445,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
   ]);
 
   const average = useMemo(() => {
-    const marks = certificatePrintableRows
-      .map((row) => row.average)
-      .filter((mark): mark is number => typeof mark === "number" && Number.isFinite(mark));
-    if (marks.length === 0) return null;
-    return Math.round((marks.reduce((sum, mark) => sum + mark, 0) / marks.length) * 10) / 10;
+    return printableRowsAverage(certificatePrintableRows);
   }, [certificatePrintableRows]);
 
   const gradeKey = useMemo(() => gradeKeyFromAverage(average), [average]);
@@ -606,6 +588,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     lateDays: number;
     earlyExitDays: number;
     behaviorLevel: BehaviorLevel;
+    behaviorNote?: string | null | undefined;
     teacherNotes?: string | null | undefined;
     teacherSignature?: string | null | undefined;
     principalSignature?: string | null | undefined;
@@ -627,6 +610,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       lateDays: record.lateDays,
       earlyExitDays: record.earlyExitDays,
       behaviorLevel: record.behaviorLevel,
+      behaviorNote: record.behaviorNote || "",
       teacherNotes: record.teacherNotes || "",
       teacherSignature: record.teacherSignature || "",
       principalSignature: record.principalSignature || "",
@@ -657,6 +641,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
         | "published"
         | "result"
         | "behaviorLevel"
+        | "behaviorNote"
         | "teacherSignature"
         | "principalSignature"
         | "teacherNotes"
@@ -676,6 +661,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       lateDays: Number.parseInt(lateDays, 10) || 0,
       earlyExitDays: Number.parseInt(earlyExitDays, 10) || 0,
       behaviorLevel: overrides.behaviorLevel ?? behaviorLevel,
+      behaviorNote: (overrides.behaviorNote ?? behaviorNote).trim() || null,
       teacherNotes: (overrides.teacherNotes ?? teacherNotes).trim() || null,
       teacherSignature: (overrides.teacherSignature ?? teacherSignature).trim() || null,
       principalSignature:
@@ -711,6 +697,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       setLateDays(String(context?.attendanceSummary.lateDays ?? 0));
       setEarlyExitDays(String(context?.attendanceSummary.earlyExitDays ?? 0));
       setBehaviorLevel(context?.behaviorSummary.suggestedLevel || "GOOD");
+      setBehaviorNote("");
       setTeacherNotes(context?.behaviorSummary.noteSuggestions[1] || "");
       setTeacherSignature("");
       setPrincipalSignature(schoolInfo?.managerName || "");
@@ -730,6 +717,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
         lateDays: context?.attendanceSummary.lateDays ?? 0,
         earlyExitDays: context?.attendanceSummary.earlyExitDays ?? 0,
         behaviorLevel: context?.behaviorSummary.suggestedLevel || "GOOD",
+        behaviorNote: "",
         teacherNotes: context?.behaviorSummary.noteSuggestions[0] || "",
         teacherSignature: "",
         principalSignature: schoolInfo?.managerName || "",
@@ -758,6 +746,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     setLateDays(String(nextLateDays));
     setEarlyExitDays(String(nextEarlyExitDays));
     setBehaviorLevel(record.behaviorLevel || "GOOD");
+    setBehaviorNote(record.behaviorNote || "");
     setTeacherNotes(record.teacherNotes || "");
     setTeacherSignature(record.teacherSignature || "");
     setPrincipalSignature(record.principalSignature || schoolInfo?.managerName || "");
@@ -790,6 +779,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       lateDays: nextLateDays,
       earlyExitDays: nextEarlyExitDays,
       behaviorLevel: record.behaviorLevel || "GOOD",
+      behaviorNote: record.behaviorNote || "",
       teacherNotes: record.teacherNotes || "",
       teacherSignature: record.teacherSignature || "",
       principalSignature: record.principalSignature || schoolInfo?.managerName || "",
@@ -862,6 +852,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
         lateDays: savedCertificate.lateDays ?? 0,
         earlyExitDays: savedCertificate.earlyExitDays ?? 0,
         behaviorLevel: savedCertificate.behaviorLevel || "GOOD",
+        behaviorNote: savedCertificate.behaviorNote || "",
         teacherNotes: savedCertificate.teacherNotes || "",
         teacherSignature: savedCertificate.teacherSignature || "",
         principalSignature: savedCertificate.principalSignature || schoolInfo?.managerName || "",
@@ -954,6 +945,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     absentDays,
     lateDays,
     behaviorLevel,
+    behaviorNote,
     teacherNotes,
     teacherSignature,
     principalSignature,
@@ -995,6 +987,22 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     if (saved) {
       setPageMessage(t("certificates.saved"));
     }
+  }
+
+  async function selectActiveCertificateStudent(studentId: string) {
+    if (studentId === selectedStudentId) return;
+    if (saveTimeoutRef.current !== null) {
+      window.clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    if (selectedStudentId && !isHydratingRef.current && (certificateId || hasMeaningfulCertificateContent())) {
+      await saveCertificate({}, true);
+    }
+    if (!studentId) {
+      setSelectedStudentId("");
+      return;
+    }
+    setSelectedStudentId(studentId);
   }
 
   function buildPrintableBody() {
@@ -1143,6 +1151,11 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
         <section class="certificate-print-notes">
           <section class="certificate-print-note"><strong>${escapeHtml(t("certificates.homeroomNotes"))}</strong><p>${escapeHtml(teacherNotes.trim() || noNotesLabel)}</p></section>
           <section class="certificate-print-note"><strong>${escapeHtml(t("certificates.behaviorEvaluation"))}</strong><p>${escapeHtml(behaviorText)}</p></section>
+          ${
+            behaviorNote.trim()
+              ? `<section class="certificate-print-note"><strong>${escapeHtml(t("certificates.showBehaviorOnCertificate"))}</strong><p>${escapeHtml(behaviorNote.trim())}</p></section>`
+              : ""
+          }
         </section>
 
         <div class="certificate-print-signatures">
@@ -1270,14 +1283,14 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                   className="secondary"
                   onClick={() => {
                     if (students.length === 0) return;
-                    setSelectedStudentIds((previous) =>
-                      previous.length === students.length
+                    const nextIds =
+                      selectedClassStudents.length === students.length
                         ? []
-                        : students.map((item) => item.id).filter((id): id is string => Boolean(id))
-                    );
-                    setSelectedStudentId((previous) =>
-                      previous && students.some((item) => item.id === previous) ? previous : students[0]?.id || ""
-                    );
+                        : students.map((item) => item.id).filter((id): id is string => Boolean(id));
+                    setSelectedStudentIds(nextIds);
+                    const nextActive =
+                      nextIds.find((id) => id === selectedStudentId) || nextIds[0] || "";
+                    void selectActiveCertificateStudent(nextActive);
                   }}
                   disabled={!selectedClassId || students.length === 0}
                 >
@@ -1312,7 +1325,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                           key={studentId}
                           data-e2e={`certificate-student-row-${studentId}`}
                           className={isChecked ? "certificate-student-row selected" : "certificate-student-row"}
-                          onClick={() => setSelectedStudentId(studentId)}
+                          onClick={() => void selectActiveCertificateStudent(studentId)}
                         >
                           <td onClick={(event) => event.stopPropagation()}>
                             <label className="certificate-student-checkbox">
@@ -1321,17 +1334,16 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                                 checked={isChecked}
                                 onChange={(event) => {
                                   const nextChecked = event.target.checked;
-                                  setSelectedStudentIds((previous) => {
-                                    if (nextChecked) {
-                                      return previous.includes(studentId) ? previous : [...previous, studentId];
-                                    }
-                                    return previous.filter((id) => id !== studentId);
-                                  });
+                                  const nextSelected = nextChecked
+                                    ? selectedStudentIds.includes(studentId)
+                                      ? selectedStudentIds
+                                      : [...selectedStudentIds, studentId]
+                                    : selectedStudentIds.filter((id) => id !== studentId);
+                                  setSelectedStudentIds(nextSelected);
                                   if (nextChecked) {
-                                    setSelectedStudentId(studentId);
+                                    void selectActiveCertificateStudent(studentId);
                                   } else if (studentId === selectedStudentId) {
-                                    const nextActive = selectedStudentIds.find((id) => id !== studentId) || "";
-                                    setSelectedStudentId(nextActive);
+                                    void selectActiveCertificateStudent(nextSelected[0] || "");
                                   }
                                 }}
                               />
@@ -1523,7 +1535,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                   type="button"
                   className="primary"
                   onClick={() => void handleSaveSelectedCertificate()}
-                  disabled={readOnly || !selectedStudent || loading || saving || classReviewLoading}
+                  disabled={readOnly || !selectedStudent || loading || saving}
                 >
                   <Save size={18} />
                   <span>{t("certificates.approve")}</span>
@@ -1550,103 +1562,6 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
         )}
       </div>
 
-      {showClassReview && (
-        <Card
-          title={t("certificates.classReviewTitle")}
-          actions={
-            <div className="certificate-top-actions no-print">
-              <button
-                type="button"
-                className="secondary"
-                onClick={() => {
-                  setShowClassReview(false);
-                  setClassReviewError("");
-                }}
-              >
-                <span>{t("common.close")}</span>
-              </button>
-            </div>
-          }
-        >
-          {classReviewLoading && (
-            <div className="form-message" role="status">
-              {t("common.loading")}
-            </div>
-          )}
-          {!classReviewLoading && classReviewError && (
-            <div className="form-message" role="status">
-              {classReviewError}
-            </div>
-          )}
-          {!classReviewLoading && !classReviewError && classCertificateReview.length === 0 && (
-            <div className="form-message" role="status">
-              {t("certificates.classReviewEmpty")}
-            </div>
-          )}
-          {!classReviewLoading && !classReviewError && classCertificateReview.length > 0 && (
-            <div className="certificate-review-list">
-              {classCertificateReview.map((item) => (
-                <div key={item.studentId} className="certificate-review-card">
-                  <div className="certificate-review-header">
-                    <strong>{item.studentName}</strong>
-                    <span>
-                      {selectedClassName} - {item.section} - {item.nationalId}
-                    </span>
-                  </div>
-                  <table className="certificate-review-table">
-                    <thead>
-                      <tr>
-                        <th>{t("common.subject")}</th>
-                        <th>{t("certificates.mark")}</th>
-                        <th>{t("certificates.average")}</th>
-                        <th>{t("certificates.grade")}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {item.rows.map((row) => (
-                        <tr key={`${item.studentId}-${row.id}`}>
-                          <td>{row.subjectName}</td>
-                          <td>{row.currentMark || "-"}</td>
-                          <td>{typeof row.average === "number" ? row.average.toFixed(1) : "-"}</td>
-                          <td>{t(row.grade || "certificates.grades.pending")}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div className="certificate-review-meta">
-                    <div>
-                      <strong>{t("certificates.average")}</strong>
-                      <span>{item.average === null ? "-" : item.average.toFixed(1)}</span>
-                    </div>
-                    <div>
-                      <strong>{t("certificates.result")}</strong>
-                      <span>{t(resultLabelKey(item.result))}</span>
-                    </div>
-                    <div>
-                      <strong>{t("certificates.behaviorEvaluation")}</strong>
-                      <span>{t(behaviorLabelKey(item.behaviorLevel))}</span>
-                    </div>
-                    <div>
-                      <strong>{t("certificates.homeroomNotes")}</strong>
-                      <span>{item.teacherNotes || t("common.none")}</span>
-                    </div>
-                  </div>
-                  <div className="certificate-review-meta">
-                    <div>
-                      <strong>{t("certificates.teacherSignature")}</strong>
-                      <span>{item.teacherSignature || t("common.none")}</span>
-                    </div>
-                    <div>
-                      <strong>{t("certificates.principalSignature")}</strong>
-                      <span>{item.principalSignature || t("common.none")}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-      )}
     </div>
   );
 }

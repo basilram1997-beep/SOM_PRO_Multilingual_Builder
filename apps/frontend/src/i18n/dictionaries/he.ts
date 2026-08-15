@@ -5,6 +5,7 @@ export const he: Record<string, string> = buildReviewedLocaleDictionary(en, "he"
 
 Object.assign(he, {
   "common.skipToContent": "דילוג לתוכן",
+  "common.loading": "טוען...",
   "common.none": "אין",
   "users.student": "תלמיד",
   "users.parent": "הורה",
@@ -84,12 +85,16 @@ Object.assign(he, {
   "certificates.previewAction": "הצגת תעודות",
   "certificates.classDetailsTitle": "בחירת כיתה ופרטי תעודה",
   "certificates.studentsSelectionTitle": "בחירת תלמידים",
+  "certificates.homeroomNotesPageTitle": "הזנת הערות",
+  "certificates.homeroomNotesPageHint": "בחר כיתה וסוג תעודה, ואז הזן הערת מחנך נפרדת לכל תלמיד.",
+  "certificates.showBehaviorOnCertificate": "הצגת סיכום התנהגות בתעודה",
   "certificates.adminOnlyNote": "שמירה ופרסום מיועדים למנהל בית הספר בלבד.",
   "certificates.hint": "אפשר להדפיס את התעודה ישירות או לשמור אותה כ-PDF מחלון ההדפסה. הפרסום יהיה זמין לאחר השמירה.",
   "certificates.curriculumType": "סוג תוכנית לימודים",
   "certificates.curriculum.palestinian": "תוכנית לימודים פלסטינית",
   "certificates.curriculum.bagrut": "תוכנית בגרות",
   "certificates.signaturesTitle": "חתימות",
+  "nav.studentCertificateNotes": "הזנת הערות",
   "nav.mainContent": "תוכן ראשי"
 });
 

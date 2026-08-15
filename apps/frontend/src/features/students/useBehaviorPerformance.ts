@@ -42,7 +42,7 @@ function sortCategorySummary(items: BehaviorListResponse["categorySummary"]) {
   return [...items].sort((left, right) => (order.get(left.category) ?? 999) - (order.get(right.category) ?? 999));
 }
 
-export function useBehaviorPerformance() {
+export function useBehaviorPerformance(currentUser?: { role?: string; studentId?: string | null; studentIds?: string[] }) {
   const { t } = useI18n();
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [classId, setClassId] = useState("");
@@ -61,8 +61,14 @@ export function useBehaviorPerformance() {
 
   useEffect(() => {
     let active = true;
-    somApi.classes
-      .list()
+    const linkedStudentId = currentUser?.studentId || currentUser?.studentIds?.[0] || "";
+    const classesRequest =
+      (currentUser?.role === "STUDENT" || currentUser?.role === "PARENT") && linkedStudentId
+        ? somApi.students.context(linkedStudentId).then((response) => ({
+            data: response.data?.class ? [response.data.class] : []
+          }))
+        : somApi.classes.list();
+    classesRequest
       .then((response) => {
         if (!active) return;
         const nextClasses = sortSchoolClasses((response.data || []) as SchoolClass[]);
@@ -76,7 +82,7 @@ export function useBehaviorPerformance() {
     return () => {
       active = false;
     };
-  }, [t]);
+  }, [currentUser?.role, currentUser?.studentId, currentUser?.studentIds, t]);
 
   useEffect(() => {
     if (!classId || !date) {

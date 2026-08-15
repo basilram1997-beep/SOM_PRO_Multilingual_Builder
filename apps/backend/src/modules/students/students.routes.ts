@@ -141,6 +141,23 @@ const CertificateQuerySchema = z.object({
   certificateType: StudentCertificateTypeSchema,
   academicYear: z.string().min(1)
 });
+const CertificateNotesQuerySchema = z.object({
+  classId: z.string().min(1),
+  certificateType: StudentCertificateTypeSchema,
+  academicYear: z.string().min(1)
+});
+const CertificateNotesSaveSchema = CertificateNotesQuerySchema.extend({
+  notes: z
+    .array(
+      z.object({
+        studentId: z.string().min(1),
+        teacherNotes: z.string().trim().max(1500).optional().nullable(),
+        showBehaviorOnCertificate: z.boolean().optional().default(false),
+        behaviorNote: z.string().trim().max(1500).optional().nullable()
+      })
+    )
+    .max(80)
+});
 const CertificateContextQuerySchema = z.object({
   studentId: z.string().min(1)
 });
@@ -196,6 +213,30 @@ function buildAttendancePayload(body: {
     leftAt: body.status === "LEFT_EARLY" ? normalizeOptionalText(body.leftAt) : null,
     note: normalizeOptionalText(body.note)
   };
+}
+
+async function isHomeroomTeacherForClass(schoolId: string, classId: string, user: Express.Request["user"]) {
+  if (!user || user.role !== "TEACHER") return false;
+  const teacher = await prisma.teacher.findFirst({
+    where: { schoolId, name: user.name },
+    select: { id: true }
+  });
+  if (!teacher) return false;
+  const assignment = await prisma.homeroomAssignment.findFirst({
+    where: {
+      schoolId,
+      classId,
+      teacherId: teacher.id,
+      isActive: true
+    },
+    select: { id: true }
+  });
+  return Boolean(assignment);
+}
+
+async function canManageCertificateNotesForClass(schoolId: string, classId: string, user: Express.Request["user"]) {
+  if (user && canRole(user.role, "manageSettings")) return true;
+  return isHomeroomTeacherForClass(schoolId, classId, user);
 }
 
 async function saveAttendanceRecord(req: any, res: any) {
@@ -1793,6 +1834,68 @@ studentsRouter.get("/certificates/context", async (req, res) => {
     data: buildStudentCertificateContext(attendanceRecords, behaviorRecords)
   });
 });
+studentsRouter.get("/certificates/homeroom-notes", async (req, res) => {
+  const parsed = CertificateNotesQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: "INVALID_CERTIFICATE_NOTES_QUERY",
+      message: "بيانات ملاحظات الشهادة غير صحيحة"
+    });
+  }
+  const schoolId = await getRequestSchoolId(req);
+  const { classId, certificateType, academicYear } = parsed.data;
+  if (!(await classBelongsToSchool(schoolId, classId))) {
+    return res.status(404).json({ error: "CLASS_NOT_FOUND", message: "الصف غير موجود" });
+  }
+  if (!(await canManageCertificateNotesForClass(schoolId, classId, req.user))) {
+    return res.status(403).json({
+      error: "FORBIDDEN",
+      message: "ملاحظات مربي الصف متاحة للمدير أو مربي الصف فقط"
+    });
+  }
+  const students = await prisma.student.findMany({
+    where: { schoolId, classId, status: "ACTIVE" },
+    select: { id: true, name: true, nationalId: true },
+    orderBy: { name: "asc" }
+  });
+  const certificates = await prisma.studentCertificate.findMany({
+    where: {
+      schoolId,
+      certificateType,
+      academicYear,
+      studentId: { in: students.map((student) => student.id) }
+    },
+    select: { id: true, studentId: true, teacherNotes: true, behaviorNote: true, behaviorLevel: true }
+  });
+  const behaviorRecords = await prisma.studentBehaviorRecord.findMany({
+    where: { schoolId, studentId: { in: students.map((student) => student.id) } },
+    orderBy: [{ createdAt: "desc" }, { date: "desc" }]
+  });
+  const certificateByStudent = new Map(certificates.map((certificate) => [certificate.studentId, certificate]));
+  const behaviorNotesByStudent = new Map<string, string>();
+  for (const record of behaviorRecords) {
+    if (behaviorNotesByStudent.has(record.studentId)) continue;
+    const note = [record.template, record.note].map((value) => value?.trim()).filter(Boolean).join(" - ");
+    if (note) behaviorNotesByStudent.set(record.studentId, note);
+  }
+  res.json({
+    data: {
+      rows: students.map((student) => {
+        const certificate = certificateByStudent.get(student.id);
+        return {
+          studentId: student.id,
+          studentName: student.name,
+          nationalId: student.nationalId,
+          certificateId: certificate?.id || null,
+          teacherNotes: certificate?.teacherNotes || "",
+          behaviorNote: certificate?.behaviorNote || "",
+          behaviorLevel: certificate?.behaviorLevel || "GOOD",
+          behaviorSummary: behaviorNotesByStudent.get(student.id) || ""
+        };
+      })
+    }
+  });
+});
 studentsRouter.get("/grade-schemes/context", async (req, res) => {
   const schoolId = await getRequestSchoolId(req);
   if (!canViewGradeData(req)) {
@@ -2161,6 +2264,74 @@ studentsRouter.post(
       }
     });
     res.status(200).json({ data: serializeCertificate(certificate) });
+  }
+);
+studentsRouter.post(
+  "/certificates/homeroom-notes",
+  validateBody(CertificateNotesSaveSchema),
+  async (req, res) => {
+    const schoolId = await getRequestSchoolId(req);
+    const { classId, certificateType, academicYear } = req.body;
+    if (!(await classBelongsToSchool(schoolId, classId))) {
+      return res.status(404).json({ error: "CLASS_NOT_FOUND", message: "الصف غير موجود" });
+    }
+    if (!(await canManageCertificateNotesForClass(schoolId, classId, req.user))) {
+      return res.status(403).json({
+        error: "FORBIDDEN",
+        message: "ملاحظات مربي الصف متاحة للمدير أو مربي الصف فقط"
+      });
+    }
+
+    const students = await prisma.student.findMany({
+      where: { schoolId, classId, status: "ACTIVE" },
+      select: { id: true }
+    });
+    const classStudentIds = new Set(students.map((student) => student.id));
+    const requestedNotes = req.body.notes.filter((note: { studentId: string }) => classStudentIds.has(note.studentId));
+    const today = new Date().toISOString().slice(0, 10);
+
+    const savedRows = [];
+    for (const note of requestedNotes) {
+      const teacherNotes = normalizeOptionalText(note.teacherNotes);
+      const behaviorNote = note.showBehaviorOnCertificate ? normalizeOptionalText(note.behaviorNote) : null;
+      const certificate = await prisma.studentCertificate.upsert({
+        where: {
+          schoolId_studentId_certificateType_academicYear: {
+            schoolId,
+            studentId: note.studentId,
+            certificateType,
+            academicYear
+          }
+        },
+        create: {
+          schoolId,
+          studentId: note.studentId,
+          certificateType,
+          academicYear,
+          issueDate: today,
+          teacherNotes,
+          behaviorNote,
+          subjectRows: []
+        },
+        update: {
+          teacherNotes,
+          behaviorNote
+        },
+        select: { id: true, studentId: true, teacherNotes: true, behaviorNote: true }
+      });
+      savedRows.push(certificate);
+    }
+
+    recordAuditLog(prisma, {
+      schoolId,
+      userId: req.user?.id || req.user?.userId || null,
+      action: "CERTIFICATE_HOMEROOM_NOTES_SAVE",
+      entity: "StudentCertificate",
+      entityId: `${classId}:${certificateType}:${academicYear}`,
+      after: { count: savedRows.length }
+    });
+
+    res.json({ data: { rows: savedRows } });
   }
 );
 studentsRouter.delete("/:id", requirePermissionForWrite("manageSettings"), async (req, res) => {

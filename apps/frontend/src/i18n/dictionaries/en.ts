@@ -688,6 +688,7 @@
   "nav.studentExams": "My exam schedule",
   "nav.studentTimetable": "My timetable",
   "nav.studentCertificates": "Certificates",
+  "nav.studentCertificateNotes": "Enter notes",
   "academic.title": "Academic level",
   "academic.filterTitle": "Choose class, subject, and date",
   "academic.studentsTitle": "Students academic records",
@@ -855,6 +856,10 @@
   "certificates.behavior.needsAttention": "Needs attention",
   "certificates.teacherNotes": "Teacher notes",
   "certificates.teacherNotesPlaceholder": "Teacher or administration notes",
+  "certificates.homeroomNotesPageTitle": "Enter notes",
+  "certificates.homeroomNotesPageHint":
+    "Choose the class and certificate type, then enter a separate homeroom note for each student.",
+  "certificates.showBehaviorOnCertificate": "Show behavior summary on certificate",
   "certificates.adminNotes": "Administration notes",
   "certificates.adminNotesPlaceholder": "Additional notes from administration",
   "certificates.notesTitle": "Certificate notes",

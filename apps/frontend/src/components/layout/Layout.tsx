@@ -117,7 +117,13 @@ const teacherWorkGroup: SidebarGroup = {
     { key: "teacher-exams", page: "studentExams", labelKey: "nav.teacherExams", icon: ClipboardCheck },
     { key: "teacher-permissions", page: "teacherPermissions", labelKey: "nav.teacherPermissions", icon: BellRing },
     { key: "teacher-pledge", page: "studentPledge", labelKey: "nav.studentPledge", icon: ClipboardCheck },
-    { key: "teacher-certificates", page: "studentCertificates", labelKey: "nav.studentCertificates", icon: Award }
+    { key: "teacher-certificates", page: "studentCertificates", labelKey: "nav.studentCertificates", icon: Award },
+    {
+      key: "teacher-certificate-notes",
+      page: "studentCertificateNotes",
+      labelKey: "nav.studentCertificateNotes",
+      icon: FileText
+    }
   ]
 };
 
@@ -137,6 +143,12 @@ const studentPortalGroup: SidebarGroup = {
   showHeader: false,
   items: [
     { key: "student-marks", page: "studentMarks", labelKey: "nav.studentMarks", icon: Calculator },
+    {
+      key: "student-behavior",
+      page: "studentBehaviorPerformance",
+      labelKey: "nav.studentBehaviorPerformance",
+      icon: Smile
+    },
     { key: "student-lesson-today", page: "studentLessonToday", labelKey: "nav.studentLessonToday", icon: FileText },
     {
       key: "student-homework",
@@ -216,7 +228,13 @@ const studentsGroup: SidebarGroup = {
     },
     { key: "student-exams", page: "studentExams", labelKey: "nav.studentExams", icon: ClipboardCheck },
     { key: "student-timetable", page: "studentTimetable", labelKey: "nav.studentTimetable", icon: Table2 },
-    { key: "student-certificates", page: "studentCertificates", labelKey: "nav.studentCertificates", icon: Award }
+    { key: "student-certificates", page: "studentCertificates", labelKey: "nav.studentCertificates", icon: Award },
+    {
+      key: "student-certificate-notes",
+      page: "studentCertificateNotes",
+      labelKey: "nav.studentCertificateNotes",
+      icon: FileText
+    }
   ]
 };
 
@@ -371,7 +389,8 @@ export function Layout({
   const visibleTeacherViewItems = teacherViewGroup.items.filter((item) => canAccessPage(currentUser.role, item.page));
   const visibleTeacherWorkItems = teacherWorkGroup.items.filter(
     (item) =>
-      canAccessPage(currentUser.role, item.page) || (item.page === "studentCertificates" && homeroomCertificateAccess)
+      canAccessPage(currentUser.role, item.page) ||
+      ((item.page === "studentCertificates" || item.page === "studentCertificateNotes") && homeroomCertificateAccess)
   );
   const visibleStudentsItems =
     isStudentAreaUser || isTeacherUser
@@ -410,7 +429,8 @@ export function Layout({
     current === "studentHomeworkPreparation" ||
     current === "studentExams" ||
     current === "studentTimetable" ||
-    current === "studentCertificates";
+    current === "studentCertificates" ||
+    current === "studentCertificateNotes";
   const shouldExpandStudentPortal = isStudentAreaUser;
   const sidebarRoleLabel =
     currentUser.role === "PARENT" || currentUser.role === "STUDENT"

@@ -5,6 +5,7 @@ export const ar: Record<string, string> = buildReviewedLocaleDictionary(en, "ar"
 
 Object.assign(ar, {
   "common.skipToContent": "تجاوز إلى المحتوى",
+  "common.loading": "جارٍ التحميل...",
   "dashboard.contactName": "باسل رموني",
   "nav.teacherPortal": "بوابة المعلم",
   "nav.studentPortal": "ملفي الشخصي",
@@ -13,6 +14,7 @@ Object.assign(ar, {
   "nav.studentExams": "جدول امتحاناتي",
   "nav.studentTimetable": "برنامجي",
   "nav.studentCertificates": "الشهادات",
+  "nav.studentCertificateNotes": "إدخال ملاحظات",
   "nav.teacherViewGroup": "ما يراه المعلم",
   "nav.teacherWorkGroup": "أدوات المعلم",
   "nav.teacherBaseSchedule": "البرنامج الثابت",
@@ -199,6 +201,10 @@ Object.assign(ar, {
   "certificates.behavior.needsAttention": "يحتاج إلى متابعة",
   "certificates.teacherNotes": "ملاحظات المعلم",
   "certificates.teacherNotesPlaceholder": "ملاحظات المعلم أو الإدارة",
+  "certificates.homeroomNotesPageTitle": "إدخال ملاحظات",
+  "certificates.homeroomNotesPageHint":
+    "اختر الصف ونوع الشهادة، ثم أدخل ملاحظة مستقلة لكل طالب. تظهر الملاحظة في شهادة الطالب نفسه فقط.",
+  "certificates.showBehaviorOnCertificate": "إظهار ملخص السلوك في الشهادة",
   "certificates.adminNotes": "ملاحظات الإدارة",
   "certificates.adminNotesPlaceholder": "ملاحظات إضافية من الإدارة",
   "certificates.notesTitle": "ملاحظات الشهادة",

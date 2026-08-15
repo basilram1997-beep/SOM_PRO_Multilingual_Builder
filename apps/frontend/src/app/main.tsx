@@ -84,6 +84,11 @@ const StudentMarksPage = lazy(() =>
 const StudentCertificatesPage = lazy(() =>
   import("../pages/students/StudentCertificatesPage").then((module) => ({ default: module.StudentCertificatesPage }))
 );
+const CertificateHomeroomNotesPage = lazy(() =>
+  import("../pages/students/CertificateHomeroomNotesPage").then((module) => ({
+    default: module.CertificateHomeroomNotesPage
+  }))
+);
 const LessonTodayPage = lazy(() =>
   import("../pages/lessons/LessonTodayPage").then((module) => ({ default: module.LessonTodayPage }))
 );
@@ -116,6 +121,7 @@ export type PageKey =
   | "studentExams"
   | "studentTimetable"
   | "studentCertificates"
+  | "studentCertificateNotes"
   | "homeroom"
   | "duties"
   | "schedules"
@@ -234,7 +240,8 @@ function App() {
     const allowed =
       (!internalToolPage || import.meta.env.DEV) &&
       (!operatorHealthPage || showOperatorHealth) &&
-      (canAccessPage(user.role, page) || (page === "studentCertificates" && homeroomCertificateAccess));
+      (canAccessPage(user.role, page) ||
+        ((page === "studentCertificates" || page === "studentCertificateNotes") && homeroomCertificateAccess));
     if (!allowed) setPage(fallbackPageForRole(user.role));
   }, [homeroomCertificateAccess, page, showOperatorHealth, user]);
 
@@ -268,6 +275,7 @@ function App() {
     studentCertificates: (
       <StudentCertificatesPage currentUser={user!} canEditCertificates={homeroomCertificateAccess} />
     ),
+    studentCertificateNotes: <CertificateHomeroomNotesPage currentUser={user!} />,
     homeroom: <HomeroomPage />,
     duties: <DutiesPage currentUser={user!} />,
     schedules: <SchedulesPage currentUser={user!} />,
@@ -305,7 +313,9 @@ function App() {
       !user ||
       ((!internalToolPage || import.meta.env.DEV) &&
         (!operatorHealthPage || showOperatorHealth) &&
-        (canAccessPage(user.role, nextPage) || (nextPage === "studentCertificates" && homeroomCertificateAccess)))
+        (canAccessPage(user.role, nextPage) ||
+          ((nextPage === "studentCertificates" || nextPage === "studentCertificateNotes") &&
+            homeroomCertificateAccess)))
     ) {
       setPage(nextPage);
       if (nextPage === "daily" && nextDailySection !== undefined) {

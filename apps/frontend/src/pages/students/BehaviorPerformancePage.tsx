@@ -8,7 +8,8 @@ import type { AuthUser } from "../auth/LoginPage";
 
 export function BehaviorPerformancePage({ currentUser }: { currentUser: AuthUser }) {
   const { t, language } = useI18n();
-  const behavior = useBehaviorPerformance();
+  const readOnly = currentUser.role === "STUDENT" || currentUser.role === "PARENT";
+  const behavior = useBehaviorPerformance(currentUser);
   const selectedClassName = behavior.selectedClass
     ? localizeClassName(behavior.selectedClass.name, language)
     : t("common.none");
@@ -100,9 +101,10 @@ export function BehaviorPerformancePage({ currentUser }: { currentUser: AuthUser
         loading={behavior.loading}
         savingStudentId={behavior.savingStudentId}
         onEdit={behavior.openEditor}
+        readOnly={readOnly}
       />
 
-      {behavior.editingStudent && (
+      {!readOnly && behavior.editingStudent && (
         <BehaviorRecordModal
           t={t}
           language={language}

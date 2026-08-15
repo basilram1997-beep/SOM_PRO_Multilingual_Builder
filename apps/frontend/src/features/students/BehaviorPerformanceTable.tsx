@@ -7,6 +7,7 @@ type Props = {
   loading: boolean;
   savingStudentId: string | null;
   onEdit: (student: BehaviorRow) => void;
+  readOnly?: boolean;
 };
 
 function summarize(row: BehaviorRow) {
@@ -21,7 +22,7 @@ function summarize(row: BehaviorRow) {
   );
 }
 
-export function BehaviorPerformanceTable({ t, rows, loading, savingStudentId, onEdit }: Props) {
+export function BehaviorPerformanceTable({ t, rows, loading, savingStudentId, onEdit, readOnly = false }: Props) {
   return (
     <Card title={t("behavior.studentsTitle")}>
       <div className="table-wrap behavior-table-wrap">
@@ -32,18 +33,18 @@ export function BehaviorPerformanceTable({ t, rows, loading, savingStudentId, on
               <th>{t("behavior.totalRecords")}</th>
               <th>{t("behavior.positive")}</th>
               <th>{t("behavior.negative")}</th>
-              <th>{t("common.actions")}</th>
+              {!readOnly && <th>{t("common.actions")}</th>}
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={5}>{t("common.loading")}</td>
+                <td colSpan={readOnly ? 4 : 5}>{t("common.loading")}</td>
               </tr>
             )}
             {!loading && rows.length === 0 && (
               <tr>
-                <td colSpan={5}>{t("behavior.emptyClass")}</td>
+                <td colSpan={readOnly ? 4 : 5}>{t("behavior.emptyClass")}</td>
               </tr>
             )}
             {!loading &&
@@ -56,11 +57,13 @@ export function BehaviorPerformanceTable({ t, rows, loading, savingStudentId, on
                     <td>{summary.total}</td>
                     <td>{summary.positive}</td>
                     <td>{summary.negative}</td>
-                    <td className="row-actions">
-                      <button type="button" className="light" disabled={disabled} onClick={() => onEdit(row)}>
-                        {summary.total > 0 ? t("behavior.edit") : t("behavior.add")}
-                      </button>
-                    </td>
+                    {!readOnly && (
+                      <td className="row-actions">
+                        <button type="button" className="light" disabled={disabled} onClick={() => onEdit(row)}>
+                          {summary.total > 0 ? t("behavior.edit") : t("behavior.add")}
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}

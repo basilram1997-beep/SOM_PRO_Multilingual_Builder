@@ -21,6 +21,7 @@ export const ROLE_ALLOWED_PAGES = {
     "studentExams",
     "studentTimetable",
     "studentCertificates",
+    "studentCertificateNotes",
     "homeroom",
     "duties",
     "schedules",
@@ -53,6 +54,7 @@ export const ROLE_ALLOWED_PAGES = {
     "studentExams",
     "studentTimetable",
     "studentCertificates",
+    "studentCertificateNotes",
     "homeroom",
     "duties",
     "schedules",
@@ -81,6 +83,7 @@ export const ROLE_ALLOWED_PAGES = {
   STUDENT: [
     "studentPortal",
     "studentMarks",
+    "studentBehaviorPerformance",
     "studentHomeworkPreparation",
     "studentTimetable",
     "studentExams",
@@ -90,6 +93,7 @@ export const ROLE_ALLOWED_PAGES = {
   PARENT: [
     "studentPortal",
     "studentMarks",
+    "studentBehaviorPerformance",
     "studentHomeworkPreparation",
     "studentTimetable",
     "studentExams",

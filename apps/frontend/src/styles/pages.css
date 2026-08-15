@@ -2599,6 +2599,92 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   cursor: pointer;
 }
 
+.certificate-notes-page {
+  display: grid;
+  gap: 16px;
+}
+
+.certificate-notes-toolbar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.certificate-notes-toolbar label {
+  display: grid;
+  gap: 6px;
+  color: #334155;
+  font-weight: 800;
+}
+
+.certificate-notes-toolbar input,
+.certificate-notes-toolbar select {
+  min-height: 42px;
+}
+
+.certificate-notes-toolbar button {
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+.certificate-notes-hint {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #d8e2ef;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 800;
+}
+
+.certificate-notes-table-wrap {
+  border-radius: 8px;
+}
+
+.certificate-notes-table th:first-child,
+.certificate-notes-table td:first-child {
+  width: 220px;
+}
+
+.certificate-notes-table th:last-child,
+.certificate-notes-table td:last-child {
+  width: 300px;
+}
+
+.certificate-notes-table textarea {
+  width: 100%;
+  min-height: 82px;
+  resize: vertical;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px;
+  font: inherit;
+  line-height: 1.6;
+}
+
+.certificate-notes-student-id {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.certificate-notes-behavior-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.6;
+  color: #334155;
+  font-weight: 800;
+}
+
+.certificate-notes-behavior-toggle input {
+  margin-top: 5px;
+  flex: 0 0 auto;
+}
+
 .certificate-preview-footer {
   display: flex;
   align-items: center;
