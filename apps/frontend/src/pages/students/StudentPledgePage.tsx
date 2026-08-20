@@ -1,4 +1,4 @@
-﻿import { Printer, Send } from "lucide-react";
+import { Printer, Send, ShieldCheck } from "lucide-react";
 import { Card } from "../../components/ui/Card";
 import { localizeClassName } from "../../i18n/displayNames";
 import { useI18n } from "../../i18n/i18n";
@@ -7,48 +7,29 @@ import { useStudentPledges } from "../../features/students/useStudentPledges";
 export function StudentPledgePage() {
   const { t, language } = useI18n();
   const pledge = useStudentPledges();
-  const isArabic = language.startsWith("ar");
-  const isHebrew = language.startsWith("he");
-  const chooseClassFirstLabel = isArabic
-    ? "اختر صفًا أولًا لعرض التعهدات"
-    : isHebrew
-      ? "בחר כיתה קודם כדי לראות התחייבויות"
-      : t("pledges.chooseClassFirst");
-  const fatherNameLabel = isArabic ? "اسم الأب" : isHebrew ? "שם האב" : t("students.fatherName");
-  const motherNameLabel = isArabic ? "اسم الأم" : isHebrew ? "שם האם" : t("students.motherName");
-  const guardianPhoneLabel = isArabic
-    ? "هاتف الوصي إن وجد"
-    : isHebrew
-      ? "טלפון האפוטרופוס אם קיים"
-      : t("students.guardianPhone");
-  const homeroomTeacherLabel = isArabic ? "اسم مربي الصف" : isHebrew ? "שם מחנך הכיתה" : t("pledges.homeroomTeacher");
-  const principalNameLabel = isArabic ? "اسم المدير" : isHebrew ? "שם המנהל" : t("pledges.principalName");
-  const teacherSignatureLabel = isArabic
-    ? "توقيع مربي الصف"
-    : isHebrew
-      ? "חתימת מחנך הכיתה"
-      : t("pledges.teacherSignature");
-  const principalSignatureLabel = isArabic
-    ? "توقيع المدير"
-    : isHebrew
-      ? "חתימת המנהל"
-      : t("pledges.principalSignature");
-  const noneLabel = isArabic ? "غير محدد" : isHebrew ? "לא מוגדר" : t("common.notSet");
+  const chooseClassFirstLabel = t("pledges.chooseClassFirst");
+  const fatherNameLabel = t("students.fatherName");
+  const motherNameLabel = t("students.motherName");
+  const guardianPhoneLabel = t("students.guardianPhone");
+  const homeroomTeacherLabel = t("pledges.homeroomTeacher");
+  const principalNameLabel = t("pledges.principalName");
+  const teacherSignatureLabel = t("pledges.teacherSignature");
+  const principalSignatureLabel = t("pledges.principalSignature");
+  const noneLabel = t("common.notSet");
 
   const classLabel = pledge.selectedClass ? localizeClassName(pledge.selectedClass.name, language) : noneLabel;
   const studentLabel = pledge.selectedStudent?.name || noneLabel;
   const nationalIdLabel = pledge.selectedStudent?.nationalId || noneLabel;
   const fatherNameValue = pledge.selectedStudent?.fatherName || noneLabel;
   const motherNameValue = pledge.selectedStudent?.motherName || noneLabel;
-  const contactLabel =
-    pledge.selectedStudent?.guardianPhone ||
-    pledge.selectedStudent?.fatherPhone ||
-    pledge.selectedStudent?.motherPhone ||
-    noneLabel;
+  const guardianPhoneValue = pledge.selectedStudent?.guardianPhone?.trim() || "";
+  const hasGuardianContact = Boolean(guardianPhoneValue);
   const pledgeTextValue = pledge.form.pledgeText.trim();
   const pledgeNoteValue = pledge.form.note.trim();
   const homeroomTeacherNameValue = pledge.form.homeroomTeacherName.trim();
   const principalNameValue = pledge.form.principalName.trim();
+  const familyInfoLabel = t("pledges.familyDetails");
+  const pledgeInfoLabel = t("pledges.pledgeDetails");
 
   return (
     <div className="page student-invitations-page student-pledges-page">
@@ -164,9 +145,12 @@ export function StudentPledgePage() {
                 <strong>{pledge.schoolName || t("app.name")}</strong>
                 <span>{pledge.schoolAddress || t("school.address")}</span>
               </div>
-              <div className="invitation-badge pledge-badge">SOM PRO</div>
+              <div className="pledge-badge" aria-hidden="true">
+                <ShieldCheck size={24} strokeWidth={2.3} />
+              </div>
             </div>
             <div className="pledge-preview-title">{t("pledges.title")}</div>
+            <div className="pledge-preview-subtitle">{t("pledges.letterhead")}</div>
           </div>
 
           <div className="pledge-preview-meta-grid">
@@ -186,7 +170,7 @@ export function StudentPledgePage() {
               </div>
             </div>
             <div className="pledge-preview-panel">
-              <strong>{t("pledges.note")}</strong>
+              <strong>{familyInfoLabel}</strong>
               <div>
                 <span>{fatherNameLabel}</span>
                 <b>{fatherNameValue}</b>
@@ -195,10 +179,15 @@ export function StudentPledgePage() {
                 <span>{motherNameLabel}</span>
                 <b>{motherNameValue}</b>
               </div>
-              <div>
-                <span>{guardianPhoneLabel}</span>
-                <b>{contactLabel}</b>
-              </div>
+              {hasGuardianContact ? (
+                <div>
+                  <span>{guardianPhoneLabel}</span>
+                  <b>{guardianPhoneValue}</b>
+                </div>
+              ) : null}
+            </div>
+            <div className="pledge-preview-panel">
+              <strong>{pledgeInfoLabel}</strong>
               <div>
                 <span>{homeroomTeacherLabel}</span>
                 <b>{homeroomTeacherNameValue || noneLabel}</b>
@@ -300,3 +289,4 @@ export function StudentPledgePage() {
     </div>
   );
 }
+

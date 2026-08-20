@@ -1064,6 +1064,7 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   border-radius: 14px;
   background: linear-gradient(180deg, #ffffff, #f8fbff);
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1);
+  cursor: pointer;
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease,
@@ -1131,6 +1132,11 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 .timetable-page .timetable-weekly-field select:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+}
+
+.student-attendance-page .attendance-controls > label select,
+.student-attendance-page .attendance-controls > label input {
+  cursor: pointer;
 }
 
 .timetable-page .timetable-subject-card {
@@ -4513,9 +4519,9 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 }
 
 .student-invitations-page .card {
-  border: 1.5px solid #cbd5e1;
-  border-radius: 14px;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+  border: 2px solid #d3dbe7;
+  border-radius: 18px;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.11);
 }
 
 .student-invitation-form {
@@ -4529,17 +4535,22 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   gap: 6px;
   font-weight: 800;
   color: #334155;
-  padding: 12px 14px;
-  border: 1.5px solid #94a3b8;
-  border-radius: 12px;
-  background: #f8fafc;
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+  padding: 13px 15px;
+  border: 1.8px solid #c2cfde;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .student-invitation-form label:hover,
 .student-invitation-form label:focus-within {
   border-color: #7ea6e8;
-  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
 }
 
 .student-invitation-form select,
@@ -4567,21 +4578,20 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 .invitation-preview {
   display: grid;
   gap: 14px;
-  padding: 18px;
-  border: 2px solid #94a3b8;
-  border-radius: 16px;
+  padding: 20px;
+  border: 2px solid #b3c7d4;
+  border-radius: 22px;
   background: #fff;
-  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.12);
 }
 
 .pledge-preview {
-  gap: 14px;
+  gap: 12px;
   padding: 18px 18px 20px;
-  border-color: #8fb8c0;
-  background:
-    radial-gradient(circle at 14% 12%, rgba(15, 118, 110, 0.08), transparent 28%),
-    radial-gradient(circle at 88% 84%, rgba(234, 179, 8, 0.06), transparent 24%), #fff;
+  border-color: #c7d7df;
+  background: #fff;
 }
+
 
 .pledge-preview-header {
   display: grid;
@@ -4590,10 +4600,17 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 
 .pledge-preview-topline {
   display: grid;
-  grid-template-columns: minmax(190px, 1fr) minmax(0, 2fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
+  min-height: 96px;
+  padding: 14px 16px;
+  border: 1.5px solid #314566;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #1b2b48 0%, #13233d 100%);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.10);
 }
+
 
 .pledge-preview-corner {
   display: grid;
@@ -4625,56 +4642,67 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 }
 
 .pledge-preview-admin {
-  color: #0f766e;
-  font-size: 13px;
-  font-weight: 900;
+  color: #c7d2e5;
+  font-size: 12px;
+  font-weight: 800;
   text-align: right;
 }
 
+
 .pledge-preview-school {
   display: grid;
-  justify-items: center;
-  gap: 3px;
-  text-align: center;
+  justify-items: end;
+  gap: 4px;
+  text-align: right;
 }
 
+
 .pledge-preview-school strong {
-  color: #0f172a;
-  font-size: 17px;
+  color: #fff;
+  font-size: 18px;
   font-weight: 900;
 }
 
+
 .pledge-preview-school span {
-  color: #64748b;
+  color: #d7e0ee;
   font-size: 12px;
   font-weight: 700;
 }
 
+
 .pledge-badge {
-  min-width: 88px;
-  background: linear-gradient(180deg, #0f766e, #115e59);
-  box-shadow: 0 10px 24px rgba(15, 118, 110, 0.22);
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #15304f 0%, #0f213a 100%);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 18px rgba(15, 23, 42, 0.18);
 }
+
 
 .pledge-preview-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 64px;
-  border-radius: 18px;
-  background: linear-gradient(90deg, #0f766e, #1f8ea0);
+  min-height: 74px;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #0f6f6b 0%, #1b8a99 52%, #2a77d4 100%);
   color: #fff;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 900;
   text-align: center;
   padding: 8px 18px;
-  box-shadow: 0 18px 30px rgba(15, 118, 110, 0.16);
+  box-shadow: 0 12px 22px rgba(15, 118, 110, 0.14);
 }
+
 
 .pledge-preview-subtitle {
   text-align: center;
-  color: #e5f8f6;
-  background: rgba(15, 118, 110, 0.85);
+  color: #effff9;
+  background: linear-gradient(90deg, #2e9890, #2f9089);
   border-radius: 16px;
   padding: 8px 14px;
   font-size: 14px;
@@ -4682,34 +4710,36 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   font-weight: 700;
 }
 
+
 .pledge-preview-meta-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .pledge-preview-panel {
   display: grid;
   gap: 8px;
-  padding: 12px 14px;
-  border: 1.5px solid #c8dde0;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #f7fbfc, #fff);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+  padding: 14px 16px;
+  border: 1.5px solid #cbd8e2;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
 }
+
 
 .pledge-preview-panel strong {
   display: flex;
   align-items: center;
   justify-content: space-between;
   color: #0f766e;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 900;
 }
 
 .pledge-preview-panel div {
   display: grid;
-  grid-template-columns: 124px minmax(0, 1fr);
+  grid-template-columns: 130px minmax(0, 1fr);
   gap: 8px;
   align-items: center;
   padding: 8px 0;
@@ -4744,9 +4774,10 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   padding: 12px 14px;
   border: 1.5px solid #d6e3e5;
   border-radius: 14px;
-  background: #fcfefe;
+  background: #fff;
   line-height: 1.9;
 }
+
 
 .pledge-preview-section strong {
   color: #0f766e;

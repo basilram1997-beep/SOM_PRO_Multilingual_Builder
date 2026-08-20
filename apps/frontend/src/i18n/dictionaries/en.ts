@@ -1137,6 +1137,8 @@
   "pledges.class": "Class",
   "pledges.student": "Student",
   "pledges.studentName": "Student name",
+  "pledges.familyDetails": "Family details",
+  "pledges.pledgeDetails": "Pledge details",
   "pledges.date": "Date",
   "pledges.titleField": "Pledge title",
   "pledges.text": "Pledge text",

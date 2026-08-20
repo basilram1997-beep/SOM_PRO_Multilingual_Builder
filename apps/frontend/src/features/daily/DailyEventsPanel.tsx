@@ -43,52 +43,74 @@ export function DailyEventsPanel(props: Props) {
       : saveEventLabel;
   return (
     <Card>
-      <div className="form-row daily-event-form">
-        <input type="date" value={date} onChange={(e) => props.onDateChange(e.target.value)} />
-        <select value={day} onChange={(e) => props.onDayChange(e.target.value)}>
-          {workingDays.map((d) => (
-            <option key={d} value={d}>
-              {localizeDay(d, language)}
-            </option>
-          ))}
-        </select>
-        <select
-          value={eventForm.type}
-          onChange={(e) => props.onEventFormChange({ ...eventForm, type: e.target.value })}
-        >
-          <option value="EXAM">{t("daily.eventExam")}</option>
-          <option value="ACTIVITY">{t("daily.eventActivity")}</option>
-          <option value="TRIP">{t("daily.eventTrip")}</option>
-        </select>
-        <select
-          value={eventForm.fromPeriod}
-          onChange={(e) => props.onEventFormChange({ ...eventForm, fromPeriod: Number(e.target.value) })}
-        >
-          {periods.map((p) => (
-            <option key={p} value={p}>
-              {t("daily.fromPeriod")} {p}
-            </option>
-          ))}
-        </select>
-        <select
-          value={eventForm.toPeriod}
-          onChange={(e) => props.onEventFormChange({ ...eventForm, toPeriod: Number(e.target.value) })}
-        >
-          {periods.map((p) => (
-            <option key={p} value={p}>
-              {t("daily.toPeriod")} {p}
-            </option>
-          ))}
-        </select>
-        <textarea
-          className="event-description-input"
-          value={eventForm.note}
-          onChange={(e) => props.onEventFormChange({ ...eventForm, note: e.target.value })}
-          placeholder={localizedEventNotePlaceholder}
-        />
-        <button type="button" onClick={props.onSave}>
-          {localizedSaveEventLabel}
-        </button>
+      <div className="daily-event-form">
+        <div className="daily-event-grid">
+          <label className="daily-event-field daily-event-field--date">
+            <span>{t("common.date")}</span>
+            <input type="date" value={date} onChange={(e) => props.onDateChange(e.target.value)} />
+          </label>
+          <label className="daily-event-field daily-event-field--day">
+            <span>{t("common.day")}</span>
+            <select value={day} onChange={(e) => props.onDayChange(e.target.value)}>
+              {workingDays.map((d) => (
+                <option key={d} value={d}>
+                  {localizeDay(d, language)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="daily-event-field daily-event-field--status">
+            <span>{t("common.status")}</span>
+            <select
+              value={eventForm.type}
+              onChange={(e) => props.onEventFormChange({ ...eventForm, type: e.target.value })}
+            >
+              <option value="EXAM">{t("daily.eventExam")}</option>
+              <option value="ACTIVITY">{t("daily.eventActivity")}</option>
+              <option value="TRIP">{t("daily.eventTrip")}</option>
+            </select>
+          </label>
+          <label className="daily-event-field daily-event-field--period">
+            <span>{t("common.from")}</span>
+            <select
+              value={eventForm.fromPeriod}
+              onChange={(e) => props.onEventFormChange({ ...eventForm, fromPeriod: Number(e.target.value) })}
+            >
+              {periods.map((p) => (
+                <option key={p} value={p}>
+                  {t("daily.fromPeriod")} {p}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="daily-event-field daily-event-field--period">
+            <span>{t("common.to")}</span>
+            <select
+              value={eventForm.toPeriod}
+              onChange={(e) => props.onEventFormChange({ ...eventForm, toPeriod: Number(e.target.value) })}
+            >
+              {periods.map((p) => (
+                <option key={p} value={p}>
+                  {t("daily.toPeriod")} {p}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="daily-event-field daily-event-field--details">
+            <span>{t("common.details")}</span>
+            <textarea
+              className="event-description-input"
+              value={eventForm.note}
+              onChange={(e) => props.onEventFormChange({ ...eventForm, note: e.target.value })}
+              placeholder={localizedEventNotePlaceholder}
+            />
+          </label>
+          <div className="daily-event-actions">
+            <button type="button" onClick={props.onSave}>
+              {localizedSaveEventLabel}
+            </button>
+          </div>
+        </div>
       </div>
       <div className="event-class-picker">
         <button

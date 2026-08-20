@@ -52,6 +52,14 @@ function resetScheduleState(
   setTeacherPrograms([]);
 }
 
+function resolvePeriodsPerDay(
+  settingsPeriodsPerDay: number | null | undefined,
+  periodDefinitions: Array<{ isActive?: boolean | null }> = []
+) {
+  const activePeriodCount = periodDefinitions.filter((period) => period.isActive !== false).length;
+  return settingsPeriodsPerDay || activePeriodCount || 7;
+}
+
 function mapStatuses(statuses: DailyStatusDraft[]) {
   return statuses.map((status) => ({
     teacherId: status.teacherId,
@@ -67,8 +75,9 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
   const [workingDays, setWorkingDays] = useState<string[]>(defaultWorkingDays);
   const [periodsPerDay, setPeriodsPerDay] = useState(7);
   const [periodDefinitions, setPeriodDefinitions] = useState<
-    Array<{ period: number; label?: string | null; startTime?: string | null; endTime?: string | null }>
+    Array<{ period: number; label?: string | null; startTime?: string | null; endTime?: string | null; isActive?: boolean }>
   >([]);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [day, setDay] = useState(defaultDay);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [teacherId, setTeacherId] = useState("");
@@ -88,7 +97,11 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
   const [events, setEvents] = useState<DailyEvent[]>([]);
   const [eventForm, setEventForm] = useState<DailyEventForm>(emptyEventForm());
 
-  const periods = useMemo(() => Array.from({ length: periodsPerDay }, (_, i) => i + 1), [periodsPerDay]);
+  const periods = useMemo(() => {
+    if (!settingsLoaded) return [];
+    const count = resolvePeriodsPerDay(periodsPerDay, periodDefinitions);
+    return Array.from({ length: count }, (_, i) => i + 1);
+  }, [periodDefinitions, periodsPerDay, settingsLoaded]);
 
   useEffect(() => {
     setDate(initialDate);
@@ -124,10 +137,16 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
 
         const days = settingsResponse.data.settings.workingDays || [];
         setWorkingDays(days);
-        setPeriodsPerDay(settingsResponse.data.settings.periodsPerDay || 7);
-        setToPeriod(settingsResponse.data.settings.periodsPerDay || 7);
+        const resolvedPeriodsPerDay = resolvePeriodsPerDay(
+          settingsResponse.data.settings.periodsPerDay,
+          settingsResponse.data.periods || []
+        );
+
+        setPeriodsPerDay(resolvedPeriodsPerDay);
+        setToPeriod(resolvedPeriodsPerDay);
         setDay(days[0] || defaultDay);
         setPeriodDefinitions(settingsResponse.data.periods || []);
+        setSettingsLoaded(true);
       } catch {
         if (!cancelled) {
           setTeachers([]);
@@ -137,6 +156,7 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
           setToPeriod(7);
           setDay(defaultDay);
           setPeriodDefinitions([]);
+          setSettingsLoaded(true);
         }
       }
     }

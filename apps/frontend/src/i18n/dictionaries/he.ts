@@ -6,12 +6,22 @@ export const he: Record<string, string> = buildReviewedLocaleDictionary(en, "he"
 Object.assign(he, {
   "common.skipToContent": "דילוג לתוכן",
   "common.loading": "טוען...",
+  "common.date": "תאריך",
+  "common.day": "יום",
+  "common.status": "מצב",
+  "common.from": "מ",
+  "common.to": "עד",
+  "common.details": "פרטים",
   "common.none": "אין",
   "users.student": "תלמיד",
   "users.parent": "הורה",
   "users.teacher": "מורה",
   "users.homeroomTeacher": "מחנך הכיתה",
   "gradeEntry.selectSubject": "בחר מקצוע",
+  "daily.eventType": "סוג האירוע",
+  "daily.eventExam": "מבחן",
+  "daily.eventActivity": "פעילות",
+  "daily.eventTrip": "טיול",
   "dashboard.contactName": "באסל רמוני",
   "nav.homeroomPortal": "העמוד שלי",
   "teacherPortal.visible.teacherProgram": "תכנית המורה שלי",
@@ -81,6 +91,7 @@ Object.assign(he, {
   "login.createSaved": "החשבון נוצר ואפשר להתחבר כעת",
   "login.createFailed": "לא ניתן ליצור את החשבון",
   "login.createRequired": "יש להשלים תחילה את פרטי החשבון",
+  "classesManagement.tableTitle": "כיתות ומחנכים",
   "certificates.printPdf": "הדפסה",
   "certificates.previewAction": "הצגת תעודות",
   "certificates.classDetailsTitle": "בחירת כיתה ופרטי תעודה",
@@ -96,6 +107,21 @@ Object.assign(he, {
   "certificates.signaturesTitle": "חתימות",
   "nav.studentCertificateNotes": "הזנת הערות",
   "nav.mainContent": "תוכן ראשי"
+});
+
+Object.assign(he, {
+  "pledges.letterhead": "ביחד לעתיד טוב יותר לילדינו",
+  "pledges.chooseClassFirst": "בחר כיתה קודם כדי להציג את ההתחייבויות",
+  "pledges.familyDetails": "פרטי המשפחה",
+  "pledges.pledgeDetails": "פרטי ההתחייבות",
+  "students.fatherName": "שם האב",
+  "students.motherName": "שם האם",
+  "students.guardianPhone": "טלפון האפוטרופוס אם קיים",
+  "pledges.homeroomTeacher": "שם מחנך הכיתה",
+  "pledges.principalName": "שם המנהל",
+  "pledges.teacherSignature": "חתימת מחנך הכיתה",
+  "pledges.principalSignature": "חתימת המנהל",
+  "common.notSet": "לא מוגדר"
 });
 
 export default he;

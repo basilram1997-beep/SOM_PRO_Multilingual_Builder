@@ -585,6 +585,24 @@ button:disabled {
   max-height: 82vh;
   overflow: auto;
 }
+
+html[dir="rtl"] .lesson-modal-backdrop {
+  padding-inline-start: 34px;
+  padding-inline-end: 14px;
+}
+
+html[dir="rtl"] .lesson-modal-backdrop .modal-card,
+html[dir="rtl"] .lesson-modal,
+html[dir="rtl"] .exam-modal,
+html[dir="rtl"] .homework-modal,
+html[dir="rtl"] .homework-submissions-modal {
+  transform: translateX(-10px);
+}
+
+html[dir="ltr"] .lesson-modal-backdrop {
+  padding-inline-start: 14px;
+  padding-inline-end: 34px;
+}
 .candidate-list {
   display: grid;
   gap: 8px;
@@ -1743,11 +1761,65 @@ html[dir="rtl"] .teachers-page .wide-table tbody tr.selected td:first-child {
 
 /* Daily event planner */
 .daily-event-form {
-  padding: 12px;
-  border: 2px solid #b9c4d6;
-  border-radius: 8px;
+  padding: 14px;
+  border: 2px solid #aebad0;
+  border-radius: 10px;
   background: #f8fafc;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+}
+.daily-event-grid {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.1fr) minmax(160px, 1fr) minmax(180px, 1.1fr) minmax(140px, 0.9fr) minmax(140px, 0.9fr) minmax(260px, 1.6fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+.daily-event-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.daily-event-field > span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.2;
+}
+.daily-event-field input,
+.daily-event-field select,
+.daily-event-field textarea {
+  width: 100%;
+  min-width: 0;
+  background: #fff;
+  border: 2px solid #94a3b8;
+  border-radius: 9px;
+  padding: 10px 12px;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+.daily-event-field input:focus,
+.daily-event-field select:focus,
+.daily-event-field textarea:focus {
+  outline: 0;
+  border-color: #2563eb;
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.16),
+    inset 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+.daily-event-field--details {
+  grid-column: 1 / span 3;
+}
+.daily-event-field--details .event-description-input {
+  min-height: 82px;
+  resize: vertical;
+}
+.daily-event-actions {
+  display: flex;
+  align-items: end;
+  justify-content: flex-end;
+}
+.daily-event-actions button {
+  min-height: 44px;
+  padding-inline: 16px;
 }
 .event-class-picker {
   display: flex;
@@ -1755,9 +1827,10 @@ html[dir="rtl"] .teachers-page .wide-table tbody tr.selected td:first-child {
   gap: 8px;
   margin: 12px 0;
   padding: 12px;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 8px;
+  border: 2px solid #c7d2e5;
+  border-radius: 10px;
   background: #fff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
 }
 .event-class-picker button {
   padding: 7px 10px;
@@ -1770,6 +1843,16 @@ html[dir="rtl"] .teachers-page .wide-table tbody tr.selected td:first-child {
 .daily-events-table {
   margin-top: 10px;
 }
+.daily-events-table table {
+  border: 1.5px solid #c7d2e5;
+}
+.daily-events-table th,
+.daily-events-table td {
+  border-color: #d6deeb;
+}
+.daily-events-table thead th {
+  background: #eef4ff;
+}
 .daily-events-table td:nth-child(7) {
   min-width: 220px;
   white-space: normal;
@@ -1778,22 +1861,7 @@ html[dir="rtl"] .teachers-page .wide-table tbody tr.selected td:first-child {
 
 /* Daily event description field */
 .daily-event-form .event-description-input {
-  flex: 1 1 360px;
-  min-width: min(100%, 360px);
-  min-height: 72px;
-  resize: vertical;
-  background: #fff;
-  border: 2px solid #94a3b8;
-  border-radius: 8px;
-  padding: 10px 12px;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
-}
-.daily-event-form .event-description-input:focus {
-  outline: 0;
-  border-color: #2563eb;
-  box-shadow:
-    0 0 0 3px rgba(37, 99, 235, 0.18),
-    inset 0 1px 2px rgba(15, 23, 42, 0.06);
+  min-height: 82px;
 }
 
 /* Compact daily page tables */
@@ -3367,18 +3435,19 @@ html[dir="ltr"] .login-card label.login-remember {
 .duty-form-row {
   display: grid;
   gap: 12px;
+  align-items: start;
 }
 
 .duty-form-row--primary {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: minmax(160px, 220px) minmax(140px, 180px) minmax(140px, 180px);
 }
 
 .duty-form-row--secondary {
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: minmax(240px, 1.3fr) minmax(160px, 0.9fr) minmax(0, 1fr);
 }
 
 .duty-form-row--details {
-  grid-template-columns: minmax(260px, 1.4fr) minmax(220px, 0.9fr);
+  grid-template-columns: minmax(260px, 1.3fr) minmax(180px, 0.9fr) minmax(0, 1fr);
   align-items: start;
 }
 
@@ -3394,6 +3463,30 @@ html[dir="ltr"] .login-card label.login-remember {
 .duty-form-row textarea {
   width: 100%;
 }
+
+.duty-form-row--primary > label:first-child,
+.duty-form-row--secondary > label:last-child {
+  min-width: 0;
+}
+
+.duty-form-row--secondary > label:first-child,
+.duty-form-row--details > label {
+  grid-column: 1 / span 2;
+}
+
+.duty-form-row--secondary > label:last-child,
+.duty-form-footer {
+  grid-column: 3;
+}
+
+.duty-form-row--details > label {
+  align-self: stretch;
+}
+
+.duty-form-row--details .duty-form-footer {
+  align-self: stretch;
+}
+
 .duty-form-row input[type="time"] {
   max-width: 150px;
   min-width: 120px;
@@ -3404,6 +3497,12 @@ html[dir="ltr"] .login-card label.login-remember {
   display: grid;
   gap: 12px;
   align-content: start;
+  justify-self: stretch;
+}
+
+.duty-form-footer .actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
 .duties-table-wrap {

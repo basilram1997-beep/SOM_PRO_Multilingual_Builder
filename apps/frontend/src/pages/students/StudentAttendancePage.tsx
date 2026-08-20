@@ -34,14 +34,6 @@ export function StudentAttendancePage({ currentUser }: Props) {
   const presentLabel = attendanceText(t, language, "attendance.present", "حاضر", "נוכח");
   const lateLabel = attendanceText(t, language, "attendance.late", "متأخر", "מאחר");
   const absentLabel = attendanceText(t, language, "attendance.absent", "غائب", "נעדר");
-  const absentExcusedLabel = attendanceText(t, language, "attendance.absentExcused", "غياب بعذر", "נעדר באישור");
-  const absentUnexcusedLabel = attendanceText(
-    t,
-    language,
-    "attendance.absentUnexcused",
-    "غياب بدون عذر",
-    "נעדר ללא אישור"
-  );
   const earlyExitLabel = attendanceText(t, language, "attendance.earlyExit", "انصراف مبكر", "יציאה מוקדמת");
   const archiveTitle = attendanceText(
     t,
@@ -159,14 +151,6 @@ export function StudentAttendancePage({ currentUser }: Props) {
               <span>{absentLabel}</span>
               <strong>{attendance.summary.absentExcused + attendance.summary.absentUnexcused}</strong>
             </div>
-            <div className="attendance-summary-card attendance-summary-absent">
-              <span>{absentExcusedLabel}</span>
-              <strong>{attendance.summary.absentExcused}</strong>
-            </div>
-            <div className="attendance-summary-card attendance-summary-absent">
-              <span>{absentUnexcusedLabel}</span>
-              <strong>{attendance.summary.absentUnexcused}</strong>
-            </div>
             <div className="attendance-summary-card attendance-summary-late">
               <span>{earlyExitLabel}</span>
               <strong>{attendance.summary.earlyExit}</strong>
@@ -224,14 +208,6 @@ export function StudentAttendancePage({ currentUser }: Props) {
                     <div>
                       <span>{archiveAbsentLabel}</span>
                       <strong>{attendance.archiveReport.absent}</strong>
-                    </div>
-                    <div>
-                      <span>{absentExcusedLabel}</span>
-                      <strong>{attendance.archiveReport.absentExcused}</strong>
-                    </div>
-                    <div>
-                      <span>{absentUnexcusedLabel}</span>
-                      <strong>{attendance.archiveReport.absentUnexcused}</strong>
                     </div>
                     <div>
                       <span>{earlyExitLabel}</span>

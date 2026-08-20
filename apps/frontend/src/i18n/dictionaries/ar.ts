@@ -6,6 +6,12 @@ export const ar: Record<string, string> = buildReviewedLocaleDictionary(en, "ar"
 Object.assign(ar, {
   "common.skipToContent": "تجاوز إلى المحتوى",
   "common.loading": "جارٍ التحميل...",
+  "common.date": "التاريخ",
+  "common.day": "اليوم",
+  "common.status": "الحالة",
+  "common.from": "من",
+  "common.to": "إلى",
+  "common.details": "التفاصيل",
   "dashboard.contactName": "باسل رموني",
   "nav.teacherPortal": "بوابة المعلم",
   "nav.studentPortal": "ملفي الشخصي",
@@ -54,6 +60,10 @@ Object.assign(ar, {
   "homework.titlePlaceholder": "مثال: حل صفحة 25",
   "homework.noTeacherAssignments": "لم يتم العثور على تكليفات تدريس لهذا المعلم بعد.",
   "exams.title": "جدول الامتحانات",
+  "daily.eventType": "نوع الحالة",
+  "daily.eventExam": "امتحان",
+  "daily.eventActivity": "فعالية",
+  "daily.eventTrip": "رحلة",
   "exams.filterTitle": "اختر اليوم والمعلم",
   "exams.summaryTitle": "ملخص جدول الامتحانات",
   "exams.listTitle": "سجل جدول الامتحانات",
@@ -503,7 +513,23 @@ Object.assign(ar, {
 Object.assign(ar, {
   "dashboard.contactName": "باسل رموني",
   "nav.homeroomPortal": "صفحتي",
-  "homeroomPortal.visibleTitle": "ما يراه مربي الصف"
+  "homeroomPortal.visibleTitle": "ما يراه مربي الصف",
+  "classesManagement.tableTitle": "الصفوف والمربين"
+});
+
+Object.assign(ar, {
+  "pledges.letterhead": "معًا من أجل مستقبل أفضل لأبنائنا",
+  "pledges.chooseClassFirst": "اختر صفًا أولًا لعرض التعهدات",
+  "pledges.familyDetails": "بيانات الأسرة",
+  "pledges.pledgeDetails": "بيانات التعهد",
+  "students.fatherName": "اسم الأب",
+  "students.motherName": "اسم الأم",
+  "students.guardianPhone": "هاتف الوصي إن وجد",
+  "pledges.homeroomTeacher": "اسم مربي الصف",
+  "pledges.principalName": "اسم المدير",
+  "pledges.teacherSignature": "توقيع مربي الصف",
+  "pledges.principalSignature": "توقيع المدير",
+  "common.notSet": "غير محدد"
 });
 
 Object.assign(ar, {
