@@ -35,7 +35,6 @@ function labels(language: AppLanguage) {
   if (language === "en") {
     return {
       title: "Weekly lessons by class and subject",
-      hint: "Required lessons come from teacher files. Actual lessons are counted from the base schedule.",
       className: "Class",
       subjectName: "Subject",
       requiredWeek: "Required / week",
@@ -45,7 +44,6 @@ function labels(language: AppLanguage) {
       year: "Year",
       total: "Total",
       empty: "No assignments were found for this teacher.",
-      saveHint: "Edit the required weekly lessons and the change will be saved immediately.",
       addTitle: "Add class, subject, and weekly lessons",
       addClass: "Class",
       addSubject: "Subject",
@@ -58,7 +56,6 @@ function labels(language: AppLanguage) {
   if (language === "he") {
     return {
       title: "שיעורים שבועיים לפי כיתה ומקצוע",
-      hint: "השיעורים הנדרשים נשמרים במבנה המורה. השיעורים בפועל נספרים מהמערכת הקבועה.",
       className: "כיתה",
       subjectName: "מקצוע",
       requiredWeek: "נדרש בשבוע",
@@ -68,7 +65,6 @@ function labels(language: AppLanguage) {
       year: "שנה",
       total: "סך הכול",
       empty: "לא נמצאו שיוכים למורה זה.",
-      saveHint: "ערוך את מספר השיעורים השבועיים והשינוי יישמר מיד.",
       addTitle: "הוספת כיתה, מקצוע ושיעורים שבועיים",
       addClass: "כיתה",
       addSubject: "מקצוע",
@@ -80,7 +76,6 @@ function labels(language: AppLanguage) {
   }
   return {
     title: "حصص المعلم حسب الصف والمادة",
-    hint: "المطلوب يُحفظ في ملف المعلم، والموجود يُحسب من البرنامج الثابت.",
     className: "الصف",
     subjectName: "المادة",
     requiredWeek: "المطلوب أسبوعيًا",
@@ -90,7 +85,6 @@ function labels(language: AppLanguage) {
     year: "السنة",
     total: "المجموع",
     empty: "لا توجد تكليفات لهذا المعلم.",
-    saveHint: "عدّل عدد الحصص الأسبوعية وسيُحفظ التغيير مباشرة.",
     addTitle: "إضافة صف ومادة وحصص أسبوعية",
     addClass: "الصف",
     addSubject: "المادة",
@@ -239,8 +233,6 @@ export function TeacherWeeklyLoadTable({
   return (
     <section className="teacher-weekly-load">
       <h3>{text.title}</h3>
-      <p className="muted">{text.hint}</p>
-      <p className="muted">{text.saveHint}</p>
 
       <div className="form-row teacher-assignment-add-row">
         <label>

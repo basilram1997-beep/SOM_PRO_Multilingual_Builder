@@ -9,7 +9,6 @@ export function TeacherEditorForm(props: TeacherEditorFormProps) {
 
   return (
     <>
-      <p className="muted">{t("teachers.fillAndSave")}</p>
       <h3>
         {form.id ? `${t("teachers.editing")}: ${selected ? selected.name : form.name}` : t("teachers.newTeacher")}
       </h3>

@@ -167,13 +167,6 @@ export function TeacherProfileFields({
         </label>
       </div>
 
-      <div className="teacher-load-formula">
-        <strong>{t("teachers.effectiveLoad")}</strong>
-        <span>
-          {form.targetLoad || 0} - {currentReleaseHours} = {currentEffectiveLoad}
-        </span>
-      </div>
-
       <div className="teacher-profile-row teacher-profile-row--choices">
         <ChoiceGroup title={t("teachers.classes")}>
           <ChoiceDisclosure summary={selectedClassesText || t("common.none")}>
