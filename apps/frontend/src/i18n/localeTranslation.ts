@@ -1216,8 +1216,6 @@ const exactTranslations: Record<SupportedLocale, Record<string, string>> = {
     "License activated successfully": "تم تفعيل الترخيص بنجاح",
     "Could not activate license": "تعذر تفعيل الترخيص",
     "Check Conflicts": "فحص التعارضات",
-    "The base schedule depends on teacher files: a teacher can only be scheduled for assigned classes and subjects, within the effective load after release hours.":
-      "يعتمد البرنامج الثابت على ملفات المعلمين: لا يمكن جدولة المعلم إلا للصفوف والمواد المسندة إليه، وضمن النصاب الفعلي بعد التفريغ.",
     "Teacher details": "تفاصيل المعلمين",
     "Teacher permission requests": "طلبات استئذان المعلم",
     "No teacher permission requests yet.": "لا توجد طلبات استئذان للمعلمين بعد.",
@@ -1586,8 +1584,6 @@ const exactTranslations: Record<SupportedLocale, Record<string, string>> = {
     "License activated successfully": "הרישיון הופעל בהצלחה",
     "Could not activate license": "לא ניתן להפעיל את הרישיון",
     "Check Conflicts": "בדיקת התנגשויות",
-    "The base schedule depends on teacher files: a teacher can only be scheduled for assigned classes and subjects, within the effective load after release hours.":
-      "לוח הזמנים הבסיסי תלוי בקבצי המורים: ניתן לשבץ מורה רק בכיתות ובנושאים שהוקצו לו, ובמסגרת הנטו לאחר שעות הפריקה.",
     "Teacher details": "פרטי המורים",
     "Teacher permission requests": "בקשות אישור של מורה",
     "No teacher permission requests yet.": "עדיין אין בקשות אישור של מורים.",

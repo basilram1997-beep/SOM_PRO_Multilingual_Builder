@@ -555,8 +555,6 @@
   "daily.exportFreeTeachers": "Export free teachers",
   "schedules.exportBase": "Export base schedule",
   "homeroom.priorityApplied": "Homeroom period was prioritized in the base schedule",
-  "system.baseFromTeacherFiles":
-    "The base schedule depends on teacher files: a teacher can only be scheduled for assigned classes and subjects, within the effective load after release hours.",
   "system.dailyFromBase": "",
   "system.homeroomPriority":
     "Homeroom periods are applied with priority to the base schedule, while staying tied to the selected homeroom teacher.",

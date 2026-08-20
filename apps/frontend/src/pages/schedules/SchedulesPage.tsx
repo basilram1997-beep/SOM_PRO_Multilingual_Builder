@@ -486,116 +486,124 @@ export function SchedulesPage({ currentUser }: { currentUser: AuthUser }) {
     <div className="page schedules-page">
       <h2>{t("schedules.title")}</h2>
 
-      <Card
-        actions={
-          !isTeacher ? (
-            <div className="actions">
-              <button onClick={schedules.validate}>{t("schedules.validate")}</button>
-              <button
-                className="secondary export-button"
-                onClick={() => void exportSectionPdf("base-schedule-grid", t("schedules.title"))}
-              >
-                {t("schedules.exportBase")}
-              </button>
-            </div>
-          ) : undefined
-        }
-      >
-        <div className="system-note">{t("system.baseFromTeacherFiles")}</div>
+      <Card title={t("common.day")}>
+        <div className="schedule-day-strip">
+          <label>
+            <span>{t("common.day")}</span>
+            <select value={schedules.day} onChange={(event) => schedules.setDay(event.target.value)}>
+              {schedules.workingDays.map((day) => (
+                <option key={day} value={day}>
+                  {localizeDay(day, language)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </Card>
 
-        <label>
-          {t("common.day")}
-          <select value={schedules.day} onChange={(event) => schedules.setDay(event.target.value)}>
-            {schedules.workingDays.map((day) => (
-              <option key={day} value={day}>
-                {localizeDay(day, language)}
-              </option>
-            ))}
-          </select>
-        </label>
+      <Card>
+        <div className="table-wrap daily-schedule-wrap" id="base-schedule-grid">
+          <table className="daily-grid-table flipped-daily-grid">
+            <thead>
+              <tr>
+                <th>{t("common.period")}</th>
+                {schedules.classes.map((cls) => (
+                  <th key={cls.id || cls.name}>{localizeClassName(cls.name, language)}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {schedules.classes.length === 0 && (
+                <tr>
+                  <td colSpan={2}>{t("common.empty")}</td>
+                </tr>
+              )}
 
-        {schedules.conflicts.length > 0 && (
-          <div className="alert">
-            {schedules.conflicts.map((conflict) => (
-              <p key={conflict}>{conflict}</p>
-            ))}
+              {schedules.classes.length > 0 &&
+                schedules.periods.map((period) => {
+                  const display = schedules.periodDisplay(period);
+
+                  return (
+                    <tr key={period}>
+                      <th className="period-time-header">
+                        <strong>{display.name}</strong>
+                        {display.time && <span>{display.time}</span>}
+                      </th>
+                      {schedules.classes.map((cls) => {
+                        const classKey = cls.id || cls.name;
+                        const slot = schedules.slotFor(classKey, period);
+
+                        return (
+                          <td
+                            key={classKey}
+                            className={slot ? "daily-cell teacher-color-cell" : "free-period"}
+                            style={slot ? teacherColorStyle(slot.teacher) : undefined}
+                          >
+                            {slot ? (
+                              <>
+                                <strong>{localizeSubjectName(slot.subject?.name || "", language)}</strong>
+                                <span>{localizeTeacherName(slot.teacher?.name || "", language)}</span>
+                                {slot.room ? (
+                                  <span className="schedule-room-cell">
+                                    {ui.roomLabel}: {slot.room}
+                                  </span>
+                                ) : null}
+                                {!isTeacher ? (
+                                  <button className="light" onClick={() => openRoomEditor(slot)}>
+                                    {ui.editRoom}
+                                  </button>
+                                ) : null}
+                              </>
+                            ) : (
+                              t("daily.free")
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="schedule-room-hint">{ui.roomHint}</p>
+        {operationMessage && (
+          <div className="form-message" role="status">
+            {operationMessage}
           </div>
         )}
+        {!isTeacher && operationError && (
+          <div className="alert" role="alert">
+            {operationError}
+          </div>
+        )}
+      </Card>
 
-        {!isTeacher && (
-          <div className="schedule-tools">
-            <div className="schedule-tool">
-              <h3>{ui.copyTitle}</h3>
-              <div className="schedule-tool-grid">
-                <label>
-                  {ui.copyFromDay}
-                  <select value={copyFromDay} onChange={(event) => setCopyFromDay(event.target.value)}>
-                    {schedules.workingDays.map((day) => (
-                      <option key={day} value={day}>
-                        {localizeDay(day, language)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  {ui.copyToDay}
-                  <select value={copyToDay} onChange={(event) => setCopyToDay(event.target.value)}>
-                    {schedules.workingDays.map((day) => (
-                      <option key={day} value={day}>
-                        {localizeDay(day, language)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="schedule-tool-check">
-                  <input
-                    type="checkbox"
-                    checked={copyOverwrite}
-                    onChange={(event) => setCopyOverwrite(event.target.checked)}
-                  />
-                  <span>{ui.copyOverwrite}</span>
-                </label>
-                <button
-                  disabled={operationBusy || copyPreviewBusy || Boolean(copyPreview && !copyPreview.canCopy)}
-                  onClick={() => void handleCopyDay()}
-                >
-                  {ui.copyButton}
-                </button>
-              </div>
-
-              {copyPreviewRequested && (
-                <div className={`schedule-copy-preview ${copyPreview?.canCopy ? "is-ok" : "is-blocked"}`}>
-                  <div className="schedule-swap-preview-head">
-                    <strong>{ui.copyPreviewTitle}</strong>
-                    <span>
-                      {localizeDay(copyFromDay, language)} → {localizeDay(copyToDay, language)}
-                    </span>
-                  </div>
-                  {copyPreviewBusy && <p className="muted">{ui.copyPreviewBusy}</p>}
-                  {!copyPreviewBusy && copyPreviewError && (
-                    <p className="schedule-swap-preview-error">{copyPreviewError}</p>
-                  )}
-                  {!copyPreviewBusy && copyPreview && copyPreview.canCopy && (
-                    <p className="schedule-swap-preview-ok">{ui.copyPreviewOk}</p>
-                  )}
-                  {!copyPreviewBusy && copyPreview && !copyPreview.canCopy && (
-                    <>
-                      <p className="schedule-swap-preview-blocked">{ui.copyPreviewBlocked}</p>
-                      <p className="schedule-swap-preview-hint">{ui.copyPreviewHint}</p>
-                      <ul className="schedule-swap-conflicts">
-                        {copyPreview.conflicts.map((conflict) => (
-                          <li key={conflict}>{conflict}</li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                  {!copyPreviewBusy && !copyPreview && !copyPreviewError && (
-                    <p className="schedule-swap-preview-hint">{ui.copyPreviewReadyHint}</p>
-                  )}
+      {!isTeacher && (
+        <>
+          <Card>
+            <div className="schedule-actions-card">
+              {schedules.conflicts.length > 0 && (
+                <div className="alert">
+                  {schedules.conflicts.map((conflict) => (
+                    <p key={conflict}>{conflict}</p>
+                  ))}
                 </div>
               )}
+              <div className="actions schedule-actions-row">
+                <button onClick={schedules.validate}>{t("schedules.validate")}</button>
+                <button
+                  className="secondary export-button"
+                  onClick={() => void exportSectionPdf("base-schedule-grid", t("schedules.title"))}
+                >
+                  {t("schedules.exportBase")}
+                </button>
+              </div>
             </div>
+          </Card>
 
+          <div className="schedule-tools">
             <div className="schedule-tool">
               <h3>{ui.swapTitle}</h3>
               <div className="schedule-tool-grid">
@@ -686,129 +694,124 @@ export function SchedulesPage({ currentUser }: { currentUser: AuthUser }) {
                 )}
               </div>
             </div>
-          </div>
-        )}
 
-        <p className="schedule-room-hint">{ui.roomHint}</p>
-        {operationMessage && (
-          <div className="form-message" role="status">
-            {operationMessage}
-          </div>
-        )}
-        {!isTeacher && operationError && (
-          <div className="alert" role="alert">
-            {operationError}
-          </div>
-        )}
-
-        <div className="table-wrap daily-schedule-wrap" id="base-schedule-grid">
-          <table className="daily-grid-table flipped-daily-grid">
-            <thead>
-              <tr>
-                <th>{t("common.period")}</th>
-                {schedules.classes.map((cls) => (
-                  <th key={cls.id || cls.name}>{localizeClassName(cls.name, language)}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {schedules.classes.length === 0 && (
-                <tr>
-                  <td colSpan={2}>{t("common.empty")}</td>
-                </tr>
-              )}
-
-              {schedules.classes.length > 0 &&
-                schedules.periods.map((period) => {
-                  const display = schedules.periodDisplay(period);
-
-                  return (
-                    <tr key={period}>
-                      <th className="period-time-header">
-                        <strong>{display.name}</strong>
-                        {display.time && <span>{display.time}</span>}
-                      </th>
-                      {schedules.classes.map((cls) => {
-                        const classKey = cls.id || cls.name;
-                        const slot = schedules.slotFor(classKey, period);
-
-                        return (
-                          <td
-                            key={classKey}
-                            className={slot ? "daily-cell teacher-color-cell" : "free-period"}
-                            style={slot ? teacherColorStyle(slot.teacher) : undefined}
-                          >
-                            {slot ? (
-                              <>
-                                <strong>{localizeSubjectName(slot.subject?.name || "", language)}</strong>
-                                <span>{localizeTeacherName(slot.teacher?.name || "", language)}</span>
-                                {slot.room ? (
-                                  <span className="schedule-room-cell">
-                                    {ui.roomLabel}: {slot.room}
-                                  </span>
-                                ) : null}
-                                {!isTeacher ? (
-                                  <button className="light" onClick={() => openRoomEditor(slot)}>
-                                    {ui.editRoom}
-                                  </button>
-                                ) : null}
-                              </>
-                            ) : (
-                              t("daily.free")
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        </div>
-
-        {!isTeacher && roomEditor && (
-          <div className="modal-backdrop" onClick={() => setRoomEditor(null)}>
-            <div className="modal-card" onClick={(event) => event.stopPropagation()}>
-              <h3>{ui.roomEditorTitle}</h3>
-              <p className="lesson-info">{ui.roomEditorHelp}</p>
+            <div className="schedule-tool">
+              <h3>{ui.copyTitle}</h3>
               <div className="schedule-tool-grid">
                 <label>
-                  <span>{ui.swapClass}</span>
-                  <input value={roomEditor.className} readOnly />
+                  {ui.copyFromDay}
+                  <select value={copyFromDay} onChange={(event) => setCopyFromDay(event.target.value)}>
+                    {schedules.workingDays.map((day) => (
+                      <option key={day} value={day}>
+                        {localizeDay(day, language)}
+                      </option>
+                    ))}
+                  </select>
                 </label>
                 <label>
-                  <span>{ui.swapDay}</span>
-                  <input value={localizeDay(roomEditor.day, language)} readOnly />
+                  {ui.copyToDay}
+                  <select value={copyToDay} onChange={(event) => setCopyToDay(event.target.value)}>
+                    {schedules.workingDays.map((day) => (
+                      <option key={day} value={day}>
+                        {localizeDay(day, language)}
+                      </option>
+                    ))}
+                  </select>
                 </label>
-                <label>
-                  <span>{ui.swapFirstPeriod}</span>
-                  <input value={roomEditor.period} readOnly />
-                </label>
-                <label>
-                  <span>{ui.roomEditorLabel}</span>
+                <label className="schedule-tool-check">
                   <input
-                    value={roomDraft}
-                    onChange={(event) => setRoomDraft(event.target.value)}
-                    placeholder={ui.roomEditorEmpty}
+                    type="checkbox"
+                    checked={copyOverwrite}
+                    onChange={(event) => setCopyOverwrite(event.target.checked)}
                   />
+                  <span>{ui.copyOverwrite}</span>
                 </label>
-                <label>
-                  <span>{ui.roomEditorCurrent}</span>
-                  <input value={roomEditor.room || ui.roomEditorEmpty} readOnly />
-                </label>
-              </div>
-              <div className="actions top-space">
-                <button disabled={operationBusy} onClick={() => void handleSaveRoom()}>
-                  {ui.roomEditorSave}
-                </button>
-                <button className="secondary" onClick={() => setRoomEditor(null)}>
-                  {ui.roomEditorClose}
+                <button
+                  disabled={operationBusy || copyPreviewBusy || Boolean(copyPreview && !copyPreview.canCopy)}
+                  onClick={() => void handleCopyDay()}
+                >
+                  {ui.copyButton}
                 </button>
               </div>
+
+              {copyPreviewRequested && (
+                <div className={`schedule-copy-preview ${copyPreview?.canCopy ? "is-ok" : "is-blocked"}`}>
+                  <div className="schedule-swap-preview-head">
+                    <strong>{ui.copyPreviewTitle}</strong>
+                    <span>
+                      {localizeDay(copyFromDay, language)} → {localizeDay(copyToDay, language)}
+                    </span>
+                  </div>
+                  {copyPreviewBusy && <p className="muted">{ui.copyPreviewBusy}</p>}
+                  {!copyPreviewBusy && copyPreviewError && (
+                    <p className="schedule-swap-preview-error">{copyPreviewError}</p>
+                  )}
+                  {!copyPreviewBusy && copyPreview && copyPreview.canCopy && (
+                    <p className="schedule-swap-preview-ok">{ui.copyPreviewOk}</p>
+                  )}
+                  {!copyPreviewBusy && copyPreview && !copyPreview.canCopy && (
+                    <>
+                      <p className="schedule-swap-preview-blocked">{ui.copyPreviewBlocked}</p>
+                      <p className="schedule-swap-preview-hint">{ui.copyPreviewHint}</p>
+                      <ul className="schedule-swap-conflicts">
+                        {copyPreview.conflicts.map((conflict) => (
+                          <li key={conflict}>{conflict}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {!copyPreviewBusy && !copyPreview && !copyPreviewError && (
+                    <p className="schedule-swap-preview-hint">{ui.copyPreviewReadyHint}</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        )}
-      </Card>
+        </>
+      )}
+
+      {!isTeacher && roomEditor && (
+        <div className="modal-backdrop" onClick={() => setRoomEditor(null)}>
+          <div className="modal-card" onClick={(event) => event.stopPropagation()}>
+            <h3>{ui.roomEditorTitle}</h3>
+            <p className="lesson-info">{ui.roomEditorHelp}</p>
+            <div className="schedule-tool-grid">
+              <label>
+                <span>{ui.swapClass}</span>
+                <input value={roomEditor.className} readOnly />
+              </label>
+              <label>
+                <span>{ui.swapDay}</span>
+                <input value={localizeDay(roomEditor.day, language)} readOnly />
+              </label>
+              <label>
+                <span>{ui.swapFirstPeriod}</span>
+                <input value={roomEditor.period} readOnly />
+              </label>
+              <label>
+                <span>{ui.roomEditorLabel}</span>
+                <input
+                  value={roomDraft}
+                  onChange={(event) => setRoomDraft(event.target.value)}
+                  placeholder={ui.roomEditorEmpty}
+                />
+              </label>
+              <label>
+                <span>{ui.roomEditorCurrent}</span>
+                <input value={roomEditor.room || ui.roomEditorEmpty} readOnly />
+              </label>
+            </div>
+            <div className="actions top-space">
+              <button disabled={operationBusy} onClick={() => void handleSaveRoom()}>
+                {ui.roomEditorSave}
+              </button>
+              <button className="secondary" onClick={() => setRoomEditor(null)}>
+                {ui.roomEditorClose}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
