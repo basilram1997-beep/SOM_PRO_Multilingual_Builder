@@ -412,7 +412,6 @@
   "dashboard.statusDetails": "Status details",
   "dashboard.contactName": "School contact",
   "dashboard.phone": "0542366524",
-  "teachers.description": "This table shows all teacher data. Select a teacher, then use add, edit, or delete.",
   "teachers.editSelected": "Edit selected teacher",
   "teachers.deleteSelected": "Delete selected teacher",
   "teachers.select": "Select",
@@ -556,8 +555,6 @@
   "daily.exportFreeTeachers": "Export free teachers",
   "schedules.exportBase": "Export base schedule",
   "homeroom.priorityApplied": "Homeroom period was prioritized in the base schedule",
-  "system.teacherFilesSource":
-    "Teacher files are the source of truth: the base schedule, daily schedule, and homeroom periods are built from them. Any change to load, release hours, or assignments should start in the teacher file.",
   "system.baseFromTeacherFiles":
     "The base schedule depends on teacher files: a teacher can only be scheduled for assigned classes and subjects, within the effective load after release hours.",
   "system.dailyFromBase": "",

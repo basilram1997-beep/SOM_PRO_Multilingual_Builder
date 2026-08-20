@@ -11,8 +11,6 @@ export function TeachersPage() {
   return (
     <div className="page teachers-page" data-e2e="teachers-page">
       <h2>{t("nav.teachers")}</h2>
-      <p className="muted">{t("teachers.description")}</p>
-      <div className="system-note">{t("system.teacherFilesSource")}</div>
 
       <Card
         title={t("nav.teachers")}

@@ -1221,8 +1221,6 @@ const exactTranslations: Record<SupportedLocale, Record<string, string>> = {
     "Teacher details": "تفاصيل المعلمين",
     "Teacher permission requests": "طلبات استئذان المعلم",
     "No teacher permission requests yet.": "لا توجد طلبات استئذان للمعلمين بعد.",
-    "Teacher files are the source of truth: the base schedule, daily schedule, and homeroom periods are built from them. Any change to load, release hours, or assignments should start in the teacher file.":
-      "ملفات المعلمين هي مصدر الحقيقة: يُبنى منها البرنامج الثابت والبرنامج اليومي وحصص المربين. أي تعديل في النصاب أو التفريغ أو التكليفات يجب أن يبدأ من ملف المعلم.",
     "Teachers who left": "المعلمون المغادرون",
     "Affected classes": "الصفوف المتأثرة",
     "Statistics by period": "الإحصائيات حسب الفترة",
@@ -1243,8 +1241,6 @@ const exactTranslations: Record<SupportedLocale, Record<string, string>> = {
     "Homeroom table": "جدول المربين",
     "Homeroom periods are applied with priority to the base schedule, while staying tied to the selected homeroom teacher.":
       "تُطبّق حصص المربين بأولوية على البرنامج الثابت، مع بقائها مرتبطة بمربي الصف المحدد.",
-    "This table shows all teacher data. Select a teacher, then use add, edit, or delete.":
-      "يعرض هذا الجدول جميع بيانات المعلمين. اختر معلمًا، ثم استخدم إضافة أو تعديل أو حذف.",
     "Edit selected teacher": "تعديل المعلم المحدد",
     "Delete selected teacher": "حذف المعلم المحدد",
     "Fill the data, then click save. You can leave fields blank and edit them later.":
@@ -1595,8 +1591,6 @@ const exactTranslations: Record<SupportedLocale, Record<string, string>> = {
     "Teacher details": "פרטי המורים",
     "Teacher permission requests": "בקשות אישור של מורה",
     "No teacher permission requests yet.": "עדיין אין בקשות אישור של מורים.",
-    "Teacher files are the source of truth: the base schedule, daily schedule, and homeroom periods are built from them. Any change to load, release hours, or assignments should start in the teacher file.":
-      "קבצי המורים הם מקור האמת: מהם נבנים הלוח הבסיסי, הלוח היומי ושעות המחנכים. כל שינוי במשרה, בשעות הפריקה או בהקצאות צריך להתחיל בקובץ המורה.",
     "Teachers who left": "המורים שעזבו",
     "Affected classes": "כיתות מושפעות",
     "Statistics by period": "סטטיסטיקה לפי תקופה",
@@ -1617,8 +1611,6 @@ const exactTranslations: Record<SupportedLocale, Record<string, string>> = {
     "Homeroom table": "טבלת מחנכים",
     "Homeroom periods are applied with priority to the base schedule, while staying tied to the selected homeroom teacher.":
       "שעות החינוך מוחלות בעדיפות ללוח הבסיס, תוך הישארות קשורות למחנך הכיתה שנבחר.",
-    "This table shows all teacher data. Select a teacher, then use add, edit, or delete.":
-      "טבלה זו מציגה את כל נתוני המורים. בחר מורה ואז השתמש בהוספה, עריכה או מחיקה.",
     "Edit selected teacher": "עריכת המורה הנבחר",
     "Delete selected teacher": "מחיקת המורה הנבחר",
     "Fill the data, then click save. You can leave fields blank and edit them later.":
