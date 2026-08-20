@@ -236,10 +236,23 @@ export function DashboardPage() {
         </div>
       </Card>
 
-      <div className="dashboard-footer-contact">
-        <strong>{t("dashboard.phone")}</strong>
-        <span>{t("dashboard.contactName")}</span>
-      </div>
+      <footer className="dashboard-footer-contact">
+        <div className="dashboard-footer-contact-row">
+          <span>
+            <strong>البريد الالكتروني :</strong>
+            Basilram1997@gmail.com
+          </span>
+          <span>
+            <strong>المبيعات:</strong>
+            0542366524
+          </span>
+          <span>
+            <strong>الدعم:</strong>
+            0542410603
+          </span>
+        </div>
+        <p>© 2026 SOM PRO. All Rights Reserved</p>
+      </footer>
 
       {dashboard.detailType && (
         <div className="modal-backdrop" onClick={() => dashboard.setDetailType(null)}>

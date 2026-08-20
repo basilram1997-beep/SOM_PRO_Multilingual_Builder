@@ -813,16 +813,44 @@ html[dir="ltr"] .daily-grid-table th:first-child {
 .dashboard-footer-contact {
   text-align: center;
   margin: 28px auto 6px;
+  width: 100%;
   display: grid;
-  gap: 4px;
+  gap: 8px;
   color: #0f172a;
 }
-.dashboard-footer-contact strong {
-  font-size: 20px;
+
+.dashboard-footer-contact-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 18px 36px;
+  overflow-x: auto;
+  padding: 12px 18px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
 }
-.dashboard-footer-contact span {
-  font-weight: bold;
+
+.dashboard-footer-contact-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
   color: #475569;
+  white-space: nowrap;
+}
+
+.dashboard-footer-contact strong {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.dashboard-footer-contact p {
+  margin: 0;
+  color: #64748b;
+  font-weight: 800;
 }
 .report-chart {
   display: grid;
@@ -1003,6 +1031,25 @@ tr.selected {
 }
 
 /* Dashboard metric cards and input area */
+.dashboard-page > .card {
+  border: 2px solid #b9c4d6;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.11);
+}
+
+.dashboard-page > .card .card-header {
+  border-bottom: 1.5px solid #cbd5e1;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  margin: -18px -18px 16px;
+  padding: 14px 18px 12px;
+  border-start-start-radius: 8px;
+  border-start-end-radius: 8px;
+}
+
+.dashboard-page > .card .card-header h2 {
+  font-weight: 900;
+  color: #0f172a;
+}
+
 .dashboard-page .stats-grid,
 .dashboard-page .details-grid,
 .dashboard-page .mini-period-counts {
