@@ -18,6 +18,9 @@ type Props = {
   onDayChange: (value: string) => void;
   onOpenTeacher: (teacher: TeacherWithAssignments) => void;
   onRemove: (id?: string, name?: string) => void;
+  onAddTeacher: () => void;
+  onEditSelected: () => void;
+  onDeleteSelected: () => void;
 };
 
 export function TeachersTable(props: Props) {
@@ -47,7 +50,7 @@ export function TeachersTable(props: Props) {
 
   return (
     <>
-      <div className="form-row">
+      <div className="teacher-list-toolbar">
         <input
           className="search wide-input"
           placeholder={teacherSearchPlaceholder}
@@ -64,6 +67,15 @@ export function TeachersTable(props: Props) {
             ))}
           </select>
         </label>
+        <div className="teacher-list-toolbar-actions">
+          <button onClick={props.onAddTeacher}>{t("teachers.add")}</button>
+          <button className="secondary" onClick={props.onEditSelected}>
+            {t("teachers.editSelected")}
+          </button>
+          <button className="danger" onClick={props.onDeleteSelected}>
+            {t("teachers.deleteSelected")}
+          </button>
+        </div>
       </div>
       <div className="table-wrap teachers-table-wrap">
         <table className="wide-table">

@@ -13,7 +13,6 @@ export function TeacherEditorForm(props: TeacherEditorFormProps) {
       <h3>
         {form.id ? `${t("teachers.editing")}: ${selected ? selected.name : form.name}` : t("teachers.newTeacher")}
       </h3>
-      <p className="muted">{t("teachers.fillAndSave")}</p>
       <TeacherProfileFields
         t={t}
         language={language}
@@ -22,15 +21,6 @@ export function TeacherEditorForm(props: TeacherEditorFormProps) {
         workingDays={props.workingDays}
         periodsPerDay={props.periodsPerDay}
         onFormChange={props.onFormChange}
-      />
-      <TeacherKpisPanel
-        t={t}
-        language={language}
-        form={form}
-        lessonsToday={props.lessonsToday(form.id)}
-        substitutionsToday={props.substitutionsToday(form.id)}
-        affectedToday={props.affectedToday(form.id)}
-        weeklyLessons={props.weeklyLessons(form.id)}
       />
       <TeacherWeeklyLoadTable
         selected={selected}
@@ -42,6 +32,15 @@ export function TeacherEditorForm(props: TeacherEditorFormProps) {
         onRemoveAssignment={props.onRemoveAssignment}
         onWeeklyPeriodsChange={props.onAssignmentWeeklyPeriodsChange}
         onAddAssignment={props.onAddAssignment}
+      />
+      <TeacherKpisPanel
+        t={t}
+        language={language}
+        form={form}
+        lessonsToday={props.lessonsToday(form.id)}
+        substitutionsToday={props.substitutionsToday(form.id)}
+        affectedToday={props.affectedToday(form.id)}
+        weeklyLessons={props.weeklyLessons(form.id)}
       />
       <h3>{t("teachers.byPeriod")}</h3>
       <TeacherPeriodSummaryTable

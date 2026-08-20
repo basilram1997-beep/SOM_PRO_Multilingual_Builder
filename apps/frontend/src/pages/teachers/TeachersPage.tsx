@@ -14,20 +14,6 @@ export function TeachersPage() {
 
       <Card
         title={t("nav.teachers")}
-        actions={
-          <div className="actions">
-            <button onClick={teachers.newTeacher}>{t("teachers.add")}</button>
-            <button
-              className="secondary"
-              onClick={() => (teachers.selected ? teachers.setForm(teachers.selected) : alert(t("teachers.select")))}
-            >
-              {t("teachers.editSelected")}
-            </button>
-            <button className="danger" onClick={() => teachers.remove()}>
-              {t("teachers.deleteSelected")}
-            </button>
-          </div>
-        }
       >
         <TeachersTable
           t={t}
@@ -45,6 +31,9 @@ export function TeachersPage() {
           onDayChange={teachers.loadSlots}
           onOpenTeacher={teachers.openTeacher}
           onRemove={teachers.remove}
+          onAddTeacher={teachers.newTeacher}
+          onEditSelected={() => (teachers.selected ? teachers.setForm(teachers.selected) : alert(t("teachers.select")))}
+          onDeleteSelected={() => teachers.remove()}
         />
       </Card>
 

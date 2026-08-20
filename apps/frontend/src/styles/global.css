@@ -1222,6 +1222,40 @@ html[dir="rtl"] .language-switcher {
   max-width: 100%;
   overflow: hidden;
 }
+.teachers-page .teacher-list-toolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.4fr) minmax(180px, 240px) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 2px solid #b9c4d6;
+  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+.teachers-page .teacher-list-toolbar label {
+  display: grid;
+  gap: 8px;
+  color: #334155;
+  font-weight: 900;
+}
+.teachers-page .teacher-list-toolbar select {
+  min-height: 42px;
+  border: 2px solid #b9c4d6;
+  border-radius: 8px;
+  background: #fff;
+}
+.teachers-page .teacher-list-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+}
+.teachers-page .teacher-list-toolbar-actions button {
+  white-space: nowrap;
+}
 .teachers-page .card-header {
   align-items: flex-start;
   flex-wrap: wrap;
@@ -1288,10 +1322,13 @@ html[dir="rtl"] .teachers-page .wide-table tbody tr.selected td:first-child {
   background: #bfdbfe;
 }
 @media (max-width: 700px) {
+  .teachers-page .teacher-list-toolbar {
+    grid-template-columns: 1fr;
+  }
   .teachers-page .card-header > div {
     min-width: 100%;
   }
-  .teachers-page .card-header .actions button {
+  .teachers-page .teacher-list-toolbar-actions button {
     flex: 1 1 150px;
   }
 }
