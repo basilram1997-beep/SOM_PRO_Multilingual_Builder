@@ -9,7 +9,9 @@ function bridgeData() {
 }
 
 function safeFileName(value) {
-  return String(value || "SOM-PRO-export.pdf").replace(/[\\/:*?"<>|]+/g, "-").slice(0, 160);
+  return String(value || "SOM-PRO-export.pdf")
+    .replace(/[\\/:*?"<>|]+/g, "-")
+    .slice(0, 160);
 }
 
 const data = bridgeData();

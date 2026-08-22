@@ -146,7 +146,10 @@ const PasswordChangeSchema = z.object({
 });
 
 const MfaEnableSchema = z.object({
-  code: z.string().trim().regex(/^\d{6}$/, "INVALID_MFA_CODE")
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "INVALID_MFA_CODE")
 });
 
 const MfaDisableSchema = z.object({
@@ -265,37 +268,43 @@ authRouter.post("/mfa/setup", authenticateRequest, authSelfServiceRateLimit, asy
   });
 });
 
-authRouter.post("/mfa/enable", authenticateRequest, authSelfServiceRateLimit, validateBody(MfaEnableSchema), async (req, res) => {
-  const actor = req.user!;
-  const user = await prisma.user.findFirst({
-    where: { id: actor.id, schoolId: actor.schoolId },
-    select: { id: true, schoolId: true, mfaSecretEncrypted: true, mfaMethod: true }
-  });
-  if (!user?.mfaSecretEncrypted || user.mfaMethod !== "TOTP_PENDING") {
-    return res.status(400).json({ error: "MFA_SETUP_REQUIRED", message: "Start MFA setup before enabling MFA" });
+authRouter.post(
+  "/mfa/enable",
+  authenticateRequest,
+  authSelfServiceRateLimit,
+  validateBody(MfaEnableSchema),
+  async (req, res) => {
+    const actor = req.user!;
+    const user = await prisma.user.findFirst({
+      where: { id: actor.id, schoolId: actor.schoolId },
+      select: { id: true, schoolId: true, mfaSecretEncrypted: true, mfaMethod: true }
+    });
+    if (!user?.mfaSecretEncrypted || user.mfaMethod !== "TOTP_PENDING") {
+      return res.status(400).json({ error: "MFA_SETUP_REQUIRED", message: "Start MFA setup before enabling MFA" });
+    }
+
+    const state = decryptMfaState(user.mfaSecretEncrypted);
+    if (!verifyTotpCode(state.secret, String(req.body.code || ""))) {
+      return res.status(400).json({ error: "INVALID_MFA_CODE", message: "MFA code is invalid" });
+    }
+
+    await prisma.user.update({
+      where: { id: actor.id },
+      data: { mfaEnabled: true, mfaMethod: "TOTP", tokenVersion: { increment: 1 } }
+    });
+
+    await recordAuditLog(prisma, {
+      schoolId: actor.schoolId,
+      userId: actor.id,
+      action: "MFA_ENABLED",
+      entity: "SchoolUser",
+      entityId: actor.id,
+      after: { method: "TOTP" } as Prisma.InputJsonValue
+    });
+
+    res.json({ data: { ok: true, method: "TOTP" } });
   }
-
-  const state = decryptMfaState(user.mfaSecretEncrypted);
-  if (!verifyTotpCode(state.secret, String(req.body.code || ""))) {
-    return res.status(400).json({ error: "INVALID_MFA_CODE", message: "MFA code is invalid" });
-  }
-
-  await prisma.user.update({
-    where: { id: actor.id },
-    data: { mfaEnabled: true, mfaMethod: "TOTP", tokenVersion: { increment: 1 } }
-  });
-
-  await recordAuditLog(prisma, {
-    schoolId: actor.schoolId,
-    userId: actor.id,
-    action: "MFA_ENABLED",
-    entity: "SchoolUser",
-    entityId: actor.id,
-    after: { method: "TOTP" } as Prisma.InputJsonValue
-  });
-
-  res.json({ data: { ok: true, method: "TOTP" } });
-});
+);
 
 authRouter.get("/mfa/readiness", authenticateRequest, async (req, res) => {
   const actor = req.user!;
@@ -307,38 +316,44 @@ authRouter.get("/mfa/readiness", authenticateRequest, async (req, res) => {
   res.json({ data: readiness });
 });
 
-authRouter.post("/mfa/disable", authenticateRequest, authSelfServiceRateLimit, validateBody(MfaDisableSchema), async (req, res) => {
-  const actor = req.user!;
-  if (!canRole(actor.role, "manageSettings")) {
-    return res.status(403).json({ error: "FORBIDDEN", message: "Disabling MFA requires settings authority" });
+authRouter.post(
+  "/mfa/disable",
+  authenticateRequest,
+  authSelfServiceRateLimit,
+  validateBody(MfaDisableSchema),
+  async (req, res) => {
+    const actor = req.user!;
+    if (!canRole(actor.role, "manageSettings")) {
+      return res.status(403).json({ error: "FORBIDDEN", message: "Disabling MFA requires settings authority" });
+    }
+
+    const targetUserId = String(req.body.userId || actor.id);
+    const target = await prisma.user.findFirst({
+      where: { id: targetUserId, schoolId: actor.schoolId },
+      select: { id: true, schoolId: true, role: true, mfaEnabled: true, mfaMethod: true }
+    });
+    if (!target) {
+      return res.status(404).json({ error: "USER_NOT_FOUND", message: "User was not found for the current school" });
+    }
+
+    await prisma.user.update({
+      where: { id: target.id },
+      data: { mfaEnabled: false, mfaMethod: null, mfaSecretEncrypted: null, tokenVersion: { increment: 1 } }
+    });
+
+    await recordAuditLog(prisma, {
+      schoolId: actor.schoolId,
+      userId: actor.id,
+      action: "MFA_DISABLED",
+      entity: "SchoolUser",
+      entityId: target.id,
+      before: { mfaEnabled: target.mfaEnabled, mfaMethod: target.mfaMethod } as Prisma.InputJsonValue,
+      after: { reason: String(req.body.reason || ""), targetRole: target.role } as Prisma.InputJsonValue
+    });
+
+    res.json({ data: { ok: true } });
   }
-
-  const targetUserId = String(req.body.userId || actor.id);
-  const target = await prisma.user.findFirst({
-    where: { id: targetUserId, schoolId: actor.schoolId },
-    select: { id: true, schoolId: true, role: true, mfaEnabled: true, mfaMethod: true }
-  });
-  if (!target) {
-    return res.status(404).json({ error: "USER_NOT_FOUND", message: "User was not found for the current school" });
-  }
-
-  await prisma.user.update({
-    where: { id: target.id },
-    data: { mfaEnabled: false, mfaMethod: null, mfaSecretEncrypted: null, tokenVersion: { increment: 1 } }
-  });
-
-  await recordAuditLog(prisma, {
-    schoolId: actor.schoolId,
-    userId: actor.id,
-    action: "MFA_DISABLED",
-    entity: "SchoolUser",
-    entityId: target.id,
-    before: { mfaEnabled: target.mfaEnabled, mfaMethod: target.mfaMethod } as Prisma.InputJsonValue,
-    after: { reason: String(req.body.reason || ""), targetRole: target.role } as Prisma.InputJsonValue
-  });
-
-  res.json({ data: { ok: true } });
-});
+);
 
 authRouter.get("/sso/oidc/config", (_req, res) => {
   res.json({
@@ -401,7 +416,10 @@ authRouter.post("/register", registerRateLimit, validateBody(RegisterSchema), as
           userId: null,
           action: "STUDENT_SELF_REGISTER_DENIED",
           entity: "SchoolUser",
-          after: { reason: "student_identity_not_matched", nationalIdProvided: Boolean(studentNationalId) } as Prisma.InputJsonValue
+          after: {
+            reason: "student_identity_not_matched",
+            nationalIdProvided: Boolean(studentNationalId)
+          } as Prisma.InputJsonValue
         });
         return res.status(403).json({
           error: "STUDENT_VERIFICATION_REQUIRED",
@@ -417,7 +435,11 @@ authRouter.post("/register", registerRateLimit, validateBody(RegisterSchema), as
         req.body.studentNationalId
       ]);
       const guardianPhone = String(req.body.guardianPhone || "").trim();
-      const { students, missingNationalIds } = await resolveActiveStudentsByNationalIds(prisma, schoolId, requestedNationalIds);
+      const { students, missingNationalIds } = await resolveActiveStudentsByNationalIds(
+        prisma,
+        schoolId,
+        requestedNationalIds
+      );
       const hasUnverifiedStudent = students.some((student) => !parentPhoneMatchesStudent(student, guardianPhone));
 
       if (requestedNationalIds.length === 0 || missingNationalIds.length > 0 || hasUnverifiedStudent) {

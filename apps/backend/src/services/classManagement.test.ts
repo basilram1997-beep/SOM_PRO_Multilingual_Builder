@@ -50,7 +50,11 @@ test("class routes reject duplicates and keep homeroom and soft-delete wiring", 
   assert.doesNotMatch(source, /teacherAssignment\.deleteMany\(/, "class deletion must preserve teacher assignments");
   assert.doesNotMatch(source, /homeroomAssignment\.deleteMany\(/, "class deletion must preserve homeroom assignments");
   assert.doesNotMatch(source, /schoolClass\.delete\(/, "class deletion must not hard-delete class rows");
-  assert.doesNotMatch(source, /student\.deleteMany\(\{ where: \{ schoolId, classId \} \}\)/, "class deletion must not delete student files");
+  assert.doesNotMatch(
+    source,
+    /student\.deleteMany\(\{ where: \{ schoolId, classId \} \}\)/,
+    "class deletion must not delete student files"
+  );
   assert.match(source, /P2003/, "class deletion should still guard relational conflicts");
 });
 

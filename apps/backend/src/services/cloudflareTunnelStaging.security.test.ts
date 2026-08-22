@@ -37,6 +37,7 @@ test("local Cloudflare proxy preserves same-origin /api routing without hard-cod
   assert.match(proxy, /SOM_TUNNEL_BACKEND_ORIGIN/);
   assert.match(proxy, /url === "\/api" \|\| url\.startsWith\("\/api\/"\)/);
   assert.doesNotMatch(proxy, /sompro\.duckdns\.org|trycloudflare\.com|app\.sompro\.co\.il/);
+  assert.doesNotMatch(proxy, /isLoopbackAddress|remoteAddress.*return true/);
 });
 
 test("Cloudflare tunnel operator scripts avoid committed secrets and reject unstable hostnames", () => {
@@ -46,10 +47,16 @@ test("Cloudflare tunnel operator scripts avoid committed secrets and reject unst
   const operator = read("../../scripts/runtime/cloudflare-tunnel-operator.js");
 
   assert.match(packageJson, /"staging:tunnel:check": "node scripts\/runtime\/cloudflare-tunnel-operator\.js --check"/);
-  assert.match(packageJson, /"staging:tunnel:write-config": "node scripts\/runtime\/cloudflare-tunnel-operator\.js --write-config"/);
+  assert.match(
+    packageJson,
+    /"staging:tunnel:write-config": "node scripts\/runtime\/cloudflare-tunnel-operator\.js --write-config"/
+  );
   assert.match(packageJson, /"staging:tunnel:evidence": "node scripts\/runtime\/cloudflare-quick-tunnel-evidence\.js"/);
   assert.match(packageJson, /"staging:tunnel:demo": "node scripts\/runtime\/cloudflare-external-demo\.js"/);
-  assert.match(packageJson, /"staging:tunnel:demo:cleanup": "node scripts\/runtime\/cloudflare-external-demo\.js --cleanup"/);
+  assert.match(
+    packageJson,
+    /"staging:tunnel:demo:cleanup": "node scripts\/runtime\/cloudflare-external-demo\.js --cleanup"/
+  );
   assert.match(gitignore, /deploy\/cloudflare\/\*\.yml/);
   assert.match(gitignore, /!deploy\/cloudflare\/\*\.example\.yml/);
   assert.match(example, /staging\.example\.com/);

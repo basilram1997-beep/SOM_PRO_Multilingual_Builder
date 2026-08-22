@@ -155,7 +155,14 @@ test("audit logs are immutable through API, permission-gated, redacted, export-s
     assert.equal((redacted as { safe: string }).safe, "visible");
 
     const seedAudit = await prisma.auditLog.findUniqueOrThrow({ where: { id: seeded.auditLogId } });
-    assertNoSecret(seedAudit, ["before-password", "secret-token", "raw-token", "raw-license", "123456", "AAAA-BBBB-CCCC"]);
+    assertNoSecret(seedAudit, [
+      "before-password",
+      "secret-token",
+      "raw-token",
+      "raw-license",
+      "123456",
+      "AAAA-BBBB-CCCC"
+    ]);
     assert.equal((seedAudit.after as { safeField?: string })?.safeField, "safe-value");
 
     const { createApp } = await import("../app");
@@ -283,7 +290,9 @@ test("audit logs are immutable through API, permission-gated, redacted, export-s
     assertNoSecret(exportText, ["before-password", "raw-token", "RAW-RECOVERY-CODE", "RAW-ID-TOKEN"]);
   } finally {
     if (server) await closeServer(server);
-    await prisma.auditLog.deleteMany({ where: { OR: [{ schoolId: seeded.schoolId }, { action: "OIDC_CLIENT_CONTEXT_FORBIDDEN" }] } }).catch(() => null);
+    await prisma.auditLog
+      .deleteMany({ where: { OR: [{ schoolId: seeded.schoolId }, { action: "OIDC_CLIENT_CONTEXT_FORBIDDEN" }] } })
+      .catch(() => null);
     await prisma.user.deleteMany({ where: { schoolId: seeded.schoolId } }).catch(() => null);
     await prisma.schoolSettings.deleteMany({ where: { schoolId: seeded.schoolId } }).catch(() => null);
     await prisma.school.deleteMany({ where: { id: seeded.schoolId } }).catch(() => null);

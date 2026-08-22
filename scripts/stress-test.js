@@ -24,6 +24,7 @@ const stressReportJson = process.env.STRESS_OUTPUT_JSON || join(outputDir, `stre
 const stressReportMd = process.env.STRESS_OUTPUT_MD || join(outputDir, `stress-report-${runId}.md`);
 const stressSummaryJson = process.env.STRESS_SUMMARY_JSON || join(outputDir, `stress-test-${runId}.json`);
 const stressSummaryMd = process.env.STRESS_SUMMARY_MD || join(outputDir, `stress-test-${runId}.md`);
+const recoveryTargetRtoMs = Number(process.env.STRESS_RECOVERY_TARGET_RTO_MS || process.env.DR_TARGET_RTO_MS || 300000);
 
 const stressEnv = {
   ...process.env,
@@ -336,6 +337,24 @@ function writeReport(summary) {
   lines.push("");
   lines.push("## Recovery Phase");
   lines.push("");
+  if (summary.recovery.startedAt) {
+    lines.push(`- Recovery started: \`${summary.recovery.startedAt}\``);
+  }
+  if (summary.recovery.completedAt) {
+    lines.push(`- Recovery completed: \`${summary.recovery.completedAt}\``);
+  }
+  if (Number.isFinite(summary.recovery.durationMs)) {
+    lines.push(`- Recovery duration: \`${summary.recovery.durationMs}ms\``);
+  }
+  if (Number.isFinite(summary.recovery.targetRtoMs)) {
+    lines.push(`- Target RTO: \`${summary.recovery.targetRtoMs}ms\``);
+    lines.push(`- Within target: \`${summary.recovery.withinTarget ? "yes" : "no"}\``);
+  }
+  if (summary.recovery.operatorHealth) {
+    lines.push(`- Replica mode: \`${summary.recovery.operatorHealth.redundancy?.mode || "-"}\``);
+    lines.push(`- Replica ready: \`${summary.recovery.operatorHealth.redundancy?.ready ? "yes" : "no"}\``);
+    lines.push(`- Backup policy: \`${summary.recovery.operatorHealth.backupPolicy?.message || "-"}\``);
+  }
   for (const step of summary.recovery.steps) {
     lines.push(`- ${step.label}: ${step.ok ? "OK" : "FAIL"}${step.status ? ` (${step.status})` : ""}`);
   }
@@ -369,10 +388,15 @@ async function main() {
   const stressReport = readJsonIfExists(stressReportJson);
   runProcessCleanup();
   await waitForPortFree("127.0.0.1", 4000, 30_000);
+  const recoveryStartedAt = new Date().toISOString();
   const backend = startBackend();
   try {
     await waitForUrl("http://127.0.0.1:4000/health", 120_000);
     const token = await bootstrapAndLogin();
+    const operatorHealth = await httpJson("http://127.0.0.1:4000/api/schools/operator-health", {
+      token,
+      timeoutMs: 20_000
+    });
     const classes = await httpJson("http://127.0.0.1:4000/api/classes", { token, timeoutMs: 20_000 });
     if (!classes.ok) {
       throw new Error(`Recovery classes request failed with status ${classes.status}`);
@@ -393,6 +417,9 @@ async function main() {
       studentsOk = students.ok;
     }
 
+    const recoveryCompletedAt = new Date().toISOString();
+    const durationMs = new Date(recoveryCompletedAt).getTime() - new Date(recoveryStartedAt).getTime();
+
     const summary = {
       runId,
       schoolId,
@@ -406,9 +433,16 @@ async function main() {
       },
       recovery: {
         report: stressSummaryJson,
+        startedAt: recoveryStartedAt,
+        completedAt: recoveryCompletedAt,
+        durationMs,
+        targetRtoMs: recoveryTargetRtoMs,
+        withinTarget: Number.isFinite(durationMs) ? durationMs <= recoveryTargetRtoMs : false,
+        operatorHealth: operatorHealth.ok ? operatorHealth.json?.data || null : null,
         steps: [
           { label: "health", ok: true, status: "200" },
           { label: "login", ok: Boolean(token), status: token ? "200" : "no-token" },
+          { label: "operator-health", ok: operatorHealth.ok, status: String(operatorHealth.status) },
           { label: "classes", ok: classes.ok, status: String(classes.status) },
           { label: "reports", ok: reports.ok, status: String(reports.status) },
           { label: "students", ok: studentsOk, status: classId ? "checked" : "skipped" }

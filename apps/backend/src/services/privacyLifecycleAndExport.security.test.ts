@@ -179,7 +179,9 @@ async function seedSchool(runId: string, suffix: string) {
 
 async function cleanupPrivacyLifecycle(runId: string) {
   const schoolIds = ["a", "b", "c"].map((suffix) => `privacy-${suffix}-school-${runId}`);
-  await prisma.auditLog.deleteMany({ where: { OR: [{ schoolId: { in: schoolIds } }, { entityId: { contains: runId } }] } }).catch(() => null);
+  await prisma.auditLog
+    .deleteMany({ where: { OR: [{ schoolId: { in: schoolIds } }, { entityId: { contains: runId } }] } })
+    .catch(() => null);
   await prisma.reportExport.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
   await prisma.backupJob.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
   await prisma.studentCertificate.deleteMany({ where: { schoolId: { in: schoolIds } } }).catch(() => null);
@@ -240,26 +242,42 @@ test("privacy lifecycle export, anonymize, delete, audit, and retention evidence
       schoolB.studentSecret
     ];
 
-    const schedulerExport = await requestJson(baseUrl, `/api/schools/${encodeURIComponent(schoolA.schoolId)}/export-data`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${schoolA.schedulerToken}` }
-    });
+    const schedulerExport = await requestJson(
+      baseUrl,
+      `/api/schools/${encodeURIComponent(schoolA.schoolId)}/export-data`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${schoolA.schedulerToken}` }
+      }
+    );
     assert.equal(schedulerExport.response.status, 403, schedulerExport.text);
     assertNotContains(schedulerExport.body, forbiddenSecrets);
 
-    const crossTenantExport = await requestJson(baseUrl, `/api/schools/${encodeURIComponent(schoolB.schoolId)}/export-data`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${schoolA.managerToken}` }
-    });
+    const crossTenantExport = await requestJson(
+      baseUrl,
+      `/api/schools/${encodeURIComponent(schoolB.schoolId)}/export-data`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${schoolA.managerToken}` }
+      }
+    );
     assert.equal(crossTenantExport.response.status, 403, crossTenantExport.text);
     assertNotContains(crossTenantExport.body, forbiddenSecrets);
 
-    const schoolExport = await requestJson(baseUrl, `/api/schools/${encodeURIComponent(schoolA.schoolId)}/export-data`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${schoolA.managerToken}` }
-    });
+    const schoolExport = await requestJson(
+      baseUrl,
+      `/api/schools/${encodeURIComponent(schoolA.schoolId)}/export-data`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${schoolA.managerToken}` }
+      }
+    );
     assert.equal(schoolExport.response.status, 200, schoolExport.text);
-    const schoolExportBody = schoolExport.body as { data?: Record<string, unknown>; lifecycle?: Record<string, unknown>; reportExport?: { filePath?: string } };
+    const schoolExportBody = schoolExport.body as {
+      data?: Record<string, unknown>;
+      lifecycle?: Record<string, unknown>;
+      reportExport?: { filePath?: string };
+    };
     assert.equal(schoolExportBody.lifecycle?.storedArtifactEncrypted, true);
     assert.equal(schoolExportBody.lifecycle?.retentionDays, 30);
     assert.equal(schoolExportBody.lifecycle?.auditRetained, true);
@@ -305,11 +323,15 @@ test("privacy lifecycle export, anonymize, delete, audit, and retention evidence
     assert.ok(anonymizeAudit, "anonymize lifecycle operation must be audited");
     assertNotContains(anonymizeAudit, forbiddenSecrets);
 
-    const deleteSchool = await requestJson(baseUrl, `/api/schools/${encodeURIComponent(schoolC.schoolId)}/delete-data`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${schoolC.managerToken}` },
-      body: JSON.stringify({ confirm: true, mode: "DELETE", reason: "end of contract purge drill" })
-    });
+    const deleteSchool = await requestJson(
+      baseUrl,
+      `/api/schools/${encodeURIComponent(schoolC.schoolId)}/delete-data`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${schoolC.managerToken}` },
+        body: JSON.stringify({ confirm: true, mode: "DELETE", reason: "end of contract purge drill" })
+      }
+    );
     assert.equal(deleteSchool.response.status, 200, deleteSchool.text);
     const deletedSchool = await prisma.school.findUniqueOrThrow({ where: { id: schoolC.schoolId } });
     assert.equal(deletedSchool.status, "DELETED");

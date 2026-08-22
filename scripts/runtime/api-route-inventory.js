@@ -75,23 +75,26 @@ function parseMounts(root) {
       block.text.match(/requirePermissionForWrite\("([^"]+)"\)/)?.[1] ||
       block.text.match(/requirePermission\("([^"]+)"\)/)?.[1] ||
       null;
-    const mountedAfterAuthGate = authGateIndex >= 0 && block.text ? appSource.indexOf(block.text) > authGateIndex : false;
+    const mountedAfterAuthGate =
+      authGateIndex >= 0 && block.text ? appSource.indexOf(block.text) > authGateIndex : false;
     mounts.push({
       mountPath: block.mountPath,
       routerName,
       sourceFile,
       mountedAfterAuthGate,
       inheritedPermission: permission,
-      inheritedPermissionMode: block.text.includes("requirePermissionForWrite") ? "write-or-read" : permission ? "required" : null
+      inheritedPermissionMode: block.text.includes("requirePermissionForWrite")
+        ? "write-or-read"
+        : permission
+          ? "required"
+          : null
     });
   }
   return mounts;
 }
 
 function stripComments(source) {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 }
 
 function routeMatches(source, routerName) {
@@ -144,8 +147,11 @@ function classifyRoute(match, nextIndex, source, mount) {
   const routeRequiresAuth = /authenticateRequest/.test(block);
   const authRequired = mount.mountedAfterAuthGate || routeRequiresAuth;
   const routePermission =
-    block.match(/requirePermissionForWrite\("([^"]+)"\)/)?.[1] || block.match(/requirePermission\("([^"]+)"\)/)?.[1] || null;
-  const selfServicePermission = authRequired && mount.mountPath === "/api/auth" && !routePermission ? "authenticated-self" : null;
+    block.match(/requirePermissionForWrite\("([^"]+)"\)/)?.[1] ||
+    block.match(/requirePermission\("([^"]+)"\)/)?.[1] ||
+    null;
+  const selfServicePermission =
+    authRequired && mount.mountPath === "/api/auth" && !routePermission ? "authenticated-self" : null;
   const permission = routePermission || mount.inheritedPermission || selfServicePermission;
   const upload = mount.mountPath === "/api/uploads" || /express\.raw|multer|Content-Type|content-type/i.test(block);
   const validatesBody = /validateBody\(|\.parse\(|safeParse\(|z\.object/.test(block);
@@ -254,10 +260,18 @@ function renderApiRouteInventoryMarkdown(inventory) {
   lines.push("");
   lines.push("## Notes");
   lines.push("");
-  lines.push("- Public routes are limited to health/version and explicitly public auth/license bootstrap/status routes.");
-  lines.push("- Routes mounted after `authenticateRequest`, `licenseGuard`, `auditTrail`, context override rejection, and `sensitiveWriteRateLimit` inherit those controls from `apps/backend/src/app.ts`.");
-  lines.push("- This inventory is generated from source and verified by `apps/backend/src/services/apiRouteInventory.security.test.ts`.");
-  lines.push("- The inventory is a code evidence baseline; dynamic penetration testing and official Ministry standards mapping remain separate evidence items.");
+  lines.push(
+    "- Public routes are limited to health/version and explicitly public auth/license bootstrap/status routes."
+  );
+  lines.push(
+    "- Routes mounted after `authenticateRequest`, `licenseGuard`, `auditTrail`, context override rejection, and `sensitiveWriteRateLimit` inherit those controls from `apps/backend/src/app.ts`."
+  );
+  lines.push(
+    "- This inventory is generated from source and verified by `apps/backend/src/services/apiRouteInventory.security.test.ts`."
+  );
+  lines.push(
+    "- The inventory is a code evidence baseline; dynamic penetration testing and official Ministry standards mapping remain separate evidence items."
+  );
   lines.push("");
   return lines.join("\n");
 }

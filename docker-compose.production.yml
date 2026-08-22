@@ -13,6 +13,11 @@
       interval: 15s
       timeout: 5s
       retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   redis:
     image: redis:7-alpine
@@ -33,6 +38,11 @@
       interval: 15s
       timeout: 5s
       retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
 
   backend:
     build:
@@ -59,6 +69,11 @@
       interval: 20s
       timeout: 5s
       retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   license-server:
     build:
@@ -82,6 +97,11 @@
       interval: 20s
       timeout: 5s
       retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     build:
@@ -97,6 +117,11 @@
       interval: 20s
       timeout: 5s
       retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
 
   nginx:
     image: nginx:1.27-alpine
@@ -120,6 +145,11 @@
       interval: 20s
       timeout: 5s
       retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   certbot:
     image: certbot/certbot:latest
@@ -137,7 +167,7 @@
       [
         "sh",
         "-c",
-        "if [ -n \"$${CERTBOT_EMAIL}\" ]; then certbot certonly --standalone --non-interactive --agree-tos --cert-name sompro --email \"$${CERTBOT_EMAIL}\" -d \"$${APP_DOMAIN:?set APP_DOMAIN}\"; else certbot certonly --standalone --non-interactive --agree-tos --cert-name sompro --register-unsafely-without-email -d \"$${APP_DOMAIN:?set APP_DOMAIN}\"; fi"
+        'if [ -n "$${CERTBOT_EMAIL}" ]; then certbot certonly --standalone --non-interactive --agree-tos --cert-name sompro --email "$${CERTBOT_EMAIL}" -d "$${APP_DOMAIN:?set APP_DOMAIN}"; else certbot certonly --standalone --non-interactive --agree-tos --cert-name sompro --register-unsafely-without-email -d "$${APP_DOMAIN:?set APP_DOMAIN}"; fi'
       ]
 
 volumes:

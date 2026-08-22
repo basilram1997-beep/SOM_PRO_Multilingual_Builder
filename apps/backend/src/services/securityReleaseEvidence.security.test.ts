@@ -21,7 +21,11 @@ test("CI includes real SAST, release security artifacts, and DAST evidence jobs"
   assert.match(ci, /reports\/security\//, "security artifacts should be uploaded from reports/security");
 
   assert.match(ci, /dast_baseline:/, "CI should include a DAST baseline job");
-  assert.match(ci, /STAGING_URL:\s*\$\{\{\s*secrets\.STAGING_URL\s*\}\}/, "DAST should target the configured staging URL secret");
+  assert.match(
+    ci,
+    /STAGING_URL:\s*\$\{\{\s*secrets\.STAGING_URL\s*\}\}/,
+    "DAST should target the configured staging URL secret"
+  );
   assert.match(ci, /ZAP_USE_DOCKER:\s*"true"/, "DAST should run OWASP ZAP in CI");
   assert.match(ci, /npm run security:dast/, "DAST job should use the canonical DAST script");
   assert.match(ci, /zap-baseline-report\.html/, "DAST job should archive the ZAP HTML report");

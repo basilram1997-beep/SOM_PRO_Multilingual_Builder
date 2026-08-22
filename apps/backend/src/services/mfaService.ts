@@ -212,9 +212,7 @@ export async function verifyUserSecondFactor(user: MfaCapableUser, input: { code
   const recoveryCode = String(input.recoveryCode || "").trim();
   if (!recoveryCode) return false;
 
-  const matchIndex = state.recoveryCodes.findIndex(
-    (item) => !item.usedAt && verifyPassword(recoveryCode, item.hash)
-  );
+  const matchIndex = state.recoveryCodes.findIndex((item) => !item.usedAt && verifyPassword(recoveryCode, item.hash));
   if (matchIndex < 0) return false;
 
   state.recoveryCodes[matchIndex] = { ...state.recoveryCodes[matchIndex], usedAt: new Date().toISOString() };

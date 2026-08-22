@@ -51,15 +51,7 @@ async function requestJson(baseUrl: string, path: string, init: RequestInit = {}
 
 function assertNoLeak(value: unknown, forbidden: string[]) {
   const serialized = typeof value === "string" ? value : JSON.stringify(value);
-  for (const item of [
-    ...forbidden,
-    "PrismaClient",
-    "Error:",
-    "stack",
-    "password",
-    "tokenVersion",
-    "createdAt"
-  ]) {
+  for (const item of [...forbidden, "PrismaClient", "Error:", "stack", "password", "tokenVersion", "createdAt"]) {
     assert.equal(serialized.includes(item), false, `response must not leak ${item}`);
   }
   assert.doesNotMatch(serialized, /\n\s+at\s+\S+\s+\(.+:\d+:\d+\)/, "response must not leak stack frames");
@@ -167,9 +159,25 @@ async function seedNegativeApiUsers(runId: string) {
 
   const managerToken = createAuthToken({ userId: managerId, schoolId: schoolAId, role: "MANAGER", tokenVersion: 0 });
   const teacherToken = createAuthToken({ userId: teacherId, schoolId: schoolAId, role: "TEACHER", tokenVersion: 0 });
-  const studentToken = createAuthToken({ userId: studentUserId, schoolId: schoolAId, role: "STUDENT", tokenVersion: 0 });
+  const studentToken = createAuthToken({
+    userId: studentUserId,
+    schoolId: schoolAId,
+    role: "STUDENT",
+    tokenVersion: 0
+  });
 
-  return { schoolAId, schoolBId, classAId, classBId, subjectAId, subjectBId, managerToken, teacherToken, studentToken, runId };
+  return {
+    schoolAId,
+    schoolBId,
+    classAId,
+    classBId,
+    subjectAId,
+    subjectBId,
+    managerToken,
+    teacherToken,
+    studentToken,
+    runId
+  };
 }
 
 async function cleanupNegativeApi(runId: string) {
@@ -312,9 +320,13 @@ test("API rejects mass assignment, privilege escalation, malformed bodies, and u
     assert.equal(studentAdminRead.response.status, 403, studentAdminRead.text);
     assertNoLeak(studentAdminRead.body, forbidden);
 
-    const crossTenantQuery = await requestJson(baseUrl, `/api/students?classId=${encodeURIComponent(seeded.classBId)}`, {
-      headers: { Authorization: `Bearer ${seeded.managerToken}` }
-    });
+    const crossTenantQuery = await requestJson(
+      baseUrl,
+      `/api/students?classId=${encodeURIComponent(seeded.classBId)}`,
+      {
+        headers: { Authorization: `Bearer ${seeded.managerToken}` }
+      }
+    );
     assert.equal(crossTenantQuery.response.status, 200, crossTenantQuery.text);
     assertNoLeak(crossTenantQuery.body, forbidden);
 

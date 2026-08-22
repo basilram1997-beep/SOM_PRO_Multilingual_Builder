@@ -8,16 +8,16 @@ No source code copy should be created for staging or production.
 
 ## Environment Summary
 
-| Setting | Local | Staging | Production |
-|---|---|---|---|
-| Public app URL | `http://localhost:5173` | `https://sompro.duckdns.org` | `https://app.example.com` |
-| Browser API base | `http://localhost:4000` in direct Vite dev; `/api` when local proxy is used | `/api` | `/api` |
-| Backend public URL | `http://localhost:4000` | `https://sompro.duckdns.org/api` | `https://app.example.com/api` |
-| License server URL | `http://localhost:4100` | `https://sompro.duckdns.org/license` | `https://app.example.com/license` |
-| CORS origin | `http://localhost:5173,http://127.0.0.1:5173` | `https://sompro.duckdns.org` | `https://app.example.com` |
-| Cookie secure behavior | `false` unless using HTTPS locally | `true` | `true` |
-| Trust proxy | `false` by default | `1` or `true` behind Nginx | `1` or `true` behind Nginx |
-| TLS/HSTS | Not required | Required | Required |
+| Setting                | Local                                                                       | Staging                              | Production                        |
+| ---------------------- | --------------------------------------------------------------------------- | ------------------------------------ | --------------------------------- |
+| Public app URL         | `http://localhost:5173`                                                     | `https://sompro.duckdns.org`         | `https://app.example.com`         |
+| Browser API base       | `http://localhost:4000` in direct Vite dev; `/api` when local proxy is used | `/api`                               | `/api`                            |
+| Backend public URL     | `http://localhost:4000`                                                     | `https://sompro.duckdns.org/api`     | `https://app.example.com/api`     |
+| License server URL     | `http://localhost:4100`                                                     | `https://sompro.duckdns.org/license` | `https://app.example.com/license` |
+| CORS origin            | `http://localhost:5173,http://127.0.0.1:5173`                               | `https://sompro.duckdns.org`         | `https://app.example.com`         |
+| Cookie secure behavior | `false` unless using HTTPS locally                                          | `true`                               | `true`                            |
+| Trust proxy            | `false` by default                                                          | `1` or `true` behind Nginx           | `1` or `true` behind Nginx        |
+| TLS/HSTS               | Not required                                                                | Required                             | Required                          |
 
 `https://app.example.com` is a placeholder. Replace it in deployment configuration only after the official domain is chosen.
 
@@ -56,18 +56,18 @@ When the real domain is selected, update DNS, TLS certificates, `.env.production
 
 ## 4. Required Environment Variables
 
-| Variable | Local | Staging | Production |
-|---|---|---|---|
-| `APP_ENV` | `development` | `staging` or `production` runtime mode with staging release channel | `production` |
-| `NODE_ENV` | optional/dev | `production` | `production` |
-| `SOM_RUNTIME_MODE` | `development` or `local-trial` | `saas` | `saas` |
-| `APP_URL` / `PUBLIC_APP_URL` | `http://localhost:5173` | `https://sompro.duckdns.org` | `https://app.example.com` |
-| `VITE_API_URL` | `http://localhost:4000` for direct dev, or `/api` with a local proxy | `/api` | `/api` |
-| `SOM_API_URL` | `http://localhost:4000` | `https://sompro.duckdns.org/api` | `https://app.example.com/api` |
-| `CORS_ORIGIN` | localhost origins | `https://sompro.duckdns.org` | `https://app.example.com` |
-| `SOM_LICENSE_SERVER_URL` / `SOM_PRO_LICENSE_SERVER_URL` | `http://localhost:4100` | `https://sompro.duckdns.org/license` | `https://app.example.com/license` |
-| `PUBLIC_BASE_URL` | `http://localhost:4100` if needed | `https://sompro.duckdns.org/license` | `https://app.example.com/license` |
-| `SOM_TRUST_PROXY` / `TRUST_PROXY` | `false` | `1` | `1` |
+| Variable                                                | Local                                                                | Staging                                                             | Production                        |
+| ------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------- |
+| `APP_ENV`                                               | `development`                                                        | `staging` or `production` runtime mode with staging release channel | `production`                      |
+| `NODE_ENV`                                              | optional/dev                                                         | `production`                                                        | `production`                      |
+| `SOM_RUNTIME_MODE`                                      | `development` or `local-trial`                                       | `saas`                                                              | `saas`                            |
+| `APP_URL` / `PUBLIC_APP_URL`                            | `http://localhost:5173`                                              | `https://sompro.duckdns.org`                                        | `https://app.example.com`         |
+| `VITE_API_URL`                                          | `http://localhost:4000` for direct dev, or `/api` with a local proxy | `/api`                                                              | `/api`                            |
+| `SOM_API_URL`                                           | `http://localhost:4000`                                              | `https://sompro.duckdns.org/api`                                    | `https://app.example.com/api`     |
+| `CORS_ORIGIN`                                           | localhost origins                                                    | `https://sompro.duckdns.org`                                        | `https://app.example.com`         |
+| `SOM_LICENSE_SERVER_URL` / `SOM_PRO_LICENSE_SERVER_URL` | `http://localhost:4100`                                              | `https://sompro.duckdns.org/license`                                | `https://app.example.com/license` |
+| `PUBLIC_BASE_URL`                                       | `http://localhost:4100` if needed                                    | `https://sompro.duckdns.org/license`                                | `https://app.example.com/license` |
+| `SOM_TRUST_PROXY` / `TRUST_PROXY`                       | `false`                                                              | `1`                                                                 | `1`                               |
 
 ## 5. Secret Variables
 

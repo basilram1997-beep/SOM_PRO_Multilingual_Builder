@@ -3,9 +3,23 @@ import { somApi } from "../../api/somApi";
 import type { Translate } from "../teachers/teacherTypes";
 
 type UserRole = "ADMIN" | "SCHEDULER" | "TEACHER" | "STUDENT" | "PARENT";
-type UserRow = { id: string; name: string; email: string; role: UserRole | string; studentId?: string | null; studentIds?: string[] };
+type UserRow = {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole | string;
+  studentId?: string | null;
+  studentIds?: string[];
+};
 type StudentOption = { id: string; name: string };
-type UserForm = { name: string; email: string; password: string; role: UserRole; studentId: string; studentIds: string[] };
+type UserForm = {
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  studentId: string;
+  studentIds: string[];
+};
 
 const emptyForm: UserForm = { name: "", email: "", password: "", role: "TEACHER", studentId: "", studentIds: [] };
 

@@ -75,7 +75,13 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
   const [workingDays, setWorkingDays] = useState<string[]>(defaultWorkingDays);
   const [periodsPerDay, setPeriodsPerDay] = useState(7);
   const [periodDefinitions, setPeriodDefinitions] = useState<
-    Array<{ period: number; label?: string | null; startTime?: string | null; endTime?: string | null; isActive?: boolean }>
+    Array<{
+      period: number;
+      label?: string | null;
+      startTime?: string | null;
+      endTime?: string | null;
+      isActive?: boolean;
+    }>
   >([]);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [day, setDay] = useState(defaultDay);

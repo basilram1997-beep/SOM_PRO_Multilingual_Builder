@@ -2,10 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const {
-  isAllowedExternalUrl,
-  isTrustedNavigationUrl
-} = require("./src/securityPolicy");
+const { isAllowedExternalUrl, isTrustedNavigationUrl } = require("./src/securityPolicy");
 
 const root = path.resolve(__dirname, "..", "..");
 
@@ -44,16 +41,28 @@ test("desktop shell blocks untrusted navigation and external windows", () => {
   assert.match(source, /isTrustedNavigationUrl\(url, runtimeConfig\)/, "navigation must use the trust policy");
   assert.match(source, /setWindowOpenHandler/, "window.open must be intercepted");
   assert.match(source, /isAllowedExternalUrl\(url, runtimeConfig\)/, "external opens must use the allowlist");
-  assert.match(source, /som-repair-local-services"[\s\S]*isTrustedSender\(event\)/, "repair IPC must reject untrusted senders");
-  assert.match(source, /som-export-pdf"[\s\S]*isTrustedSender\(event\)/, "PDF export IPC must reject untrusted senders");
+  assert.match(
+    source,
+    /som-repair-local-services"[\s\S]*isTrustedSender\(event\)/,
+    "repair IPC must reject untrusted senders"
+  );
+  assert.match(
+    source,
+    /som-export-pdf"[\s\S]*isTrustedSender\(event\)/,
+    "PDF export IPC must reject untrusted senders"
+  );
   assert.match(source, /return \{ action: "deny" \}/, "new renderer windows must be denied");
-  assert.doesNotMatch(source, /shell\.openExternal\(url\);\s*return \{ action: "deny" \}/, "external URLs must not open without an allowlist check");
+  assert.doesNotMatch(
+    source,
+    /shell\.openExternal\(url\);\s*return \{ action: "deny" \}/,
+    "external URLs must not open without an allowlist check"
+  );
   assert.ok(
-    source.indexOf("setWindowOpenHandler") < source.indexOf("loadFile(path.join(root, \"loading.html\"))"),
+    source.indexOf("setWindowOpenHandler") < source.indexOf('loadFile(path.join(root, "loading.html"))'),
     "window.open handler should be installed before the first page load"
   );
   assert.ok(
-    source.indexOf("will-navigate") < source.indexOf("loadFile(path.join(root, \"loading.html\"))"),
+    source.indexOf("will-navigate") < source.indexOf('loadFile(path.join(root, "loading.html"))'),
     "navigation guard should be installed before the first page load"
   );
 });
@@ -61,11 +70,23 @@ test("desktop shell blocks untrusted navigation and external windows", () => {
 test("preload remains a narrow sandbox-compatible IPC bridge", () => {
   const preload = read("apps/desktop/preload.js");
 
-  assert.match(preload, /contextBridge\.exposeInMainWorld\(\s*"somDesktop"/, "preload should expose one bridge namespace");
-  assert.match(preload, /ipcRenderer\.sendSync\("som-desktop-bridge-data"\)/, "static bridge data should come from main");
+  assert.match(
+    preload,
+    /contextBridge\.exposeInMainWorld\(\s*"somDesktop"/,
+    "preload should expose one bridge namespace"
+  );
+  assert.match(
+    preload,
+    /ipcRenderer\.sendSync\("som-desktop-bridge-data"\)/,
+    "static bridge data should come from main"
+  );
   assert.match(preload, /Object\.freeze/, "exposed bridge object should be immutable");
   assert.match(preload, /safeFileName/, "exported filenames should be sanitized before IPC");
-  assert.doesNotMatch(preload, /require\("fs"\)|require\("path"\)|require\("\.\/src\//, "sandboxed preload must not use Node filesystem or local modules");
+  assert.doesNotMatch(
+    preload,
+    /require\("fs"\)|require\("path"\)|require\("\.\/src\//,
+    "sandboxed preload must not use Node filesystem or local modules"
+  );
 });
 
 test("security policy allows only trusted app navigation and HTTPS external origins", () => {
@@ -92,12 +113,28 @@ test("desktop release signing and update integrity evidence is gated", () => {
 
   assert.match(builder, /SOM_ENABLE_CODESIGN/, "code signing should be controlled by an explicit env gate");
   assert.match(builder, /signExecutable:\s*codesignEnabled/, "Windows executable signing should use the env gate");
-  assert.match(desktopPackage.scripts["build:win:signed"], /SOM_ENABLE_CODESIGN=true/, "desktop package should expose a signed Windows build");
+  assert.match(
+    desktopPackage.scripts["build:win:signed"],
+    /SOM_ENABLE_CODESIGN=true/,
+    "desktop package should expose a signed Windows build"
+  );
   assert.equal(rootPackage.scripts["desktop:signing:check"], "node scripts/desktop-signing-check.js");
-  assert.match(rootPackage.scripts["desktop:check"], /desktop:signing:check/, "desktop checks should include signing evidence baseline");
+  assert.match(
+    rootPackage.scripts["desktop:check"],
+    /desktop:signing:check/,
+    "desktop checks should include signing evidence baseline"
+  );
 
   assert.match(signingCheck, /Get-AuthenticodeSignature/, "signing check should verify Authenticode on Windows");
   assert.match(signingCheck, /sha256/, "signing check should write installer hash evidence");
-  assert.match(signingCheck, /SOM_ENABLE_CODESIGN=true requires SOM_DESKTOP_INSTALLER/, "release signing should fail without an installer artifact");
-  assert.match(signingCheck, /No auto-update channel is enabled/, "update integrity policy should be explicit when auto-update is absent");
+  assert.match(
+    signingCheck,
+    /SOM_ENABLE_CODESIGN=true requires SOM_DESKTOP_INSTALLER/,
+    "release signing should fail without an installer artifact"
+  );
+  assert.match(
+    signingCheck,
+    /No auto-update channel is enabled/,
+    "update integrity policy should be explicit when auto-update is absent"
+  );
 });

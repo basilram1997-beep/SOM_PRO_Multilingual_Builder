@@ -16,19 +16,19 @@ Required jurisdiction: Israel.
 
 Use `docs/ISRAEL_HOSTING_PROVIDER_REQUEST_CHECKLIST.md` as the provider-facing request and comparison template.
 
-| Requirement | Minimum answer before purchase |
-|---|---|
-| Data center / region | Written statement that the VPS and storage are hosted in Israel |
-| Static public IP | One IPv4 address dedicated to the VPS |
-| OS | Ubuntu Server 22.04 LTS or 24.04 LTS |
-| CPU/RAM | 2 vCPU / 4 GB minimum for staging; 4 vCPU / 8 GB preferred |
-| Disk | 80 GB SSD minimum, encrypted storage preferred |
-| Backups | Snapshot/offsite backup option with location documented as Israel or legally approved |
-| Firewall | Provider firewall/security group support |
-| Reverse DNS/DNS | Ability to point a domain or Cloudflare Named Tunnel to the server |
-| KMS/secret store | Native option preferred; otherwise document compensating secret-injection controls |
-| SLA/support | Support plan and incident contact |
-| DPA/security docs | DPA, privacy/security terms, ISO/SOC/security package if available |
+| Requirement          | Minimum answer before purchase                                                        |
+| -------------------- | ------------------------------------------------------------------------------------- |
+| Data center / region | Written statement that the VPS and storage are hosted in Israel                       |
+| Static public IP     | One IPv4 address dedicated to the VPS                                                 |
+| OS                   | Ubuntu Server 22.04 LTS or 24.04 LTS                                                  |
+| CPU/RAM              | 2 vCPU / 4 GB minimum for staging; 4 vCPU / 8 GB preferred                            |
+| Disk                 | 80 GB SSD minimum, encrypted storage preferred                                        |
+| Backups              | Snapshot/offsite backup option with location documented as Israel or legally approved |
+| Firewall             | Provider firewall/security group support                                              |
+| Reverse DNS/DNS      | Ability to point a domain or Cloudflare Named Tunnel to the server                    |
+| KMS/secret store     | Native option preferred; otherwise document compensating secret-injection controls    |
+| SLA/support          | Support plan and incident contact                                                     |
+| DPA/security docs    | DPA, privacy/security terms, ISO/SOC/security package if available                    |
 
 ## Initial Server Hardening
 
@@ -143,9 +143,9 @@ Record only secret names/version IDs in evidence. Never record values.
 
 Choose one:
 
-| Ingress | Use when | Evidence |
-|---|---|---|
-| Nginx + DNS + TLS | A domain points to the VPS IP | TLS certificate, HTTP redirect, HSTS, health |
+| Ingress                 | Use when                                                       | Evidence                                                 |
+| ----------------------- | -------------------------------------------------------------- | -------------------------------------------------------- |
+| Nginx + DNS + TLS       | A domain points to the VPS IP                                  | TLS certificate, HTTP redirect, HSTS, health             |
 | Cloudflare Named Tunnel | No inbound public ports or extra edge access policy is desired | Named Tunnel config, DNS route, Access policy if enabled |
 
 Quick Tunnel is not acceptable for Ministry staging.
@@ -220,16 +220,16 @@ No-Go if:
 
 ## Handoff Checklist
 
-| Item | Status |
-|---|---|
-| Provider Israel region statement archived | Pending |
-| VPS IP and hostname recorded | Pending |
-| SSH key-only login verified | Pending |
-| Firewall rules archived | Pending |
-| Docker/Compose versions recorded | Pending |
+| Item                                            | Status  |
+| ----------------------------------------------- | ------- |
+| Provider Israel region statement archived       | Pending |
+| VPS IP and hostname recorded                    | Pending |
+| SSH key-only login verified                     | Pending |
+| Firewall rules archived                         | Pending |
+| Docker/Compose versions recorded                | Pending |
 | Secret injection source recorded without values | Pending |
-| HTTPS certificate report archived | Pending |
-| DAST/ZAP report archived | Pending |
-| Strict staging evidence archived | Pending |
-| Backup/restore drill archived | Pending |
-| DPA/SLA/security package archived | Pending |
+| HTTPS certificate report archived               | Pending |
+| DAST/ZAP report archived                        | Pending |
+| Strict staging evidence archived                | Pending |
+| Backup/restore drill archived                   | Pending |
+| DPA/SLA/security package archived               | Pending |

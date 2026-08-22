@@ -1,5 +1,5 @@
 import { apiErrorMessage, isLocalApiUrl, readResponseBody } from "./httpUtils";
-import { removeStoredValue } from "../lib/browserStorage";
+import { readStoredValue, removeStoredValue, writeStoredValue } from "../lib/browserStorage";
 
 const LOCAL_API_URL = "http://localhost:4000";
 const SAME_ORIGIN_API_URL = "/api";
@@ -47,18 +47,30 @@ export function clearLegacyAuthTokens() {
     removeStoredValue("localStorage", key);
     removeStoredValue("sessionStorage", key);
   }
+}
+
+function clearCurrentAuthTokenStorage() {
   removeStoredValue("localStorage", AUTH_TOKEN_KEY);
   removeStoredValue("sessionStorage", SESSION_AUTH_TOKEN_KEY);
 }
 
 export function getAuthToken() {
-  clearLegacyAuthTokens();
+  if (authTokenMemory) return authTokenMemory;
+  const storedToken =
+    readStoredValue("sessionStorage", SESSION_AUTH_TOKEN_KEY) ||
+    readStoredValue("localStorage", AUTH_TOKEN_KEY) ||
+    "";
+  authTokenMemory = storedToken;
   return authTokenMemory;
 }
 
 export function setAuthToken(token: string) {
   clearLegacyAuthTokens();
-  authTokenMemory = String(token || "");
+  const cleanToken = String(token || "").trim();
+  authTokenMemory = cleanToken;
+  clearCurrentAuthTokenStorage();
+  if (!cleanToken) return;
+  writeStoredValue("sessionStorage", SESSION_AUTH_TOKEN_KEY, cleanToken);
 }
 
 clearLegacyAuthTokens();
@@ -80,6 +92,14 @@ function resolveApiUrl() {
 }
 
 export const API_URL = resolveApiUrl();
+
+function resolveRequestUrl(path: string) {
+  const cleanPath = String(path || "").startsWith("/") ? String(path || "") : `/${String(path || "")}`;
+  if (API_URL === SAME_ORIGIN_API_URL && cleanPath.startsWith("/api/")) {
+    return cleanPath;
+  }
+  return `${API_URL}${cleanPath}`;
+}
 
 function ensureProductionApiIsSecure() {
   if (!import.meta.env.PROD) return;
@@ -110,7 +130,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   let response: Response;
   try {
-    response = await fetch(`${API_URL}${path}`, {
+    response = await fetch(resolveRequestUrl(path), {
       ...options,
       headers,
       signal: controller.signal
@@ -152,7 +172,7 @@ async function download(path: string, options: RequestInit = {}) {
 
   let response: Response;
   try {
-    response = await fetch(`${API_URL}${path}`, {
+    response = await fetch(resolveRequestUrl(path), {
       ...options,
       headers,
       signal: controller.signal

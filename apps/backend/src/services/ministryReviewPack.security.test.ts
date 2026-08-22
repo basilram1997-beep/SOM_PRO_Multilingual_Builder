@@ -30,7 +30,11 @@ test("Ministry review pack generator writes manifest and markdown with required 
     };
     const markdown = readFileSync(join(reportDir, "MINISTRY_REVIEW_PACK.md"), "utf8");
 
-    assert.equal(manifest.submissionReady, false, "local pack should not claim Ministry submission readiness with pending evidence");
+    assert.equal(
+      manifest.submissionReady,
+      false,
+      "local pack should not claim Ministry submission readiness with pending evidence"
+    );
     assert.deepEqual(
       manifest.sourceDocuments.map((source) => source.path),
       [
@@ -38,7 +42,8 @@ test("Ministry review pack generator writes manifest and markdown with required 
         "docs/MINISTRY_COMPLIANCE_MATRIX.md",
         "docs/MINISTRY_TEST_PLAN.md",
         "docs/LIVE_STAGING_EVIDENCE_CLOSURE.md",
-        "docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md"
+        "docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md",
+        "docs/MINISTRY_LOCAL_READINESS_REPORT_AR.md"
       ]
     );
     assert.ok(manifest.sourceDocuments.every((source) => source.exists && source.sha256));

@@ -647,7 +647,11 @@ test("tenant isolation blocks cross-school resource access through params, query
     assertNoTenantBLeak(schoolDelete.body, tenantB);
 
     const schoolBAfterForbiddenLifecycleRequests = await prisma.school.findUnique({ where: { id: tenantB.schoolId } });
-    assert.equal(schoolBAfterForbiddenLifecycleRequests?.isActive, true, "school A must not deactivate/delete school B");
+    assert.equal(
+      schoolBAfterForbiddenLifecycleRequests?.isActive,
+      true,
+      "school A must not deactivate/delete school B"
+    );
 
     const originalScannerEnabled = process.env.SOM_FILE_UPLOAD_SCANNING_ENABLED;
     const originalScannerUrl = process.env.SOM_FILE_UPLOAD_SCANNER_URL;

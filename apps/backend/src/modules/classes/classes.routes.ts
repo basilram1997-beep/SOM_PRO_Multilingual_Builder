@@ -82,9 +82,7 @@ async function saveHomeroomAssignment(req: Request, res: Response, classId: stri
     classId
   });
   if (!parsed.success) {
-    return res
-      .status(400)
-      .json({ error: "INVALID_HOMEROOM_ASSIGNMENT", message: "بيانات المربي غير صحيحة" });
+    return res.status(400).json({ error: "INVALID_HOMEROOM_ASSIGNMENT", message: "بيانات المربي غير صحيحة" });
   }
   const data = parsed.data;
   if (data.weeklyDay && data.weeklyPeriod) {
@@ -315,4 +313,3 @@ classesRouter.post("/:id/deactivate", async (req, res) => removeClassById(req, r
 classesRouter.post("/:id/assign-homeroom-teacher", async (req, res) =>
   saveHomeroomAssignment(req, res, String(req.params.id))
 );
-

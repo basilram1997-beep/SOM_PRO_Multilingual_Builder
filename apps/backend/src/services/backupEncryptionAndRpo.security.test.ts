@@ -31,7 +31,11 @@ test("backup scripts encrypt artifacts, write manifests, and block plaintext res
 
   assert.match(postgresRestore, /decrypt_backup_file/, "restore should decrypt encrypted backups");
   assert.match(postgresRestore, /Plaintext restore files are blocked/, "restore should reject plaintext by default");
-  assert.match(postgresRestore, /ALLOW_PLAINTEXT_RESTORE=yes only for isolated tests/, "plaintext restore override must be explicit");
+  assert.match(
+    postgresRestore,
+    /ALLOW_PLAINTEXT_RESTORE=yes only for isolated tests/,
+    "plaintext restore override must be explicit"
+  );
 });
 
 test("backend product backups encrypt PostgreSQL and license artifacts before recording backup jobs", () => {
@@ -42,8 +46,16 @@ test("backend product backups encrypt PostgreSQL and license artifacts before re
 
   assert.match(productBackup, /createCipheriv\("aes-256-gcm"/, "product backup should use authenticated encryption");
   assert.match(productBackup, /encryptFileInPlace\(postgresDumpPath\)/, "PostgreSQL dump should be encrypted in place");
-  assert.match(productBackup, /encryptFilesRecursive\(licenseTargetDir\)/, "license files should be encrypted recursively");
-  assert.match(productBackup, /fs\.rmSync\(filePath, \{ force: true \}\)/, "plaintext product backup files should be deleted");
+  assert.match(
+    productBackup,
+    /encryptFilesRecursive\(licenseTargetDir\)/,
+    "license files should be encrypted recursively"
+  );
+  assert.match(
+    productBackup,
+    /fs\.rmSync\(filePath, \{ force: true \}\)/,
+    "plaintext product backup files should be deleted"
+  );
   assert.match(productBackup, /encrypted:\s*true/, "product backup manifest should declare encryption");
   assert.doesNotMatch(productBackup, /postgresDumpPath:\s*postgresDumpPath/, "result must not expose raw SQL path");
 
@@ -52,5 +64,9 @@ test("backend product backups encrypt PostgreSQL and license artifacts before re
 
   assert.match(updateManager, /encryptBackupFile\(backupFile\)/, "safe update backups should be encrypted");
   assert.match(updateManager, /Plaintext restore files are blocked/, "safe update restore should reject plaintext");
-  assert.match(updateManager, /SOM_BACKUP_ENCRYPTION_KEY or SOM_BACKUP_PASSPHRASE/, "production update backups should require a key");
+  assert.match(
+    updateManager,
+    /SOM_BACKUP_ENCRYPTION_KEY or SOM_BACKUP_PASSPHRASE/,
+    "production update backups should require a key"
+  );
 });

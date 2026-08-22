@@ -23,11 +23,11 @@ Cloudflare Tunnel can replace public inbound ports. The application still uses t
 
 ## Modes
 
-| Mode | URL stability | Use for | Ministry evidence status |
-|---|---|---|---|
-| Quick Tunnel | Random `https://*.trycloudflare.com` URL | Short manual demo only | Not acceptable as final staging evidence |
+| Mode         | URL stability                                         | Use for                                | Ministry evidence status                                                  |
+| ------------ | ----------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------- |
+| Quick Tunnel | Random `https://*.trycloudflare.com` URL              | Short manual demo only                 | Not acceptable as final staging evidence                                  |
 | Named Tunnel | Stable hostname such as `https://staging.example.com` | Staging, DAST, external tester handoff | Acceptable after DNS, TLS, strict evidence, and access rules are archived |
-| VPS/Nginx | Stable public IP/domain | Staging or production-like hosting | Acceptable after the same evidence gates pass |
+| VPS/Nginx    | Stable public IP/domain                               | Staging or production-like hosting     | Acceptable after the same evidence gates pass                             |
 
 ## Quick Tunnel Fallback
 
@@ -59,12 +59,12 @@ docker run --rm --name sompro-cloudflared-quick cloudflare/cloudflared:latest tu
 
 The local proxy defaults are:
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `SOM_TUNNEL_PROXY_HOST` | `127.0.0.1` | Local listener host |
-| `SOM_TUNNEL_PROXY_PORT` | `8080` | Local listener port passed to cloudflared |
-| `SOM_TUNNEL_FRONTEND_ORIGIN` | `http://127.0.0.1:4188` | Local frontend origin |
-| `SOM_TUNNEL_BACKEND_ORIGIN` | `http://127.0.0.1:4000` | Local backend origin |
+| Variable                     | Default                 | Purpose                                   |
+| ---------------------------- | ----------------------- | ----------------------------------------- |
+| `SOM_TUNNEL_PROXY_HOST`      | `127.0.0.1`             | Local listener host                       |
+| `SOM_TUNNEL_PROXY_PORT`      | `8080`                  | Local listener port passed to cloudflared |
+| `SOM_TUNNEL_FRONTEND_ORIGIN` | `http://127.0.0.1:4188` | Local frontend origin                     |
+| `SOM_TUNNEL_BACKEND_ORIGIN`  | `http://127.0.0.1:4000` | Local backend origin                      |
 
 Stop Quick Tunnel after the demo:
 
@@ -103,15 +103,15 @@ Do not assume the final production domain. Replace `staging.example.com` through
 
 Required deployment values:
 
-| Setting | Staging value |
-|---|---|
-| `APP_URL` / `PUBLIC_APP_URL` | `https://staging.example.com` |
-| `VITE_API_URL` | `/api` |
-| `SOM_API_URL` | `https://staging.example.com/api` |
-| `CORS_ORIGIN` | `https://staging.example.com` |
+| Setting                                                 | Staging value                         |
+| ------------------------------------------------------- | ------------------------------------- |
+| `APP_URL` / `PUBLIC_APP_URL`                            | `https://staging.example.com`         |
+| `VITE_API_URL`                                          | `/api`                                |
+| `SOM_API_URL`                                           | `https://staging.example.com/api`     |
+| `CORS_ORIGIN`                                           | `https://staging.example.com`         |
 | `SOM_LICENSE_SERVER_URL` / `SOM_PRO_LICENSE_SERVER_URL` | `https://staging.example.com/license` |
-| `SOM_TRUST_PROXY` / `TRUST_PROXY` | `1` |
-| `STAGING_URL` | `https://staging.example.com` |
+| `SOM_TRUST_PROXY` / `TRUST_PROXY`                       | `1`                                   |
+| `STAGING_URL`                                           | `https://staging.example.com`         |
 
 Secret values such as `DATABASE_URL`, `JWT_SECRET`, license secrets, backup passphrases, and Cloudflare tunnel credentials must come from the operator secret store. Never commit them.
 

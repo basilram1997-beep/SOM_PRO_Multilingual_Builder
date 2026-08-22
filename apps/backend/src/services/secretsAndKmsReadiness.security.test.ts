@@ -20,7 +20,11 @@ function parseEnv(text: string) {
 
 function assertPlaceholder(value: string, key: string) {
   if (/^redis:\/\/[^:@/]+:\d+$/i.test(value)) return;
-  assert.match(value, /CHANGE_ME|change-me|example\.com|\/run\/secrets\//i, `${key} must be placeholder or secret-file reference only`);
+  assert.match(
+    value,
+    /CHANGE_ME|change-me|example\.com|\/run\/secrets\//i,
+    `${key} must be placeholder or secret-file reference only`
+  );
 }
 
 test("secrets and KMS readiness runbook defines inventory, rotation, and evidence boundaries", () => {

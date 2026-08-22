@@ -77,10 +77,7 @@ async function main() {
   const license = await isTcpReachable("127.0.0.1", Number(process.env.SOM_LICENSE_PORT || 4100), 1000);
   record("License server", true, license ? "already running on 4100" : "not running; E2E can use local license bypass");
 
-  const alertingChannels = [
-    process.env.SOM_NOTIFICATION_WEBHOOK_URL,
-    process.env.SOM_SMS_WEBHOOK_URL
-  ]
+  const alertingChannels = [process.env.SOM_NOTIFICATION_WEBHOOK_URL, process.env.SOM_SMS_WEBHOOK_URL]
     .map((value) => String(value || "").trim())
     .filter(Boolean);
   record(

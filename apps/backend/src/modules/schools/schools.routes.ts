@@ -37,21 +37,23 @@ const SchoolDeletionSchema = z.object({
 
 const SCHOOL_EXPORT_RETENTION_DAYS = Number(process.env.SOM_SCHOOL_EXPORT_RETENTION_DAYS || 30);
 
-const lifecycleRedactedKeys = new Set([
-  "authorization",
-  "authtoken",
-  "licensecode",
-  "licensekey",
-  "mfacode",
-  "mfaSecretEncrypted",
-  "password",
-  "passwordHash",
-  "recoverycode",
-  "recoverycodes",
-  "secret",
-  "token",
-  "tokenVersion"
-].map((key) => key.toLowerCase()));
+const lifecycleRedactedKeys = new Set(
+  [
+    "authorization",
+    "authtoken",
+    "licensecode",
+    "licensekey",
+    "mfacode",
+    "mfaSecretEncrypted",
+    "password",
+    "passwordHash",
+    "recoverycode",
+    "recoverycodes",
+    "secret",
+    "token",
+    "tokenVersion"
+  ].map((key) => key.toLowerCase())
+);
 
 function scrubLifecycleExportValue<T>(value: T): T {
   if (Array.isArray(value)) return value.map((item) => scrubLifecycleExportValue(item)) as T;
@@ -252,7 +254,8 @@ async function checkReplicaEndpoint(raw: string | undefined, timeoutMs: number):
       };
     }
 
-    const healthUrl = endpoint.pathname && endpoint.pathname !== "/" ? configured : `${configured.replace(/\/$/, "")}/health`;
+    const healthUrl =
+      endpoint.pathname && endpoint.pathname !== "/" ? configured : `${configured.replace(/\/$/, "")}/health`;
     const httpResult = await checkHttpEndpoint(healthUrl, timeoutMs);
     return {
       configured: true,
@@ -516,20 +519,22 @@ async function exportSchoolData(schoolId: string) {
     duties,
     reportExports,
     backupJobs,
-    auditLogs: scrubLifecycleExportValue(auditLogs.map((item) => ({
-      id: item.id,
-      schoolId: item.schoolId,
-      userId: item.userId,
-      action: item.action,
-      entity: item.entity,
-      entityId: item.entityId,
-      before: redactSensitiveAuditValue(item.before),
-      after: redactSensitiveAuditValue(item.after),
-      accessResult: item.accessResult,
-      ipAddress: item.ipAddress,
-      userAgent: item.userAgent,
-      createdAt: item.createdAt
-    })))
+    auditLogs: scrubLifecycleExportValue(
+      auditLogs.map((item) => ({
+        id: item.id,
+        schoolId: item.schoolId,
+        userId: item.userId,
+        action: item.action,
+        entity: item.entity,
+        entityId: item.entityId,
+        before: redactSensitiveAuditValue(item.before),
+        after: redactSensitiveAuditValue(item.after),
+        accessResult: item.accessResult,
+        ipAddress: item.ipAddress,
+        userAgent: item.userAgent,
+        createdAt: item.createdAt
+      }))
+    )
   };
 }
 
@@ -631,9 +636,7 @@ schoolsRouter.get("/operations", async (req, res) => {
 schoolsRouter.post("/backups", async (req, res) => {
   const schoolId = await getRequestSchoolId(req);
   if (!canManageSchoolOperations(req.user?.role)) {
-    return res
-      .status(403)
-      .json({ error: "FORBIDDEN", message: "ليس لديك صلاحية إنشاء نسخة احتياطية" });
+    return res.status(403).json({ error: "FORBIDDEN", message: "ليس لديك صلاحية إنشاء نسخة احتياطية" });
   }
 
   const now = new Date();
@@ -716,8 +719,7 @@ schoolsRouter.post("/backups", async (req, res) => {
 
     res.status(500).json({
       error: "PRODUCT_BACKUP_FAILED",
-      message:
-        "تعذر إنشاء النسخة الاحتياطية. تأكد من جاهزية PostgreSQL أو Docker."
+      message: "تعذر إنشاء النسخة الاحتياطية. تأكد من جاهزية PostgreSQL أو Docker."
     });
   }
 });
@@ -1160,7 +1162,10 @@ schoolsRouter.post("/:id/delete-data", validateBody(SchoolDeletionSchema), async
     snapshot
   );
   const expiresAt = new Date(now.getTime() + SCHOOL_EXPORT_RETENTION_DAYS * 24 * 60 * 60 * 1000);
-  const lifecycle = buildLifecycleEvidence(req.body.mode === "ANONYMIZE" ? "SCHOOL_ANONYMIZE_DATA" : "SCHOOL_DELETE_DATA", expiresAt);
+  const lifecycle = buildLifecycleEvidence(
+    req.body.mode === "ANONYMIZE" ? "SCHOOL_ANONYMIZE_DATA" : "SCHOOL_DELETE_DATA",
+    expiresAt
+  );
   const reportRecord = await createReportExportRecord(prisma, {
     schoolId,
     reportType: req.body.mode === "ANONYMIZE" ? "SCHOOL_ANONYMIZE_DATA" : "SCHOOL_DELETE_DATA",
@@ -1205,4 +1210,3 @@ schoolsRouter.post("/:id/delete-data", validateBody(SchoolDeletionSchema), async
     }
   });
 });
-

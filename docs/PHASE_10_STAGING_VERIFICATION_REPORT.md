@@ -28,17 +28,17 @@ Expected automated result:
 
 Complete this section after deploying to the real staging domain.
 
-| Item | Evidence Required | Result |
-| ---- | ----------------- | ------ |
-| Staging app URL | Final browser URL starts with `https://` | Pending |
-| API health URL | `https://<api-domain>/health` returns healthy response | Pending |
-| Edge health URL | `https://<domain>/healthz` returns 200 | Pending |
-| HTTP redirect | `http://<domain>` returns 301/308 to the same HTTPS host/path | Pending |
-| HSTS | Response contains `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` | Pending |
-| TLS certificate | Issuer, subject/SAN, valid-from, valid-to, and chain captured | Pending |
-| Placeholder scan | `.env.staging` contains no `CHANGE_ME`, `example.invalid`, `your-domain`, `localhost`, or `127.0.0.1` for public endpoints/secrets | Pending |
-| Smoke login | Non-production test user can open the app over HTTPS only | Pending |
-| Evidence artifact | Console output/screenshots saved in review pack | Pending |
+| Item              | Evidence Required                                                                                                                  | Result  |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Staging app URL   | Final browser URL starts with `https://`                                                                                           | Pending |
+| API health URL    | `https://<api-domain>/health` returns healthy response                                                                             | Pending |
+| Edge health URL   | `https://<domain>/healthz` returns 200                                                                                             | Pending |
+| HTTP redirect     | `http://<domain>` returns 301/308 to the same HTTPS host/path                                                                      | Pending |
+| HSTS              | Response contains `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`                                        | Pending |
+| TLS certificate   | Issuer, subject/SAN, valid-from, valid-to, and chain captured                                                                      | Pending |
+| Placeholder scan  | `.env.staging` contains no `CHANGE_ME`, `example.invalid`, `your-domain`, `localhost`, or `127.0.0.1` for public endpoints/secrets | Pending |
+| Smoke login       | Non-production test user can open the app over HTTPS only                                                                          | Pending |
+| Evidence artifact | Console output/screenshots saved in review pack                                                                                    | Pending |
 
 ## Suggested Command Log
 

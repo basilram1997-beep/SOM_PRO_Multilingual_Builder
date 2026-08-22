@@ -215,8 +215,14 @@ export const somApi = {
       api.get<{ data: { username: string; role: string } }>(
         `/api/settings/users/suggest-username?role=${encodeURIComponent(role)}`
       ),
-    createUser: (data: { name: string; email: string; password: string; role: string; studentId?: string | null; studentIds?: string[] }) =>
-      api.post<{ data: UserRow }>("/api/settings/users", data),
+    createUser: (data: {
+      name: string;
+      email: string;
+      password: string;
+      role: string;
+      studentId?: string | null;
+      studentIds?: string[];
+    }) => api.post<{ data: UserRow }>("/api/settings/users", data),
     removeUser: (id: string) => api.delete<void>(`/api/settings/users/${id}`)
   },
   teachers: {
@@ -344,10 +350,11 @@ export const somApi = {
             showBehaviorOnCertificate: boolean;
             behaviorNote?: string | null;
           }>;
-        }) => api.post<{ data: { rows: Array<{ id: string; studentId: string; teacherNotes: string | null }> } }>(
-          "/api/students/certificates/homeroom-notes",
-          data
-        )
+        }) =>
+          api.post<{ data: { rows: Array<{ id: string; studentId: string; teacherNotes: string | null }> } }>(
+            "/api/students/certificates/homeroom-notes",
+            data
+          )
       }
     },
     gradeSchemes: {

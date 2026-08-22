@@ -13,7 +13,10 @@ test("live staging execution runbook preserves operator commands, secret handlin
   assert.match(runbook, /DATABASE_URL/);
   assert.match(runbook, /ZAP_USE_DOCKER=true npm run security:dast/);
   assert.match(runbook, /STAGING_EVIDENCE_STRICT=true npm run security:staging-evidence/);
-  assert.match(runbook, /STAGING_EVIDENCE_LIVE_DB=true DATABASE_URL=postgresql:\/\/\.\.\. npm run security:staging-evidence/);
+  assert.match(
+    runbook,
+    /STAGING_EVIDENCE_LIVE_DB=true DATABASE_URL=postgresql:\/\/\.\.\. npm run security:staging-evidence/
+  );
   assert.match(runbook, /npm run security:pentest:prep/);
   assert.match(runbook, /npm run ministry:review-pack/);
   assert.match(runbook, /MINISTRY_REVIEW_PACK_STRICT=true npm run ministry:review-pack/);

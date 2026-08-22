@@ -19,30 +19,30 @@ Real values must never be committed to Git, pasted into issue trackers, included
 
 ## Secret Inventory
 
-| Secret | Scope | Required in | Storage rule | Rotation trigger |
-|---|---|---|---|---|
-| `DATABASE_URL` | PostgreSQL credential and host | Backend, migrations, live DB evidence | Secret manager/deployment env only | Any operator change, DB user rotation, suspected leak, staging rebuild |
-| `REDIS_URL` / `REDIS_PASSWORD` | Redis auth | Backend, Redis container | Secret manager/deployment env only | Redis rebuild, suspected leak, access policy change |
-| `POSTGRES_PASSWORD` | PostgreSQL container password | Production compose | Docker secret or protected deployment env | DB bootstrap, operator offboarding |
-| `SOM_PRO_AUTH_SECRET` | Auth token/MFA encryption signing material | Backend | KMS/secret manager/deployment env only | Before production, after Quick Tunnel demos if local values were reused, suspected leak |
-| `SOM_PRO_LICENSE_SECRET` | License signing/verification | Backend and license server | KMS/secret manager/deployment env only | License server deployment, suspected leak, pre-sale handoff |
-| `LICENSE_ADMIN_TOKEN` | License server owner/admin API | License server | Secret manager/deployment env only | Admin offboarding, reset-token incident, pre-sale handoff |
-| `SOM_BACKUP_PASSPHRASE` / `SOM_BACKUP_PASSPHRASE_FILE` | Backup encryption | Backup/restore jobs | Prefer `_FILE` with Docker secret/KMS materialization | Backup storage migration, restore drill, suspected leak |
-| Cloudflare tunnel credentials | Named Tunnel | Cloudflare operator host | Cloudflare account + local protected credentials file outside repo | Domain/tunnel change, operator offboarding |
-| OIDC/SAML client secret | Future Ministry/IdP SSO | Backend auth | IdP secret store/deployment secret only | IdP rotation, app registration change |
-| Email/SMS/webhook tokens | Notifications | Backend/worker | Secret manager/deployment env only | Provider token rotation, incident |
+| Secret                                                 | Scope                                      | Required in                           | Storage rule                                                       | Rotation trigger                                                                        |
+| ------------------------------------------------------ | ------------------------------------------ | ------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                         | PostgreSQL credential and host             | Backend, migrations, live DB evidence | Secret manager/deployment env only                                 | Any operator change, DB user rotation, suspected leak, staging rebuild                  |
+| `REDIS_URL` / `REDIS_PASSWORD`                         | Redis auth                                 | Backend, Redis container              | Secret manager/deployment env only                                 | Redis rebuild, suspected leak, access policy change                                     |
+| `POSTGRES_PASSWORD`                                    | PostgreSQL container password              | Production compose                    | Docker secret or protected deployment env                          | DB bootstrap, operator offboarding                                                      |
+| `SOM_PRO_AUTH_SECRET`                                  | Auth token/MFA encryption signing material | Backend                               | KMS/secret manager/deployment env only                             | Before production, after Quick Tunnel demos if local values were reused, suspected leak |
+| `SOM_PRO_LICENSE_SECRET`                               | License signing/verification               | Backend and license server            | KMS/secret manager/deployment env only                             | License server deployment, suspected leak, pre-sale handoff                             |
+| `LICENSE_ADMIN_TOKEN`                                  | License server owner/admin API             | License server                        | Secret manager/deployment env only                                 | Admin offboarding, reset-token incident, pre-sale handoff                               |
+| `SOM_BACKUP_PASSPHRASE` / `SOM_BACKUP_PASSPHRASE_FILE` | Backup encryption                          | Backup/restore jobs                   | Prefer `_FILE` with Docker secret/KMS materialization              | Backup storage migration, restore drill, suspected leak                                 |
+| Cloudflare tunnel credentials                          | Named Tunnel                               | Cloudflare operator host              | Cloudflare account + local protected credentials file outside repo | Domain/tunnel change, operator offboarding                                              |
+| OIDC/SAML client secret                                | Future Ministry/IdP SSO                    | Backend auth                          | IdP secret store/deployment secret only                            | IdP rotation, app registration change                                                   |
+| Email/SMS/webhook tokens                               | Notifications                              | Backend/worker                        | Secret manager/deployment env only                                 | Provider token rotation, incident                                                       |
 
 ## Current Support
 
-| Capability | Status | Evidence |
-|---|---|---|
-| Real `.env` files ignored | Exists | `.gitignore`, `scripts/security-secrets-check.js` |
-| Production examples use placeholders | Exists | `.env.production.example`, `apps/backend/.env.production.example`, `apps/license-server/.env.production.example` |
-| Backup passphrase file reference | Exists | `SOM_BACKUP_PASSPHRASE_FILE=/run/secrets/som_backup_passphrase` |
-| Strict staging secret placeholder check | Exists | `scripts/staging-check.js` |
-| Quick Tunnel marked demo-only | Exists | `docs/CLOUDFLARE_QUICK_TUNNEL_DEMO_REPORT.md` |
-| Final provider/KMS proof | Pending | Requires hosting/provider decision |
-| App-wide `_FILE` support for every secret | Pending | Do not claim complete until implemented or provided by deployment platform |
+| Capability                                | Status  | Evidence                                                                                                         |
+| ----------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
+| Real `.env` files ignored                 | Exists  | `.gitignore`, `scripts/security-secrets-check.js`                                                                |
+| Production examples use placeholders      | Exists  | `.env.production.example`, `apps/backend/.env.production.example`, `apps/license-server/.env.production.example` |
+| Backup passphrase file reference          | Exists  | `SOM_BACKUP_PASSPHRASE_FILE=/run/secrets/som_backup_passphrase`                                                  |
+| Strict staging secret placeholder check   | Exists  | `scripts/staging-check.js`                                                                                       |
+| Quick Tunnel marked demo-only             | Exists  | `docs/CLOUDFLARE_QUICK_TUNNEL_DEMO_REPORT.md`                                                                    |
+| Final provider/KMS proof                  | Pending | Requires hosting/provider decision                                                                               |
+| App-wide `_FILE` support for every secret | Pending | Do not claim complete until implemented or provided by deployment platform                                       |
 
 ## Production Readiness Gate
 
@@ -60,15 +60,15 @@ Before a staging or production environment is accepted:
 
 Use this after a Quick Tunnel demo, operator handoff, suspected secret leak, or before production launch:
 
-| Step | Owner | Evidence |
-|---|---|---|
-| Revoke old license admin token | Security/operator | masked rotation log |
-| Generate new `SOM_PRO_AUTH_SECRET` and `SOM_PRO_LICENSE_SECRET` | Security/operator | secret store version IDs only |
-| Rotate DB and Redis credentials | DBA/operator | DB role/password version record |
-| Rotate backup passphrase and test new encrypted backup | Operations | backup manifest and restore drill |
-| Rotate Cloudflare tunnel credentials if Named Tunnel was exposed | DevOps | Cloudflare audit event/export |
-| Restart affected services with new secret versions | DevOps | deployment log |
-| Run smoke, DAST, staging evidence, and secret scan | QA/security | reports with secrets redacted |
+| Step                                                             | Owner             | Evidence                          |
+| ---------------------------------------------------------------- | ----------------- | --------------------------------- |
+| Revoke old license admin token                                   | Security/operator | masked rotation log               |
+| Generate new `SOM_PRO_AUTH_SECRET` and `SOM_PRO_LICENSE_SECRET`  | Security/operator | secret store version IDs only     |
+| Rotate DB and Redis credentials                                  | DBA/operator      | DB role/password version record   |
+| Rotate backup passphrase and test new encrypted backup           | Operations        | backup manifest and restore drill |
+| Rotate Cloudflare tunnel credentials if Named Tunnel was exposed | DevOps            | Cloudflare audit event/export     |
+| Restart affected services with new secret versions               | DevOps            | deployment log                    |
+| Run smoke, DAST, staging evidence, and secret scan               | QA/security       | reports with secrets redacted     |
 
 ## Evidence Rules
 
@@ -81,16 +81,16 @@ Use this after a Quick Tunnel demo, operator handoff, suspected secret leak, or 
 
 Fill this when a real staging/production provider is selected:
 
-| Field | Value |
-|---|---|
-| Provider | Pending |
-| Region/data residency | Pending |
-| Secret manager/KMS product | Pending |
-| Key rotation policy | Pending |
+| Field                       | Value   |
+| --------------------------- | ------- |
+| Provider                    | Pending |
+| Region/data residency       | Pending |
+| Secret manager/KMS product  | Pending |
+| Key rotation policy         | Pending |
 | Backup encryption key owner | Pending |
-| Operator access approver | Pending |
-| Audit export location | Pending |
-| Evidence archive path | Pending |
+| Operator access approver    | Pending |
+| Audit export location       | Pending |
+| Evidence archive path       | Pending |
 
 ## Ministry Boundary
 

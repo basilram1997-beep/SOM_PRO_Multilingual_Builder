@@ -16,11 +16,13 @@ function sha256(file) {
 function findInstaller() {
   const releaseDir = path.join(root, "apps", "desktop", "release");
   if (!fs.existsSync(releaseDir)) return null;
-  return fs
-    .readdirSync(releaseDir)
-    .filter((name) => /^SOM-PRO-Setup-.*\.exe$/i.test(name))
-    .map((name) => path.join(releaseDir, name))
-    .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0] || null;
+  return (
+    fs
+      .readdirSync(releaseDir)
+      .filter((name) => /^SOM-PRO-Setup-.*\.exe$/i.test(name))
+      .map((name) => path.join(releaseDir, name))
+      .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0] || null
+  );
 }
 
 function verifyWindowsSignature(file) {
@@ -54,15 +56,18 @@ function main() {
   const installer = process.env.SOM_DESKTOP_INSTALLER || findInstaller();
   const configSignals = {
     signExecutableEnvGate: /signExecutable:\s*codesignEnabled/.test(config),
-    signedBuildScript: /build:win:signed/.test(fs.readFileSync(path.join(root, "apps", "desktop", "package.json"), "utf8"))
+    signedBuildScript: /build:win:signed/.test(
+      fs.readFileSync(path.join(root, "apps", "desktop", "package.json"), "utf8")
+    )
   };
-  const installerEvidence = installer && fs.existsSync(installer)
-    ? {
-        path: path.relative(root, installer).replace(/\\/g, "/"),
-        sha256: sha256(installer),
-        authenticode: verifyWindowsSignature(installer)
-      }
-    : null;
+  const installerEvidence =
+    installer && fs.existsSync(installer)
+      ? {
+          path: path.relative(root, installer).replace(/\\/g, "/"),
+          sha256: sha256(installer),
+          authenticode: verifyWindowsSignature(installer)
+        }
+      : null;
 
   const report = {
     generatedAt: new Date().toISOString(),
@@ -71,7 +76,8 @@ function main() {
     installer: installerEvidence,
     updateIntegrity: {
       autoUpdateEnabled: false,
-      policy: "No auto-update channel is enabled in this release. Updates are manual signed-installer deliveries with SHA-256 evidence."
+      policy:
+        "No auto-update channel is enabled in this release. Updates are manual signed-installer deliveries with SHA-256 evidence."
     }
   };
   writeReport(report);
@@ -82,13 +88,17 @@ function main() {
   }
 
   if (!signingRequested) {
-    warn("Desktop signing check: baseline only. Set SOM_ENABLE_CODESIGN=true and provide a signed installer for release evidence.");
+    warn(
+      "Desktop signing check: baseline only. Set SOM_ENABLE_CODESIGN=true and provide a signed installer for release evidence."
+    );
     success("Desktop signing baseline written:", path.relative(root, reportPath));
     return;
   }
 
   if (!installerEvidence) {
-    error("SOM_ENABLE_CODESIGN=true requires SOM_DESKTOP_INSTALLER or a generated SOM-PRO installer under apps/desktop/release");
+    error(
+      "SOM_ENABLE_CODESIGN=true requires SOM_DESKTOP_INSTALLER or a generated SOM-PRO installer under apps/desktop/release"
+    );
     process.exit(1);
   }
 

@@ -6,20 +6,20 @@
 
 ## نتيجة الفحوصات المحلية
 
-| الأمر | النتيجة | ملاحظة |
-| --- | --- | --- |
-| `npm.cmd run ministry:review-pack` | نجح مع عناصر معلقة | `submissionReady=false` لأن هناك أدلة خارجية ناقصة. |
-| `npm.cmd run acceptance:check` | نجح | يحتاج `SOM_E2E_BASE_URL` و `SOM_E2E_API_BASE_URL` عند وجود staging حي. |
-| `npm.cmd run security:secrets` | نجح | لا توجد أسرار runtime متتبعة أو أسرار واضحة في الملفات المتتبعة. |
-| `npm.cmd run build` | نجح | تم بناء shared/backend/frontend بنجاح. |
+| الأمر                              | النتيجة            | ملاحظة                                                                 |
+| ---------------------------------- | ------------------ | ---------------------------------------------------------------------- |
+| `npm.cmd run ministry:review-pack` | نجح مع عناصر معلقة | `submissionReady=false` لأن هناك أدلة خارجية ناقصة.                    |
+| `npm.cmd run acceptance:check`     | نجح                | يحتاج `SOM_E2E_BASE_URL` و `SOM_E2E_API_BASE_URL` عند وجود staging حي. |
+| `npm.cmd run security:secrets`     | نجح                | لا توجد أسرار runtime متتبعة أو أسرار واضحة في الملفات المتتبعة.       |
+| `npm.cmd run build`                | نجح                | تم بناء shared/backend/frontend بنجاح.                                 |
 
 ## النواقص التي لا تغلق من داخل الكود
 
-| البند | المطلوب لإغلاقه | مكان الأرشفة |
-| --- | --- | --- |
-| Staging حي على HTTPS | دومين حقيقي، شهادة TLS، تشغيل Docker/Nginx، ثم تشغيل فحوصات DAST وstaging strict. | `reports/security/` و `docs/PHASE_10_STAGING_VERIFICATION_REPORT.md` |
-| مصادر الوزارة الرسمية | ملفات أو روابط رسمية من `sapakim.education.gov.il` أو مصدر وزارة معتمد، مع SHA-256 وتاريخ/نسخة. | `docs/official-ministry-standards/` و `docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md` |
-| تقرير اختراق خارجي موقّع | تقرير من جهة اختبار خارجية مع حالة إعادة الفحص وإغلاق النتائج. | `reports/ministry-review/external-pentest-signed-report.pdf` |
+| البند                    | المطلوب لإغلاقه                                                                                 | مكان الأرشفة                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Staging حي على HTTPS     | دومين حقيقي، شهادة TLS، تشغيل Docker/Nginx، ثم تشغيل فحوصات DAST وstaging strict.               | `reports/security/` و `docs/PHASE_10_STAGING_VERIFICATION_REPORT.md`               |
+| مصادر الوزارة الرسمية    | ملفات أو روابط رسمية من `sapakim.education.gov.il` أو مصدر وزارة معتمد، مع SHA-256 وتاريخ/نسخة. | `docs/official-ministry-standards/` و `docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md` |
+| تقرير اختراق خارجي موقّع | تقرير من جهة اختبار خارجية مع حالة إعادة الفحص وإغلاق النتائج.                                  | `reports/ministry-review/external-pentest-signed-report.pdf`                       |
 
 ## تجهيز staging على سيرفر HTTPS
 

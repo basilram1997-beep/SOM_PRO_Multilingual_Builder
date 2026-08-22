@@ -9,7 +9,12 @@ import { hashPassword } from "../../services/authService";
 import { recordAuditLog } from "../../services/auditLog";
 import { canRole, permissionsForRole } from "../../services/accessPolicy";
 import { z } from "zod";
-import { getParentStudentIds, primaryStudentId, replaceParentStudentLinks, uniqueNonEmpty } from "../../services/accountLinking";
+import {
+  getParentStudentIds,
+  primaryStudentId,
+  replaceParentStudentLinks,
+  uniqueNonEmpty
+} from "../../services/accountLinking";
 
 export const settingsRouter = Router();
 
@@ -152,7 +157,10 @@ async function assertSchoolStudentsExist(schoolId: string, studentIds: string[])
   return students;
 }
 
-async function existingLinkedStudentIdsForUser(schoolId: string, user: { id: string; role: string; studentId?: string | null }) {
+async function existingLinkedStudentIdsForUser(
+  schoolId: string,
+  user: { id: string; role: string; studentId?: string | null }
+) {
   if (user.role === "PARENT") {
     return uniqueNonEmpty([user.studentId, ...(await getParentStudentIds(prisma, schoolId, user.id))]);
   }
@@ -248,7 +256,9 @@ settingsRouter.post("/users", validateBody(UserCreateSchema), async (req, res) =
       entityId: user.id,
       after: user as Prisma.InputJsonValue
     });
-    res.status(201).json({ data: { ...user, studentIds: req.body.role === "PARENT" ? linkedStudentIds : [studentId].filter(Boolean) } });
+    res.status(201).json({
+      data: { ...user, studentIds: req.body.role === "PARENT" ? linkedStudentIds : [studentId].filter(Boolean) }
+    });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return res.status(409).json({ error: "USERNAME_EXISTS", message: "اسم المستخدم موجود مسبقًا" });
@@ -296,10 +306,9 @@ settingsRouter.put("/users/:id", validateBody(UserUpdateSchema), async (req, res
 
   const nextRole = req.body.role || user.role;
   const linkFieldsProvided = req.body.studentId !== undefined || req.body.studentIds !== undefined;
-  const linkedStudentIds =
-    linkFieldsProvided
-      ? linkedStudentIdsFromBody(req.body)
-      : await existingLinkedStudentIdsForUser(schoolId, user);
+  const linkedStudentIds = linkFieldsProvided
+    ? linkedStudentIdsFromBody(req.body)
+    : await existingLinkedStudentIdsForUser(schoolId, user);
   const studentId = primaryStudentId(linkedStudentIds);
   const email = req.body.email ? req.body.email.trim().toLowerCase() : user.email;
   if (email !== user.email) {

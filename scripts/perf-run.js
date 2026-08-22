@@ -7,12 +7,16 @@ const { generateE2ELicenseCode } = require("./e2e-license");
 const prisma = new PrismaClient();
 const nodeCommand = process.platform === "win32" ? "node.exe" : "node";
 
+function nowIso() {
+  return new Date().toISOString();
+}
+
 function trace(message, details) {
   if (details === undefined) {
-    console.log(`[${new Date().toISOString()}] ${message}`);
+    console.log(`[${nowIso()}] ${message}`);
     return;
   }
-  console.log(`[${new Date().toISOString()}] ${message}`, details);
+  console.log(`[${nowIso()}] ${message}`, details);
 }
 
 function parseArgs() {
@@ -255,6 +259,142 @@ function describeActiveResources() {
   };
 }
 
+function parsePositiveNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function readProcessSnapshot(pid) {
+  if (!pid) return null;
+
+  if (process.platform === "win32") {
+    const script = `
+$process = Get-Process -Id ${Number(pid)} -ErrorAction SilentlyContinue
+if ($null -eq $process) {
+  exit 2
+}
+[PSCustomObject]@{
+  id = $process.Id
+  cpuSeconds = $process.CPU
+  rssBytes = $process.WorkingSet64
+  privateBytes = $process.PrivateMemorySize64
+  virtualBytes = $process.VirtualMemorySize64
+} | ConvertTo-Json -Compress
+`;
+
+    const result = spawnSync("powershell.exe", ["-NoLogo", "-NoProfile", "-Command", script], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      windowsHide: true,
+      shell: false
+    });
+
+    if (result.status !== 0 || !String(result.stdout || "").trim()) {
+      return null;
+    }
+
+    try {
+      const data = JSON.parse(result.stdout);
+      return {
+        id: Number(data.id || pid),
+        cpuSeconds: Number(data.cpuSeconds || 0),
+        rssBytes: Number(data.rssBytes || 0),
+        privateBytes: Number(data.privateBytes || 0),
+        virtualBytes: Number(data.virtualBytes || 0)
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  const result = spawnSync("ps", ["-p", String(pid), "-o", "pid=,pcpu=,rss=,vsz="], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    windowsHide: true,
+    shell: false
+  });
+
+  if (result.status !== 0 || !String(result.stdout || "").trim()) {
+    return null;
+  }
+
+  const line = String(result.stdout).trim().split(/\r?\n/).pop()?.trim();
+  if (!line) return null;
+
+  const [idText, cpuPercentText, rssKbText, virtualKbText] = line.split(/\s+/);
+  const rssBytes = Number(rssKbText) * 1024;
+  const virtualBytes = Number(virtualKbText) * 1024;
+  return {
+    id: Number(idText || pid),
+    cpuSeconds: Number(cpuPercentText || 0) / 100,
+    rssBytes: Number.isFinite(rssBytes) ? rssBytes : 0,
+    privateBytes: Number.isFinite(rssBytes) ? rssBytes : 0,
+    virtualBytes: Number.isFinite(virtualBytes) ? virtualBytes : 0
+  };
+}
+
+function createProcessResourceSampler(pid, sampleEveryMs = 5000) {
+  const samples = [];
+  let previous = null;
+  let previousAt = performance.now();
+
+  const interval = setInterval(() => {
+    const snapshot = readProcessSnapshot(pid);
+    if (!snapshot) {
+      return;
+    }
+
+    const now = performance.now();
+    const elapsedSeconds = Math.max(0.001, (now - previousAt) / 1000);
+    const cpuSeconds = Number(snapshot.cpuSeconds || 0);
+    const cpuPercent = previous ? Math.max(0, ((cpuSeconds - previous.cpuSeconds) / elapsedSeconds) * 100) : 0;
+
+    previous = snapshot;
+    previousAt = now;
+    samples.push({
+      at: nowIso(),
+      pid: snapshot.id,
+      cpuPercent,
+      cpuSeconds,
+      rssBytes: snapshot.rssBytes,
+      rssMb: snapshot.rssBytes / 1024 / 1024,
+      privateBytes: snapshot.privateBytes,
+      privateMb: snapshot.privateBytes / 1024 / 1024,
+      virtualBytes: snapshot.virtualBytes,
+      virtualMb: snapshot.virtualBytes / 1024 / 1024
+    });
+  }, sampleEveryMs);
+
+  interval.unref?.();
+  return {
+    samples,
+    stop() {
+      clearInterval(interval);
+    }
+  };
+}
+
+function summarizeProcessSamples(samples) {
+  const summary = {
+    count: samples.length,
+    maxCpuPercent: 0,
+    maxRssMb: 0,
+    maxPrivateMb: 0,
+    maxVirtualMb: 0,
+    latest: null
+  };
+
+  for (const sample of samples) {
+    summary.maxCpuPercent = Math.max(summary.maxCpuPercent, Number(sample.cpuPercent || 0));
+    summary.maxRssMb = Math.max(summary.maxRssMb, Number(sample.rssMb || 0));
+    summary.maxPrivateMb = Math.max(summary.maxPrivateMb, Number(sample.privateMb || 0));
+    summary.maxVirtualMb = Math.max(summary.maxVirtualMb, Number(sample.virtualMb || 0));
+    summary.latest = sample;
+  }
+
+  return summary;
+}
+
 function logActiveResources(stage) {
   trace(stage, describeActiveResources());
 }
@@ -340,9 +480,14 @@ async function main() {
   env.PERF_ITERATIONS = iterations;
   env.PERF_WARMUP_ITERATIONS = warmupIterations;
   env.PERF_OUTPUT_JSON = outputJson;
+  env.RESOURCE_MAX_RSS_MB = process.env.RESOURCE_MAX_RSS_MB || "";
+  env.RESOURCE_MAX_CPU_PERCENT = process.env.RESOURCE_MAX_CPU_PERCENT || "";
+  env.RESOURCE_MAX_PRIVATE_MB = process.env.RESOURCE_MAX_PRIVATE_MB || "";
+  env.RESOURCE_SAMPLE_INTERVAL_MS = process.env.RESOURCE_SAMPLE_INTERVAL_MS || "";
   env.PERF_API_URL = apiUrl;
   env.PERF_HEALTH_URL = apiUrl;
   let backendProcess;
+  let resourceSampler;
   let exitCode = 0;
 
   trace("perf run started", {
@@ -384,6 +529,8 @@ async function main() {
     await verifyDataset(runKey, profile);
 
     backendProcess = spawnBackendProcess(env);
+    const resourceSampleIntervalMs = parsePositiveNumber(process.env.RESOURCE_SAMPLE_INTERVAL_MS, 5000);
+    resourceSampler = createProcessResourceSampler(backendProcess.pid, resourceSampleIntervalMs);
     await waitForUrl(`${apiUrl}/health`, 60_000);
 
     const measure = spawnSync(nodeCommand, ["scripts/perf-measure.js", `--mode=${mode}`, `--datasetSize=${profile}`], {
@@ -410,6 +557,7 @@ async function main() {
   } finally {
     trace("entering finally", { runKey, profile, keepData });
     logActiveResources("active resources before cleanup");
+    resourceSampler?.stop();
     if (backendProcess) {
       trace("child termination started", { pid: backendProcess.pid });
       await terminateProcessTree(backendProcess);
@@ -429,6 +577,38 @@ async function main() {
         shell: false
       });
       trace("cleanup seed completed", { runKey, profile });
+    }
+
+    const processSummary = summarizeProcessSamples(resourceSampler?.samples || []);
+    const resourceViolations = [];
+    const maxRssMb = parsePositiveNumber(process.env.RESOURCE_MAX_RSS_MB, 0);
+    const maxCpuPercent = parsePositiveNumber(process.env.RESOURCE_MAX_CPU_PERCENT, 0);
+    const maxPrivateMb = parsePositiveNumber(process.env.RESOURCE_MAX_PRIVATE_MB, 0);
+
+    if (processSummary.count > 0) {
+      trace("resource consumption summary", processSummary);
+      if (maxRssMb && processSummary.maxRssMb > maxRssMb) {
+        resourceViolations.push(`backend RSS ${processSummary.maxRssMb.toFixed(1)} MB exceeded budget ${maxRssMb} MB`);
+      }
+      if (maxCpuPercent && processSummary.maxCpuPercent > maxCpuPercent) {
+        resourceViolations.push(
+          `backend CPU ${processSummary.maxCpuPercent.toFixed(1)}% exceeded budget ${maxCpuPercent}%`
+        );
+      }
+      if (maxPrivateMb && processSummary.maxPrivateMb > maxPrivateMb) {
+        resourceViolations.push(
+          `backend private memory ${processSummary.maxPrivateMb.toFixed(1)} MB exceeded budget ${maxPrivateMb} MB`
+        );
+      }
+    } else {
+      trace("resource consumption summary", { count: 0, note: "no samples captured" });
+    }
+
+    if (resourceViolations.length) {
+      for (const violation of resourceViolations) {
+        console.error(`Resource budget violation: ${violation}`);
+      }
+      exitCode = 1;
     }
 
     logActiveResources("active resources after cleanup");

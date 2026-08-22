@@ -392,10 +392,7 @@ runBackupRestoreTest(
         data: { attachments: "uploads/lesson/changed-after-backup.png" }
       });
 
-      assert.equal(
-        (await prisma.student.findUnique({ where: { id: student.id } }))?.name,
-        "الطالب المعدل بعد النسخة"
-      );
+      assert.equal((await prisma.student.findUnique({ where: { id: student.id } }))?.name, "الطالب المعدل بعد النسخة");
       assert.equal(
         (
           await prisma.studentAttendance.findUnique({

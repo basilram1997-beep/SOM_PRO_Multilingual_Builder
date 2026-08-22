@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { Teacher } from "@som/shared";
 import { localizeClassName, localizeDay } from "../../i18n/displayNames";
-import { arabicDays, effectiveLoad, preferredClassText, releaseHoursUsed } from "./teacherHelpers";
+import { arabicDays, preferredClassText, releaseHoursUsed } from "./teacherHelpers";
 import type { AppLanguage, Translate } from "./teacherTypes";
 
 function toggleStringValue(values: string[], value: string, order: string[]) {
@@ -76,7 +76,6 @@ export function TeacherProfileFields({
     ? `${(form.preferredPeriods || []).length} ${t("common.period")}`
     : t("common.none");
   const currentReleaseHours = releaseHoursUsed(form);
-  const currentEffectiveLoad = effectiveLoad({ targetLoad: form.targetLoad, releaseHours: currentReleaseHours });
 
   return (
     <div className="form teacher-profile-form teacher-profile-form--dense">

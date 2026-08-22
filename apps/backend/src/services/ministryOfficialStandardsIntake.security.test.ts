@@ -10,7 +10,12 @@ function parseRegisterRows(markdown: string) {
   return markdown
     .split(/\r?\n/)
     .filter((line) => /^\| MOS-\d{3} \|/.test(line))
-    .map((line) => line.split("|").slice(1, -1).map((cell) => cell.trim()));
+    .map((line) =>
+      line
+        .split("|")
+        .slice(1, -1)
+        .map((cell) => cell.trim())
+    );
 }
 
 test("official Ministry standards intake register blocks formal compliance claims until archived standards are mapped and approved", () => {

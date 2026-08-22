@@ -455,5 +455,3 @@ export async function exportArchiveFile(
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-
-

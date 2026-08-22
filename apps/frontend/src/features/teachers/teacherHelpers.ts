@@ -121,5 +121,3 @@ export function releaseHoursUsed(teacher?: Pick<Teacher, "adminRole" | "releaseH
   if (!teacher?.adminRole?.trim()) return 0;
   return Math.max(0, teacher.releaseHours || 0);
 }
-
-

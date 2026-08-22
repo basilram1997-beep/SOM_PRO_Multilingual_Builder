@@ -123,6 +123,11 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
     event.preventDefault();
     const enteredLicense = licenseCode.trim();
 
+    if (!enteredLicense) {
+      setMessage(labels.missingLicense);
+      return;
+    }
+
     if (enteredLicense && setupLicenseCode && normalizeCode(enteredLicense) !== normalizeCode(setupLicenseCode)) {
       setMessage(labels.licenseMismatch);
       return;

@@ -579,7 +579,7 @@ test("commercial install database checks are explicit and local-only by default"
   assert.match(operatorHealthTypes, /redundancy/);
   assert.match(operatorHealthPage, /Alerting/);
   assert.match(operatorHealthPage, /Redundancy \/ failover/);
-  });
+});
 
 test("license server keeps production security controls in place", () => {
   const source = readFileSync("../../apps/license-server/src/server.js", "utf8");

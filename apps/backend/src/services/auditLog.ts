@@ -10,28 +10,30 @@ type AuditInput = {
   after?: Prisma.InputJsonValue | null;
 };
 
-const sensitiveAuditKeys = new Set([
-  "authorization",
-  "authtoken",
-  "currentpassword",
-  "licensecode",
-  "licensekey",
-  "mfacode",
-  "mfa_secret",
-  "mfasecret",
-  "mfaSecretEncrypted",
-  "newpassword",
-  "oldpassword",
-  "ownertoken",
-  "password",
-  "passwordconfirm",
-  "passwordconfirmation",
-  "recoverycode",
-  "recoverycodes",
-  "secret",
-  "token",
-  "tokenversion"
-].map((key) => key.toLowerCase()));
+const sensitiveAuditKeys = new Set(
+  [
+    "authorization",
+    "authtoken",
+    "currentpassword",
+    "licensecode",
+    "licensekey",
+    "mfacode",
+    "mfa_secret",
+    "mfasecret",
+    "mfaSecretEncrypted",
+    "newpassword",
+    "oldpassword",
+    "ownertoken",
+    "password",
+    "passwordconfirm",
+    "passwordconfirmation",
+    "recoverycode",
+    "recoverycodes",
+    "secret",
+    "token",
+    "tokenversion"
+  ].map((key) => key.toLowerCase())
+);
 
 export function redactSensitiveAuditValue(value: unknown): unknown {
   if (Buffer.isBuffer(value)) {

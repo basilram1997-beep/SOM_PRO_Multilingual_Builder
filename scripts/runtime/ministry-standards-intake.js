@@ -8,7 +8,9 @@ const { error, success, warn } = require("../cli-output");
 const root = path.resolve(__dirname, "..", "..");
 const archiveDir = path.join(root, "docs", "official-ministry-standards");
 const intakePath = path.join(root, "docs", "MINISTRY_OFFICIAL_STANDARDS_INTAKE.md");
-const reportDir = path.resolve(process.env.MINISTRY_STANDARDS_INTAKE_REPORT_DIR || path.join(root, "reports", "ministry-standards"));
+const reportDir = path.resolve(
+  process.env.MINISTRY_STANDARDS_INTAKE_REPORT_DIR || path.join(root, "reports", "ministry-standards")
+);
 const jsonReportPath = path.join(reportDir, "official-standards-intake.json");
 const markdownReportPath = path.join(reportDir, "official-standards-intake.md");
 const strict = process.argv.includes("--strict") || process.env.MINISTRY_STANDARDS_INTAKE_STRICT === "true";
@@ -52,7 +54,10 @@ function parseRows(markdown) {
     .split(/\r?\n/)
     .filter((line) => /^\| MOS-\d{3} \|/.test(line))
     .map((line) => {
-      const cells = line.split("|").slice(1, -1).map((cell) => cell.trim());
+      const cells = line
+        .split("|")
+        .slice(1, -1)
+        .map((cell) => cell.trim());
       return {
         controlId: cells[0],
         requiredDocument: cells[1],
@@ -157,7 +162,9 @@ function writeReports(report) {
     "| --- | --- | --- | --- |"
   ];
   for (const row of report.rows) {
-    lines.push(`| ${row.controlId} | ${row.status} | ${row.archiveExists ? "yes" : "no"} | ${row.issues.join("; ") || "none"} |`);
+    lines.push(
+      `| ${row.controlId} | ${row.status} | ${row.archiveExists ? "yes" : "no"} | ${row.issues.join("; ") || "none"} |`
+    );
   }
   lines.push("", "## Archive Files", "");
   if (!report.archiveFiles.length) {

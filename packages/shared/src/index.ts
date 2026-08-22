@@ -457,10 +457,12 @@ const StudentCertificateBaseSchema = z.object({
   subjectRows: z.array(StudentCertificateSubjectRowSchema).default([])
 });
 
-export const StudentCertificateSchema = StudentCertificateBaseSchema.transform(({ approved, saved, ...certificate }) => ({
-  ...certificate,
-  saved: saved ?? approved ?? false
-}));
+export const StudentCertificateSchema = StudentCertificateBaseSchema.transform(
+  ({ approved, saved, ...certificate }) => ({
+    ...certificate,
+    saved: saved ?? approved ?? false
+  })
+);
 
 export const TeacherLessonTodayStatusSchema = z.enum(["NOT_STARTED", "IN_PROGRESS", "COMPLETED"]);
 

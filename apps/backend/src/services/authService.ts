@@ -2,12 +2,7 @@ import crypto from "node:crypto";
 import { UserRole } from "@prisma/client";
 import { prisma } from "../db/prisma";
 import { getDefaultSchoolId } from "./schoolContext";
-import {
-  createMfaChallengeToken,
-  getSchoolMfaPolicy,
-  userRequiresMfa,
-  verifyUserSecondFactor
-} from "./mfaService";
+import { createMfaChallengeToken, getSchoolMfaPolicy, userRequiresMfa, verifyUserSecondFactor } from "./mfaService";
 import { getParentStudentIds, uniqueNonEmpty } from "./accountLinking";
 
 const DEFAULT_AUTH_SECRET = "change-this-auth-secret-before-selling";
@@ -47,7 +42,12 @@ export async function findUsersByLoginIdentifier(value: string) {
   });
 }
 
-async function linkedStudentIdsForUser(user: { id: string; schoolId: string; studentId?: string | null; role?: UserRole }) {
+async function linkedStudentIdsForUser(user: {
+  id: string;
+  schoolId: string;
+  studentId?: string | null;
+  role?: UserRole;
+}) {
   if (user.role !== "PARENT") return uniqueNonEmpty([user.studentId]);
   return uniqueNonEmpty([user.studentId, ...(await getParentStudentIds(prisma, user.schoolId, user.id))]);
 }

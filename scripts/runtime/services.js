@@ -152,11 +152,11 @@ function waitForShutdownSignal() {
   });
 }
 
-async function waitForUrl(url, timeoutMs) {
+async function waitForUrl(url, timeoutMs, options = {}) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
     try {
-      const response = await fetch(url, { method: "GET" });
+      const response = await fetch(url, { method: "GET", ...options });
       if (response.ok || response.status === 304) {
         trace("health check passed", { url, status: response.status });
         return;

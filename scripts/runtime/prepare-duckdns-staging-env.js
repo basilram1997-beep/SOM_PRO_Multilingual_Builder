@@ -129,5 +129,11 @@ writeEnv("apps/license-server/.env.production", [
 ]);
 
 success("DuckDNS staging env prepared for:", appUrl);
-success("Next:", "issue TLS certificates, then run docker compose --env-file .env.production -f docker-compose.production.yml up -d --build");
-warn("Important:", "generated secrets are local files ignored by Git; store a backup in a password manager before production use.");
+success(
+  "Next:",
+  "issue TLS certificates, then run docker compose --env-file .env.production -f docker-compose.production.yml up -d --build"
+);
+warn(
+  "Important:",
+  "generated secrets are local files ignored by Git; store a backup in a password manager before production use."
+);

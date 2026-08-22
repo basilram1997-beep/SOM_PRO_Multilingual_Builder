@@ -21,7 +21,9 @@ function readModeArg() {
       return String(arg.slice("--mode=".length)).trim().toLowerCase();
     }
   }
-  return String(process.env.RESILIENCE_MODE || "chaos").trim().toLowerCase();
+  return String(process.env.RESILIENCE_MODE || "chaos")
+    .trim()
+    .toLowerCase();
 }
 
 function trace(message, details) {
@@ -51,8 +53,7 @@ function main() {
     STRESS_ALLOW_FAILURES: "true",
     STRESS_KEEP_DATA: "true",
     STRESS_LOGIN_USERS: process.env.RESILIENCE_LOGIN_USERS || process.env.STRESS_LOGIN_USERS || "4",
-    STRESS_LOGIN_CONCURRENCY:
-      process.env.RESILIENCE_LOGIN_CONCURRENCY || process.env.STRESS_LOGIN_CONCURRENCY || "2",
+    STRESS_LOGIN_CONCURRENCY: process.env.RESILIENCE_LOGIN_CONCURRENCY || process.env.STRESS_LOGIN_CONCURRENCY || "2",
     STRESS_REQUESTS: process.env.RESILIENCE_REQUESTS || process.env.STRESS_REQUESTS || "4",
     STRESS_CONCURRENCY: process.env.RESILIENCE_CONCURRENCY || process.env.STRESS_CONCURRENCY || "1",
     STRESS_OUTAGE_DELAY_MS: process.env.RESILIENCE_OUTAGE_DELAY_MS || process.env.STRESS_OUTAGE_DELAY_MS || "120",

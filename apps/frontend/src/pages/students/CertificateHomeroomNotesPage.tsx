@@ -148,7 +148,10 @@ export function CertificateHomeroomNotesPage({ currentUser }: Props) {
           </label>
           <label>
             <span>{t("certificates.type")}</span>
-            <select value={certificateType} onChange={(event) => setCertificateType(event.target.value as CertificateType)}>
+            <select
+              value={certificateType}
+              onChange={(event) => setCertificateType(event.target.value as CertificateType)}
+            >
               {certificateTypeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {t(option.labelKey)}
@@ -160,7 +163,12 @@ export function CertificateHomeroomNotesPage({ currentUser }: Props) {
             <span>{t("certificates.academicYear")}</span>
             <input value={academicYear} onChange={(event) => setAcademicYear(event.target.value)} />
           </label>
-          <button type="button" className="primary" onClick={() => void saveNotes()} disabled={!classId || saving || loading}>
+          <button
+            type="button"
+            className="primary"
+            onClick={() => void saveNotes()}
+            disabled={!classId || saving || loading}
+          >
             <Save size={18} />
             <span>{saving ? t("certificates.saving") : t("certificates.save")}</span>
           </button>

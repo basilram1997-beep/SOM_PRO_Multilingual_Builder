@@ -12,53 +12,53 @@ This document prevents SOM PRO from treating "reachable from the internet" as eq
 
 ## Current Position
 
-| Option | Current status | Acceptable for demo | Acceptable for Ministry staging | Acceptable for production |
-|---|---|---:|---:|---:|
-| Cloudflare Quick Tunnel | Implemented for temporary external demo | Yes | No | No |
-| DuckDNS on home router | Blocked by CGNAT / port-forwarding limitations | Limited | No | No |
-| Cloudflare Named Tunnel | Ready as architecture/runbook, needs owned domain and provider host | Yes | Only with stable Israel-hosted origin and evidence | Only with stable Israel-hosted origin and full provider evidence |
-| Small VPS in Israel | Candidate | Yes | Possible after hardening/evidence | Possible only with provider/KMS/backup/SLA evidence |
-| Managed cloud in Israel | Candidate | Yes | Preferred if KMS/secret manager/logging/backups are available | Preferred after contracts and evidence |
+| Option                  | Current status                                                      | Acceptable for demo |                               Acceptable for Ministry staging |                                        Acceptable for production |
+| ----------------------- | ------------------------------------------------------------------- | ------------------: | ------------------------------------------------------------: | ---------------------------------------------------------------: |
+| Cloudflare Quick Tunnel | Implemented for temporary external demo                             |                 Yes |                                                            No |                                                               No |
+| DuckDNS on home router  | Blocked by CGNAT / port-forwarding limitations                      |             Limited |                                                            No |                                                               No |
+| Cloudflare Named Tunnel | Ready as architecture/runbook, needs owned domain and provider host |                 Yes |            Only with stable Israel-hosted origin and evidence | Only with stable Israel-hosted origin and full provider evidence |
+| Small VPS in Israel     | Candidate                                                           |                 Yes |                             Possible after hardening/evidence |              Possible only with provider/KMS/backup/SLA evidence |
+| Managed cloud in Israel | Candidate                                                           |                 Yes | Preferred if KMS/secret manager/logging/backups are available |                           Preferred after contracts and evidence |
 
 ## Mandatory Acceptance Criteria
 
-| Control | Requirement | Evidence required |
-|---|---|---|
-| Data residency | Student/school production data stored and processed in Israel | Provider region statement, contract/order form, DPA |
-| Secret management | No production secrets in Git or local `.env`; use secret manager/KMS/protected deployment env | `docs/SECRETS_AND_KMS_READINESS.md`, masked secret-store evidence |
-| KMS/key management | Backup/database/application key ownership and rotation documented | KMS/secret manager product, key IDs/version IDs only, rotation policy |
-| TLS/edge security | HTTPS, HTTP-to-HTTPS redirect, HSTS, health evidence | strict staging evidence, TLS report |
-| Backups | Encrypted backup, offsite/isolated storage, restore drill | backup manifest, restore drill, RPO/RTO report |
-| Audit/logging | App audit plus provider/platform logs retained and protected | audit export, provider log retention settings, access logs masked |
-| Provider assurance | ISO/SOC or equivalent provider security evidence when available | certificates/reports or provider security package |
-| SLA/availability | uptime/support/incident escalation documented | provider SLA/support plan |
-| DPA/privacy | processor obligations and deletion/return duties documented | signed DPA or legal-approved agreement |
-| External testing | DAST and external pentest run against stable staging URL | ZAP report, external sign-off |
+| Control            | Requirement                                                                                   | Evidence required                                                     |
+| ------------------ | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Data residency     | Student/school production data stored and processed in Israel                                 | Provider region statement, contract/order form, DPA                   |
+| Secret management  | No production secrets in Git or local `.env`; use secret manager/KMS/protected deployment env | `docs/SECRETS_AND_KMS_READINESS.md`, masked secret-store evidence     |
+| KMS/key management | Backup/database/application key ownership and rotation documented                             | KMS/secret manager product, key IDs/version IDs only, rotation policy |
+| TLS/edge security  | HTTPS, HTTP-to-HTTPS redirect, HSTS, health evidence                                          | strict staging evidence, TLS report                                   |
+| Backups            | Encrypted backup, offsite/isolated storage, restore drill                                     | backup manifest, restore drill, RPO/RTO report                        |
+| Audit/logging      | App audit plus provider/platform logs retained and protected                                  | audit export, provider log retention settings, access logs masked     |
+| Provider assurance | ISO/SOC or equivalent provider security evidence when available                               | certificates/reports or provider security package                     |
+| SLA/availability   | uptime/support/incident escalation documented                                                 | provider SLA/support plan                                             |
+| DPA/privacy        | processor obligations and deletion/return duties documented                                   | signed DPA or legal-approved agreement                                |
+| External testing   | DAST and external pentest run against stable staging URL                                      | ZAP report, external sign-off                                         |
 
 ## Israel-First Shortlist Criteria
 
 Do not select a host only because it can run Docker. Score candidates against:
 
-| Criterion | Minimum |
-|---|---|
-| Israel region/data center | Required |
-| Private network/VPC or equivalent | Required |
-| Managed database or hardened self-managed PostgreSQL | Required |
-| Secret manager/KMS or protected secret injection | Required for production, acceptable pending for pilot only with documented compensating controls |
-| Encrypted backups and restore workflow | Required |
-| Firewall/security groups | Required |
-| Audit logs and operator access logs | Required |
-| DPA and data processing terms | Required before real student data |
-| SLA/support | Required before production |
+| Criterion                                            | Minimum                                                                                          |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Israel region/data center                            | Required                                                                                         |
+| Private network/VPC or equivalent                    | Required                                                                                         |
+| Managed database or hardened self-managed PostgreSQL | Required                                                                                         |
+| Secret manager/KMS or protected secret injection     | Required for production, acceptable pending for pilot only with documented compensating controls |
+| Encrypted backups and restore workflow               | Required                                                                                         |
+| Firewall/security groups                             | Required                                                                                         |
+| Audit logs and operator access logs                  | Required                                                                                         |
+| DPA and data processing terms                        | Required before real student data                                                                |
+| SLA/support                                          | Required before production                                                                       |
 
 ## Decision Register
 
 Fill this table when comparing real offers. Do not mark a provider approved until every required evidence item has an owner and archive location.
 
-| Candidate | Israel data residency | KMS/secret manager | Backups | Provider assurance | SLA/support | DPA | Status | Evidence archive |
-|---|---|---|---|---|---|---|---|---|
-| Pending VPS candidate | Pending | Pending | Pending | Pending | Pending | Pending | Not selected | Pending |
-| Pending managed cloud candidate | Pending | Pending | Pending | Pending | Pending | Pending | Not selected | Pending |
+| Candidate                       | Israel data residency | KMS/secret manager | Backups | Provider assurance | SLA/support | DPA     | Status       | Evidence archive |
+| ------------------------------- | --------------------- | ------------------ | ------- | ------------------ | ----------- | ------- | ------------ | ---------------- |
+| Pending VPS candidate           | Pending               | Pending            | Pending | Pending            | Pending     | Pending | Not selected | Pending          |
+| Pending managed cloud candidate | Pending               | Pending            | Pending | Pending            | Pending     | Pending | Not selected | Pending          |
 
 ## Go / No-Go
 

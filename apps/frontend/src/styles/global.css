@@ -587,21 +587,46 @@ button:disabled {
 }
 
 html[dir="rtl"] .lesson-modal-backdrop {
-  padding-inline-start: 34px;
-  padding-inline-end: 14px;
-}
-
-html[dir="rtl"] .lesson-modal-backdrop .modal-card,
-html[dir="rtl"] .lesson-modal,
-html[dir="rtl"] .exam-modal,
-html[dir="rtl"] .homework-modal,
-html[dir="rtl"] .homework-submissions-modal {
-  transform: translateX(-10px);
+  padding-inline: 20px;
 }
 
 html[dir="ltr"] .lesson-modal-backdrop {
-  padding-inline-start: 14px;
-  padding-inline-end: 34px;
+  padding-inline: 20px;
+}
+
+html[dir="rtl"] .behavior-modal-backdrop {
+  padding-inline: 20px;
+}
+
+html[dir="ltr"] .behavior-modal-backdrop {
+  padding-inline: 20px;
+}
+
+@media (min-width: 901px) {
+  .lesson-modal-backdrop {
+    inset-inline-start: 260px;
+  }
+
+  .lesson-modal-backdrop .lesson-modal {
+    width: min(1180px, calc(100vw - 300px));
+  }
+
+  .lesson-modal-backdrop .exam-modal,
+  .lesson-modal-backdrop .homework-submissions-modal {
+    width: min(1320px, calc(100vw - 300px));
+  }
+
+  .lesson-modal-backdrop .homework-modal {
+    width: min(1240px, calc(100vw - 300px));
+  }
+
+  .behavior-modal-backdrop {
+    inset-inline-start: 260px;
+  }
+
+  .behavior-modal-backdrop .behavior-modal {
+    width: min(1180px, calc(100vw - 300px));
+  }
 }
 .candidate-list {
   display: grid;
@@ -1769,7 +1794,9 @@ html[dir="rtl"] .teachers-page .wide-table tbody tr.selected td:first-child {
 }
 .daily-event-grid {
   display: grid;
-  grid-template-columns: minmax(160px, 1.1fr) minmax(160px, 1fr) minmax(180px, 1.1fr) minmax(140px, 0.9fr) minmax(140px, 0.9fr) minmax(260px, 1.6fr) auto;
+  grid-template-columns:
+    minmax(160px, 1.1fr) minmax(160px, 1fr) minmax(180px, 1.1fr) minmax(140px, 0.9fr) minmax(140px, 0.9fr)
+    minmax(260px, 1.6fr) auto;
   gap: 12px;
   align-items: end;
 }

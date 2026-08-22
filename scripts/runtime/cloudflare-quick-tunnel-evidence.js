@@ -9,6 +9,15 @@ const reportDir = path.resolve(process.env.SOM_QUICK_TUNNEL_REPORT_DIR || path.j
 const jsonReportPath = path.join(reportDir, "cloudflare-quick-tunnel-trial.json");
 const markdownReportPath = path.join(reportDir, "cloudflare-quick-tunnel-trial.md");
 const rawUrl = process.env.SOM_QUICK_TUNNEL_URL || process.env.STAGING_QUICK_TUNNEL_URL || "";
+const authUser = String(process.env.SOM_TUNNEL_PROXY_USER || "").trim();
+const authPassword = String(process.env.SOM_TUNNEL_PROXY_PASSWORD || "").trim();
+
+function basicAuthHeader() {
+  if (!authUser || !authPassword) return {};
+  return {
+    authorization: `Basic ${Buffer.from(`${authUser}:${authPassword}`, "utf8").toString("base64")}`
+  };
+}
 
 function parseQuickTunnelUrl(value) {
   let url;
@@ -84,10 +93,11 @@ async function main() {
   const url = parseQuickTunnelUrl(rawUrl);
   const frontendUrl = new URL("/", url).toString();
   const apiVersionUrl = new URL("/api/version", url).toString();
+  const headers = basicAuthHeader();
 
   const [frontend, apiVersion] = await Promise.all([
-    fetchProbe(frontendUrl, { method: "GET" }),
-    fetchProbe(apiVersionUrl, { method: "GET", headers: { accept: "application/json" } })
+    fetchProbe(frontendUrl, { method: "GET", headers }),
+    fetchProbe(apiVersionUrl, { method: "GET", headers: { ...headers, accept: "application/json" } })
   ]);
 
   const report = {

@@ -103,7 +103,9 @@ export function createApp() {
 
   app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     const error = err instanceof Error ? err : new Error("UNKNOWN_SERVER_ERROR");
-    const status = Number((err as { status?: number; statusCode?: number })?.status || (err as { statusCode?: number })?.statusCode);
+    const status = Number(
+      (err as { status?: number; statusCode?: number })?.status || (err as { statusCode?: number })?.statusCode
+    );
     const type = String((err as { type?: string })?.type || "");
 
     if (type === "entity.parse.failed" || error instanceof SyntaxError) {

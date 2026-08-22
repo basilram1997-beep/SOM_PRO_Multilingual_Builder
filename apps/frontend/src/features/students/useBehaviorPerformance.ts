@@ -42,7 +42,21 @@ function sortCategorySummary(items: BehaviorListResponse["categorySummary"]) {
   return [...items].sort((left, right) => (order.get(left.category) ?? 999) - (order.get(right.category) ?? 999));
 }
 
-export function useBehaviorPerformance(currentUser?: { role?: string; studentId?: string | null; studentIds?: string[] }) {
+function resolveBehaviorTemplate(form: StudentBehaviorForm) {
+  const category = form.category || behaviorCategories[0].key;
+  const templates = getBehaviorTemplates(category, form.tone);
+  const template = String(form.template || "").trim();
+  if (template) return template;
+  const note = String(form.note || "").trim();
+  if (note) return note;
+  return templates[0] || category;
+}
+
+export function useBehaviorPerformance(currentUser?: {
+  role?: string;
+  studentId?: string | null;
+  studentIds?: string[];
+}) {
   const { t } = useI18n();
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [classId, setClassId] = useState("");
@@ -154,12 +168,16 @@ export function useBehaviorPerformance(currentUser?: { role?: string; studentId?
       setMessage("");
       setSavingStudentId(editingStudent.id);
       await somApi.students.behavior.clear(editingStudent.id, classId, date);
-      const refreshed = await somApi.students.behavior.list(classId, date);
-      setRows(refreshed.data?.rows || []);
-      setSummary(refreshed.data?.summary || { total: 0, positive: 0, negative: 0 });
-      setCategorySummary(sortCategorySummary(refreshed.data?.categorySummary || []));
       setMessage(t("behavior.cleared"));
       closeEditor();
+      try {
+        const refreshed = await somApi.students.behavior.list(classId, date);
+        setRows(refreshed.data?.rows || []);
+        setSummary(refreshed.data?.summary || { total: 0, positive: 0, negative: 0 });
+        setCategorySummary(sortCategorySummary(refreshed.data?.categorySummary || []));
+      } catch {
+        // Keep the successful clear visible even if the refresh fails.
+      }
     } catch {
       setMessage(t("behavior.clearFailed"));
     } finally {
@@ -168,7 +186,10 @@ export function useBehaviorPerformance(currentUser?: { role?: string; studentId?
   }
 
   async function saveRecord() {
-    if (!form.studentId || !form.category || !form.template || !classId || !date || !day) {
+    const category = form.category || behaviorCategories[0].key;
+    const template = resolveBehaviorTemplate(form);
+
+    if (!form.studentId || !category || !template || !classId || !date || !day) {
       setMessage(t("behavior.required"));
       return;
     }
@@ -178,6 +199,8 @@ export function useBehaviorPerformance(currentUser?: { role?: string; studentId?
     try {
       const response = await somApi.students.behavior.save({
         ...form,
+        category,
+        template,
         studentId: form.studentId,
         date,
         day
@@ -191,15 +214,19 @@ export function useBehaviorPerformance(currentUser?: { role?: string; studentId?
                   ? row.behaviorRecords.map((record) => (record.id === response.data?.id ? response.data : record))
                   : [...row.behaviorRecords, response.data]
               }
-            : row
+              : row
         )
       );
-      const refreshed = await somApi.students.behavior.list(classId, date);
-      setRows(refreshed.data?.rows || []);
-      setSummary(refreshed.data?.summary || { total: 0, positive: 0, negative: 0 });
-      setCategorySummary(sortCategorySummary(refreshed.data?.categorySummary || []));
       setMessage(t("behavior.saved"));
       closeEditor();
+      try {
+        const refreshed = await somApi.students.behavior.list(classId, date);
+        setRows(refreshed.data?.rows || []);
+        setSummary(refreshed.data?.summary || { total: 0, positive: 0, negative: 0 });
+        setCategorySummary(sortCategorySummary(refreshed.data?.categorySummary || []));
+      } catch {
+        // Preserve the saved record locally even if the refresh fails.
+      }
     } catch {
       setMessage(t("behavior.saveFailed"));
     } finally {

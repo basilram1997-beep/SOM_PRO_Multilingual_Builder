@@ -33,26 +33,26 @@ Allowed status values:
 - `Mapped`: exact clauses are mapped to controls/tests, but not approved.
 - `Approved`: mapped controls were reviewed and signed off by the owner.
 
-| Control ID | Required official document | Source URL | Document title | Download date | Version / publication date | SHA-256 | Archive path | Review owner | Status | Mapped control IDs |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| MOS-001 | Ministry supplier information security standard | TBD from `sapakim.education.gov.il` | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Product owner + security reviewer | Missing | TBD |
-| MOS-002 | Privacy procedure for technological products | TBD from `sapakim.education.gov.il` | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Legal/privacy owner | Missing | TBD |
-| MOS-003 | Pedagogical management software standard | TBD from `sapakim.education.gov.il` | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Product owner + backend owner | Missing | TBD |
-| MOS-004 | Technology compatibility standard | TBD from `sapakim.education.gov.il` | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | QA/accessibility owner | Missing | TBD |
-| MOS-005 | Scheduling and teaching staff management standard | TBD from `sapakim.education.gov.il` | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Product owner + scheduling owner | Missing | TBD |
-| MOS-006 | Ministry IDM/OIDC/SAML integration requirements | TBD from `sapakim.education.gov.il` or official IdP onboarding source | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Security/identity owner | Missing | TBD |
-| MOS-007 | Official data exchange/API interface specification | TBD from `sapakim.education.gov.il` or official Ministry integration source | TBD | TBD | TBD | TBD | `docs/official-ministry-standards/` | Backend/integration owner | Missing | TBD |
+| Control ID | Required official document                         | Source URL                                                                  | Document title | Download date | Version / publication date | SHA-256 | Archive path                        | Review owner                      | Status  | Mapped control IDs |
+| ---------- | -------------------------------------------------- | --------------------------------------------------------------------------- | -------------- | ------------- | -------------------------- | ------- | ----------------------------------- | --------------------------------- | ------- | ------------------ |
+| MOS-001    | Ministry supplier information security standard    | TBD from `sapakim.education.gov.il`                                         | TBD            | TBD           | TBD                        | TBD     | `docs/official-ministry-standards/` | Product owner + security reviewer | Missing | TBD                |
+| MOS-002    | Privacy procedure for technological products       | TBD from `sapakim.education.gov.il`                                         | TBD            | TBD           | TBD                        | TBD     | `docs/official-ministry-standards/` | Legal/privacy owner               | Missing | TBD                |
+| MOS-003    | Pedagogical management software standard           | TBD from `sapakim.education.gov.il`                                         | TBD            | TBD           | TBD                        | TBD     | `docs/official-ministry-standards/` | Product owner + backend owner     | Missing | TBD                |
+| MOS-004    | Technology compatibility standard                  | TBD from `sapakim.education.gov.il`                                         | TBD            | TBD           | TBD                        | TBD     | `docs/official-ministry-standards/` | QA/accessibility owner            | Missing | TBD                |
+| MOS-005    | Scheduling and teaching staff management standard  | TBD from `sapakim.education.gov.il`                                         | TBD            | TBD           | TBD                        | TBD     | `docs/official-ministry-standards/` | Product owner + scheduling owner  | Missing | TBD                |
+| MOS-006    | Ministry IDM/OIDC/SAML integration requirements    | TBD from `sapakim.education.gov.il` or official IdP onboarding source       | TBD            | TBD           | TBD                        | TBD     | `docs/official-ministry-standards/` | Security/identity owner           | Missing | TBD                |
+| MOS-007    | Official data exchange/API interface specification | TBD from `sapakim.education.gov.il` or official Ministry integration source | TBD            | TBD           | TBD                        | TBD     | `docs/official-ministry-standards/` | Backend/integration owner         | Missing | TBD                |
 
 ## Public Context Sources
 
 Public Ministry pages may inform readiness work, but they are not a substitute for official supplier standards unless the Ministry explicitly designates them as controlling requirements.
 
-| Source | Status | Relevant themes | Project mapping |
-| --- | --- | --- | --- |
-| `https://pop.education.gov.il/sherutey-tiksuv-bachinuch/data-security-e-learning/` | Public context only | Safe digital learning environments, privacy, cyber reporting, approved technology tools | Security controls, incident response, privacy, audit evidence |
-| `https://pop.education.gov.il/sherutey-tiksuv-bachinuch/ict-technology-coordinator-portfolio/school-electronic-organization/` | Public context only | Unified identification, approved digital tools, pedagogical management software functions, information security | SSO/OIDC readiness, route inventory, role/access controls |
-| `https://edu-tech.education.gov.il/taknot/kol-kore/authorities-genetic-laboratory/` | Public context only | Approved technological suppliers, Ministry security/privacy review, IDM connection references | Supplier approval dependency, SSO/IDM requirement tracking |
-| `https://www.mr.gov.il/` | Procurement context only | Procurement publications and tender metadata | Procurement context; not a substitute for supplier security standards |
+| Source                                                                                                                        | Status                   | Relevant themes                                                                                                 | Project mapping                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `https://pop.education.gov.il/sherutey-tiksuv-bachinuch/data-security-e-learning/`                                            | Public context only      | Safe digital learning environments, privacy, cyber reporting, approved technology tools                         | Security controls, incident response, privacy, audit evidence         |
+| `https://pop.education.gov.il/sherutey-tiksuv-bachinuch/ict-technology-coordinator-portfolio/school-electronic-organization/` | Public context only      | Unified identification, approved digital tools, pedagogical management software functions, information security | SSO/OIDC readiness, route inventory, role/access controls             |
+| `https://edu-tech.education.gov.il/taknot/kol-kore/authorities-genetic-laboratory/`                                           | Public context only      | Approved technological suppliers, Ministry security/privacy review, IDM connection references                   | Supplier approval dependency, SSO/IDM requirement tracking            |
+| `https://www.mr.gov.il/`                                                                                                      | Procurement context only | Procurement publications and tender metadata                                                                    | Procurement context; not a substitute for supplier security standards |
 
 ## Intake Procedure
 
@@ -69,29 +69,28 @@ Public Ministry pages may inform readiness work, but they are not a substitute f
 
 When an official file or link is provided, close the matching row using this sequence:
 
-| Step | Action | Required field |
-| --- | --- | --- |
-| 1 | Save the original unmodified document. | `Archive path` |
-| 2 | Record the exact official source URL. | `Source URL` |
-| 3 | Record the visible document title and version/publication date. | `Document title`, `Version / publication date` |
-| 4 | Record the local download date. | `Download date` |
-| 5 | Calculate SHA-256 from the archived file. | `SHA-256` |
-| 6 | Change status from `Missing` to `Downloaded`. | `Status` |
-| 7 | Map clauses to controls/tests in `docs/MINISTRY_COMPLIANCE_MATRIX.md`. | `Mapped control IDs` |
-| 8 | Owner signs off and status becomes `Approved`. | `Review owner`, `Status` |
+| Step | Action                                                                 | Required field                                 |
+| ---- | ---------------------------------------------------------------------- | ---------------------------------------------- |
+| 1    | Save the original unmodified document.                                 | `Archive path`                                 |
+| 2    | Record the exact official source URL.                                  | `Source URL`                                   |
+| 3    | Record the visible document title and version/publication date.        | `Document title`, `Version / publication date` |
+| 4    | Record the local download date.                                        | `Download date`                                |
+| 5    | Calculate SHA-256 from the archived file.                              | `SHA-256`                                      |
+| 6    | Change status from `Missing` to `Downloaded`.                          | `Status`                                       |
+| 7    | Map clauses to controls/tests in `docs/MINISTRY_COMPLIANCE_MATRIX.md`. | `Mapped control IDs`                           |
+| 8    | Owner signs off and status becomes `Approved`.                         | `Review owner`, `Status`                       |
 
 Suggested archive names:
 
-| Standard | Suggested file name |
-| --- | --- |
-| Supplier information security | `MOS-001_supplier-information-security-standard_YYYY-MM-DD_original.pdf` |
-| Privacy procedure | `MOS-002_privacy-procedure-technological-products_YYYY-MM-DD_original.pdf` |
+| Standard                        | Suggested file name                                                        |
+| ------------------------------- | -------------------------------------------------------------------------- |
+| Supplier information security   | `MOS-001_supplier-information-security-standard_YYYY-MM-DD_original.pdf`   |
+| Privacy procedure               | `MOS-002_privacy-procedure-technological-products_YYYY-MM-DD_original.pdf` |
 | Pedagogical management software | `MOS-003_pedagogical-management-software-standard_YYYY-MM-DD_original.pdf` |
-| Technology compatibility | `MOS-004_technology-compatibility-standard_YYYY-MM-DD_original.pdf` |
-| Scheduling and teaching staff | `MOS-005_scheduling-teaching-staff-standard_YYYY-MM-DD_original.pdf` |
-| Ministry identity integration | `MOS-006_ministry-idm-oidc-saml-requirements_YYYY-MM-DD_original.pdf` |
-| Ministry data exchange/API | `MOS-007_ministry-data-exchange-api-spec_YYYY-MM-DD_original.pdf` |
- 
+| Technology compatibility        | `MOS-004_technology-compatibility-standard_YYYY-MM-DD_original.pdf`        |
+| Scheduling and teaching staff   | `MOS-005_scheduling-teaching-staff-standard_YYYY-MM-DD_original.pdf`       |
+| Ministry identity integration   | `MOS-006_ministry-idm-oidc-saml-requirements_YYYY-MM-DD_original.pdf`      |
+| Ministry data exchange/API      | `MOS-007_ministry-data-exchange-api-spec_YYYY-MM-DD_original.pdf`          |
 
 ## Intake Automation
 

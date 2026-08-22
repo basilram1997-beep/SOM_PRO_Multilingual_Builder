@@ -12,19 +12,19 @@ The repository stays single-source. DuckDNS is a staging configuration value onl
 
 ## Current Network
 
-| Item | Value |
-|---|---|
-| DuckDNS domain | `sompro.duckdns.org` |
-| Router public IP in DuckDNS | `79.177.139.125` |
-| Local SOM PRO machine IP | `10.0.0.5` |
-| Router gateway | `10.0.0.138` |
+| Item                        | Value                |
+| --------------------------- | -------------------- |
+| DuckDNS domain              | `sompro.duckdns.org` |
+| Router public IP in DuckDNS | `79.177.139.125`     |
+| Local SOM PRO machine IP    | `10.0.0.5`           |
+| Router gateway              | `10.0.0.138`         |
 
 Router forwarding must point:
 
 | External port | Protocol | Internal target |
-|---|---|---|
-| `80` | TCP | `10.0.0.5:80` |
-| `443` | TCP | `10.0.0.5:443` |
+| ------------- | -------- | --------------- |
+| `80`          | TCP      | `10.0.0.5:80`   |
+| `443`         | TCP      | `10.0.0.5:443`  |
 
 ## Prepare Local Env Files
 
@@ -50,14 +50,14 @@ node scripts/runtime/prepare-duckdns-staging-env.js --force
 
 ## Required Public URLs
 
-| Setting | Staging value |
-|---|---|
-| `APP_URL` | `https://sompro.duckdns.org` |
-| `PUBLIC_APP_URL` | `https://sompro.duckdns.org` |
-| `VITE_API_URL` | `/api` |
-| `SOM_API_URL` | `https://sompro.duckdns.org/api` |
-| `CORS_ORIGIN` | `https://sompro.duckdns.org` |
-| `SOM_LICENSE_SERVER_URL` | `https://sompro.duckdns.org/license` |
+| Setting                      | Staging value                        |
+| ---------------------------- | ------------------------------------ |
+| `APP_URL`                    | `https://sompro.duckdns.org`         |
+| `PUBLIC_APP_URL`             | `https://sompro.duckdns.org`         |
+| `VITE_API_URL`               | `/api`                               |
+| `SOM_API_URL`                | `https://sompro.duckdns.org/api`     |
+| `CORS_ORIGIN`                | `https://sompro.duckdns.org`         |
+| `SOM_LICENSE_SERVER_URL`     | `https://sompro.duckdns.org/license` |
 | `SOM_PRO_LICENSE_SERVER_URL` | `https://sompro.duckdns.org/license` |
 
 ## TLS Certificate Requirement

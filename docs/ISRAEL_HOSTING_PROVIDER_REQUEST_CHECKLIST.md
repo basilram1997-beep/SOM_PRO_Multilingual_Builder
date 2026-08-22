@@ -35,19 +35,19 @@ Please also state any limitation that would prevent using your service for Minis
 
 ## Minimum VPS Staging Requirements
 
-| Requirement | Minimum |
-|---|---|
-| Region | Israel |
-| IP | Static public IPv4 |
-| OS | Ubuntu Server 22.04 LTS or 24.04 LTS |
-| CPU/RAM | 2 vCPU / 4 GB minimum; 4 vCPU / 8 GB preferred |
-| Disk | 80 GB SSD minimum |
-| Firewall | Provider firewall/security group plus OS firewall |
-| Database | PostgreSQL private to server/Docker network |
-| Redis | Private to server/Docker network |
-| Secrets | Protected operator vault, secret manager, or KMS-backed process |
-| Backup | Encrypted backup/snapshot with Israel location documented |
-| Ingress | Nginx HTTPS or Cloudflare Named Tunnel |
+| Requirement | Minimum                                                         |
+| ----------- | --------------------------------------------------------------- |
+| Region      | Israel                                                          |
+| IP          | Static public IPv4                                              |
+| OS          | Ubuntu Server 22.04 LTS or 24.04 LTS                            |
+| CPU/RAM     | 2 vCPU / 4 GB minimum; 4 vCPU / 8 GB preferred                  |
+| Disk        | 80 GB SSD minimum                                               |
+| Firewall    | Provider firewall/security group plus OS firewall               |
+| Database    | PostgreSQL private to server/Docker network                     |
+| Redis       | Private to server/Docker network                                |
+| Secrets     | Protected operator vault, secret manager, or KMS-backed process |
+| Backup      | Encrypted backup/snapshot with Israel location documented       |
+| Ingress     | Nginx HTTPS or Cloudflare Named Tunnel                          |
 
 ## Scoring Table
 
@@ -57,20 +57,20 @@ Score each item:
 - `1`: available but weak/manual/no written evidence.
 - `2`: available with written evidence and acceptable controls.
 
-| Criterion | Weight | Candidate A | Candidate B | Candidate C |
-|---|---:|---:|---:|---:|
-| Israel compute/data residency evidence | 5 |  |  |  |
-| Backup/snapshot location documented as Israel or approved | 5 |  |  |  |
-| DPA/privacy terms | 5 |  |  |  |
-| Secret manager/KMS/protected secret injection | 4 |  |  |  |
-| Managed PostgreSQL or hardened private DB support | 4 |  |  |  |
-| Firewall/security groups | 4 |  |  |  |
-| Audit/operator logs | 3 |  |  |  |
-| SLA/support/incident path | 3 |  |  |  |
-| ISO/SOC/security assurance package | 3 |  |  |  |
-| Cost fit for staging | 2 |  |  |  |
-| Docker/Compose or managed runtime support | 2 |  |  |  |
-| Cloudflare Named Tunnel compatibility | 1 |  |  |  |
+| Criterion                                                 | Weight | Candidate A | Candidate B | Candidate C |
+| --------------------------------------------------------- | -----: | ----------: | ----------: | ----------: |
+| Israel compute/data residency evidence                    |      5 |             |             |             |
+| Backup/snapshot location documented as Israel or approved |      5 |             |             |             |
+| DPA/privacy terms                                         |      5 |             |             |             |
+| Secret manager/KMS/protected secret injection             |      4 |             |             |             |
+| Managed PostgreSQL or hardened private DB support         |      4 |             |             |             |
+| Firewall/security groups                                  |      4 |             |             |             |
+| Audit/operator logs                                       |      3 |             |             |             |
+| SLA/support/incident path                                 |      3 |             |             |             |
+| ISO/SOC/security assurance package                        |      3 |             |             |             |
+| Cost fit for staging                                      |      2 |             |             |             |
+| Docker/Compose or managed runtime support                 |      2 |             |             |             |
+| Cloudflare Named Tunnel compatibility                     |      1 |             |             |             |
 
 Recommended decision threshold:
 
@@ -92,25 +92,25 @@ Do not use the provider for Ministry-facing staging or production if any answer 
 
 ## Evidence To Archive
 
-| Evidence | Required for staging | Required for production |
-|---|---:|---:|
-| Provider region/data residency statement | Yes | Yes |
-| Order form/contract showing Israel region | Yes | Yes |
-| DPA/privacy terms | Before real student data | Yes |
-| SLA/support plan | Preferred | Yes |
-| Security package/ISO/SOC statement | Preferred | Yes if available/required |
-| Firewall/security group screenshot/export | Yes | Yes |
-| Secret manager/KMS or compensating control evidence | Yes | Yes |
-| Backup storage location and encryption statement | Yes | Yes |
-| Deletion/return process | Before real student data | Yes |
+| Evidence                                            |     Required for staging |   Required for production |
+| --------------------------------------------------- | -----------------------: | ------------------------: |
+| Provider region/data residency statement            |                      Yes |                       Yes |
+| Order form/contract showing Israel region           |                      Yes |                       Yes |
+| DPA/privacy terms                                   | Before real student data |                       Yes |
+| SLA/support plan                                    |                Preferred |                       Yes |
+| Security package/ISO/SOC statement                  |                Preferred | Yes if available/required |
+| Firewall/security group screenshot/export           |                      Yes |                       Yes |
+| Secret manager/KMS or compensating control evidence |                      Yes |                       Yes |
+| Backup storage location and encryption statement    |                      Yes |                       Yes |
+| Deletion/return process                             | Before real student data |                       Yes |
 
 ## Candidate Comparison Register
 
-| Candidate | Contact | Israel residency evidence | Cost | Score | No-Go? | Decision | Notes |
-|---|---|---|---:|---:|---|---|---|
-| Candidate A | Pending | Pending | Pending | 0 | Pending | Pending |  |
-| Candidate B | Pending | Pending | Pending | 0 | Pending | Pending |  |
-| Candidate C | Pending | Pending | Pending | 0 | Pending | Pending |  |
+| Candidate   | Contact | Israel residency evidence |    Cost | Score | No-Go?  | Decision | Notes |
+| ----------- | ------- | ------------------------- | ------: | ----: | ------- | -------- | ----- |
+| Candidate A | Pending | Pending                   | Pending |     0 | Pending | Pending  |       |
+| Candidate B | Pending | Pending                   | Pending |     0 | Pending | Pending  |       |
+| Candidate C | Pending | Pending                   | Pending |     0 | Pending | Pending  |       |
 
 ## Decision Template
 

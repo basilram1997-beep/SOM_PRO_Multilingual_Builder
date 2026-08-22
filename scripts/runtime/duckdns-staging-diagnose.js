@@ -45,4 +45,6 @@ if (listeners.stdout.trim()) {
 }
 
 log("If W3SVC is running, open PowerShell as Administrator and run: Stop-Service W3SVC -Force");
-log("Then retry: docker compose --env-file .env.production -f docker-compose.production.yml --profile certbot run --rm --service-ports certbot");
+log(
+  "Then retry: docker compose --env-file .env.production -f docker-compose.production.yml --profile certbot run --rm --service-ports certbot"
+);

@@ -31,7 +31,10 @@ function commandExists(command) {
 }
 
 function normalizeHostname(value) {
-  return String(value || "").trim().replace(/^https?:\/\//i, "").replace(/\/.*$/, "");
+  return String(value || "")
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "");
 }
 
 function assertRealHostname(hostname) {
@@ -44,7 +47,9 @@ function assertRealHostname(hostname) {
     /trycloudflare\.com$/i.test(hostname) ||
     /^\d+\.\d+\.\d+\.\d+$/.test(hostname)
   ) {
-    throw new Error("SOM_CLOUDFLARE_TUNNEL_HOSTNAME must be a stable owned hostname, not localhost, IP, placeholder, or trycloudflare.com");
+    throw new Error(
+      "SOM_CLOUDFLARE_TUNNEL_HOSTNAME must be a stable owned hostname, not localhost, IP, placeholder, or trycloudflare.com"
+    );
   }
 }
 

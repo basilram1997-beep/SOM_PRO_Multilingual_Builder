@@ -8,16 +8,16 @@ This report documents a local SOM PRO external demo through Cloudflare Quick Tun
 
 ## Run Summary
 
-| Item | Result |
-|---|---|
-| Runner command | `npm.cmd run staging:tunnel:demo` |
-| Cleanup command | `npm.cmd run staging:tunnel:demo:cleanup` |
-| Temporary URL | `https://migration-computing-settled-columnists.trycloudflare.com` |
-| Frontend probe | `200`, title `SOM PRO | School Operations Manager` |
-| API probe | `200`, `/api/version` returned `0.9.0-rc.1` |
-| Evidence JSON | `reports/security/cloudflare-quick-tunnel-trial.json` |
-| Evidence Markdown | `reports/security/cloudflare-quick-tunnel-trial.md` |
-| Ministry submission evidence | No |
+| Item                         | Result                                                             |
+| ---------------------------- | ------------------------------------------------------------------ |
+| Runner command               | `npm.cmd run staging:tunnel:demo`                                  |
+| Cleanup command              | `npm.cmd run staging:tunnel:demo:cleanup`                          |
+| Temporary URL                | `https://migration-computing-settled-columnists.trycloudflare.com` |
+| Frontend probe               | `200`, title `SOM PRO                                              | School Operations Manager` |
+| API probe                    | `200`, `/api/version` returned `0.9.0-rc.1`                        |
+| Evidence JSON                | `reports/security/cloudflare-quick-tunnel-trial.json`              |
+| Evidence Markdown            | `reports/security/cloudflare-quick-tunnel-trial.md`                |
+| Ministry submission evidence | No                                                                 |
 
 ## Findings
 

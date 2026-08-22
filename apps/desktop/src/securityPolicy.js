@@ -16,12 +16,7 @@ function originOf(value) {
 }
 
 function configuredOrigins(runtimeConfig, extraOrigins = []) {
-  return [
-    runtimeConfig?.appUrl,
-    runtimeConfig?.apiUrl,
-    runtimeConfig?.licenseServerUrl,
-    ...extraOrigins
-  ]
+  return [runtimeConfig?.appUrl, runtimeConfig?.apiUrl, runtimeConfig?.licenseServerUrl, ...extraOrigins]
     .map(originOf)
     .filter(Boolean);
 }

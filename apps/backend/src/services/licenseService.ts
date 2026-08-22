@@ -109,7 +109,7 @@ function normalizeLicenseCode(value: string) {
 
 export function getLicenseCredentialHashForStorage(licenseKey: string) {
   const clean = String(licenseKey || "").trim();
-  return clean.includes(".") ? hash(clean) : hash(normalizeLicenseCode(clean));
+  return clean.startsWith("SOM2-") || clean.includes(".") ? hash(clean) : hash(normalizeLicenseCode(clean));
 }
 
 function hmac(value: string) {
@@ -120,6 +120,37 @@ function hmac(value: string) {
 function base64UrlDecode(value: string) {
   const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((value.length + 3) % 4);
   return Buffer.from(padded, "base64").toString("utf8");
+}
+
+function shortLicenseSignature(payloadPart: string) {
+  return hmac(payloadPart).slice(0, 4).toUpperCase();
+}
+
+function parseShortLicenseKey(licenseKey: string): LicensePayload {
+  const clean = String(licenseKey || "").trim();
+  const parts = clean.split("-");
+  if (parts.length !== 3 || parts[0] !== "SOM2") throw new Error("INVALID_LICENSE_FORMAT");
+
+  const [, institutionCode, signature] = parts;
+  if (!/^[A-Z0-9-]+$/i.test(institutionCode) || !/^[A-Z0-9]{4}$/i.test(signature)) {
+    throw new Error("INVALID_LICENSE_FORMAT");
+  }
+
+  const payloadPart = institutionCode.toUpperCase();
+  if (shortLicenseSignature(payloadPart) !== String(signature || "").trim().toUpperCase()) {
+    throw new Error("INVALID_LICENSE_SIGNATURE");
+  }
+
+  const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+  if (Number.isNaN(expiresAt.getTime())) throw new Error("INVALID_LICENSE_EXPIRY");
+
+  return {
+    plan: "TRIAL",
+    institutionCode: institutionCode.toUpperCase(),
+    expiresAt: expiresAt.toISOString(),
+    maxDevices: 1,
+    allowedFeatures: ["browser-e2e"]
+  };
 }
 
 function fallbackDeviceId() {
@@ -133,6 +164,7 @@ export function getDeviceFingerprint(deviceInfo?: LicenseDeviceInfo) {
 
 export function parseLicenseKey(licenseKey: string): LicensePayload {
   const clean = String(licenseKey || "").trim();
+  if (clean.startsWith("SOM2-")) return parseShortLicenseKey(clean);
   if (!clean.startsWith("SOM-")) throw new Error("INVALID_LICENSE_FORMAT");
   const body = clean.slice(4);
   const [payloadPart, signature] = body.split(".");

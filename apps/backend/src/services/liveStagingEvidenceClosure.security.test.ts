@@ -15,9 +15,15 @@ test("live staging evidence closure checklist preserves required execution comma
   assert.match(closure, /LSE-001/);
   assert.match(closure, /LSE-101/);
   assert.match(closure, /LSE-201/);
-  assert.match(closure, /STAGING_URL=https:\/\/staging-api\.example\.gov\.il ZAP_USE_DOCKER=true npm run security:dast/);
+  assert.match(
+    closure,
+    /STAGING_URL=https:\/\/staging-api\.example\.gov\.il ZAP_USE_DOCKER=true npm run security:dast/
+  );
   assert.match(closure, /STAGING_EVIDENCE_STRICT=true npm run security:staging-evidence/);
-  assert.match(closure, /STAGING_EVIDENCE_LIVE_DB=true DATABASE_URL=postgresql:\/\/\.\.\. npm run security:staging-evidence/);
+  assert.match(
+    closure,
+    /STAGING_EVIDENCE_LIVE_DB=true DATABASE_URL=postgresql:\/\/\.\.\. npm run security:staging-evidence/
+  );
   assert.match(closure, /npm run security:pentest:prep/);
   assert.match(closure, /reports\/security\/dast-baseline\.json/);
   assert.match(closure, /reports\/security\/zap-baseline-report\.html/);

@@ -30,7 +30,7 @@ export function LessonTodayTable({
         <table className="lesson-table">
           <thead>
             <tr>
-              <th>{t("common.period")}</th>
+              <th className="lesson-period-column">{t("common.period")}</th>
               <th>{t("common.class")}</th>
               <th>{t("common.subject")}</th>
               <th>{t("lessonToday.titleField")}</th>
@@ -53,7 +53,7 @@ export function LessonTodayTable({
             {!loading &&
               rows.map((row) => (
                 <tr key={row.id}>
-                  <td>{row.period}</td>
+                  <td className="lesson-period-column">{row.period}</td>
                   <td>{localizeClassName(row.class.name ?? "", language)}</td>
                   <td>{localizeSubjectName(row.subject.name ?? "", language)}</td>
                   <td>{row.title}</td>

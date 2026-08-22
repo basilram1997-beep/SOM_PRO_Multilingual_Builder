@@ -153,7 +153,10 @@ function backupEncryptionKey() {
   if (!source && process.env.NODE_ENV === "production") {
     throw new Error("SOM_BACKUP_ENCRYPTION_KEY or SOM_BACKUP_PASSPHRASE is required for production backups.");
   }
-  return crypto.createHash("sha256").update(source || "development-backup-encryption-key").digest();
+  return crypto
+    .createHash("sha256")
+    .update(source || "development-backup-encryption-key")
+    .digest();
 }
 
 function encryptFileInPlace(filePath: string) {

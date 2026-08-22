@@ -79,7 +79,11 @@ export async function resolveActiveStudentsByNationalIds(
 }
 
 export function studentNameMatches(recordName: string, inputName: string) {
-  const normalizeName = (value: string) => String(value || "").trim().replace(/\s+/g, " ").toLowerCase();
+  const normalizeName = (value: string) =>
+    String(value || "")
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
   return normalizeName(recordName) === normalizeName(inputName);
 }
 

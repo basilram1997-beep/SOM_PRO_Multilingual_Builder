@@ -15,6 +15,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [createAccountOpen, setCreateAccountOpen] = useState(false);
   const [systemOnline, setSystemOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
   const {
+    licenseCode,
+    setLicenseCode,
     email,
     setEmail,
     password,
@@ -79,6 +81,16 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
         <form className="login-card" onSubmit={submit} data-e2e="login-form" noValidate>
           <h1>{labels.title}</h1>
+          <label htmlFor="login-license-input">
+            <span>{labels.licenseCode}</span>
+            <input
+              id="login-license-input"
+              value={licenseCode}
+              onChange={(event) => setLicenseCode(event.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </label>
           <label htmlFor="login-username-input">
             <span>{labels.username}</span>
             <input

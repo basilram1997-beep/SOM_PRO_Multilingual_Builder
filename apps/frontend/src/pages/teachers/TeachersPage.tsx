@@ -12,9 +12,7 @@ export function TeachersPage() {
     <div className="page teachers-page" data-e2e="teachers-page">
       <h2>{t("nav.teachers")}</h2>
 
-      <Card
-        title={t("nav.teachers")}
-      >
+      <Card title={t("nav.teachers")}>
         <TeachersTable
           t={t}
           language={language}

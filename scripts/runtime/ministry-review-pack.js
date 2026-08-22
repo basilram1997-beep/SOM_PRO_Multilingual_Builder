@@ -27,7 +27,10 @@ function exists(relativePath) {
 }
 
 function sha256(relativePath) {
-  return crypto.createHash("sha256").update(fs.readFileSync(path.join(root, relativePath))).digest("hex");
+  return crypto
+    .createHash("sha256")
+    .update(fs.readFileSync(path.join(root, relativePath)))
+    .digest("hex");
 }
 
 function sourceSummary(relativePath) {
@@ -52,7 +55,10 @@ function collectOfficialRows(intake) {
     .split(/\r?\n/)
     .filter((line) => /^\| MOS-\d{3} \|/.test(line))
     .map((line) => {
-      const cells = line.split("|").slice(1, -1).map((cell) => cell.trim());
+      const cells = line
+        .split("|")
+        .slice(1, -1)
+        .map((cell) => cell.trim());
       return {
         id: cells[0],
         document: cells[1],
@@ -93,9 +99,15 @@ function buildManifest() {
         artifacts: [
           artifact("apps/backend/src/services/tenantIsolation.security.test.ts", "Tenant isolation proof"),
           artifact("apps/backend/src/services/mfaAndSso.security.test.ts", "MFA/SSO fail-closed proof"),
-          artifact("apps/backend/src/services/auditImmutabilityAndRedaction.security.test.ts", "Audit immutability/redaction proof"),
+          artifact(
+            "apps/backend/src/services/auditImmutabilityAndRedaction.security.test.ts",
+            "Audit immutability/redaction proof"
+          ),
           artifact("apps/backend/src/services/backupEncryptionAndRpo.security.test.ts", "Backup encryption/RPO proof"),
-          artifact("apps/backend/src/services/privacyLifecycleAndExport.security.test.ts", "Privacy lifecycle/export proof"),
+          artifact(
+            "apps/backend/src/services/privacyLifecycleAndExport.security.test.ts",
+            "Privacy lifecycle/export proof"
+          ),
           artifact("apps/backend/src/services/dbTenantIntegrity.security.test.ts", "DB tenant integrity proof")
         ]
       },
@@ -136,18 +148,18 @@ function buildManifest() {
       {
         id: "MRP-LIVE-103",
         title: "Run live DB guardrails after migration deploy",
-        command: "STAGING_URL=https://... STAGING_EVIDENCE_STRICT=true STAGING_EVIDENCE_LIVE_DB=true DATABASE_URL=postgresql://... npm run security:staging-evidence",
+        command:
+          "STAGING_URL=https://... STAGING_EVIDENCE_STRICT=true STAGING_EVIDENCE_LIVE_DB=true DATABASE_URL=postgresql://... npm run security:staging-evidence",
         source: "docs/LIVE_STAGING_EVIDENCE_CLOSURE.md#LSE-104",
-        artifacts: [
-          artifact("reports/security/staging-evidence-pack.json", "Live DB guardrail evidence")
-        ]
+        artifacts: [artifact("reports/security/staging-evidence-pack.json", "Live DB guardrail evidence")]
       }
     ],
     "Pending official Ministry source": pendingOfficial.map((row) => ({
       id: row.id,
       title: row.document,
       status: row.status,
-      requiredAction: "Archive official source document, record URL/title/date/version/SHA-256, map controls, and approve.",
+      requiredAction:
+        "Archive official source document, record URL/title/date/version/SHA-256, map controls, and approve.",
       source: "docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md",
       owner: row.owner,
       archivePath: row.archivePath
@@ -222,8 +234,12 @@ function writeMarkdown(manifest) {
   }
 
   lines.push("## Strict Mode", "");
-  lines.push("Run `MINISTRY_REVIEW_PACK_STRICT=true npm run ministry:review-pack` before any Ministry submission claim.");
-  lines.push("Strict mode fails while live staging, official Ministry source, or external sign-off items remain pending.");
+  lines.push(
+    "Run `MINISTRY_REVIEW_PACK_STRICT=true npm run ministry:review-pack` before any Ministry submission claim."
+  );
+  lines.push(
+    "Strict mode fails while live staging, official Ministry source, or external sign-off items remain pending."
+  );
   lines.push("");
   return `${lines.join("\n")}\n`;
 }

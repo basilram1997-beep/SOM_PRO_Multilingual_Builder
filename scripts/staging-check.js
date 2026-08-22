@@ -56,12 +56,7 @@ const publicUrlKeys = [
   "SOM_REPLICA_LICENSE_SERVER_URL"
 ];
 
-const secretLikeKeys = [
-  "DATABASE_URL",
-  "JWT_SECRET",
-  "SOM_PRO_LICENSE_SECRET",
-  "LICENSE_ADMIN_TOKEN"
-];
+const secretLikeKeys = ["DATABASE_URL", "JWT_SECRET", "SOM_PRO_LICENSE_SECRET", "LICENSE_ADMIN_TOKEN"];
 
 function parseEnv(text) {
   const values = {};
@@ -111,9 +106,21 @@ const nginx = fs.readFileSync(nginxPath, "utf8");
 assertContains(nginx, /listen\s+80\s+default_server;/, "nginx listens on port 80");
 assertContains(nginx, /return\s+301\s+https:\/\/\$host\$request_uri;/, "nginx redirects HTTP to HTTPS");
 assertContains(nginx, /listen\s+443\s+ssl\s+http2\s+default_server;/, "nginx listens on HTTPS 443");
-assertContains(nginx, /ssl_certificate\s+\/etc\/letsencrypt\/live\/sompro\/fullchain\.pem;/, "nginx TLS certificate path is configured");
-assertContains(nginx, /ssl_certificate_key\s+\/etc\/letsencrypt\/live\/sompro\/privkey\.pem;/, "nginx TLS private key path is configured");
-assertContains(nginx, /Strict-Transport-Security\s+"max-age=31536000; includeSubDomains; preload"\s+always;/, "production HSTS is configured");
+assertContains(
+  nginx,
+  /ssl_certificate\s+\/etc\/letsencrypt\/live\/sompro\/fullchain\.pem;/,
+  "nginx TLS certificate path is configured"
+);
+assertContains(
+  nginx,
+  /ssl_certificate_key\s+\/etc\/letsencrypt\/live\/sompro\/privkey\.pem;/,
+  "nginx TLS private key path is configured"
+);
+assertContains(
+  nginx,
+  /Strict-Transport-Security\s+"max-age=31536000; includeSubDomains; preload"\s+always;/,
+  "production HSTS is configured"
+);
 assertContains(nginx, /X-Content-Type-Options\s+"nosniff"\s+always;/, "nginx sends nosniff");
 assertContains(nginx, /X-Frame-Options\s+"DENY"\s+always;/, "nginx sends frame denial");
 assertContains(nginx, /X-Forwarded-Proto\s+https;/, "nginx forwards HTTPS scheme to upstreams");
@@ -152,7 +159,8 @@ if (exampleEnv.SOM_ENABLE_OPERATOR_HEALTH !== "true") fail("SOM_ENABLE_OPERATOR_
 if (exampleEnv.VITE_SOM_SHOW_OPERATOR_HEALTH !== "true") fail("VITE_SOM_SHOW_OPERATOR_HEALTH must be true for staging");
 
 const backupInterval = Number(exampleEnv.SOM_AUTO_BACKUP_INTERVAL_HOURS || 0);
-if (!Number.isFinite(backupInterval) || backupInterval <= 0) fail("SOM_AUTO_BACKUP_INTERVAL_HOURS must be a positive number");
+if (!Number.isFinite(backupInterval) || backupInterval <= 0)
+  fail("SOM_AUTO_BACKUP_INTERVAL_HOURS must be a positive number");
 
 if (!["single-region", "active-passive"].includes(exampleEnv.SOM_REDUNDANCY_MODE)) {
   fail('SOM_REDUNDANCY_MODE must be either "single-region" or "active-passive"');
@@ -179,4 +187,6 @@ if (fs.existsSync(actualEnvPath)) {
 }
 
 if (process.exitCode) process.exit(process.exitCode);
-success("staging verification baseline passed. Real deployment evidence still requires a live HTTPS domain smoke run and attached TLS report.");
+success(
+  "staging verification baseline passed. Real deployment evidence still requires a live HTTPS domain smoke run and attached TLS report."
+);

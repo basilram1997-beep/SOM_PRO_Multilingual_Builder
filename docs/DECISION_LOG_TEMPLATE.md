@@ -9,20 +9,20 @@ The decision log keeps compliance decisions from becoming informal or forgotten.
 
 ## Template
 
-| Field | Value |
-|---|---|
-| Date | YYYY-MM-DD |
-| Decision title |  |
-| Decision owner |  |
-| Scope |  |
-| Risk level | Low / Medium / High |
-| Related policy |  |
-| Required approval |  |
-| Approved by |  |
-| Summary |  |
-| Operational impact |  |
-| Follow-up action |  |
-| Re-test or review date |  |
+| Field                  | Value               |
+| ---------------------- | ------------------- |
+| Date                   | YYYY-MM-DD          |
+| Decision title         |                     |
+| Decision owner         |                     |
+| Scope                  |                     |
+| Risk level             | Low / Medium / High |
+| Related policy         |                     |
+| Required approval      |                     |
+| Approved by            |                     |
+| Summary                |                     |
+| Operational impact     |                     |
+| Follow-up action       |                     |
+| Re-test or review date |                     |
 
 ## Typical entries
 

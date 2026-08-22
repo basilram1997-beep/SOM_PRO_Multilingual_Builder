@@ -62,7 +62,11 @@ function isSubjectAllowedForCurriculum(subjectName: string, curriculumType: Curr
   if (curriculumType === "PALESTINIAN") {
     return !normalized.includes("مدنيات") && !normalized.includes("civics");
   }
-  return !normalized.includes("دراسات اجتماعيه") && !normalized.includes("دراسات اجتماعية") && !normalized.includes("social studies");
+  return (
+    !normalized.includes("دراسات اجتماعيه") &&
+    !normalized.includes("دراسات اجتماعية") &&
+    !normalized.includes("social studies")
+  );
 }
 
 function behaviorLabelKey(value: BehaviorLevel) {
@@ -303,7 +307,10 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       }
     }
 
-    const classSubjects = assignedSubjectIds.size > 0 ? subjects.filter((subject) => subject.id && assignedSubjectIds.has(subject.id)) : subjects;
+    const classSubjects =
+      assignedSubjectIds.size > 0
+        ? subjects.filter((subject) => subject.id && assignedSubjectIds.has(subject.id))
+        : subjects;
     return classSubjects.filter((subject) =>
       isSubjectAllowedForCurriculum(localizeSubjectName(subject.name || "", language), curriculumType)
     );
@@ -706,10 +713,12 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
 
     const contextAttendance = context?.attendanceSummary;
     const hasContextAttendance = (contextAttendance?.totalDays ?? 0) > 0;
-    const nextPresentDays = hasContextAttendance ? contextAttendance?.presentDays ?? 0 : record.presentDays ?? 0;
-    const nextAbsentDays = hasContextAttendance ? contextAttendance?.absentDays ?? 0 : record.absentDays ?? 0;
-    const nextLateDays = hasContextAttendance ? contextAttendance?.lateDays ?? 0 : record.lateDays ?? 0;
-    const nextEarlyExitDays = hasContextAttendance ? contextAttendance?.earlyExitDays ?? 0 : record.earlyExitDays ?? 0;
+    const nextPresentDays = hasContextAttendance ? (contextAttendance?.presentDays ?? 0) : (record.presentDays ?? 0);
+    const nextAbsentDays = hasContextAttendance ? (contextAttendance?.absentDays ?? 0) : (record.absentDays ?? 0);
+    const nextLateDays = hasContextAttendance ? (contextAttendance?.lateDays ?? 0) : (record.lateDays ?? 0);
+    const nextEarlyExitDays = hasContextAttendance
+      ? (contextAttendance?.earlyExitDays ?? 0)
+      : (record.earlyExitDays ?? 0);
 
     setCertificateId(record.id || "");
     setSchoolNumber(record.schoolNumber || selectedStudent?.nationalId || "");
@@ -977,12 +986,20 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     setSelectedStudentId(studentId);
   }
 
-  function buildPrintableBody() {
+  function buildPrintableBodyForStudent(studentId: string) {
     const translateWithFallback = (key: string, fallback: Record<string, string>) => {
       const translated = t(key);
       if (translated && translated !== key) return translated;
       return fallback[language] || fallback.en || key;
     };
+
+    const student = students.find((item) => item.id === studentId) || null;
+    const studentName = student?.name?.trim() || t("common.none");
+    const studentNationalId = student?.nationalId?.trim() || "-";
+    const printableRows = buildPrintableRowsForStudent(studentId);
+    const studentAverage = printableRowsAverage(printableRows);
+    const studentGradeKey = gradeKeyFromAverage(studentAverage);
+    const studentResult = resultFromAverage(studentAverage);
 
     const typeLabel = certificateTypeLabel(t, language, certificateType);
     const curriculumLabel = t(
@@ -1029,20 +1046,20 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       he: "ימי יציאה מוקדמת",
       en: "Early exit days"
     });
-    const rows = certificatePrintableRows
+    const rows = printableRows
       .map(
         (row) => `
         <tr>
           <td>${escapeHtml(row.subjectName || subjects.find((item) => item.id === row.subjectId)?.name || t("certificates.subjectPlaceholder"))}</td>
           <td>${escapeHtml(row.currentMark || row.comparisonMark || "-")}</td>
-          <td>${escapeHtml(t(row.grade || gradeKey))}</td>
+          <td>${escapeHtml(t(row.grade || studentGradeKey))}</td>
         </tr>
       `
       )
       .join("");
 
-    const averageText = average === null ? "-" : average.toFixed(1);
-    const finalResultText = t(resultLabelKey(result));
+    const averageText = studentAverage === null ? "-" : studentAverage.toFixed(1);
+    const finalResultText = t(resultLabelKey(studentResult));
     const behaviorText = t(behaviorLabelKey(behaviorLevel));
 
     return `
@@ -1068,8 +1085,8 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
         <section class="certificate-student-data">
           <div class="certificate-avatar" aria-hidden="true"></div>
           <div class="certificate-data-grid">
-            <div><span>${escapeHtml(t("certificates.studentName"))}</span><strong>${escapeHtml(selectedStudentName)}</strong></div>
-            <div><span>${escapeHtml(t("students.nationalId"))}</span><strong>${escapeHtml(selectedStudent?.nationalId || "-")}</strong></div>
+            <div><span>${escapeHtml(t("certificates.studentName"))}</span><strong>${escapeHtml(studentName)}</strong></div>
+            <div><span>${escapeHtml(t("students.nationalId"))}</span><strong>${escapeHtml(studentNationalId)}</strong></div>
             <div><span>${escapeHtml(t("common.class"))}</span><strong>${escapeHtml(selectedClassName)}</strong></div>
             <div><span>${escapeHtml(t("certificates.sectionLabel"))}</span><strong>${escapeHtml(selectedClassSection)}</strong></div>
             <div><span>${escapeHtml(t("certificates.curriculumType"))}</span><strong>${escapeHtml(curriculumLabel)}</strong></div>
@@ -1095,7 +1112,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
           </div>
           <div>
             <span>${escapeHtml(t("certificates.result"))}</span>
-            <strong class="${result === "INCOMPLETE" || result === "REVIEW" ? "is-review" : "is-pass"}">${escapeHtml(finalResultText)}</strong>
+            <strong class="${studentResult === "INCOMPLETE" || studentResult === "REVIEW" ? "is-review" : "is-pass"}">${escapeHtml(finalResultText)}</strong>
           </div>
         </section>
 
@@ -1138,6 +1155,22 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     `;
   }
 
+  function buildPrintableBody() {
+    const previewStudents =
+      selectedClassStudents.length > 0 ? selectedClassStudents : selectedStudent ? [selectedStudent] : [];
+
+    return previewStudents
+      .map((student, index) => {
+        const studentId = student.id || "";
+        return `
+          <div class="certificate-preview-stack-item" data-certificate-index="${index}">
+            ${buildPrintableBodyForStudent(studentId)}
+          </div>
+        `;
+      })
+      .join("");
+  }
+
   function handlePreview() {
     setShowPreview(true);
   }
@@ -1150,7 +1183,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
   <title>${escapeHtml(t("certificates.title"))}</title>
   <style>@page { size: A4 portrait; margin: 10mm; }</style>
 </head>
-<body>${buildPrintableBody()}</body>
+<body><div class="certificate-preview-stack">${buildPrintableBody()}</div></body>
 </html>`;
   }
 
@@ -1166,11 +1199,31 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
       <h2>{t("certificates.title")}</h2>
 
       <div className="certificate-page-status no-print">
-        {saving ? <div className="form-message" role="status">{t("certificates.saving")}</div> : null}
-        {!saving && certificateStatus ? <div className="form-message" role="status">{certificateStatus}</div> : null}
-        {loading ? <div className="form-message" role="status">{t("common.loading")}</div> : null}
-        {pageMessage ? <div className="form-message" role="status">{pageMessage}</div> : null}
-        {readOnly ? <div className="form-message certificate-warning" role="status">{t("users.readOnly")}</div> : null}
+        {saving ? (
+          <div className="form-message" role="status">
+            {t("certificates.saving")}
+          </div>
+        ) : null}
+        {!saving && certificateStatus ? (
+          <div className="form-message" role="status">
+            {certificateStatus}
+          </div>
+        ) : null}
+        {loading ? (
+          <div className="form-message" role="status">
+            {t("common.loading")}
+          </div>
+        ) : null}
+        {pageMessage ? (
+          <div className="form-message" role="status">
+            {pageMessage}
+          </div>
+        ) : null}
+        {readOnly ? (
+          <div className="form-message certificate-warning" role="status">
+            {t("users.readOnly")}
+          </div>
+        ) : null}
       </div>
 
       <div
@@ -1260,8 +1313,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                         ? []
                         : students.map((item) => item.id).filter((id): id is string => Boolean(id));
                     setSelectedStudentIds(nextIds);
-                    const nextActive =
-                      nextIds.find((id) => id === selectedStudentId) || nextIds[0] || "";
+                    const nextActive = nextIds.find((id) => id === selectedStudentId) || nextIds[0] || "";
                     void selectActiveCertificateStudent(nextActive);
                   }}
                   disabled={!selectedClassId || students.length === 0}
@@ -1354,7 +1406,12 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                 </label>
               </div>
               <div className="certificate-saving-row">
-                <button type="button" className="secondary" onClick={handlePreview} disabled={!selectedStudent || loading}>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={handlePreview}
+                  disabled={!selectedStudent || loading}
+                >
                   <Eye size={18} />
                   <span>{t("certificates.previewAction")}</span>
                 </button>
@@ -1367,7 +1424,11 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
                   <Save size={18} />
                   <span>{t("certificates.approve")}</span>
                 </button>
-                <button type="button" onClick={() => void handlePrint()} disabled={!selectedStudent || loading || saving}>
+                <button
+                  type="button"
+                  onClick={() => void handlePrint()}
+                  disabled={!selectedStudent || loading || saving}
+                >
                   <Printer size={18} />
                   <span>{t("certificates.printPdf")}</span>
                 </button>
@@ -1388,7 +1449,6 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
           </div>
         )}
       </div>
-
     </div>
   );
 }

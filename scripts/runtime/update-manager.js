@@ -23,7 +23,10 @@ function backupEncryptionKey() {
   if (!source && process.env.NODE_ENV === "production") {
     throw new Error("SOM_BACKUP_ENCRYPTION_KEY or SOM_BACKUP_PASSPHRASE is required for production update backups.");
   }
-  return require("node:crypto").createHash("sha256").update(source || "development-backup-encryption-key").digest();
+  return require("node:crypto")
+    .createHash("sha256")
+    .update(source || "development-backup-encryption-key")
+    .digest();
 }
 
 function encryptBackupFile(plaintextFile) {

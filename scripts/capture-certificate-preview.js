@@ -10,6 +10,9 @@ const apiUrl = process.env.SOM_E2E_API_BASE_URL || "http://127.0.0.1:4000";
 const artifactDir = path.resolve("tests/e2e/artifacts");
 const screenshotPath = path.join(artifactDir, "certificate-preview.png");
 const sourceHtmlPath = path.join(artifactDir, "certificate-preview.html");
+const previewClassId = process.env.DEMO_CERTIFICATE_CLASS_ID || "";
+const previewClassName = process.env.DEMO_CERTIFICATE_CLASS_NAME || "";
+const previewStudentName = process.env.DEMO_CERTIFICATE_STUDENT_NAME || "";
 
 const e2eLicenseCode =
   process.env.SOM_E2E_LICENSE_CODE ||
@@ -216,7 +219,14 @@ async function ensurePreviewStudent(headers, classId) {
   const payload = await response.json();
   const students = Array.isArray(payload?.data) ? payload.data : [];
   if (students.length > 0) {
-    return students[0];
+    if (previewStudentName) {
+      const matched = students.find((student) => String(student.name || "").trim() === previewStudentName.trim());
+      if (matched) {
+        return matched;
+      }
+    } else {
+      return students[0];
+    }
   }
 
   const suffix = Date.now().toString(36);
@@ -227,7 +237,7 @@ async function ensurePreviewStudent(headers, classId) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      name: `طالب اللقطة ${suffix}`,
+      name: previewStudentName || `طالب اللقطة ${suffix}`,
       nationalId: `39${String(Date.now()).slice(-7)}`,
       classId
     })
@@ -245,6 +255,18 @@ function pickFirstClass(classesPayload) {
   const classes = Array.isArray(classesPayload?.data) ? classesPayload.data : [];
   if (classes.length === 0) {
     throw new Error("No classes were available for the certificate preview visual capture.");
+  }
+  if (previewClassId) {
+    const matchedById = classes.find((item) => item.id === previewClassId);
+    if (matchedById) {
+      return matchedById;
+    }
+  }
+  if (previewClassName) {
+    const matchedByName = classes.find((item) => String(item.name || "").trim() === previewClassName.trim());
+    if (matchedByName) {
+      return matchedByName;
+    }
   }
   return classes[0];
 }

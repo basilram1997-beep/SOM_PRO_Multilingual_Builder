@@ -22,6 +22,13 @@ const backendTimeoutMs = Number(process.env.SOM_QUICK_TUNNEL_BACKEND_TIMEOUT_MS 
 const frontendTimeoutMs = Number(process.env.SOM_QUICK_TUNNEL_FRONTEND_TIMEOUT_MS || 90_000);
 const tunnelTimeoutMs = Number(process.env.SOM_QUICK_TUNNEL_CREATE_TIMEOUT_MS || 90_000);
 
+function basicAuthHeader(user, password) {
+  if (!user || !password) return {};
+  return {
+    authorization: `Basic ${Buffer.from(`${user}:${password}`, "utf8").toString("base64")}`
+  };
+}
+
 function runDocker(args, options = {}) {
   return spawnSync("docker", args, {
     encoding: "utf8",
@@ -72,7 +79,12 @@ Write-Output $ids.Count
     if (result.stderr) warn(result.stderr.trim());
     return;
   }
-  const stopped = Number(String(result.stdout || "0").trim().split(/\s+/).pop() || 0);
+  const stopped = Number(
+    String(result.stdout || "0")
+      .trim()
+      .split(/\s+/)
+      .pop() || 0
+  );
   success(`Stopped ${Number.isFinite(stopped) ? stopped : 0} demo port process(es).`);
 }
 
@@ -84,7 +96,9 @@ function cleanup() {
 function assertDockerAvailable() {
   const result = runDocker(["--version"]);
   if (result.status !== 0) {
-    throw new Error("Docker is required for the one-command Quick Tunnel demo. Run npm.cmd run staging:tunnel:check first.");
+    throw new Error(
+      "Docker is required for the one-command Quick Tunnel demo. Run npm.cmd run staging:tunnel:check first."
+    );
   }
 }
 
@@ -162,7 +176,9 @@ function runEvidence(url, env) {
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     const result = runShell("npm.cmd run staging:tunnel:evidence", {
       ...env,
-      SOM_QUICK_TUNNEL_URL: url
+      SOM_QUICK_TUNNEL_URL: url,
+      SOM_QUICK_TUNNEL_AUTH_USER: env.SOM_TUNNEL_PROXY_USER,
+      SOM_QUICK_TUNNEL_AUTH_PASSWORD: env.SOM_TUNNEL_PROXY_PASSWORD
     });
     if ((result.status || 0) === 0) {
       return;
@@ -210,7 +226,12 @@ async function main() {
   await waitForUrl("http://127.0.0.1:4188/", frontendTimeoutMs);
 
   processes.add(startShell("npm.cmd run staging:tunnel:proxy", env, "cloudflare-local-proxy"));
-  await waitForUrl("http://127.0.0.1:8080/api/version", backendTimeoutMs);
+  await waitForUrl("http://127.0.0.1:8080/api/version", backendTimeoutMs, {
+    headers: basicAuthHeader(env.SOM_TUNNEL_PROXY_USER, env.SOM_TUNNEL_PROXY_PASSWORD)
+  });
+  success("Cloudflare local proxy basic auth is enabled:");
+  console.log(`username: ${env.SOM_TUNNEL_PROXY_USER}`);
+  console.log(`password: ${env.SOM_TUNNEL_PROXY_PASSWORD}`);
 
   const cloudflared = startCloudflared();
   const tunnelUrl = await waitForTunnelUrl(cloudflared);
@@ -221,7 +242,9 @@ async function main() {
   success("Evidence artifacts:");
   console.log("reports/security/cloudflare-quick-tunnel-trial.json");
   console.log("reports/security/cloudflare-quick-tunnel-trial.md");
-  warn("Keep this terminal running while testing. Press Ctrl+C or run npm.cmd run staging:tunnel:demo:cleanup to stop.");
+  warn(
+    "Keep this terminal running while testing. Press Ctrl+C or run npm.cmd run staging:tunnel:demo:cleanup to stop."
+  );
 
   await waitForShutdownSignal();
   await processes.stopAll();

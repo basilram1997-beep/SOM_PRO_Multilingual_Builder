@@ -25,7 +25,8 @@
     "The license code does not match the installation license on this device. Use the same code entered during installation.",
   "login.createCardTitle": "Create new account",
   "login.createCardHelp": "Enter the name, email, and password, then create the account directly.",
-  "login.createCardHint": "Only student and parent accounts can be created here after matching school records. Teacher accounts are created by the principal.",
+  "login.createCardHint":
+    "Only student and parent accounts can be created here after matching school records. Teacher accounts are created by the principal.",
   "login.createRole": "Account type",
   "login.createStudent": "Student",
   "login.createParent": "Parent",

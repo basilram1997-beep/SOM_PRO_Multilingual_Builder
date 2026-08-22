@@ -2632,12 +2632,67 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   background: #eff6ff;
 }
 
+.certificate-student-table {
+  min-width: 760px;
+  table-layout: fixed;
+}
+
+.certificate-student-table th,
+.certificate-student-table td {
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.certificate-student-table th:first-child,
+.certificate-student-table td:first-child {
+  width: 34%;
+}
+
+.certificate-student-table th:nth-child(2),
+.certificate-student-table td:nth-child(2) {
+  width: 42%;
+}
+
+.certificate-student-table th:nth-child(3),
+.certificate-student-table td:nth-child(3) {
+  width: 24%;
+  white-space: nowrap;
+  direction: ltr;
+  unicode-bidi: plaintext;
+}
+
 .certificate-student-checkbox {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-weight: 800;
   cursor: pointer;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.certificate-student-checkbox span {
+  white-space: nowrap;
+}
+
+.certificate-preview-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.certificate-preview-stack-item {
+  display: grid;
+  gap: 0;
+}
+
+.certificate-preview-stack-item + .certificate-preview-stack-item {
+  padding-top: 18px;
+  border-top: 1.5px dashed #cbd5e1;
+  page-break-before: always;
+}
+
+.certificate-preview-stack-item .certificate-print-sheet {
+  page-break-inside: avoid;
 }
 
 .certificate-notes-page {
@@ -2759,7 +2814,9 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 
 .certificate-notes-table textarea:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16), inset 0 1px 3px rgba(15, 23, 42, 0.06);
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.16),
+    inset 0 1px 3px rgba(15, 23, 42, 0.06);
   outline: none;
 }
 
@@ -2837,9 +2894,7 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   margin: 0 auto;
   padding: 14mm 12mm;
   color: #071d36;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 252, 245, 0.96)),
-    #fffaf0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 252, 245, 0.96)), #fffaf0;
   border: 8px solid var(--certificate-navy);
   outline: 2px solid var(--certificate-gold);
   outline-offset: -12px;
@@ -2930,37 +2985,36 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 
 .certificate-student-data {
   display: grid;
-  grid-template-columns: 132px minmax(0, 1fr);
-  gap: 18px;
-  padding: 14px;
+  grid-template-columns: 124px minmax(0, 1fr);
+  gap: 14px;
+  padding: 12px 14px;
   border: 1.8px solid var(--certificate-gold);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.76);
 }
 
 .certificate-avatar {
-  width: 112px;
-  min-height: 128px;
+  width: 108px;
+  min-height: 126px;
   border: 1.5px solid #b8c4d6;
   border-radius: 10px;
   background:
     radial-gradient(circle at 50% 36%, var(--certificate-navy) 0 19px, transparent 20px),
-    radial-gradient(ellipse at 50% 78%, var(--certificate-navy) 0 36px, transparent 37px),
-    #f8fafc;
+    radial-gradient(ellipse at 50% 78%, var(--certificate-navy) 0 36px, transparent 37px), #f8fafc;
 }
 
 .certificate-data-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 26px;
+  gap: 0 12px;
 }
 
 .certificate-data-grid div {
   display: grid;
-  grid-template-columns: 116px minmax(0, 1fr);
-  gap: 8px;
+  grid-template-columns: 102px minmax(0, 1fr);
+  gap: 5px;
   align-items: center;
-  min-height: 38px;
+  min-height: 32px;
   border-bottom: 1.4px solid #e7d2a6;
 }
 
@@ -2970,14 +3024,16 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
 .certificate-print-note strong,
 .certificate-print-signatures span {
   color: var(--certificate-navy);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 900;
 }
 
 .certificate-data-grid strong {
   color: #071d36;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 900;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .certificate-print-table {
@@ -3181,6 +3237,8 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   box-shadow: none;
   border-radius: 14px;
   min-height: 0;
+  width: min(100%, 235mm);
+  padding: 12mm 10mm;
 }
 
 .certificate-preview-shell .certificate-print-header {
@@ -3456,6 +3514,12 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   padding: 12px 14px;
   vertical-align: top;
   word-break: break-word;
+}
+
+.lesson-table .lesson-period-column {
+  min-width: 74px;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .lesson-modal {
@@ -4592,7 +4656,6 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   background: #fff;
 }
 
-
 .pledge-preview-header {
   display: grid;
   gap: 8px;
@@ -4608,9 +4671,8 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   border: 1.5px solid #314566;
   border-radius: 18px;
   background: linear-gradient(180deg, #1b2b48 0%, #13233d 100%);
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1);
 }
-
 
 .pledge-preview-corner {
   display: grid;
@@ -4648,7 +4710,6 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   text-align: right;
 }
 
-
 .pledge-preview-school {
   display: grid;
   justify-items: end;
@@ -4656,20 +4717,17 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   text-align: right;
 }
 
-
 .pledge-preview-school strong {
   color: #fff;
   font-size: 18px;
   font-weight: 900;
 }
 
-
 .pledge-preview-school span {
   color: #d7e0ee;
   font-size: 12px;
   font-weight: 700;
 }
-
 
 .pledge-badge {
   width: 58px;
@@ -4679,9 +4737,10 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   border-radius: 16px;
   background: linear-gradient(180deg, #15304f 0%, #0f213a 100%);
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 18px rgba(15, 23, 42, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 18px rgba(15, 23, 42, 0.18);
 }
-
 
 .pledge-preview-title {
   display: flex;
@@ -4698,7 +4757,6 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   box-shadow: 0 12px 22px rgba(15, 118, 110, 0.14);
 }
 
-
 .pledge-preview-subtitle {
   text-align: center;
   color: #effff9;
@@ -4709,7 +4767,6 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   line-height: 1.7;
   font-weight: 700;
 }
-
 
 .pledge-preview-meta-grid {
   display: grid;
@@ -4726,7 +4783,6 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   background: #fff;
   box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
 }
-
 
 .pledge-preview-panel strong {
   display: flex;
@@ -4777,7 +4833,6 @@ html[dir="rtl"] .daily-duties-table .teacher-color-cell {
   background: #fff;
   line-height: 1.9;
 }
-
 
 .pledge-preview-section strong {
   color: #0f766e;

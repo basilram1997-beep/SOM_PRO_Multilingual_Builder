@@ -100,12 +100,46 @@ function base64UrlDecode(value) {
 }
 
 function makeLicenseKey(payload) {
-  const payloadPart = base64Url(JSON.stringify(payload));
-  return "SOM-" + payloadPart + "." + hmac(payloadPart);
+  const plan = String(payload.plan || "PAID")
+    .trim()
+    .toUpperCase()
+    .startsWith("T")
+    ? "T"
+    : "P";
+  const institutionCode = repairMojibakeText(payload.institutionCode || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9-]/g, "") || "000000";
+  const expiresAt = new Date(payload.expiresAt);
+  const expiresDate = Number.isNaN(expiresAt.getTime())
+    ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10).replace(/-/g, "")
+    : expiresAt.toISOString().slice(0, 10).replace(/-/g, "");
+  const payloadPart = institutionCode;
+  return "SOM2-" + payloadPart + "-" + hmac(payloadPart).slice(0, 4).toUpperCase();
 }
 
 function parseLicenseKey(licenseKey) {
   const clean = String(licenseKey || "").trim();
+  if (clean.startsWith("SOM2-")) {
+    const parts = clean.split("-");
+    if (parts.length !== 3) throw new Error("INVALID_LICENSE_FORMAT");
+    const [, institutionCode, signature] = parts;
+    if (!/^[A-Z0-9-]+$/i.test(institutionCode) || !/^[A-Z0-9]{4}$/i.test(signature)) {
+      throw new Error("INVALID_LICENSE_FORMAT");
+    }
+    const payloadPart = institutionCode.toUpperCase();
+    if (hmac(payloadPart).slice(0, 4).toUpperCase() !== String(signature || "").trim().toUpperCase()) {
+      throw new Error("INVALID_LICENSE_SIGNATURE");
+    }
+    const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    return {
+      plan: "TRIAL",
+      institutionCode: institutionCode.toUpperCase(),
+      expiresAt: expiresAt.toISOString(),
+      maxDevices: 1,
+      allowedFeatures: ["core"]
+    };
+  }
   if (!clean.startsWith("SOM-")) throw new Error("INVALID_LICENSE_FORMAT");
   const [payloadPart, signature] = clean.slice(4).split(".");
   if (!payloadPart || !signature) throw new Error("INVALID_LICENSE_FORMAT");
@@ -141,7 +175,8 @@ function generateLicenseCode() {
 }
 
 function licenseCodeHash(code) {
-  return hash(normalizeLicenseCode(code));
+  const clean = String(code || "").trim();
+  return clean.includes(".") ? hash(clean) : hash(normalizeLicenseCode(clean));
 }
 
 function generateUniqueLicenseCode(db) {
@@ -239,7 +274,9 @@ function createResetToken(license, account, ip) {
   const token = "SOM-RESET-" + crypto.randomBytes(24).toString("hex").toUpperCase();
   const tokenHash = hash(token);
   const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS).toISOString();
-  const tokens = readResetTokens().filter((item) => new Date(item.expiresAt || 0).getTime() > Date.now() && !item.usedAt);
+  const tokens = readResetTokens().filter(
+    (item) => new Date(item.expiresAt || 0).getTime() > Date.now() && !item.usedAt
+  );
   tokens.push({
     tokenHash,
     licenseId: license.id,
@@ -270,7 +307,11 @@ function consumeResetToken(token, newPassword, ip) {
   const accounts = readAccounts();
   const index = accounts.findIndex((item) => item.licenseId === reset.licenseId && item.email === reset.email);
   if (index === -1) return null;
-  accounts[index] = { ...accounts[index], password: String(newPassword || "").trim(), updatedAt: new Date().toISOString() };
+  accounts[index] = {
+    ...accounts[index],
+    password: String(newPassword || "").trim(),
+    updatedAt: new Date().toISOString()
+  };
   reset.usedAt = new Date().toISOString();
   writeAccounts(accounts);
   writeResetTokens(tokens);

@@ -231,7 +231,6 @@ async function createWindow() {
     if (localIndex) await win.loadFile(localIndex, { query: { desktop: "1" } });
     else await win.loadFile(path.join(root, "offline.html"));
   });
-
 }
 
 module.exports = { createWindow };

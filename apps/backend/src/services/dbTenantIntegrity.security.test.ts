@@ -47,11 +47,23 @@ test("database migrations make audit append-only and preserve lifecycle evidence
   assert.match(migrationSource, /CREATE TRIGGER "AuditLog_prevent_delete"[\s\S]*BEFORE DELETE ON "AuditLog"/);
   assert.match(migrationSource, /RAISE EXCEPTION 'AuditLog is append-only; update\/delete is not allowed'/);
 
-  assert.match(migrationSource, /ALTER TABLE "reports_exports" DROP CONSTRAINT IF EXISTS "reports_exports_school_id_fkey"/);
-  assert.match(migrationSource, /FOREIGN KEY \("school_id"\) REFERENCES "School"\("id"\)\s+ON DELETE RESTRICT ON UPDATE CASCADE/);
+  assert.match(
+    migrationSource,
+    /ALTER TABLE "reports_exports" DROP CONSTRAINT IF EXISTS "reports_exports_school_id_fkey"/
+  );
+  assert.match(
+    migrationSource,
+    /FOREIGN KEY \("school_id"\) REFERENCES "School"\("id"\)\s+ON DELETE RESTRICT ON UPDATE CASCADE/
+  );
   assert.match(migrationSource, /ALTER TABLE "backup_jobs" DROP CONSTRAINT IF EXISTS "backup_jobs_school_id_fkey"/);
-  assert.match(schemaSource, /ReportExport[\s\S]*School @relation\(fields: \[schoolId\], references: \[id\], onDelete: Restrict\)/);
-  assert.match(schemaSource, /BackupJob[\s\S]*School @relation\(fields: \[schoolId\], references: \[id\], onDelete: Restrict\)/);
+  assert.match(
+    schemaSource,
+    /ReportExport[\s\S]*School @relation\(fields: \[schoolId\], references: \[id\], onDelete: Restrict\)/
+  );
+  assert.match(
+    schemaSource,
+    /BackupJob[\s\S]*School @relation\(fields: \[schoolId\], references: \[id\], onDelete: Restrict\)/
+  );
 
   assert.doesNotMatch(archiveRoutesSource, /auditLog\.deleteMany/);
   assert.doesNotMatch(schoolRoutesSource, /prisma\.auditLog\.deleteMany/);
@@ -80,6 +92,7 @@ test("school-private Prisma models carry tenant ownership and a schoolId index o
     "HomeroomAssignment",
     "Lesson",
     "LicenseActivation",
+    "ParentStudentLink",
     "PeriodDefinition",
     "ReportExport",
     "Role",
@@ -109,7 +122,11 @@ test("school-private Prisma models carry tenant ownership and a schoolId index o
 
   for (const model of schoolScopedModels) {
     assert.equal(hasSchoolIndex(model), true, `${model.name} must have @@index/@@unique beginning with schoolId`);
-    assert.match(model.body, /school\s+School\s+@relation\(fields: \[schoolId\], references: \[id\]/, `${model.name} must relate schoolId to School`);
+    assert.match(
+      model.body,
+      /school\s+School\s+@relation\(fields: \[schoolId\], references: \[id\]/,
+      `${model.name} must relate schoolId to School`
+    );
   }
 
   const auditLog = byName.get("AuditLog");
@@ -120,7 +137,13 @@ test("school-private Prisma models carry tenant ownership and a schoolId index o
   assert.match(auditLog.body, /@@index\(\[schoolId, entityType, entityId\]\)/);
 
   const permittedGlobalModels = ["Permission", "RolePermission", "School"];
-  for (const model of models.filter((item) => !/^\s+schoolId\s+String(?:\s|$)/m.test(item.body) && item.name !== "AuditLog")) {
-    assert.equal(permittedGlobalModels.includes(model.name), true, `${model.name} must be explicitly global or school-scoped`);
+  for (const model of models.filter(
+    (item) => !/^\s+schoolId\s+String(?:\s|$)/m.test(item.body) && item.name !== "AuditLog"
+  )) {
+    assert.equal(
+      permittedGlobalModels.includes(model.name),
+      true,
+      `${model.name} must be explicitly global or school-scoped`
+    );
   }
 });

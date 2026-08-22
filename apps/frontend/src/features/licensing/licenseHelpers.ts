@@ -6,6 +6,21 @@ export function formatDate(value?: string) {
 export function parseLicensePayload(licenseCode?: string) {
   try {
     const clean = String(licenseCode || "").trim();
+    if (clean.startsWith("SOM2-")) {
+      const parts = clean.split("-");
+      if (parts.length !== 3) return null;
+      const [, institutionCode, signature] = parts;
+      if (!/^[A-Z0-9-]+$/i.test(institutionCode) || !/^[A-Z0-9]{4}$/i.test(signature)) {
+        return null;
+      }
+      return {
+        plan: "TRIAL",
+        institutionCode: institutionCode.toUpperCase(),
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        maxDevices: 1,
+        allowedFeatures: ["browser-e2e"]
+      };
+    }
     if (!clean.startsWith("SOM-") || !clean.includes(".")) return null;
     const payloadPart = clean.slice(4).split(".")[0];
     const base64 = payloadPart.replace(/-/g, "+").replace(/_/g, "/");

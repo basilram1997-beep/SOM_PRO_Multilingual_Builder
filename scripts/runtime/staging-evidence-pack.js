@@ -55,9 +55,12 @@ function assertRealHttpsUrl(value, key) {
   const url = safeUrl(value);
   if (!url) return status(false, `${key} is not a valid URL`);
   if (url.protocol !== "https:") return status(false, `${key} must use https://`, { protocol: url.protocol });
-  if (hasPlaceholder(url.hostname)) return status(false, `${key} must not be local or placeholder`, { host: url.hostname });
+  if (hasPlaceholder(url.hostname))
+    return status(false, `${key} must not be local or placeholder`, { host: url.hostname });
   if (strict && /\.trycloudflare\.com$/i.test(url.hostname)) {
-    return status(false, `${key} must use a stable staging hostname in strict mode, not a temporary Quick Tunnel`, { host: url.hostname });
+    return status(false, `${key} must use a stable staging hostname in strict mode, not a temporary Quick Tunnel`, {
+      host: url.hostname
+    });
   }
   return status(true, `${key} is a real HTTPS URL`, { origin: url.origin });
 }
@@ -120,7 +123,9 @@ async function checkHttpsAndHealth() {
     }
   };
   const failed = Object.entries(checks).filter(([, check]) => typeof check === "object" && check.ok === false);
-  return failed.length ? status(false, "Live HTTPS/staging health checks failed", checks) : status(true, "Live HTTPS/staging health checks passed", checks);
+  return failed.length
+    ? status(false, "Live HTTPS/staging health checks failed", checks)
+    : status(true, "Live HTTPS/staging health checks passed", checks);
 }
 
 function checkStaticDeploymentBaseline() {
@@ -136,7 +141,9 @@ function checkStaticDeploymentBaseline() {
     operatorHealth: rootEnv.SOM_ENABLE_OPERATOR_HEALTH === "true"
   };
   const failed = Object.entries(checks).filter(([, ok]) => !ok);
-  return failed.length ? status(false, "Static staging deployment baseline is incomplete", checks) : status(true, "Static staging deployment baseline is complete", checks);
+  return failed.length
+    ? status(false, "Static staging deployment baseline is incomplete", checks)
+    : status(true, "Static staging deployment baseline is complete", checks);
 }
 
 function checkDbMigrationContract() {
@@ -155,13 +162,16 @@ function checkDbMigrationContract() {
     schemaBackupJobRestrict: /BackupJob[\s\S]*onDelete: Restrict/.test(schema)
   };
   const failed = Object.entries(checks).filter(([, ok]) => !ok);
-  return failed.length ? status(false, "DB guardrail migration contract is incomplete", checks) : status(true, "DB guardrail migration contract is present", checks);
+  return failed.length
+    ? status(false, "DB guardrail migration contract is incomplete", checks)
+    : status(true, "DB guardrail migration contract is present", checks);
 }
 
 async function checkLiveDbGuardrails() {
   if (!liveDb) return pending("Live DB guardrail probes were not requested; run with --live-db on staging");
   const databaseUrl = process.env.DATABASE_URL || "";
-  if (!databaseUrl || hasPlaceholder(databaseUrl)) return status(false, "DATABASE_URL is missing or placeholder for live DB probes");
+  if (!databaseUrl || hasPlaceholder(databaseUrl))
+    return status(false, "DATABASE_URL is missing or placeholder for live DB probes");
 
   const { PrismaClient } = loadPrismaClient();
   const prisma = new PrismaClient();
@@ -224,7 +234,9 @@ async function checkLiveDbGuardrails() {
       evidence.restrictFks.every((row) => row.deleteRule === "RESTRICT") &&
       updateBlocked &&
       deleteBlocked;
-    return ok ? status(true, "Live DB guardrail probes passed", evidence) : status(false, "Live DB guardrail probes failed", evidence);
+    return ok
+      ? status(true, "Live DB guardrail probes passed", evidence)
+      : status(false, "Live DB guardrail probes failed", evidence);
   } finally {
     await prisma.$disconnect();
   }
@@ -243,9 +255,11 @@ function checkBackupEncryptionEnv() {
   };
   if (actualEnv) {
     const secret = String(actualEnv.SOM_BACKUP_PASSPHRASE || actualEnv.SOM_BACKUP_PASSPHRASE_FILE || "");
-    if (!secret || hasPlaceholder(secret)) return status(false, "Staging backup encryption secret is missing or placeholder", evidence);
+    if (!secret || hasPlaceholder(secret))
+      return status(false, "Staging backup encryption secret is missing or placeholder", evidence);
   }
-  if (!evidence.passphraseConfigured) return status(false, "Backup encryption passphrase or passphrase file is not configured", evidence);
+  if (!evidence.passphraseConfigured)
+    return status(false, "Backup encryption passphrase or passphrase file is not configured", evidence);
   return status(true, "Backup encryption environment is configured without exposing secret value", evidence);
 }
 
@@ -272,16 +286,15 @@ function checkReleaseArtifacts() {
     "reports/security/npm-audit.json",
     "reports/security/sast-baseline.json"
   ];
-  const liveRequired = [
-    "reports/security/dast-baseline.json",
-    "reports/security/zap-baseline-report.html"
-  ];
+  const liveRequired = ["reports/security/dast-baseline.json", "reports/security/zap-baseline-report.html"];
   const required = [...alwaysRequired, ...liveRequired];
   const optional = ["reports/security/api-route-inventory.json", "reports/security/desktop-signing-report.json"];
   const artifacts = [...required, ...optional].map(artifactSummary);
   const missingAlways = artifacts.filter((item) => alwaysRequired.includes(item.path) && !item.exists);
   const missingLive = artifacts.filter((item) => liveRequired.includes(item.path) && !item.exists);
-  const dastReport = exists("reports/security/dast-baseline.json") ? readJsonArtifact("reports/security/dast-baseline.json") : null;
+  const dastReport = exists("reports/security/dast-baseline.json")
+    ? readJsonArtifact("reports/security/dast-baseline.json")
+    : null;
   const failedDast = dastReport && dastReport.status !== "passed";
   if (missingAlways.length) {
     return status(false, "Required release security artifacts are missing", {
@@ -349,7 +362,8 @@ async function main() {
     process.exit(1);
   }
 
-  if (pendingChecks.length) warn("Staging evidence pack has pending live checks:", pendingChecks.map(([name]) => name).join(", "));
+  if (pendingChecks.length)
+    warn("Staging evidence pack has pending live checks:", pendingChecks.map(([name]) => name).join(", "));
   success("Staging evidence pack written:", path.relative(root, jsonReportPath));
   success("Staging evidence pack markdown written:", path.relative(root, markdownReportPath));
 }

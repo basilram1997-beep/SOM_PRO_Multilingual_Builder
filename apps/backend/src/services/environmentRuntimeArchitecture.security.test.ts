@@ -37,7 +37,10 @@ test("multi-environment architecture documents one source tree and same-origin r
   assert.match(doc, /one repository, one source tree, and one build architecture/i);
   assert.match(doc, /https:\/\/sompro\.duckdns\.org/);
   assert.match(doc, /https:\/\/app\.example\.com/);
-  assert.match(doc, /\| `VITE_API_URL` \| `http:\/\/localhost:4000` for direct dev, or `\/api` with a local proxy \| `\/api` \| `\/api` \|/);
+  assert.match(
+    doc,
+    /\| `VITE_API_URL` \| `http:\/\/localhost:4000` for direct dev, or `\/api` with a local proxy \| `\/api` \| `\/api` \|/
+  );
   assert.match(doc, /https:\/\/DOMAIN\/api\/\*/);
   assert.match(doc, /https:\/\/DOMAIN\/license\/\*/);
   assert.match(doc, /Do not change application source code/);
@@ -99,7 +102,11 @@ test("application source logic does not hard-code staging or future production d
   for (const root of sourceRoots) {
     for (const file of listSourceFiles(root)) {
       const content = readFileSync(file, "utf8");
-      assert.doesNotMatch(content, /sompro\.duckdns\.org|app\.sompro\.co\.il/i, `${file} must not hard-code deployment domains`);
+      assert.doesNotMatch(
+        content,
+        /sompro\.duckdns\.org|app\.sompro\.co\.il/i,
+        `${file} must not hard-code deployment domains`
+      );
     }
   }
 });

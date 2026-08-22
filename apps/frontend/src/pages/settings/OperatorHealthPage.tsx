@@ -141,7 +141,10 @@ export function OperatorHealthPage() {
                 alertingChannels.length === 0
                   ? "-"
                   : alertingChannels
-                      .map((channel) => `${channel.name}: ${channel.message}${channel.target ? ` (${channel.target})` : ""}`)
+                      .map(
+                        (channel) =>
+                          `${channel.name}: ${channel.message}${channel.target ? ` (${channel.target})` : ""}`
+                      )
                       .join(" · ")
               }
               ok={data.alerting.configured}
@@ -213,7 +216,9 @@ export function OperatorHealthPage() {
                         ? isArabic
                           ? "غير مفعلة"
                           : "Disabled"
-                        : alertingChannels.map((channel) => `${channel.name}: ${channel.target || channel.message}`).join(" · ")}
+                        : alertingChannels
+                            .map((channel) => `${channel.name}: ${channel.target || channel.message}`)
+                            .join(" · ")}
                     </td>
                   </tr>
                   <tr>

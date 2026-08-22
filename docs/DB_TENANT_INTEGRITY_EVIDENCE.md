@@ -6,22 +6,22 @@ Purpose: document database-level guardrails that support API tenant isolation, a
 
 ## Implemented Guardrails
 
-| Control | Evidence | Verification |
-| ------- | -------- | ------------ |
-| Audit append-only trigger | `apps/backend/prisma/migrations/20260812143000_audit_append_only_and_lifecycle_evidence_guards/migration.sql` creates `prevent_audit_log_mutation()` plus `AuditLog_prevent_update` and `AuditLog_prevent_delete` triggers | `apps/backend/src/services/dbTenantIntegrity.security.test.ts` |
-| Export/backup evidence cannot cascade away on hard school delete | `reports_exports_school_id_fkey` and `backup_jobs_school_id_fkey` are recreated with `ON DELETE RESTRICT`; Prisma schema uses `onDelete: Restrict` for `ReportExport` and `BackupJob` | `apps/backend/src/services/dbTenantIntegrity.security.test.ts` |
-| School delete is lifecycle purge, not hard delete | `apps/backend/src/modules/schools/schools.routes.ts` keeps a `DELETED` school tombstone and does not delete audit, report export, or backup job rows during lifecycle purge | `apps/backend/src/services/privacyLifecycleAndExport.security.test.ts`, `apps/backend/src/services/dbTenantIntegrity.security.test.ts` |
-| Archive deletion no longer deletes audit evidence | `apps/backend/src/modules/archive/archive.routes.ts` deletes the daily schedule row but keeps `ARCHIVE_DAY` audit snapshots and records `ARCHIVE_DELETE` | `apps/backend/src/services/dbTenantIntegrity.security.test.ts` |
-| School-private models carry tenant ownership | Models with school-private data contain `schoolId`, a `School` relation, and a `schoolId`-leading index/unique constraint | `apps/backend/src/services/dbTenantIntegrity.security.test.ts` |
+| Control                                                          | Evidence                                                                                                                                                                                                                   | Verification                                                                                                                           |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Audit append-only trigger                                        | `apps/backend/prisma/migrations/20260812143000_audit_append_only_and_lifecycle_evidence_guards/migration.sql` creates `prevent_audit_log_mutation()` plus `AuditLog_prevent_update` and `AuditLog_prevent_delete` triggers | `apps/backend/src/services/dbTenantIntegrity.security.test.ts`                                                                         |
+| Export/backup evidence cannot cascade away on hard school delete | `reports_exports_school_id_fkey` and `backup_jobs_school_id_fkey` are recreated with `ON DELETE RESTRICT`; Prisma schema uses `onDelete: Restrict` for `ReportExport` and `BackupJob`                                      | `apps/backend/src/services/dbTenantIntegrity.security.test.ts`                                                                         |
+| School delete is lifecycle purge, not hard delete                | `apps/backend/src/modules/schools/schools.routes.ts` keeps a `DELETED` school tombstone and does not delete audit, report export, or backup job rows during lifecycle purge                                                | `apps/backend/src/services/privacyLifecycleAndExport.security.test.ts`, `apps/backend/src/services/dbTenantIntegrity.security.test.ts` |
+| Archive deletion no longer deletes audit evidence                | `apps/backend/src/modules/archive/archive.routes.ts` deletes the daily schedule row but keeps `ARCHIVE_DAY` audit snapshots and records `ARCHIVE_DELETE`                                                                   | `apps/backend/src/services/dbTenantIntegrity.security.test.ts`                                                                         |
+| School-private models carry tenant ownership                     | Models with school-private data contain `schoolId`, a `School` relation, and a `schoolId`-leading index/unique constraint                                                                                                  | `apps/backend/src/services/dbTenantIntegrity.security.test.ts`                                                                         |
 
 ## Explicit Global/Exception Models
 
-| Model | Reason |
-| ----- | ------ |
-| `School` | Tenant root entity. |
-| `Permission` | Global permission dictionary. |
-| `RolePermission` | Bridge table scoped through `Role`, which is school-scoped. |
-| `AuditLog` | May contain global/system events, so `schoolId` is nullable; it still has schoolId indexes and append-only DB trigger evidence. |
+| Model            | Reason                                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `School`         | Tenant root entity.                                                                                                             |
+| `Permission`     | Global permission dictionary.                                                                                                   |
+| `RolePermission` | Bridge table scoped through `Role`, which is school-scoped.                                                                     |
+| `AuditLog`       | May contain global/system events, so `schoolId` is nullable; it still has schoolId indexes and append-only DB trigger evidence. |
 
 ## Operational Notes
 

@@ -50,6 +50,8 @@ function createE2EEnv(overrides = {}) {
     SOM_E2E_STUDENT_PASSWORD: process.env.SOM_E2E_STUDENT_PASSWORD || "SOM-E2E-Student-123!",
     SOM_E2E_PARENT_EMAIL: process.env.SOM_E2E_PARENT_EMAIL || "parent@som-e2e.local",
     SOM_E2E_PARENT_PASSWORD: process.env.SOM_E2E_PARENT_PASSWORD || "SOM-E2E-Parent-123!",
+    SOM_TUNNEL_PROXY_USER: process.env.SOM_TUNNEL_PROXY_USER || "demo",
+    SOM_TUNNEL_PROXY_PASSWORD: process.env.SOM_TUNNEL_PROXY_PASSWORD || "Demo-Tunnel-2026!",
     ...overrides
   });
 }

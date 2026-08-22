@@ -35,16 +35,15 @@ function validateTarget(rawTarget) {
 }
 
 function htmlEscape(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 function writeFallbackHtml(report) {
   const rows = report.findings
-    .map((finding) => `<tr><td>${htmlEscape(finding.risk)}</td><td>${htmlEscape(finding.name)}</td><td>${htmlEscape(finding.count)}</td></tr>`)
+    .map(
+      (finding) =>
+        `<tr><td>${htmlEscape(finding.risk)}</td><td>${htmlEscape(finding.name)}</td><td>${htmlEscape(finding.count)}</td></tr>`
+    )
     .join("");
   const html = `<!doctype html>
 <html lang="en">
@@ -114,14 +113,7 @@ async function runZap(baseUrl) {
   }
 
   const command = process.env.ZAP_BASELINE_COMMAND || "zap-baseline.py";
-  const args = [
-    "-t",
-    baseUrl.toString(),
-    "-J",
-    rawZapJsonPath,
-    "-r",
-    htmlReportPath
-  ];
+  const args = ["-t", baseUrl.toString(), "-J", rawZapJsonPath, "-r", htmlReportPath];
   return runCommand(command, args);
 }
 
@@ -165,7 +157,10 @@ async function main() {
       target: targetCheck.url.origin,
       summary: `OWASP ZAP baseline command failed to start: ${zapResult.error}`,
       scanner: process.env.ZAP_USE_DOCKER === "true" ? "OWASP ZAP Docker baseline" : "OWASP ZAP baseline",
-      command: process.env.ZAP_USE_DOCKER === "true" ? "docker run ghcr.io/zaproxy/zaproxy:stable zap-baseline.py" : process.env.ZAP_BASELINE_COMMAND || "zap-baseline.py",
+      command:
+        process.env.ZAP_USE_DOCKER === "true"
+          ? "docker run ghcr.io/zaproxy/zaproxy:stable zap-baseline.py"
+          : process.env.ZAP_BASELINE_COMMAND || "zap-baseline.py",
       findings: []
     };
     writeReport(report);

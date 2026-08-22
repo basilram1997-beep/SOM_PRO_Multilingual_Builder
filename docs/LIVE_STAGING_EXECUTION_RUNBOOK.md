@@ -6,13 +6,13 @@ Purpose: provide the operator sequence for turning repository evidence into date
 
 ## Required Inputs
 
-| Input | Requirement | Handling rule |
-| --- | --- | --- |
-| `STAGING_URL` | Real `https://` staging URL, not localhost, IP-only, or placeholder. | Pass through the shell/CI secret store only. |
-| `DATABASE_URL` | Staging database URL after `prisma migrate deploy`. | Pass through a secret manager or CI secret only; never commit it. |
-| ZAP runtime | Docker with `ZAP_USE_DOCKER=true` or local `zap-baseline.py`. | Prefer Docker for repeatable evidence. |
-| Archive location | Controlled release evidence location. | Keep generated reports under `reports/security/` and final bundle under `reports/ministry-review/`. |
-| External tester contact | Approved test window and escalation contact. | Keep signed report/sign-off outside source code if it contains sensitive evidence. |
+| Input                   | Requirement                                                          | Handling rule                                                                                       |
+| ----------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `STAGING_URL`           | Real `https://` staging URL, not localhost, IP-only, or placeholder. | Pass through the shell/CI secret store only.                                                        |
+| `DATABASE_URL`          | Staging database URL after `prisma migrate deploy`.                  | Pass through a secret manager or CI secret only; never commit it.                                   |
+| ZAP runtime             | Docker with `ZAP_USE_DOCKER=true` or local `zap-baseline.py`.        | Prefer Docker for repeatable evidence.                                                              |
+| Archive location        | Controlled release evidence location.                                | Keep generated reports under `reports/security/` and final bundle under `reports/ministry-review/`. |
+| External tester contact | Approved test window and escalation contact.                         | Keep signed report/sign-off outside source code if it contains sensitive evidence.                  |
 
 ## Pre-Flight
 
@@ -131,36 +131,36 @@ Pass criteria:
 
 ## Failure Handling
 
-| Failure | Response |
-| --- | --- |
-| DAST/ZAP reports High/Critical | Stop release, file remediation item, rerun ZAP after fix. |
-| Strict staging evidence has pending checks | Do not submit; close missing live URL, DB, DAST, or artifact prerequisite. |
-| Live DB guardrail fails | Stop release, verify migration deploy and runtime DB role, then rerun. |
-| Secrets appear in generated evidence | Treat as incident, rotate affected secret, purge artifact from handoff package, regenerate. |
-| External sign-off is missing | Keep `Pending external sign-off` open in the Ministry review pack. |
-| Official Ministry documents remain Missing | Do not claim formal Ministry compliance; keep official source category pending. |
+| Failure                                    | Response                                                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| DAST/ZAP reports High/Critical             | Stop release, file remediation item, rerun ZAP after fix.                                   |
+| Strict staging evidence has pending checks | Do not submit; close missing live URL, DB, DAST, or artifact prerequisite.                  |
+| Live DB guardrail fails                    | Stop release, verify migration deploy and runtime DB role, then rerun.                      |
+| Secrets appear in generated evidence       | Treat as incident, rotate affected secret, purge artifact from handoff package, regenerate. |
+| External sign-off is missing               | Keep `Pending external sign-off` open in the Ministry review pack.                          |
+| Official Ministry documents remain Missing | Do not claim formal Ministry compliance; keep official source category pending.             |
 
 ## Archive Checklist
 
-| Evidence ID | Artifact |
-| --- | --- |
-| LSE-102 | `reports/security/dast-baseline.json`, `reports/security/dast-zap-raw.json`, `reports/security/zap-baseline-report.html` |
-| LSE-103 | `reports/security/staging-evidence-pack.json`, `reports/security/staging-evidence-pack.md` |
-| LSE-104 | `reports/security/staging-evidence-pack.json` with live DB mode evidence |
-| LSE-201 | Reviewed ZAP finding disposition |
-| LSE-202 | Strict staging evidence JSON/Markdown |
-| LSE-203 | Audit mutation/FK restrict proof |
-| LSE-204 | `reports/security/sbom.cyclonedx.json`, `reports/security/sast-baseline.json`, `reports/security/npm-audit.json`, `reports/security/license-report.json`, `reports/security/license-report.md` |
-| LSE-205 | Signed external pentest report and retest status |
+| Evidence ID | Artifact                                                                                                                                                                                       |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LSE-102     | `reports/security/dast-baseline.json`, `reports/security/dast-zap-raw.json`, `reports/security/zap-baseline-report.html`                                                                       |
+| LSE-103     | `reports/security/staging-evidence-pack.json`, `reports/security/staging-evidence-pack.md`                                                                                                     |
+| LSE-104     | `reports/security/staging-evidence-pack.json` with live DB mode evidence                                                                                                                       |
+| LSE-201     | Reviewed ZAP finding disposition                                                                                                                                                               |
+| LSE-202     | Strict staging evidence JSON/Markdown                                                                                                                                                          |
+| LSE-203     | Audit mutation/FK restrict proof                                                                                                                                                               |
+| LSE-204     | `reports/security/sbom.cyclonedx.json`, `reports/security/sast-baseline.json`, `reports/security/npm-audit.json`, `reports/security/license-report.json`, `reports/security/license-report.md` |
+| LSE-205     | Signed external pentest report and retest status                                                                                                                                               |
 
 ## Final Operator Sign-Off
 
-| Item | Owner | Status | Date | Notes |
-| --- | --- | --- | --- | --- |
-| Live staging URL validated | DevOps | Pending | | |
-| DAST/ZAP passed | Security | Pending | | |
-| Strict staging evidence passed | DevOps/security | Pending | | |
-| Live DB guardrails passed | DBA/security | Pending | | |
-| External pentest sign-off attached | Product/security | Pending | | |
-| Official Ministry source intake mapped/approved | Compliance/legal | Pending | | |
-| Strict Ministry review pack passed | Release owner | Pending | | |
+| Item                                            | Owner            | Status  | Date | Notes |
+| ----------------------------------------------- | ---------------- | ------- | ---- | ----- |
+| Live staging URL validated                      | DevOps           | Pending |      |       |
+| DAST/ZAP passed                                 | Security         | Pending |      |       |
+| Strict staging evidence passed                  | DevOps/security  | Pending |      |       |
+| Live DB guardrails passed                       | DBA/security     | Pending |      |       |
+| External pentest sign-off attached              | Product/security | Pending |      |       |
+| Official Ministry source intake mapped/approved | Compliance/legal | Pending |      |       |
+| Strict Ministry review pack passed              | Release owner    | Pending |      |       |
