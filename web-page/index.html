@@ -395,6 +395,40 @@
       .cards-3 .card {
         min-height: 220px;
       }
+      .showcase-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+      .showcase-card {
+        background: rgba(255, 255, 255, 0.98);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        padding: 18px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.07);
+        overflow: hidden;
+      }
+      .showcase-card img {
+        display: block;
+        width: 100%;
+        height: 420px;
+        object-fit: cover;
+        border-radius: 20px;
+        border: 1px solid rgba(214, 223, 235, 0.9);
+        background: #e7eef8;
+      }
+      .showcase-card figcaption {
+        margin-top: 14px;
+      }
+      .showcase-card h3 {
+        margin: 0 0 8px;
+        font-size: 21px;
+      }
+      .showcase-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.8;
+      }
       .feature-strip {
         display: grid;
         grid-template-columns: 1.15fr 0.85fr;
@@ -484,6 +518,7 @@
       @media (max-width: 1100px) {
         .hero-inner,
         .feature-strip,
+        .showcase-grid,
         .cta-box {
           grid-template-columns: 1fr;
         }
@@ -518,6 +553,9 @@
         .grid.cards-3,
         .hero-metrics {
           grid-template-columns: 1fr;
+        }
+        .showcase-card img {
+          height: 340px;
         }
         .hero h1 {
           max-width: none;
@@ -645,6 +683,49 @@
               <h3 data-i18n="parentTitle">ولي الأمر</h3>
               <p data-i18n="parentText">يحصل على مخرجات واضحة حول التقدم والسلوك والفعاليات بحسب الصلاحيات الممنوحة.</p>
             </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="showcase">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <h2 data-i18n="showcaseTitle">صور توضح الفكرة</h2>
+              <p data-i18n="showcaseText">
+                نعرض كل فئة بصورة حقيقية من داخل النظام حتى يرى الزائر كيف تبدو واجهة المعلم والطالب
+                والمدير قبل التجربة.
+              </p>
+            </div>
+          </div>
+          <div class="showcase-grid">
+            <figure class="showcase-card">
+              <img src="assets/showcase/admin-dashboard.png" alt="واجهة المدير" />
+              <figcaption>
+                <h3 data-i18n="showcaseAdminTitle">للمدير</h3>
+                <p data-i18n="showcaseAdminText">
+                  لوحة التحكم تعرض الحالة العامة، الأقسام، والاختصارات الإدارية في مكان واحد مرتب.
+                </p>
+              </figcaption>
+            </figure>
+            <figure class="showcase-card">
+              <img src="assets/showcase/teacher-lesson-today.png" alt="واجهة المعلم" />
+              <figcaption>
+                <h3 data-i18n="showcaseTeacherTitle">للمعلم</h3>
+                <p data-i18n="showcaseTeacherText">
+                  صفحة درس اليوم تشرح الدرس، المادة، والمحتوى العملي بصورة واضحة وسريعة القراءة.
+                </p>
+              </figcaption>
+            </figure>
+            <figure class="showcase-card">
+              <img src="assets/showcase/student-certificates.png" alt="واجهة الطالب" />
+              <figcaption>
+                <h3 data-i18n="showcaseStudentTitle">للطالب</h3>
+                <p data-i18n="showcaseStudentText">
+                  عرض الشهادات أو الملخصات يمنح الطالب تصورًا مباشرًا عن المخرجات والنتائج.
+                </p>
+              </figcaption>
+            </figure>
           </div>
         </div>
       </section>
@@ -806,6 +887,15 @@
           packagesTitle: "الحزم المقترحة",
           packagesText:
             "نفس التوازن الذي يعجب في الصفحات الجيدة: وضوح، ثقة، ورسالة مباشرة، مع تقسيم بسيط للفئات التي ستستخدم النظام.",
+          showcaseTitle: "صور توضح الفكرة",
+          showcaseText:
+            "نعرِض كل فئة بصورة حقيقية من داخل النظام حتى يرى الزائر كيف تبدو واجهة المعلم والطالب والمدير قبل التجربة.",
+          showcaseAdminTitle: "للمدير",
+          showcaseAdminText: "لوحة التحكم تعرض الحالة العامة، الأقسام، والاختصارات الإدارية في مكان واحد مرتب.",
+          showcaseTeacherTitle: "للمعلم",
+          showcaseTeacherText: "صفحة درس اليوم تشرح الدرس، المادة، والمحتوى العملي بصورة واضحة وسريعة القراءة.",
+          showcaseStudentTitle: "للطالب",
+          showcaseStudentText: "عرض الشهادات أو الملخصات يمنح الطالب تصورًا مباشرًا عن المخرجات والنتائج.",
           pkg1Title: "نسخة سطح المكتب",
           pkg1Text: "مناسبة للتشغيل المحلي في المدرسة أو لبيئة داخلية محدودة.",
           pkg2Title: "نسخة الويب",
@@ -875,6 +965,15 @@
           packagesTitle: "Suggested packages",
           packagesText:
             "The same balance that makes strong product pages feel trustworthy: clarity, confidence, and a direct message, with simple audience grouping.",
+          showcaseTitle: "Screens that explain the idea",
+          showcaseText:
+            "We show each audience with a real in-app screenshot so visitors can see the teacher, student, and admin experience before trying it.",
+          showcaseAdminTitle: "For administrators",
+          showcaseAdminText: "The dashboard keeps status, sections, and admin shortcuts in one neat place.",
+          showcaseTeacherTitle: "For teachers",
+          showcaseTeacherText: "The lesson-today page shows the lesson, subject, and practical content clearly.",
+          showcaseStudentTitle: "For students",
+          showcaseStudentText: "Certificates or summaries give students a direct view of results and outcomes.",
           pkg1Title: "Desktop edition",
           pkg1Text: "Great for local school use or a limited internal environment.",
           pkg2Title: "Web edition",
@@ -944,6 +1043,15 @@
           packagesTitle: "חבילות מוצעות",
           packagesText:
             "אותו איזון שעובד בדפי מוצר חזקים: בהירות, ביטחון ומסר ישיר, עם חלוקה פשוטה של קהלי היעד.",
+          showcaseTitle: "מסכים שמסבירים את הרעיון",
+          showcaseText:
+            "אנחנו מציגים כל קהל יעד עם צילום מסך אמיתי מתוך המערכת כדי שהמבקר יראה את חוויית המנהל, המורה והתלמיד לפני הניסיון.",
+          showcaseAdminTitle: "למנהלים",
+          showcaseAdminText: "לוח הבקרה מציג מצב כללי, אזורים וקיצורי דרך ניהוליים במקום אחד מסודר.",
+          showcaseTeacherTitle: "למורים",
+          showcaseTeacherText: "עמוד 'שיעור היום' מציג את השיעור, המקצוע והתוכן המעשי באופן ברור.",
+          showcaseStudentTitle: "לתלמידים",
+          showcaseStudentText: "תעודות או סיכומים נותנים לתלמידים מבט ישיר על תוצרים ותוצאות.",
           pkg1Title: "גרסת Desktop",
           pkg1Text: "מתאימה לשימוש מקומי בבית הספר או בסביבה פנימית מוגבלת.",
           pkg2Title: "גרסת Web",
