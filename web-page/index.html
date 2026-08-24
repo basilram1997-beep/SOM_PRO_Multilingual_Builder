@@ -395,39 +395,84 @@
       .cards-3 .card {
         min-height: 220px;
       }
-      .showcase-grid {
+      .showcase-groups {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+      .showcase-group {
+        display: grid;
+        gap: 18px;
+      }
+      .showcase-group-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 18px;
+      }
+      .showcase-group-head h3 {
+        margin: 0;
+        font-size: clamp(22px, 2.6vw, 32px);
+      }
+      .showcase-group-head p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.8;
+        max-width: 700px;
+      }
+      .showcase-tiles {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 18px;
       }
       .showcase-card {
-        background: rgba(255, 255, 255, 0.98);
+        appearance: none;
         border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.98);
         border-radius: 28px;
-        padding: 18px;
         box-shadow: 0 16px 40px rgba(15, 23, 42, 0.07);
-        overflow: hidden;
+        padding: 16px;
+        cursor: zoom-in;
+        text-align: right;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease,
+          border-color 0.18s ease;
+      }
+      .showcase-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 22px 48px rgba(15, 23, 42, 0.1);
+        border-color: rgba(37, 99, 235, 0.26);
+      }
+      .showcase-card:focus-visible {
+        outline: 3px solid rgba(37, 99, 235, 0.45);
+        outline-offset: 3px;
       }
       .showcase-card img {
         display: block;
         width: 100%;
-        height: 420px;
+        height: 280px;
         object-fit: cover;
         border-radius: 20px;
         border: 1px solid rgba(214, 223, 235, 0.9);
         background: #e7eef8;
       }
       .showcase-card figcaption {
-        margin-top: 14px;
+        display: grid;
+        gap: 6px;
       }
       .showcase-card h3 {
-        margin: 0 0 8px;
-        font-size: 21px;
+        margin: 0;
+        font-size: 20px;
       }
       .showcase-card p {
         margin: 0;
         color: var(--muted);
         line-height: 1.8;
+        font-size: 15px;
       }
       .feature-strip {
         display: grid;
@@ -451,6 +496,73 @@
       .feature-highlight p {
         color: rgba(226, 239, 255, 0.92);
         line-height: 1.95;
+      }
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        background: rgba(6, 13, 30, 0.86);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 100;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.18s ease;
+      }
+      .lightbox.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .lightbox-shell {
+        width: min(1120px, 100%);
+        display: grid;
+        gap: 14px;
+      }
+      .lightbox-frame {
+        margin: 0;
+        background: #fff;
+        border-radius: 28px;
+        padding: 18px;
+        box-shadow: 0 32px 90px rgba(0, 0, 0, 0.28);
+      }
+      .lightbox-frame img {
+        display: block;
+        width: 100%;
+        max-height: min(78vh, 900px);
+        object-fit: contain;
+        border-radius: 20px;
+        background: #eef3fb;
+      }
+      .lightbox-caption {
+        color: white;
+        display: grid;
+        gap: 6px;
+      }
+      .lightbox-caption h3 {
+        margin: 0;
+        font-size: 28px;
+      }
+      .lightbox-caption p {
+        margin: 0;
+        color: rgba(234, 241, 255, 0.9);
+        line-height: 1.9;
+        font-size: 16px;
+      }
+      .lightbox-close {
+        position: fixed;
+        top: 18px;
+        left: 18px;
+        width: 50px;
+        height: 50px;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.16);
+        color: white;
+        font-size: 26px;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
       }
       .feature-highlights {
         display: grid;
@@ -506,7 +618,6 @@
       @media (max-width: 1100px) {
         .hero-inner,
         .feature-strip,
-        .showcase-grid,
         .cta-box {
           grid-template-columns: 1fr;
         }
@@ -559,6 +670,23 @@
         }
         .button {
           width: 100%;
+        }
+        .showcase-group-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .showcase-card img {
+          height: 260px;
+        }
+        .lightbox {
+          padding: 14px;
+        }
+        .lightbox-caption h3 {
+          font-size: 22px;
+        }
+        .lightbox-close {
+          top: 12px;
+          left: 12px;
         }
       }
     </style>
@@ -693,37 +821,125 @@
               </p>
             </div>
           </div>
-          <div class="showcase-grid">
-            <figure class="showcase-card">
-              <img src="assets/showcase/admin-view-v3.png" alt="واجهة المدير" />
-              <figcaption>
-                <h3 data-i18n="showcaseAdminTitle">للمدير</h3>
-                <p data-i18n="showcaseAdminText">
-                  شاشة المدير تبرز المؤشرات والطلبات والبدائل والتفاصيل التجريبية في مساحة واحدة واضحة.
-                </p>
-              </figcaption>
-            </figure>
-            <figure class="showcase-card">
-              <img src="assets/showcase/classes-teachers-v1.png" alt="صفوف ومربون" />
-              <figcaption>
-                <h3 data-i18n="showcaseTeacherTitle">للصفوف والمربين</h3>
-                <p data-i18n="showcaseTeacherText">
-                  شاشة الصفوف والمربين تعرض توزيع الصفوف، مربي الصف، والحالة الحالية بسرعة واضحة.
-                </p>
-              </figcaption>
-            </figure>
-            <figure class="showcase-card">
-              <img src="assets/showcase/substitutions-program-v1.png" alt="البرنامج المحدث" />
-              <figcaption>
-                <h3 data-i18n="showcaseStudentTitle">للبرنامج بعد الاستبدالات</h3>
-                <p data-i18n="showcaseStudentText">
-                  شاشة البرنامج المحدث تعرض الحصص المعدلة، البدلاء، والحالة النهائية بوضوح مباشر.
-                </p>
-              </figcaption>
-            </figure>
+          <div class="showcase-groups">
+            <article class="showcase-group">
+              <div class="showcase-group-head">
+                <div>
+                  <h3>واجهات الطالب</h3>
+                  <p>أربع لقطات ببيانات تجريبية فقط توضّح ما يراه الطالب في يومه الدراسي.</p>
+                </div>
+              </div>
+              <div class="showcase-tiles">
+                <button class="showcase-card" type="button" data-full="assets/showcase/student-homework-v1.png" data-title="واجباتي" data-caption="صفحة الطالب تعرض الواجبات المستحقة مع الموعد والحالة والتقدّم.">
+                  <img src="assets/showcase/student-homework-v1.png" alt="واجباتي - بيانات تجريبية من داخل المشروع" />
+                  <figcaption>
+                    <h3>واجباتي</h3>
+                    <p>الواجبات المستحقة مع الموعد والحالة والتقدّم.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/student-lessons-v1.png" data-title="دروسي" data-caption="لقطة توضّح دروس الطالب خلال يومه الدراسي.">
+                  <img src="assets/showcase/student-lessons-v1.png" alt="دروسي - بيانات تجريبية من داخل المشروع" />
+                  <figcaption>
+                    <h3>دروسي</h3>
+                    <p>الدروس مرتبة حسب اليوم مع ربط سريع بالمادة والمعلم.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/student-exams-v1.png" data-title="امتحاناتي" data-caption="مخطط امتحانات الطالب مع التاريخ والنوع والحالة الحالية.">
+                  <img src="assets/showcase/student-exams-v1.png" alt="امتحاناتي - بيانات تجريبية من داخل المشروع" />
+                  <figcaption>
+                    <h3>امتحاناتي</h3>
+                    <p>مخطط الامتحانات مع التاريخ والنوع والحالة.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/student-program-v1.png" data-title="برنامجي" data-caption="البرنامج اليومي للطالب مع الحصص والمواد والمعلمين والزمن.">
+                  <img src="assets/showcase/student-program-v1.png" alt="برنامجي - بيانات تجريبية من داخل المشروع" />
+                  <figcaption>
+                    <h3>برنامجي</h3>
+                    <p>البرنامج اليومي للحصص والمواد والمعلمين والزمن.</p>
+                  </figcaption>
+                </button>
+              </div>
+            </article>
+
+            <article class="showcase-group">
+              <div class="showcase-group-head">
+                <div>
+                  <h3>واجهات المعلم</h3>
+                  <p>خمس لقطات ببيانات تجريبية فقط تمثل العمل اليومي للمعلم داخل المشروع.</p>
+                </div>
+              </div>
+              <div class="showcase-tiles">
+                <button class="showcase-card" type="button" data-full="assets/showcase/teacher-program-v1.png" data-title="برنامج المعلم" data-caption="برنامج المعلم اليومي مع الحصص والصفوف والمواعيد.">
+                  <img src="assets/showcase/teacher-program-v1.png" alt="برنامج المعلم - بيانات تجريبية من داخل المشروع" />
+                  <figcaption>
+                    <h3>برنامج المعلم</h3>
+                    <p>الحصص والصفوف والمواعيد في شاشة عملية واحدة.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/teacher-substitutions-v1.png" data-title="مناوبتي" data-caption="البدائل والمناوبات المعتمدة مع الصف والحصة الأصلية والبديل.">
+                  <img src="assets/showcase/teacher-substitutions-v1.png" alt="مناوبتي - بيانات تجريبية من داخل المشروع" />
+                  <figcaption>
+                    <h3>مناوبتي</h3>
+                    <p>البدائل والمناوبات المعتمدة مع الصف والحصة.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/teacher-grades-v1.png" data-title="إدخال العلامات" data-caption="صفحة إدخال العلامات تعرض الطلاب ودرجاتهم والتقدير والملاحظة.">
+                  <img src="assets/showcase/teacher-grades-v1.png" alt="إدخال العلامات - بيانات تجريبية من داخل المشروع" />
+                  <figcaption>
+                    <h3>إدخال العلامات</h3>
+                    <p>أسماء الطلاب والدرجات والتقدير والملاحظة.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/teacher-behavior-v1.png" data-title="إدخال السلوك" data-caption="تسجيل السلوك الإيجابي أو السلبي مع التاريخ والإجراء والمتابعة.">
+                  <img src="assets/showcase/teacher-behavior-v1.png" alt="إدخال السلوك - بيانات تجريبية من داخل المشروع" />
+                  <figcaption>
+                    <h3>إدخال السلوك</h3>
+                    <p>السلوك الإيجابي أو السلبي مع التاريخ والإجراء.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/teacher-exam-v1.png" data-title="إدخال امتحان" data-caption="إنشاء امتحان جديد مع ربطه بالصف والمادة والحالة النهائية.">
+                  <img src="assets/showcase/teacher-exam-v1.png" alt="إدخال امتحان - بيانات تجريبية من داخل المشروع" />
+                  <figcaption>
+                    <h3>إدخال امتحان</h3>
+                    <p>إنشاء امتحان جديد مع ربطه بالصف والمادة والحالة.</p>
+                  </figcaption>
+                </button>
+              </div>
+            </article>
+
+            <article class="showcase-group">
+              <div class="showcase-group-head">
+                <div>
+                  <h3>واجهة المدير</h3>
+                  <p>لقطة واحدة ببيانات تجريبية توضّح برنامج الفراغ ومن هو متفرغ وبأي حصة.</p>
+                </div>
+              </div>
+              <div class="showcase-tiles" style="max-width: 520px">
+                <button class="showcase-card" type="button" data-full="assets/showcase/admin-free-slot-v1.png" data-title="برنامج الفراغ" data-caption="يعرض من هو متفرغ وبأي حصة، مع حالة السدّ والاستدعاء والبديل.">
+                  <img src="assets/showcase/admin-free-slot-v1.png" alt="برنامج الفراغ - بيانات تجريبية من داخل المشروع" />
+                  <figcaption>
+                    <h3>برنامج الفراغ</h3>
+                    <p>من هو متفرغ وبأي حصة مع حالة السدّ والاستدعاء.</p>
+                  </figcaption>
+                </button>
+              </div>
+            </article>
           </div>
         </div>
       </section>
+
+      <div class="lightbox" aria-hidden="true">
+        <button class="lightbox-close" type="button" aria-label="إغلاق المعاينة">×</button>
+        <div class="lightbox-shell" role="dialog" aria-modal="true" aria-label="معاينة الصورة">
+          <figure class="lightbox-frame">
+            <img class="lightbox-image" alt="" />
+          </figure>
+          <div class="lightbox-caption">
+            <h3></h3>
+            <p></p>
+          </div>
+        </div>
+      </div>
 
       <section class="section" id="features">
         <div class="shell">
@@ -738,10 +954,6 @@
           <div class="feature-strip">
             <div class="feature-highlight">
               <h3 data-i18n="highlightTitle">واجهة تسويقية مدروسة، ونظام تشغيلي عملي</h3>
-              <p data-i18n="highlightText">
-                نعرض الفكرة للزائر كما يعرضها المنتج الناضج: عنوان قوي، وصف مباشر، ثم بطاقات توضح أين
-                يفيد النظام داخل المدرسة.
-              </p>
               <div class="hero-actions" style="margin-top: 22px">
                 <a class="button primary" href="#packages" data-i18n="highlightButton1">استعراض الحزم</a>
                 <a class="button secondary" href="#contact" data-i18n="highlightButton2">تواصل سريع</a>
@@ -865,8 +1077,6 @@
           featuresTitle: "المزايا التي تميّز SOM PRO",
           featuresText: "أقسام مرئية واضحة، بطاقات قوية، وتدرج بصري يذكّر بروح kindix.me لكن بهوية SOM PRO الخاصة.",
           highlightTitle: "واجهة تسويقية مدروسة، ونظام تشغيلي عملي",
-          highlightText:
-            "نعرِض الفكرة للزائر كما يعرضها المنتج الناضج: عنوان قوي، وصف مباشر، ثم بطاقات توضح أين يفيد النظام داخل المدرسة.",
           highlightButton1: "استعراض الحزم",
           highlightButton2: "تواصل سريع",
           stack1Title: "برنامج يومي وبدائل",
@@ -880,7 +1090,7 @@
             "تقسيم واضح يطابق طريقة الاستخدام الفعلية داخل المدرسة: تجربة على سطح المكتب للمدارس، ووصول عبر الويب للهواتف والمتصفح، وروابط رسمية للموقع والخصوصية.",
           showcaseTitle: "صور توضح الفكرة",
           showcaseText:
-            "لقطات من داخل النظام توضح المدير والصفوف والبرنامج المحدث قبل التجربة.",
+            "لقطات من داخل النظام تعرض واجهة الطالب والمعلم والمدير ببيانات تجريبية واضحة قبل التجربة.",
           showcaseAdminTitle: "للمدير",
           showcaseAdminText: "شاشة المدير تبرز المؤشرات والطلبات والبدائل والتفاصيل التجريبية في مساحة واحدة واضحة.",
           showcaseTeacherTitle: "للصفوف والمربين",
@@ -939,8 +1149,6 @@
           featuresTitle: "What makes SOM PRO stand out",
           featuresText: "Clear visual sections, strong cards, and a premium gradient flow inspired by good school landing pages.",
           highlightTitle: "A thoughtful marketing page with a practical operating system",
-          highlightText:
-            "We present the product the way a mature platform does: a strong headline, a direct description, and cards that explain where it helps in school life.",
           highlightButton1: "Explore packages",
           highlightButton2: "Quick contact",
           stack1Title: "Daily program and substitutions",
@@ -954,7 +1162,7 @@
             "A clear split that matches real school usage: desktop for school devices, web for phones and browsers, and official links for the site and privacy page.",
           showcaseTitle: "Screens that explain the idea",
           showcaseText:
-            "We show real in-app screenshots so visitors can see the admin view, class assignments, and updated program before trying it.",
+            "We show real in-app screenshots so visitors can see the student, teacher, and admin experiences with demo data before trying it.",
           showcaseAdminTitle: "For administrators",
           showcaseAdminText: "The admin screen highlights the dashboard, requests, substitutions, and trial details in one place.",
           showcaseTeacherTitle: "For classes and homeroom teachers",
@@ -1013,8 +1221,6 @@
           featuresTitle: "מה מייחד את SOM PRO",
           featuresText: "אזורי תוכן ברורים, כרטיסים חזקים וזרימת צבעים פרימיום בהשראת דפי נחיתה טובים.",
           highlightTitle: "דף שיווקי מחושב עם מערכת תפעולית אמיתית",
-          highlightText:
-            "אנחנו מציגים את המוצר כמו פלטפורמה בשלה: כותרת חזקה, תיאור ישיר וכרטיסים שמסבירים כיצד הוא עוזר בבית הספר.",
           highlightButton1: "עיון בחבילות",
           highlightButton2: "צור קשר",
           stack1Title: "תוכנית יומית והחלפות",
@@ -1028,7 +1234,7 @@
             "אותו איזון שעובד בדפי מוצר חזקים: בהירות, ביטחון ומסר ישיר, עם חלוקה פשוטה של קהלי היעד.",
           showcaseTitle: "מסכים שמסבירים את הרעיון",
           showcaseText:
-            "אנחנו מציגים צילומי מסך אמיתיים מתוך המערכת כדי שהמבקר יראה את מסך הניהול, חלוקת הכיתות והמורים, ואת התוכנית המעודכנת לפני הניסיון.",
+            "אנחנו מציגים צילומי מסך אמיתיים מתוך המערכת כדי שהמבקר יראה את חוויית התלמיד, המורה והמנהל עם נתוני דמו ברורים לפני הניסיון.",
           showcaseAdminTitle: "למנהלים",
           showcaseAdminText: "מסך המנהל מדגיש לוח בקרה, בקשות, החלפות ופרטי הדגמה במקום אחד.",
           showcaseTeacherTitle: "לכיתות ולמחנכים",
@@ -1074,6 +1280,127 @@
 
       document.querySelectorAll(".language-switcher button").forEach((b) => {
         b.addEventListener("click", () => setLang(b.dataset.lang));
+      });
+      const audioState = {
+        context: null,
+        introPlayed: false,
+      };
+
+      function getAudioContext() {
+        const Ctor = window.AudioContext || window.webkitAudioContext;
+        if (!Ctor) return null;
+        if (!audioState.context) {
+          audioState.context = new Ctor();
+        }
+        return audioState.context;
+      }
+
+      async function tryUnlockAudio() {
+        const ctx = getAudioContext();
+        if (!ctx) return null;
+        if (ctx.state === "suspended") {
+          try {
+            await ctx.resume();
+          } catch {}
+        }
+        return ctx.state === "running" ? ctx : null;
+      }
+
+      function playTone(ctx, frequency, startTime, duration, volume, type = "sine") {
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, startTime);
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration + 0.02);
+      }
+
+      async function playIntroTheme() {
+        if (audioState.introPlayed) return;
+        const ctx = await tryUnlockAudio();
+        if (!ctx) return;
+        audioState.introPlayed = true;
+        const start = ctx.currentTime + 0.04;
+        const notes = [392, 523, 659, 784, 659, 587, 523, 440];
+        notes.forEach((freq, index) => {
+          playTone(ctx, freq, start + index * 0.76, 0.66, 0.025, index % 2 === 0 ? "sine" : "triangle");
+        });
+      }
+
+      function playClickSound() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === "suspended") {
+          ctx.resume().catch(() => {});
+        }
+        const start = ctx.currentTime;
+        playTone(ctx, 880, start, 0.08, 0.018, "triangle");
+      }
+
+      document.querySelectorAll(".language-switcher button").forEach((b) => {
+        b.addEventListener("click", () => setLang(b.dataset.lang));
+      });
+      document.addEventListener("pointerdown", () => {
+        playIntroTheme();
+      }, { once: true });
+      document.addEventListener("keydown", () => {
+        playIntroTheme();
+      }, { once: true });
+      window.addEventListener("load", () => {
+        playIntroTheme();
+      });
+
+      document.addEventListener("click", (event) => {
+        const target = event.target.closest("a, button, .showcase-card");
+        if (target) {
+          playClickSound();
+        }
+      });
+
+      const lightbox = document.querySelector(".lightbox");
+      const lightboxImage = document.querySelector(".lightbox-image");
+      const lightboxTitle = document.querySelector(".lightbox-caption h3");
+      const lightboxCaption = document.querySelector(".lightbox-caption p");
+      const lightboxClose = document.querySelector(".lightbox-close");
+
+      function openLightbox(card) {
+        const full = card.dataset.full;
+        const title = card.dataset.title || "";
+        const caption = card.dataset.caption || "";
+        lightboxImage.src = full;
+        lightboxImage.alt = title;
+        lightboxTitle.textContent = title;
+        lightboxCaption.textContent = caption;
+        lightbox.classList.add("open");
+        lightbox.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove("open");
+        lightbox.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      }
+
+      document.querySelectorAll(".showcase-card").forEach((card) => {
+        card.addEventListener("click", () => openLightbox(card));
+      });
+
+      lightbox.addEventListener("click", (event) => {
+        if (event.target === lightbox || event.target === lightboxClose) {
+          closeLightbox();
+        }
+      });
+      lightboxClose.addEventListener("click", closeLightbox);
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && lightbox.classList.contains("open")) {
+          closeLightbox();
+        }
       });
       setLang(getStoredLang() || "ar");
     </script>
