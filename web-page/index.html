@@ -3,47 +3,80 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="SOM PRO هو نظام مدرسي هجين لإدارة الغياب والبدائل والبرنامج اليومي والواجبات والامتحانات والشهادات والتقارير."
+    />
     <title>SOM PRO | School Operations Manager</title>
     <style>
       :root {
-        --blue: #0f3269;
-        --primary: #2563eb;
-        --gold: #f59e0b;
-        --bg: #f6f7fb;
+        --bg: #eff4fb;
+        --surface: #ffffff;
         --ink: #0f172a;
         --muted: #64748b;
+        --primary: #2563eb;
+        --primary-2: #1744a3;
+        --primary-3: #0f2d6c;
+        --accent: #f59e0b;
+        --line: #d6dfeb;
+        --shadow: 0 28px 80px rgba(15, 23, 42, 0.14);
       }
       * {
         box-sizing: border-box;
       }
+      html {
+        scroll-behavior: smooth;
+      }
       body {
         margin: 0;
         font-family: Tahoma, Arial, sans-serif;
-        background: var(--bg);
+        background:
+          radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 28%),
+          radial-gradient(circle at top right, rgba(15, 45, 108, 0.1), transparent 24%),
+          var(--bg);
         color: var(--ink);
+        overflow-x: hidden;
+      }
+      a {
+        color: inherit;
+      }
+      .shell {
+        width: min(1280px, calc(100% - 32px));
+        margin: 0 auto;
       }
       .language-switcher {
         position: fixed;
         top: 14px;
         left: 14px;
-        z-index: 99;
+        z-index: 50;
         display: flex;
         gap: 6px;
-        background: #ffffffee;
-        border: 1px solid #d9dee8;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(214, 223, 235, 0.9);
         border-radius: 999px;
         padding: 6px;
-        box-shadow: 0 10px 30px #0002;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
         direction: ltr;
+        backdrop-filter: blur(12px);
       }
       .language-switcher button {
-        border: 1px solid #d9dee8;
-        background: #f8fafc;
-        color: #0f172a;
+        border: 1px solid transparent;
+        background: #f8fbff;
+        color: var(--ink);
         border-radius: 999px;
-        padding: 8px 11px;
+        min-width: 50px;
+        padding: 9px 12px;
         font-weight: 900;
+        letter-spacing: 0;
         cursor: pointer;
+        transition:
+          transform 0.18s ease,
+          background 0.18s ease,
+          color 0.18s ease,
+          border-color 0.18s ease;
+      }
+      .language-switcher button:hover {
+        transform: translateY(-1px);
       }
       .language-switcher button.active {
         background: var(--primary);
@@ -51,113 +84,455 @@
         border-color: var(--primary);
       }
       header {
-        background: linear-gradient(135deg, var(--blue), #1d4ed8);
-        color: white;
-        padding: 28px 8vw;
+        position: sticky;
+        top: 0;
+        z-index: 25;
+        background: rgba(8, 20, 48, 0.36);
+        backdrop-filter: blur(18px);
+        border-bottom: 1px solid rgba(214, 223, 235, 0.18);
       }
-      nav {
+      .topbar {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
+        gap: 18px;
+        padding: 18px 0;
+        color: white;
       }
       .brand {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         font-weight: 900;
-        font-size: 28px;
+        font-size: 24px;
+        letter-spacing: 0;
       }
       .brand img {
-        width: 54px;
-        height: 54px;
-        border-radius: 14px;
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        object-fit: cover;
+        background: rgba(255, 255, 255, 0.18);
+        box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
       }
-      .pro {
-        color: var(--gold);
+      .brand .pro {
+        color: #fbbf24;
+      }
+      .brand-subtitle {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.88);
+        font-weight: 700;
+        font-size: 14px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        transition: background 0.18s ease;
+      }
+      .nav-links a:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+      .nav-cta {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+      }
+      main {
+        padding-bottom: 48px;
       }
       .hero {
-        display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        gap: 36px;
-        align-items: center;
-        padding: 70px 8vw;
-        background: linear-gradient(135deg, #0f3269, #2563eb);
+        background: linear-gradient(135deg, #0c2a64 0%, #1d4ed8 46%, #2e6df6 100%);
         color: white;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero::before,
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: auto;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      .hero::before {
+        width: 460px;
+        height: 460px;
+        left: -140px;
+        top: 120px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 68%);
+      }
+      .hero::after {
+        width: 380px;
+        height: 380px;
+        right: -120px;
+        top: 40px;
+        background: radial-gradient(circle, rgba(15, 23, 42, 0.2), transparent 70%);
+      }
+      .hero-inner {
+        position: relative;
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 44px;
+        align-items: center;
+        min-height: 720px;
+        padding: 70px 0 56px;
+      }
+      .hero-copy {
+        order: 2;
+      }
+      .hero-panel {
+        order: 1;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 999px;
+        padding: 10px 16px;
+        color: rgba(255, 255, 255, 0.96);
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 24px;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
       }
       .hero h1 {
-        font-size: 52px;
-        margin: 0 0 14px;
-        line-height: 1.25;
+        margin: 0 0 18px;
+        font-size: clamp(42px, 5vw, 68px);
+        line-height: 1.15;
+        letter-spacing: 0;
+        max-width: 10ch;
       }
-      .hero p {
-        font-size: 21px;
-        line-height: 1.9;
-        color: #dbeafe;
+      .hero .lede {
+        margin: 0 0 28px;
+        max-width: 700px;
+        font-size: clamp(18px, 1.9vw, 22px);
+        line-height: 1.95;
+        color: rgba(226, 239, 255, 0.92);
       }
-      .panel {
-        background: white;
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 30px;
+      }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+        border-radius: 16px;
+        padding: 14px 22px;
+        font-weight: 900;
+        font-size: 16px;
+        letter-spacing: 0;
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease,
+          background 0.18s ease;
+      }
+      .button:hover {
+        transform: translateY(-1px);
+      }
+      .button.primary {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #101828;
+        box-shadow: 0 18px 30px rgba(245, 158, 11, 0.32);
+      }
+      .button.secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .hero-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        max-width: 640px;
+      }
+      .metric {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 20px;
+        padding: 16px 18px;
+        backdrop-filter: blur(8px);
+      }
+      .metric strong {
+        display: block;
+        font-size: 24px;
+        margin-bottom: 4px;
+      }
+      .metric span {
+        color: rgba(226, 239, 255, 0.86);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .hero-panel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .panel-card {
+        width: min(100%, 560px);
+        background: rgba(255, 255, 255, 0.98);
         color: var(--ink);
-        border-radius: 28px;
-        padding: 28px;
-        box-shadow: 0 24px 80px #0002;
+        border-radius: 34px;
+        padding: 34px;
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.24);
+        border: 1px solid rgba(255, 255, 255, 0.36);
       }
-      .panel ul {
-        line-height: 2.2;
+      .panel-card h2 {
+        margin: 0 0 14px;
+        font-size: 30px;
+        color: #14213d;
+      }
+      .panel-card .sub {
+        margin: 0 0 22px;
+        color: var(--muted);
+        line-height: 1.9;
+        font-size: 16px;
+      }
+      .bullet-list {
         margin: 0;
-        padding-inline-start: 22px;
+        padding-inline-start: 20px;
+        display: grid;
+        gap: 10px;
       }
-      section {
-        padding: 56px 8vw;
+      .bullet-list li {
+        color: #16233e;
+        line-height: 1.9;
+        font-size: 16px;
+      }
+      .section {
+        padding: 74px 0;
+      }
+      .section-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 24px;
+      }
+      .section-head h2 {
+        margin: 0;
+        font-size: clamp(28px, 3vw, 42px);
+        line-height: 1.2;
+      }
+      .section-head p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 620px;
+        line-height: 1.9;
       }
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 18px;
       }
+      .grid.cards-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .grid.cards-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
       .card {
-        background: white;
-        border: 1px solid #d9dee8;
-        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid var(--line);
+        border-radius: 26px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.07);
         padding: 24px;
-        box-shadow: 0 12px 30px #0000000a;
+      }
+      .persona {
+        position: relative;
+        overflow: hidden;
+        min-height: 230px;
+      }
+      .persona::after {
+        content: "";
+        position: absolute;
+        inset: auto -60px -70px auto;
+        width: 170px;
+        height: 170px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.18), transparent 68%);
+      }
+      .icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.14), rgba(245, 158, 11, 0.16));
+        color: #1744a3;
+        font-size: 24px;
+        margin-bottom: 16px;
       }
       .card h3 {
-        margin-top: 0;
-        color: var(--primary);
+        margin: 0 0 10px;
+        font-size: 22px;
       }
-      .muted {
+      .card p,
+      .card li {
         color: var(--muted);
         line-height: 1.9;
+        font-size: 16px;
+      }
+      .card ul {
+        margin: 12px 0 0;
+        padding-inline-start: 18px;
+      }
+      .cards-3 .card {
+        min-height: 220px;
+      }
+      .feature-strip {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 18px;
+        align-items: stretch;
+      }
+      .feature-highlight {
+        background:
+          radial-gradient(circle at top right, rgba(255, 255, 255, 0.12), transparent 30%),
+          linear-gradient(135deg, #0f2d6c, #1d4ed8 72%, #2563eb);
+        color: white;
+        border-radius: 28px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+      }
+      .feature-highlight h3 {
+        margin-top: 0;
+        font-size: 30px;
+      }
+      .feature-highlight p {
+        color: rgba(226, 239, 255, 0.92);
+        line-height: 1.95;
+      }
+      .feature-highlights {
+        display: grid;
+        gap: 16px;
+      }
+      .stack {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: 0 14px 38px rgba(15, 23, 42, 0.06);
+      }
+      .stack strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+      .stack span {
+        color: var(--muted);
+        line-height: 1.8;
       }
       .cta {
-        background: #0f172a;
+        padding: 0 0 18px;
+      }
+      .cta-box {
+        background: linear-gradient(135deg, #0f2d6c, #1d4ed8 68%, #2e6df6);
         color: white;
-        text-align: center;
+        border-radius: 34px;
+        padding: 36px;
+        box-shadow: var(--shadow);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 18px;
+        align-items: center;
       }
-      .cta h2 {
-        font-size: 36px;
+      .cta-box h2 {
+        margin: 0 0 10px;
+        font-size: clamp(28px, 3vw, 40px);
       }
-      .button {
-        display: inline-block;
-        background: var(--gold);
-        color: #111827;
-        text-decoration: none;
-        padding: 14px 24px;
-        border-radius: 14px;
-        font-weight: 900;
+      .cta-box p {
+        margin: 0;
+        color: rgba(226, 239, 255, 0.92);
+        line-height: 1.9;
       }
-      footer {
-        padding: 24px 8vw;
-        text-align: center;
+      .footer {
+        padding: 18px 0 40px;
         color: var(--muted);
+        text-align: center;
+        font-size: 14px;
       }
-      @media (max-width: 850px) {
-        .hero {
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .footer-links a {
+        color: var(--primary);
+        text-decoration: none;
+      }
+      .footer-links a:hover {
+        text-decoration: underline;
+      }
+      @media (max-width: 1100px) {
+        .hero-inner,
+        .feature-strip,
+        .cta-box {
+          grid-template-columns: 1fr;
+        }
+        .grid.cards-4 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .grid.cards-3 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .hero-copy,
+        .hero-panel {
+          order: initial;
+        }
+        .hero-inner {
+          min-height: auto;
+          padding: 48px 0 52px;
+        }
+      }
+      @media (max-width: 720px) {
+        .shell {
+          width: min(100% - 24px, 1000px);
+        }
+        .topbar {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .nav-links {
+          justify-content: flex-start;
+          gap: 8px;
+        }
+        .grid.cards-4,
+        .grid.cards-3,
+        .hero-metrics {
           grid-template-columns: 1fr;
         }
         .hero h1 {
-          font-size: 38px;
+          max-width: none;
+        }
+        .panel-card,
+        .feature-highlight,
+        .cta-box {
+          border-radius: 26px;
+          padding: 24px;
+        }
+        .hero-actions {
+          flex-direction: column;
+        }
+        .button {
+          width: 100%;
         }
       }
     </style>
@@ -168,141 +543,422 @@
       <button data-lang="en">EN</button>
       <button data-lang="he">HE</button>
     </div>
+
     <header>
-      <nav>
+      <div class="shell topbar">
         <div class="brand">
-          <img src="../assets/brand/som-pro-icon.png" alt="SOM PRO" />SOM <span class="pro">PRO</span>
+          <img src="../assets/brand/som-pro-icon.png" alt="SOM PRO" />
+          <div>
+            <div>SOM <span class="pro">PRO</span></div>
+            <div class="brand-subtitle" data-i18n="subtitle">مدير تشغيل المدرسة</div>
+          </div>
         </div>
-        <div data-i18n="subtitle">School Operations Manager</div>
-      </nav>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="#about" data-i18n="navAbout">لمحة</a>
+          <a href="#features" data-i18n="navFeatures">المزايا</a>
+          <a href="#audience" data-i18n="navAudience">الفئات</a>
+          <a href="#packages" data-i18n="navPackages">الحزم</a>
+          <a href="./privacy/" data-i18n="navPrivacy">الخصوصية</a>
+          <a class="nav-cta" href="#contact" data-i18n="navCTA">طلب تجربة</a>
+        </nav>
+      </div>
     </header>
+
     <main>
       <section class="hero">
-        <div>
-          <h1 data-i18n="heroTitle">نظام تشغيل يومي للمدرسة عند الغياب والتأخر والفعاليات</h1>
-          <p data-i18n="heroText">
-            SOM PRO يحوّل البرنامج المدرسي اليومي إلى نظام منظم: غياب، بدائل، أرشيف، تقارير، وبرامج يومية خاصة للمعلمين.
-          </p>
-        </div>
-        <div class="panel">
-          <h2 data-i18n="solvesTitle">ما الذي يحله النظام؟</h2>
-          <ul>
-            <li data-i18n="solve1">توليد بدائل المعلمين حسب التفرغ والتخصص.</li>
-            <li data-i18n="solve2">دعم مدارس بأيام دوام وحصص مختلفة.</li>
-            <li data-i18n="solve3">برنامج يومي واضح قابل للإرسال للمعلمين.</li>
-            <li data-i18n="solve4">برنامج خاص لكل معلم بضغطة زر.</li>
-            <li data-i18n="solve5">أرشيف وتقارير إدارية.</li>
-          </ul>
-        </div>
-      </section>
-      <section>
-        <h2 data-i18n="featuresTitle">مزايا SOM PRO</h2>
-        <div class="grid">
-          <div class="card">
-            <h3 data-i18n="f1Title">مرونة المدرسة</h3>
-            <p class="muted" data-i18n="f1Text">5 أو 6 أيام دوام، 5 إلى 12 حصة، وأوقات حصص قابلة للتخصيص.</p>
-          </div>
-          <div class="card">
-            <h3 data-i18n="f2Title">محرك بدائل</h3>
-            <p class="muted" data-i18n="f2Text">اختيار البديل حسب الصف، المادة، الطبقة، والتفرغ الفعلي.</p>
-          </div>
-          <div class="card">
-            <h3 data-i18n="f3Title">برامج المعلمين</h3>
-            <p class="muted" data-i18n="f3Text">كل معلم يرى حصصه الأصلية والاستبدالات المكلف بها.</p>
-          </div>
-          <div class="card">
-            <h3 data-i18n="f4Title">هجين Desktop + Web</h3>
-            <p class="muted" data-i18n="f4Text">
-              تجربة محلية كتطبيق سطح مكتب، ثم انتقال تدريجي إلى منصة Web لعدة مدارس.
+        <div class="shell hero-inner" id="about">
+          <div class="hero-copy">
+            <div class="eyebrow" data-i18n="eyebrow">منصة مدرسية هجينة بواجهة ويب وتجربة سطح مكتب</div>
+            <h1 data-i18n="heroTitle">نظام تشغيل يومي للمدرسة بشكل أنيق ومنظم</h1>
+            <p class="lede" data-i18n="heroText">
+              SOM PRO يجمع غياب اليوم، البدائل، البرنامج اليومي، الدروس، الواجبات، الامتحانات، الشهادات،
+              والتقارير في منصة واحدة واضحة وسريعة.
             </p>
+            <div class="hero-actions">
+              <a class="button primary" href="#contact" data-i18n="heroPrimary">طلب تجربة</a>
+              <a class="button secondary" href="./privacy/" data-i18n="heroSecondary">سياسة الخصوصية</a>
+            </div>
+            <div class="hero-metrics" aria-label="Product highlights">
+              <div class="metric">
+                <strong data-i18n="metric1Value">01</strong>
+                <span data-i18n="metric1Text">لوحة موحّدة للمدرسة والمعلمين</span>
+              </div>
+              <div class="metric">
+                <strong data-i18n="metric2Value">02</strong>
+                <span data-i18n="metric2Text">برنامج يومي وبدائل وتقارير</span>
+              </div>
+              <div class="metric">
+                <strong data-i18n="metric3Value">03</strong>
+                <span data-i18n="metric3Text">واجهة عربية حديثة مع تعدد لغات</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-panel">
+            <div class="panel-card">
+              <h2 data-i18n="panelTitle">ما الذي يقدمه النظام؟</h2>
+              <p class="sub" data-i18n="panelText">
+                تجربة منظمة تشبه صفحات الأنظمة المدرسية الراقية: نظيفة، واضحة، ومليئة بالمعلومات المفيدة
+                دون ازدحام بصري.
+              </p>
+              <ul class="bullet-list">
+                <li data-i18n="panel1">البرنامج اليومي للمعلمين والصفوف.</li>
+                <li data-i18n="panel2">إدخال الواجبات والامتحانات والشهادات.</li>
+                <li data-i18n="panel3">إدارة الغياب والتأخر والفعاليات.</li>
+                <li data-i18n="panel4">لوحات متابعة، أرشيف، وتقارير إدارية.</li>
+                <li data-i18n="panel5">نسخة سطح مكتب محلية ثم توسع ويب لاحقًا.</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
-      <section class="cta">
-        <h2 data-i18n="ctaTitle">SOM PRO جاهز للتجربة المدرسية</h2>
-        <p data-i18n="ctaText">ابدأ كتطبيق سطح مكتب، ثم وسّعه كمنصة ويب.</p>
-        <a class="button" href="#" data-i18n="ctaButton">طلب تجربة</a>
+
+      <section class="section" id="audience">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <h2 data-i18n="audienceTitle">من يخدم SOM PRO؟</h2>
+              <p data-i18n="audienceText">
+                صممنا الواجهة لتخاطب أطراف المدرسة الأساسية بطريقة واضحة تشبه صفحات المنتجات الاحترافية:
+                لكل فئة ما تحتاجه، بلا ازدحام.
+              </p>
+            </div>
+          </div>
+          <div class="grid cards-4">
+            <article class="card persona">
+              <div class="icon">👩‍🎓</div>
+              <h3 data-i18n="studentTitle">الطالب</h3>
+              <p data-i18n="studentText">يتابع جدوله، واجباته، شهاداته، والإشعارات المرتبطة بيومه الدراسي.</p>
+            </article>
+            <article class="card persona">
+              <div class="icon">👩‍🏫</div>
+              <h3 data-i18n="teacherTitle">المعلم</h3>
+              <p data-i18n="teacherText">يرى البرنامج اليومي، البدائل، الدروس، والمهام في واجهة بسيطة وسريعة.</p>
+            </article>
+            <article class="card persona">
+              <div class="icon">🏫</div>
+              <h3 data-i18n="adminTitle">الإدارة</h3>
+              <p data-i18n="adminText">تضبط الغياب، الجداول، التقارير، والقرارات التشغيلية من مكان واحد.</p>
+            </article>
+            <article class="card persona">
+              <div class="icon">👨‍👩‍👧</div>
+              <h3 data-i18n="parentTitle">ولي الأمر</h3>
+              <p data-i18n="parentText">يحصل على مخرجات واضحة حول التقدم والسلوك والفعاليات بحسب الصلاحيات الممنوحة.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <h2 data-i18n="featuresTitle">المزايا التي تميّز SOM PRO</h2>
+              <p data-i18n="featuresText">
+                أقسام مرئية واضحة، بطاقات قوية، وتدرج بصري يذكّر بروح kindix.me لكن بهوية SOM PRO الخاصة.
+              </p>
+            </div>
+          </div>
+          <div class="feature-strip">
+            <div class="feature-highlight">
+              <h3 data-i18n="highlightTitle">واجهة تسويقية مدروسة، ونظام تشغيلي عملي</h3>
+              <p data-i18n="highlightText">
+                نعرض الفكرة للزائر كما يعرضها المنتج الناضج: عنوان قوي، وصف مباشر، ثم بطاقات توضح أين
+                يفيد النظام داخل المدرسة.
+              </p>
+              <div class="hero-actions" style="margin-top: 22px">
+                <a class="button primary" href="#packages" data-i18n="highlightButton1">استعراض الحزم</a>
+                <a class="button secondary" href="#contact" data-i18n="highlightButton2">تواصل سريع</a>
+              </div>
+            </div>
+            <div class="feature-highlights">
+              <div class="stack">
+                <strong data-i18n="stack1Title">برنامج يومي وبدائل</strong>
+                <span data-i18n="stack1Text">إعداد اليوم الدراسي، التغطيات، والبدائل من واجهة واحدة.</span>
+              </div>
+              <div class="stack">
+                <strong data-i18n="stack2Title">الواجبات والامتحانات</strong>
+                <span data-i18n="stack2Text">عرض وإدارة العمل اليومي الدراسي دون تبديل صفحات كثيرة.</span>
+              </div>
+              <div class="stack">
+                <strong data-i18n="stack3Title">الشهادات والحضور</strong>
+                <span data-i18n="stack3Text">نتائج قابلة للمعاينة والطباعة مع مخرجات مرتبة ومفهومة.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="packages">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <h2 data-i18n="packagesTitle">الحزم المقترحة</h2>
+              <p data-i18n="packagesText">
+                نفس التوازن الذي يعجب في الصفحات الجيدة: وضوح، ثقة، ورسالة مباشرة، مع تقسيم بسيط للفئات
+                التي ستستخدم النظام.
+              </p>
+            </div>
+          </div>
+          <div class="grid cards-3">
+            <article class="card">
+              <div class="icon">💻</div>
+              <h3 data-i18n="pkg1Title">نسخة سطح المكتب</h3>
+              <p data-i18n="pkg1Text">مناسبة للتشغيل المحلي في المدرسة أو لبيئة داخلية محدودة.</p>
+            </article>
+            <article class="card">
+              <div class="icon">🌐</div>
+              <h3 data-i18n="pkg2Title">نسخة الويب</h3>
+              <p data-i18n="pkg2Text">واجهة عامة أنيقة، قابلة للتوسع والدخول من أي جهاز متصل.</p>
+            </article>
+            <article class="card">
+              <div class="icon">☁️</div>
+              <h3 data-i18n="pkg3Title">النشر السحابي</h3>
+              <p data-i18n="pkg3Text">ملائمة للتجارب العامة، الروابط الرسمية، وصفحات الخصوصية والمتجر.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section cta" id="contact">
+        <div class="shell">
+          <div class="cta-box">
+            <div>
+              <h2 data-i18n="ctaTitle">SOM PRO جاهز لتجربة المدرسة التالية</h2>
+              <p data-i18n="ctaText">
+                إذا أردنا، نكمل الآن تحسينات الصفحة التالية بنفس المستوى البصري، أو نربط هذه النسخة مع
+                مواد المتجر.
+              </p>
+            </div>
+            <div>
+              <a class="button primary" href="mailto:BasilRam1997@gmail.com" data-i18n="ctaButton">
+                طلب تجربة
+              </a>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
-    <footer>© SOM PRO - School Operations Manager</footer>
+
+    <footer class="shell footer">
+      <div>© SOM PRO - School Operations Manager</div>
+      <div class="footer-links">
+        <a href="./privacy/" data-i18n="footerPrivacy">سياسة الخصوصية</a>
+        <a href="mailto:BasilRam1997@gmail.com" data-i18n="footerEmail">البريد الداعم</a>
+      </div>
+    </footer>
+
     <script>
       const dict = {
         ar: {
           dir: "rtl",
           subtitle: "مدير تشغيل المدرسة",
-          heroTitle: "نظام تشغيل يومي للمدرسة عند الغياب والتأخر والفعاليات",
+          navAbout: "لمحة",
+          navFeatures: "المزايا",
+          navAudience: "الفئات",
+          navPackages: "الحزم",
+          navPrivacy: "الخصوصية",
+          navCTA: "طلب تجربة",
+          eyebrow: "منصة مدرسية هجينة بواجهة ويب وتجربة سطح مكتب",
+          heroTitle: "نظام تشغيل يومي للمدرسة بشكل أنيق ومنظم",
           heroText:
-            "SOM PRO يحوّل البرنامج المدرسي اليومي إلى نظام منظم: غياب، بدائل، أرشيف، تقارير، وبرامج يومية خاصة للمعلمين.",
-          solvesTitle: "ما الذي يحله النظام؟",
-          solve1: "توليد بدائل المعلمين حسب التفرغ والتخصص.",
-          solve2: "دعم مدارس بأيام دوام وحصص مختلفة.",
-          solve3: "برنامج يومي واضح قابل للإرسال للمعلمين.",
-          solve4: "برنامج خاص لكل معلم بضغطة زر.",
-          solve5: "أرشيف وتقارير إدارية.",
-          featuresTitle: "مزايا SOM PRO",
-          f1Title: "مرونة المدرسة",
-          f1Text: "5 أو 6 أيام دوام، 5 إلى 12 حصة، وأوقات حصص قابلة للتخصيص.",
-          f2Title: "محرك بدائل",
-          f2Text: "اختيار البديل حسب الصف، المادة، الطبقة، والتفرغ الفعلي.",
-          f3Title: "برامج المعلمين",
-          f3Text: "كل معلم يرى حصصه الأصلية والاستبدالات المكلف بها.",
-          f4Title: "هجين Desktop + Web",
-          f4Text: "تجربة محلية كتطبيق سطح مكتب، ثم انتقال تدريجي إلى منصة Web لعدة مدارس.",
-          ctaTitle: "SOM PRO جاهز للتجربة المدرسية",
-          ctaText: "ابدأ كتطبيق سطح مكتب، ثم وسّعه كمنصة ويب.",
-          ctaButton: "طلب تجربة"
+            "SOM PRO يجمع غياب اليوم، البدائل، البرنامج اليومي، الدروس، الواجبات، الامتحانات، الشهادات، والتقارير في منصة واحدة واضحة وسريعة.",
+          heroPrimary: "طلب تجربة",
+          heroSecondary: "سياسة الخصوصية",
+          metric1Value: "01",
+          metric1Text: "لوحة موحّدة للمدرسة والمعلمين",
+          metric2Value: "02",
+          metric2Text: "برنامج يومي وبدائل وتقارير",
+          metric3Value: "03",
+          metric3Text: "واجهة عربية حديثة مع تعدد لغات",
+          panelTitle: "ما الذي يقدمه النظام؟",
+          panelText:
+            "تجربة منظمة تشبه صفحات الأنظمة المدرسية الراقية: نظيفة، واضحة، ومليئة بالمعلومات المفيدة دون ازدحام بصري.",
+          panel1: "البرنامج اليومي للمعلمين والصفوف.",
+          panel2: "إدخال الواجبات والامتحانات والشهادات.",
+          panel3: "إدارة الغياب والتأخر والفعاليات.",
+          panel4: "لوحات متابعة، أرشيف، وتقارير إدارية.",
+          panel5: "نسخة سطح مكتب محلية ثم توسع ويب لاحقًا.",
+          audienceTitle: "من يخدم SOM PRO؟",
+          audienceText:
+            "صممنا الواجهة لتخاطب أطراف المدرسة الأساسية بطريقة واضحة تشبه صفحات المنتجات الاحترافية: لكل فئة ما تحتاجه، بلا ازدحام.",
+          studentTitle: "الطالب",
+          studentText: "يتابع جدوله، واجباته، شهاداته، والإشعارات المرتبطة بيومه الدراسي.",
+          teacherTitle: "المعلم",
+          teacherText: "يرى البرنامج اليومي، البدائل، الدروس، والمهام في واجهة بسيطة وسريعة.",
+          adminTitle: "الإدارة",
+          adminText: "تضبط الغياب، الجداول، التقارير، والقرارات التشغيلية من مكان واحد.",
+          parentTitle: "ولي الأمر",
+          parentText: "يحصل على مخرجات واضحة حول التقدم والسلوك والفعاليات بحسب الصلاحيات الممنوحة.",
+          featuresTitle: "المزايا التي تميّز SOM PRO",
+          featuresText: "أقسام مرئية واضحة، بطاقات قوية، وتدرج بصري يذكّر بروح kindix.me لكن بهوية SOM PRO الخاصة.",
+          highlightTitle: "واجهة تسويقية مدروسة، ونظام تشغيلي عملي",
+          highlightText:
+            "نعرِض الفكرة للزائر كما يعرضها المنتج الناضج: عنوان قوي، وصف مباشر، ثم بطاقات توضح أين يفيد النظام داخل المدرسة.",
+          highlightButton1: "استعراض الحزم",
+          highlightButton2: "تواصل سريع",
+          stack1Title: "برنامج يومي وبدائل",
+          stack1Text: "إعداد اليوم الدراسي، التغطيات، والبدائل من واجهة واحدة.",
+          stack2Title: "الواجبات والامتحانات",
+          stack2Text: "عرض وإدارة العمل اليومي الدراسي دون تبديل صفحات كثيرة.",
+          stack3Title: "الشهادات والحضور",
+          stack3Text: "نتائج قابلة للمعاينة والطباعة مع مخرجات مرتبة ومفهومة.",
+          packagesTitle: "الحزم المقترحة",
+          packagesText:
+            "نفس التوازن الذي يعجب في الصفحات الجيدة: وضوح، ثقة، ورسالة مباشرة، مع تقسيم بسيط للفئات التي ستستخدم النظام.",
+          pkg1Title: "نسخة سطح المكتب",
+          pkg1Text: "مناسبة للتشغيل المحلي في المدرسة أو لبيئة داخلية محدودة.",
+          pkg2Title: "نسخة الويب",
+          pkg2Text: "واجهة عامة أنيقة، قابلة للتوسع والدخول من أي جهاز متصل.",
+          pkg3Title: "النشر السحابي",
+          pkg3Text: "ملائمة للتجارب العامة، الروابط الرسمية، وصفحات الخصوصية والمتجر.",
+          ctaTitle: "SOM PRO جاهز لتجربة المدرسة التالية",
+          ctaText:
+            "إذا أردنا، نكمل الآن تحسينات الصفحة التالية بنفس المستوى البصري، أو نربط هذه النسخة مع مواد المتجر.",
+          ctaButton: "طلب تجربة",
+          footerPrivacy: "سياسة الخصوصية",
+          footerEmail: "البريد الداعم"
         },
         en: {
           dir: "ltr",
           subtitle: "School Operations Manager",
-          heroTitle: "Daily school operations for absences, lateness, and activities",
+          navAbout: "Overview",
+          navFeatures: "Features",
+          navAudience: "Audience",
+          navPackages: "Packages",
+          navPrivacy: "Privacy",
+          navCTA: "Request demo",
+          eyebrow: "Hybrid school platform with web and desktop experiences",
+          heroTitle: "A polished daily school operations system",
           heroText:
-            "SOM PRO turns the daily school schedule into an organized system: absences, substitutions, archive, reports, and daily programs for each teacher.",
-          solvesTitle: "What does it solve?",
-          solve1: "Generates teacher substitutions based on availability and specialty.",
-          solve2: "Supports schools with different working days and period counts.",
-          solve3: "Creates a clear daily schedule ready to send to teachers.",
-          solve4: "Generates a private program for each teacher with one click.",
-          solve5: "Provides archive and administrative reports.",
-          featuresTitle: "SOM PRO Features",
-          f1Title: "Flexible School Setup",
-          f1Text: "5 or 6 working days, 5 to 12 periods, and customizable period times.",
-          f2Title: "Substitution Engine",
-          f2Text: "Selects substitutes by class, subject, grade level, and actual availability.",
-          f3Title: "Teacher Programs",
-          f3Text: "Each teacher sees original lessons and assigned substitutions.",
-          f4Title: "Hybrid Desktop + Web",
-          f4Text: "Start locally as a desktop app, then move gradually to a web platform for many schools.",
-          ctaTitle: "SOM PRO is ready for school testing",
-          ctaText: "Start as a desktop app, then expand it as a web platform.",
-          ctaButton: "Request a demo"
+            "SOM PRO brings today’s absences, substitutions, lesson plans, homework, exams, certificates, and reports into one clear and fast platform.",
+          heroPrimary: "Request demo",
+          heroSecondary: "Privacy policy",
+          metric1Value: "01",
+          metric1Text: "Unified view for schools and teachers",
+          metric2Value: "02",
+          metric2Text: "Daily program, substitutions, and reports",
+          metric3Value: "03",
+          metric3Text: "Modern Arabic UI with multilingual support",
+          panelTitle: "What does the system provide?",
+          panelText:
+            "An organized experience inspired by premium school product pages: clean, clear, and information-rich without visual clutter.",
+          panel1: "Daily program for teachers and classes.",
+          panel2: "Homework, exams, and certificates entry.",
+          panel3: "Absence, lateness, and activities management.",
+          panel4: "Dashboards, archives, and administrative reports.",
+          panel5: "Local desktop edition first, then web expansion.",
+          audienceTitle: "Who does SOM PRO serve?",
+          audienceText:
+            "We designed the interface to speak to the school’s core audiences in a premium product-page style: each group gets exactly what it needs.",
+          studentTitle: "Students",
+          studentText: "Track lessons, homework, certificates, and daily notifications in one place.",
+          teacherTitle: "Teachers",
+          teacherText: "See your daily program, substitutions, lessons, and tasks in a fast interface.",
+          adminTitle: "Administrators",
+          adminText: "Manage absences, schedules, reports, and daily decisions from one place.",
+          parentTitle: "Parents",
+          parentText: "Receive clear outputs about progress, behavior, and activities by role permissions.",
+          featuresTitle: "What makes SOM PRO stand out",
+          featuresText: "Clear visual sections, strong cards, and a premium gradient flow inspired by good school landing pages.",
+          highlightTitle: "A thoughtful marketing page with a practical operating system",
+          highlightText:
+            "We present the product the way a mature platform does: a strong headline, a direct description, and cards that explain where it helps in school life.",
+          highlightButton1: "Explore packages",
+          highlightButton2: "Quick contact",
+          stack1Title: "Daily program and substitutions",
+          stack1Text: "Build the school day, coverages, and substitutions from one interface.",
+          stack2Title: "Homework and exams",
+          stack2Text: "Manage daily academic work without jumping between many pages.",
+          stack3Title: "Certificates and attendance",
+          stack3Text: "Previewable and printable outputs that stay neat and easy to read.",
+          packagesTitle: "Suggested packages",
+          packagesText:
+            "The same balance that makes strong product pages feel trustworthy: clarity, confidence, and a direct message, with simple audience grouping.",
+          pkg1Title: "Desktop edition",
+          pkg1Text: "Great for local school use or a limited internal environment.",
+          pkg2Title: "Web edition",
+          pkg2Text: "A polished web interface, ready to scale and open from any connected device.",
+          pkg3Title: "Cloud publishing",
+          pkg3Text: "Ideal for public demos, official links, privacy pages, and store assets.",
+          ctaTitle: "SOM PRO is ready for the next school trial",
+          ctaText:
+            "If we want, we can keep polishing the following pages or connect this version to the store assets.",
+          ctaButton: "Request demo",
+          footerPrivacy: "Privacy policy",
+          footerEmail: "Support email"
         },
         he: {
           dir: "rtl",
           subtitle: "ניהול תפעול בית ספר",
-          heroTitle: "ניהול יומי לבית הספר בזמן היעדרויות, איחורים ופעילויות",
+          navAbout: "סקירה",
+          navFeatures: "יתרונות",
+          navAudience: "קהל יעד",
+          navPackages: "חבילות",
+          navPrivacy: "פרטיות",
+          navCTA: "בקשת ניסיון",
+          eyebrow: "פלטפורמה היברידית לבית ספר עם חוויית ווב ו-desktop",
+          heroTitle: "מערכת יומית אלגנטית ומסודרת לניהול בית הספר",
           heroText:
-            "SOM PRO הופך את המערכת היומית למערכת מסודרת: היעדרויות, החלפות, ארכיון, דוחות ומערכות יומיות לכל מורה.",
-          solvesTitle: "מה המערכת פותרת?",
-          solve1: "הפקת החלפות לפי זמינות והתמחות.",
-          solve2: "תמיכה בבתי ספר עם ימי עבודה ומספר שיעורים שונים.",
-          solve3: "מערכת יומית ברורה שניתן לשלוח למורים.",
-          solve4: "מערכת אישית לכל מורה בלחיצת כפתור.",
-          solve5: "ארכיון ודוחות ניהוליים.",
-          featuresTitle: "יתרונות SOM PRO",
-          f1Title: "גמישות בית ספרית",
-          f1Text: "5 או 6 ימי עבודה, 5 עד 12 שיעורים וזמני שיעורים מותאמים.",
-          f2Title: "מנוע החלפות",
-          f2Text: "בחירת מחליף לפי כיתה, מקצוע, שכבה וזמינות בפועל.",
-          f3Title: "מערכות למורים",
-          f3Text: "כל מורה רואה שיעורים מקוריים והחלפות שהוקצו לו.",
-          f4Title: "היברידי Desktop + Web",
-          f4Text: "מתחילים מקומית כאפליקציית שולחן עבודה ואז עוברים בהדרגה לפלטפורמת Web למספר בתי ספר.",
-          ctaTitle: "SOM PRO מוכן לניסוי בבית הספר",
-          ctaText: "התחל כאפליקציית שולחן עבודה ואז הרחב לפלטפורמת Web.",
-          ctaButton: "בקשת ניסיון"
+            "SOM PRO מאחד היעדרויות, החלפות, תוכניות יומיות, שיעורים, שיעורי בית, מבחנים, תעודות ודוחות במקום אחד ברור ומהיר.",
+          heroPrimary: "בקשת ניסיון",
+          heroSecondary: "מדיניות פרטיות",
+          metric1Value: "01",
+          metric1Text: "תצוגה אחידה לבית הספר ולמורים",
+          metric2Value: "02",
+          metric2Text: "תוכנית יומית, החלפות ודוחות",
+          metric3Value: "03",
+          metric3Text: "ממשק עברי מודרני עם תמיכה רב-לשונית",
+          panelTitle: "מה המערכת מספקת?",
+          panelText:
+            "חוויה מסודרת בהשראת דפי מוצר איכותיים: נקייה, ברורה ועשירה במידע בלי עומס חזותי.",
+          panel1: "תוכנית יומית למורים ולכיתות.",
+          panel2: "הזנת שיעורי בית, מבחנים ותעודות.",
+          panel3: "ניהול היעדרויות, איחורים ופעילויות.",
+          panel4: "לוחות בקרה, ארכיון ודוחות ניהוליים.",
+          panel5: "גרסת Desktop מקומית ולאחר מכן הרחבת Web.",
+          audienceTitle: "למי SOM PRO מיועד?",
+          audienceText:
+            "עיצבנו את הממשק כך שידבר אל קהלי היעד של בית הספר בסגנון מוצר פרימיום: כל קבוצה מקבלת בדיוק את מה שהיא צריכה.",
+          studentTitle: "תלמידים",
+          studentText: "מעקב אחר שיעורים, שיעורי בית, תעודות והודעות יומיות במקום אחד.",
+          teacherTitle: "מורים",
+          teacherText: "תצוגה מהירה של התוכנית היומית, החלפות, שיעורים ומשימות.",
+          adminTitle: "מנהלים",
+          adminText: "ניהול היעדרויות, לוחות זמנים, דוחות והחלטות יומיומיות ממקום אחד.",
+          parentTitle: "הורים",
+          parentText: "קבלת תוצרים ברורים על התקדמות, התנהגות ופעילויות בהתאם להרשאות.",
+          featuresTitle: "מה מייחד את SOM PRO",
+          featuresText: "אזורי תוכן ברורים, כרטיסים חזקים וזרימת צבעים פרימיום בהשראת דפי נחיתה טובים.",
+          highlightTitle: "דף שיווקי מחושב עם מערכת תפעולית אמיתית",
+          highlightText:
+            "אנחנו מציגים את המוצר כמו פלטפורמה בשלה: כותרת חזקה, תיאור ישיר וכרטיסים שמסבירים כיצד הוא עוזר בבית הספר.",
+          highlightButton1: "עיון בחבילות",
+          highlightButton2: "צור קשר",
+          stack1Title: "תוכנית יומית והחלפות",
+          stack1Text: "בניית יום הלימודים, הכיסויים וההחלפות מממשק אחד.",
+          stack2Title: "שיעורי בית ומבחנים",
+          stack2Text: "ניהול עבודה יומית מבלי לקפוץ בין דפים רבים.",
+          stack3Title: "תעודות ונוכחות",
+          stack3Text: "תוצרים לצפייה ולהדפסה שנשארים מסודרים וקריאים.",
+          packagesTitle: "חבילות מוצעות",
+          packagesText:
+            "אותו איזון שעובד בדפי מוצר חזקים: בהירות, ביטחון ומסר ישיר, עם חלוקה פשוטה של קהלי היעד.",
+          pkg1Title: "גרסת Desktop",
+          pkg1Text: "מתאימה לשימוש מקומי בבית הספר או בסביבה פנימית מוגבלת.",
+          pkg2Title: "גרסת Web",
+          pkg2Text: "ממשק ווב מהודק, מוכן להתרחבות ולגישה מכל מכשיר מחובר.",
+          pkg3Title: "פרסום בענן",
+          pkg3Text: "מתאים להדגמות ציבוריות, קישורים רשמיים, דפי פרטיות וחומרי חנות.",
+          ctaTitle: "SOM PRO מוכן לניסיון הבא בבית הספר",
+          ctaText:
+            "אם נרצה, אפשר להמשיך ללטש את הדפים הבאים או לחבר את הגרסה הזו לחומרי החנות.",
+          ctaButton: "בקשת ניסיון",
+          footerPrivacy: "מדיניות פרטיות",
+          footerEmail: "מייל תמיכה"
         }
       };
+
       function getStoredLang() {
         try {
           return localStorage.getItem("som-pro-web-lang");
@@ -320,16 +976,18 @@
         document.documentElement.lang = lang;
         document.documentElement.dir = d.dir;
         document.querySelectorAll("[data-i18n]").forEach((el) => {
-          el.textContent = d[el.dataset.i18n] || el.textContent;
+          const text = d[el.dataset.i18n];
+          if (text) el.textContent = text;
         });
         document
           .querySelectorAll(".language-switcher button")
           .forEach((b) => b.classList.toggle("active", b.dataset.lang === lang));
         setStoredLang(lang);
       }
-      document
-        .querySelectorAll(".language-switcher button")
-        .forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
+
+      document.querySelectorAll(".language-switcher button").forEach((b) => {
+        b.addEventListener("click", () => setLang(b.dataset.lang));
+      });
       setLang(getStoredLang() || "ar");
     </script>
   </body>
