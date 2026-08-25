@@ -41,6 +41,7 @@
         margin: 0 0 10px;
         font-size: 40px;
         line-height: 1.25;
+        color: #dbeafe;
       }
       .hero p {
         margin: 0;
@@ -109,12 +110,23 @@
       .contact strong {
         display: block;
         margin-bottom: 4px;
+        color: #1d4ed8;
+      }
+      .contact .value {
+        color: #1d4ed8;
+        font-weight: 700;
+      }
+      .contact .line {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
       }
       .footer {
         margin-top: 20px;
-        color: var(--muted);
+        color: #1d4ed8;
         font-size: 14px;
         text-align: center;
+        font-weight: 700;
       }
       a {
         color: var(--primary);
@@ -134,11 +146,6 @@
       <section class="hero">
         <h1>سياسة الخصوصية</h1>
         <p>هذه السياسة تشرح كيف نتعامل مع بيانات المدارس داخل SOM PRO.</p>
-        <div class="meta">
-          <span>آخر تحديث: 23 أغسطس 2026</span>
-          <span>التطبيق: SOM PRO</span>
-          <span>النطاق: إدارة شؤون المدرسة</span>
-        </div>
       </section>
 
       <main class="card">
@@ -204,17 +211,17 @@
 
         <h2>9. التواصل</h2>
         <div class="contact">
-          <div>
+          <div class="line">
             <strong>البريد الداعم</strong>
-            BasilRam1997@gmail.com
+            <span class="value">BasilRam1997@gmail.com</span>
           </div>
-          <div>
-            <strong>الموقع</strong>
-            <a href="/" rel="nofollow">الصفحة الرئيسية للمشروع</a>
+          <div class="line">
+            <strong>باسل - المبيعات</strong>
+            <span class="value">054236654</span>
           </div>
-          <div>
-            <strong>سياسة الخصوصية</strong>
-            <a href="/privacy/" rel="nofollow">هذه الصفحة</a>
+          <div class="line">
+            <strong>حسام - الدعم</strong>
+            <span class="value">0542410603</span>
           </div>
         </div>
 
