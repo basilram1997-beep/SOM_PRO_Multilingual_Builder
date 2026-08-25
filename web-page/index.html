@@ -128,7 +128,17 @@
         align-items: center;
         gap: 14px;
         flex-wrap: wrap;
-        justify-content: flex-end;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 22px;
+        padding: 12px 14px;
+        box-shadow: 0 18px 32px rgba(0, 0, 0, 0.12);
+      }
+      .nav-wrap {
+        flex: 1;
+        display: flex;
+        justify-content: center;
       }
       .nav-links a {
         text-decoration: none;
@@ -707,14 +717,16 @@
             <div class="brand-subtitle" data-i18n="subtitle">مدير تشغيل المدرسة</div>
           </div>
         </div>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a href="#about" data-i18n="navAbout">لمحة</a>
-          <a href="#features" data-i18n="navFeatures">المزايا</a>
-          <a href="#audience" data-i18n="navAudience">الفئات</a>
-          <a href="#packages" data-i18n="navPackages">الحزم</a>
-          <a href="./privacy/" data-i18n="navPrivacy">الخصوصية</a>
-          <a class="nav-cta" href="#contact" data-i18n="navCTA">طلب تجربة</a>
-        </nav>
+        <div class="nav-wrap">
+          <nav class="nav-links" aria-label="Main navigation">
+            <a href="#about" data-i18n="navAbout">لمحة</a>
+            <a href="#features" data-i18n="navFeatures">المزايا</a>
+            <a href="#audience" data-i18n="navAudience">الفئات</a>
+            <a href="#packages" data-i18n="navPackages">الحزم</a>
+            <a href="./privacy/" data-i18n="navPrivacy">الخصوصية</a>
+            <a class="nav-cta" href="#contact" data-i18n="navCTA">طلب تجربة</a>
+          </nav>
+        </div>
       </div>
     </header>
 
@@ -722,8 +734,6 @@
       <section class="hero">
         <div class="shell hero-inner" id="about">
           <div class="hero-copy">
-            <div class="eyebrow" data-i18n="eyebrow">منصة مدرسية موحّدة</div>
-            <h1 data-i18n="heroTitle">نظام يومي أنيق لإدارة المدرسة</h1>
             <p class="lede" data-i18n="heroText">
               SOM PRO يجمع ما يحتاجه الطالب وولي الأمر والمعلم والإدارة في مكان واحد: البرنامج اليومي،
               الدروس، الواجبات، العلامات، السلوك، الحضور، الشهادات، والتقارير.
@@ -739,7 +749,7 @@
               </div>
               <div class="metric">
                 <strong data-i18n="metric2Value">2</strong>
-                <span data-i18n="metric2Text">برنامج يومي وبدائل وتقارير</span>
+                <span data-i18n="metric2Text">لوحة موحدة للأهل والطلاب</span>
               </div>
               <div class="metric">
                 <strong data-i18n="metric3Value">3</strong>
@@ -752,15 +762,14 @@
             <div class="panel-card">
               <h2 data-i18n="panelTitle">ما الذي يقدمه النظام؟</h2>
               <p class="sub" data-i18n="panelText">
-                واجهة منظمة تركّز على أهم ما يحتاجه كل طرف في المدرسة، مع عرض واضح للمعلومات من دون تشويش
-                أو ازدحام بصري.
+                واجهة منظمة تركّز على أهم ما يحتاجه كل طرف في المدرسة، مع عرض واضح للمعلومات.
               </p>
               <ul class="bullet-list">
                 <li data-i18n="panel1">لوحة الطالب تعرض برنامجه، دروسه، واجباته، علاماته، وسلوكه بشكل يومي.</li>
                 <li data-i18n="panel2">لوحة ولي الأمر تتابع حضور الابن، تقدمه، واجباته، وملخص ما يحدث في يومه الدراسي.</li>
                 <li data-i18n="panel3">لوحة المعلم لإدخال العلامات والسلوك والدروس والواجبات والتحضير والشهادات.</li>
-                <li data-i18n="panel4">لوحة المدير لرؤية الغياب والبدائل ومن تأثر ومن يحتاج متابعة فورية بزر واحد.</li>
-                <li data-i18n="panel5">تجربة قابلة للاستخدام على سطح المكتب للمدارس، وعلى الويب للهواتف والتصفح السريع.</li>
+                <li data-i18n="panel4">لوحة المدير لرؤية الغياب والاستئذانات والاستبدالات والتفريغات والمناوبات.</li>
+                <li data-i18n="panel5">برنامج قابل لاستخدام المدراء والمعلمين والأهل والطلاب.</li>
               </ul>
             </div>
           </div>
@@ -773,8 +782,7 @@
             <div>
               <h2 data-i18n="audienceTitle">من يخدم SOM PRO؟</h2>
               <p data-i18n="audienceText">
-                صممنا الواجهة لتخاطب أطراف المدرسة الأساسية بوضوح عملي: كل فئة ترى ما يخصها مباشرة، من
-                دون ازدحام أو خطوات زائدة.
+                صممنا الواجهة لتخاطب أطراف المدرسة الأساسية بحيث كل فئة ترى ما يخصها مباشرة.
               </p>
             </div>
           </div>
@@ -783,7 +791,7 @@
               <div class="icon">👩‍🎓</div>
               <h3 data-i18n="studentTitle">الطالب</h3>
               <p data-i18n="studentText">
-                يرى برنامجه اليومي، دروسه، واجباته، علاماته، سلوكه، وتقدمه الدراسي في شاشة واحدة واضحة.
+                يرى برنامجه اليومي والثابت وبرنامج الامتحانات، دروسه، واجباته، علاماته، سلوكه، وتقدمه الدراسي في شاشة واحدة واضحة.
               </p>
             </article>
             <article class="card persona">
@@ -797,7 +805,7 @@
               <div class="icon">🏫</div>
               <h3 data-i18n="adminTitle">الإدارة</h3>
               <p data-i18n="adminText">
-                تراقب الغياب والبدائل وتأثيرها على الصفوف والمواد، وتتابع كل شيء بسرعة من زر واحد.
+                لا تراقب وتعرض فقط، بل تقدم حلولًا ذكية بكبسة زر واحدة.
               </p>
             </article>
             <article class="card persona">
@@ -817,7 +825,7 @@
             <div>
               <h2 data-i18n="showcaseTitle">صور توضح الفكرة</h2>
               <p data-i18n="showcaseText">
-                لقطات من داخل النظام توضح المدير والصفوف والبرنامج المحدث قبل التجربة.
+                لقطات من داخل النظام تعرض واجهة الطالب والمعلم والمدير ببيانات تجريبية واضحة قبل التجربة.
               </p>
             </div>
           </div>
@@ -945,15 +953,10 @@
         <div class="shell">
           <div class="section-head">
             <div>
-              <h2 data-i18n="featuresTitle">المزايا التي تميّز SOM PRO</h2>
-              <p data-i18n="featuresText">
-                أقسام مرئية واضحة، بطاقات قوية، وتدرج بصري يذكّر بروح kindix.me لكن بهوية SOM PRO الخاصة.
-              </p>
             </div>
           </div>
           <div class="feature-strip">
             <div class="feature-highlight">
-              <h3 data-i18n="highlightTitle">واجهة تسويقية مدروسة، ونظام تشغيلي عملي</h3>
               <div class="hero-actions" style="margin-top: 22px">
                 <a class="button primary" href="#packages" data-i18n="highlightButton1">استعراض الحزم</a>
                 <a class="button secondary" href="#contact" data-i18n="highlightButton2">تواصل سريع</a>
@@ -980,13 +983,7 @@
       <section class="section" id="packages">
         <div class="shell">
           <div class="section-head">
-            <div>
-              <h2 data-i18n="packagesTitle">الحزم المقترحة</h2>
-              <p data-i18n="packagesText">
-                تقسيم واضح يطابق طريقة الاستخدام الفعلية داخل المدرسة: تجربة على سطح المكتب للمدارس،
-                ووصول عبر الويب للهواتف والمتصفح، وروابط رسمية للموقع والخصوصية.
-              </p>
-            </div>
+            <div></div>
           </div>
           <div class="grid cards-3">
             <article class="card">
@@ -1012,7 +1009,7 @@
         <div class="shell">
           <div class="cta-box">
             <div>
-              <h2 data-i18n="ctaTitle">SOM PRO جاهز لتجربة المدرسة التالية</h2>
+              <h2 data-i18n="ctaTitle">SOM PRO جاهز لتجربة النسخة المجانية</h2>
             </div>
             <div>
               <a class="button primary" href="mailto:BasilRam1997@gmail.com" data-i18n="ctaButton">
@@ -1025,7 +1022,7 @@
     </main>
 
     <footer class="shell footer">
-      <div>© 2026 SOM PRO - School Operations Manager | جميع الحقوق محفوظة 2026 |</div>
+      <div>© 2026 SOM PRO - School Operations Manager</div>
       <div>المبيعات (باسل): 054236654 | الدعم (حسام): 0542410603</div>
     </footer>
 
@@ -1040,8 +1037,8 @@
           navPackages: "الحزم",
           navPrivacy: "الخصوصية",
           navCTA: "طلب تجربة",
-          eyebrow: "منصة مدرسية موحّدة",
-          heroTitle: "نظام يومي أنيق لإدارة المدرسة",
+          eyebrow: "",
+          heroTitle: "",
           heroText:
             "SOM PRO يجمع ما يحتاجه الطالب وولي الأمر والمعلم والإدارة في مكان واحد: البرنامج اليومي، الدروس، الواجبات، العلامات، السلوك، الحضور، الشهادات، والتقارير.",
           heroPrimary: "طلب تجربة",
@@ -1049,35 +1046,35 @@
           metric1Value: "1",
           metric1Text: "لوحة موحّدة للمدرسة والمعلمين",
           metric2Value: "2",
-          metric2Text: "برنامج يومي وبدائل وتقارير",
+          metric2Text: "لوحة موحدة للأهل والطلاب",
           metric3Value: "3",
           metric3Text: "واجهة عربية حديثة مع تعدد لغات",
           panelTitle: "ما الذي يقدمه النظام؟",
           panelText:
-            "واجهة منظمة تركّز على أهم ما يحتاجه كل طرف في المدرسة، مع عرض واضح للمعلومات من دون تشويش أو ازدحام بصري.",
+            "واجهة منظمة تركّز على أهم ما يحتاجه كل طرف في المدرسة، مع عرض واضح للمعلومات.",
           panel1: "لوحة الطالب تعرض برنامجه، دروسه، واجباته، علاماته، وسلوكه بشكل يومي.",
           panel2: "لوحة ولي الأمر تتابع حضور الابن، تقدمه، واجباته، وملخص ما يحدث في يومه الدراسي.",
           panel3: "لوحة المعلم لإدخال العلامات والسلوك والدروس والواجبات والتحضير والشهادات.",
-          panel4: "لوحة المدير لرؤية الغياب والبدائل ومن تأثر ومن يحتاج متابعة فورية بزر واحد.",
-          panel5: "تجربة قابلة للاستخدام على سطح المكتب للمدارس، وعلى الويب للهواتف والتصفح السريع.",
+          panel4: "لوحة المدير لرؤية الغياب والاستئذانات والاستبدالات والتفريغات والمناوبات.",
+          panel5: "برنامج قابل لاستخدام المدراء والمعلمين والأهل والطلاب.",
           audienceTitle: "من يخدم SOM PRO؟",
           audienceText:
-            "صممنا الواجهة لتخاطب أطراف المدرسة الأساسية بوضوح عملي: كل فئة ترى ما يخصها مباشرة، من دون ازدحام أو خطوات زائدة.",
+            "صممنا الواجهة لتخاطب أطراف المدرسة الأساسية بحيث كل فئة ترى ما يخصها مباشرة.",
           studentTitle: "الطالب",
           studentText:
-            "يرى برنامجه اليومي، دروسه، واجباته، علاماته، سلوكه، وتقدمه الدراسي في شاشة واحدة واضحة.",
+            "يرى برنامجه اليومي والثابت وبرنامج الامتحانات، دروسه، واجباته، علاماته، سلوكه، وتقدمه الدراسي في شاشة واحدة واضحة.",
           teacherTitle: "المعلم",
           teacherText:
             "يدخل العلامات والسلوك والتحضير والواجبات والدروس والشهادات من واجهة عملية وسريعة.",
           adminTitle: "الإدارة",
           adminText:
-            "تراقب الغياب والبدائل وتأثيرها على الصفوف والمواد، وتتابع كل شيء بسرعة من زر واحد.",
+            "لا تراقب وتعرض فقط، بل تقدم حلولًا ذكية بكبسة زر واحدة.",
           parentTitle: "ولي الأمر",
           parentText:
             "يتابع ابنَه من خلال الحضور والواجبات والدرجات والسلوك والتقدم اليومي بصورة مفهومة ومختصرة.",
           featuresTitle: "المزايا التي تميّز SOM PRO",
-          featuresText: "أقسام مرئية واضحة، بطاقات قوية، وتدرج بصري يذكّر بروح kindix.me لكن بهوية SOM PRO الخاصة.",
-          highlightTitle: "واجهة تسويقية مدروسة، ونظام تشغيلي عملي",
+          featuresText: "",
+          highlightTitle: "",
           highlightButton1: "استعراض الحزم",
           highlightButton2: "تواصل سريع",
           stack1Title: "برنامج يومي وبدائل",
@@ -1086,9 +1083,8 @@
           stack2Text: "عرض وإدارة العمل اليومي الدراسي دون تبديل صفحات كثيرة.",
           stack3Title: "الشهادات والحضور",
           stack3Text: "نتائج قابلة للمعاينة والطباعة مع مخرجات مرتبة ومفهومة.",
-          packagesTitle: "الحزم المقترحة",
-          packagesText:
-            "تقسيم واضح يطابق طريقة الاستخدام الفعلية داخل المدرسة: تجربة على سطح المكتب للمدارس، ووصول عبر الويب للهواتف والمتصفح، وروابط رسمية للموقع والخصوصية.",
+          packagesTitle: "",
+          packagesText: "",
           showcaseTitle: "صور توضح الفكرة",
           showcaseText:
             "لقطات من داخل النظام تعرض واجهة الطالب والمعلم والمدير ببيانات تجريبية واضحة قبل التجربة.",
@@ -1104,7 +1100,7 @@
           pkg2Text: "واجهة مناسبة للهواتف والمتصفحات الحديثة مع وصول سريع وتجربة خفيفة.",
           pkg3Title: "الروابط الرسمية",
           pkg3Text: "صفحة الموقع وصفحة الخصوصية وروابط الإطلاق التي يحتاجها المستخدم والمتجر.",
-          ctaTitle: "SOM PRO جاهز لتجربة المدرسة التالية",
+          ctaTitle: "SOM PRO جاهز لتجربة النسخة المجانية",
           ctaButton: "طلب تجربة",
         },
         en: {
@@ -1116,8 +1112,8 @@
           navPackages: "Packages",
           navPrivacy: "Privacy",
           navCTA: "Request demo",
-          eyebrow: "Unified school platform",
-          heroTitle: "A polished daily school management system",
+          eyebrow: "",
+          heroTitle: "",
           heroText:
             "SOM PRO brings what students, parents, teachers, and administrators need into one place: schedules, lessons, homework, grades, behavior, attendance, certificates, and reports.",
           heroPrimary: "Request demo",
@@ -1125,31 +1121,31 @@
           metric1Value: "1",
           metric1Text: "Unified view for schools and teachers",
           metric2Value: "2",
-          metric2Text: "Daily program, substitutions, and reports",
+          metric2Text: "Unified dashboard for parents and students",
           metric3Value: "3",
           metric3Text: "Modern Arabic UI with multilingual support",
           panelTitle: "What does the system provide?",
           panelText:
-            "An organized interface focused on what each school audience actually needs, with clear information and no visual clutter.",
+            "An organized interface focused on what each school audience actually needs, with clear information.",
           panel1: "Student view for schedule, lessons, homework, grades, and behavior.",
           panel2: "Parent view for attendance, progress, homework, and daily follow-up.",
           panel3: "Teacher view for grades, behavior, lessons, homework, certificates, and prep.",
-          panel4: "Admin view for absences, substitutions, affected classes, and quick follow-up.",
-          panel5: "Desktop-friendly for schools, with web access that works smoothly on phones.",
+          panel4: "See absences, permissions, substitutions, free periods, and duty rotations, with smart solutions in one click.",
+          panel5: "A program usable by administrators, teachers, parents, and students.",
           audienceTitle: "Who does SOM PRO serve?",
           audienceText:
-            "We designed the interface to speak clearly to the school’s core audiences: each group sees exactly what matters to them, without extra steps.",
+            "We designed the interface to speak clearly to the school’s core audiences so each group sees exactly what matters to them.",
           studentTitle: "Students",
-          studentText: "See schedule, lessons, homework, grades, behavior, and progress in one clean view.",
+          studentText: "See the daily and fixed schedule, exam schedule, lessons, homework, grades, behavior, and progress in one clean view.",
           teacherTitle: "Teachers",
           teacherText: "Enter grades, behavior, lessons, homework, prep, and certificates from one practical screen.",
           adminTitle: "Administrators",
-          adminText: "Track absences, substitutions, and the classes or subjects affected from one place.",
+          adminText: "Do more than track and show data; provide smart solutions with one click.",
           parentTitle: "Parents",
           parentText: "Follow a child’s attendance, homework, grades, behavior, and daily progress with clarity.",
           featuresTitle: "What makes SOM PRO stand out",
-          featuresText: "Clear visual sections, strong cards, and a premium gradient flow inspired by good school landing pages.",
-          highlightTitle: "A thoughtful marketing page with a practical operating system",
+          featuresText: "",
+          highlightTitle: "",
           highlightButton1: "Explore packages",
           highlightButton2: "Quick contact",
           stack1Title: "Daily program and substitutions",
@@ -1158,9 +1154,8 @@
           stack2Text: "Manage daily academic work without jumping between many pages.",
           stack3Title: "Certificates and attendance",
           stack3Text: "Previewable and printable outputs that stay neat and easy to read.",
-          packagesTitle: "Suggested packages",
-          packagesText:
-            "A clear split that matches real school usage: desktop for school devices, web for phones and browsers, and official links for the site and privacy page.",
+          packagesTitle: "",
+          packagesText: "",
           showcaseTitle: "Screens that explain the idea",
           showcaseText:
             "We show real in-app screenshots so visitors can see the student, teacher, and admin experiences with demo data before trying it.",
@@ -1176,7 +1171,7 @@
           pkg2Text: "A web interface that works well on phones and modern browsers with a light touch.",
           pkg3Title: "Official links",
           pkg3Text: "Website, privacy page, and the release links needed by users and the store.",
-          ctaTitle: "SOM PRO is ready for the next school trial",
+          ctaTitle: "SOM PRO is ready for the free version trial",
           ctaButton: "Request demo",
         },
         he: {
@@ -1188,8 +1183,8 @@
           navPackages: "חבילות",
           navPrivacy: "פרטיות",
           navCTA: "בקשת ניסיון",
-          eyebrow: "פלטפורמה אחודה לבית ספר",
-          heroTitle: "מערכת יומית אלגנטית לניהול בית הספר",
+          eyebrow: "",
+          heroTitle: "",
           heroText:
             "SOM PRO מאחד את מה שתלמידים, הורים, מורים ומנהלים צריכים במקום אחד: מערכת שעות, שיעורים, שיעורי בית, ציונים, התנהגות, נוכחות, תעודות ודוחות.",
           heroPrimary: "בקשת ניסיון",
@@ -1197,31 +1192,31 @@
           metric1Value: "1",
           metric1Text: "תצוגה אחידה לבית הספר ולמורים",
           metric2Value: "2",
-          metric2Text: "תוכנית יומית, החלפות ודוחות",
+          metric2Text: "לוח אחוד להורים ולתלמידים",
           metric3Value: "3",
           metric3Text: "ממשק עברי מודרני עם תמיכה רב-לשונית",
           panelTitle: "מה המערכת מספקת?",
           panelText:
-            "ממשק מסודר שמתרכז במה שכל קהל בבית הספר באמת צריך, עם מידע ברור וללא עומס חזותי.",
+            "ממשק מסודר שמתרכז במה שכל קהל בבית הספר באמת צריך, עם מידע ברור.",
           panel1: "תצוגת תלמיד למערכת שעות, שיעורים, שיעורי בית, ציונים והתנהגות.",
           panel2: "תצוגת הורה למעקב אחר נוכחות, התקדמות, שיעורי בית והתנהלות יומית.",
           panel3: "תצוגת מורה להזנת ציונים, התנהגות, שיעורים, שיעורי בית, הכנה ותעודות.",
-          panel4: "תצוגת מנהל למעקב אחר היעדרויות, החלפות, כיתות ותחומים מושפעים בלחיצה אחת.",
-          panel5: "מותאם לעבודה על מחשבי desktop ו-laptop, עם גישה דרך web שפועלת היטב גם בטלפון.",
+          panel4: "לראות היעדרויות, אישורים, החלפות, שעות פנויות ומשמרות, עם פתרונות חכמים בלחיצה אחת.",
+          panel5: "תוכנית שימושית למנהלים, מורים, הורים ותלמידים.",
           audienceTitle: "למי SOM PRO מיועד?",
           audienceText:
-            "עיצבנו את הממשק כך שידבר אל קהלי היעד של בית הספר בבהירות מעשית: כל קבוצה רואה בדיוק את מה שחשוב לה.",
+            "עיצבנו את הממשק כך שידבר אל קהלי היעד של בית הספר כך שכל קבוצה רואה בדיוק את מה שחשוב לה.",
           studentTitle: "תלמידים",
-          studentText: "צפייה במערכת השעות, בשיעורים, בשיעורי הבית, בציונים, בהתנהגות ובהתקדמות במקום אחד.",
+          studentText: "צפייה במערכת היומית והקבועה, במערכת המבחנים, בשיעורים, בשיעורי הבית, בציונים, בהתנהגות ובהתקדמות במקום אחד.",
           teacherTitle: "מורים",
           teacherText: "הזנת ציונים, התנהגות, שיעורים, שיעורי בית, הכנה ותעודות ממסך אחד פרקטי.",
           adminTitle: "מנהלים",
-          adminText: "מעקב אחר היעדרויות, החלפות, כיתות ותחומים מושפעים ממקום אחד.",
+          adminText: "לא רק לעקוב ולהציג, אלא להציע פתרונות חכמים בלחיצה אחת.",
           parentTitle: "הורים",
           parentText: "מעקב ברור אחרי נוכחות, שיעורי בית, ציונים, התנהגות והתקדמות יומית של הילד.",
           featuresTitle: "מה מייחד את SOM PRO",
-          featuresText: "אזורי תוכן ברורים, כרטיסים חזקים וזרימת צבעים פרימיום בהשראת דפי נחיתה טובים.",
-          highlightTitle: "דף שיווקי מחושב עם מערכת תפעולית אמיתית",
+          featuresText: "",
+          highlightTitle: "",
           highlightButton1: "עיון בחבילות",
           highlightButton2: "צור קשר",
           stack1Title: "תוכנית יומית והחלפות",
@@ -1230,9 +1225,8 @@
           stack2Text: "ניהול עבודה יומית מבלי לקפוץ בין דפים רבים.",
           stack3Title: "תעודות ונוכחות",
           stack3Text: "תוצרים לצפייה ולהדפסה שנשארים מסודרים וקריאים.",
-          packagesTitle: "חבילות מוצעות",
-          packagesText:
-            "אותו איזון שעובד בדפי מוצר חזקים: בהירות, ביטחון ומסר ישיר, עם חלוקה פשוטה של קהלי היעד.",
+          packagesTitle: "",
+          packagesText: "",
           showcaseTitle: "מסכים שמסבירים את הרעיון",
           showcaseText:
             "אנחנו מציגים צילומי מסך אמיתיים מתוך המערכת כדי שהמבקר יראה את חוויית התלמיד, המורה והמנהל עם נתוני דמו ברורים לפני הניסיון.",
@@ -1248,7 +1242,7 @@
           pkg2Text: "ממשק web שעובד היטב בטלפונים ובדפדפנים מודרניים עם חוויה קלה.",
           pkg3Title: "קישורים רשמיים",
           pkg3Text: "אתר, דף פרטיות וקישורי ההפצה הנדרשים למשתמשים ולחנות.",
-          ctaTitle: "SOM PRO מוכן לניסיון הבא בבית הספר",
+          ctaTitle: "SOM PRO מוכן לניסיון النسخة المجانية",
           ctaButton: "בקשת ניסיון",
         }
       };
@@ -1282,9 +1276,9 @@
       document.querySelectorAll(".language-switcher button").forEach((b) => {
         b.addEventListener("click", () => setLang(b.dataset.lang));
       });
+
       const audioState = {
         context: null,
-        introPlayed: false,
       };
 
       function getAudioContext() {
@@ -1296,41 +1290,18 @@
         return audioState.context;
       }
 
-      async function tryUnlockAudio() {
-        const ctx = getAudioContext();
-        if (!ctx) return null;
-        if (ctx.state === "suspended") {
-          try {
-            await ctx.resume();
-          } catch {}
-        }
-        return ctx.state === "running" ? ctx : null;
-      }
-
       function playTone(ctx, frequency, startTime, duration, volume, type = "sine") {
         const oscillator = ctx.createOscillator();
         const gain = ctx.createGain();
         oscillator.type = type;
         oscillator.frequency.setValueAtTime(frequency, startTime);
         gain.gain.setValueAtTime(0.0001, startTime);
-        gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.06);
+        gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.03);
         gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
         oscillator.connect(gain);
         gain.connect(ctx.destination);
         oscillator.start(startTime);
         oscillator.stop(startTime + duration + 0.02);
-      }
-
-      async function playIntroTheme() {
-        if (audioState.introPlayed) return;
-        const ctx = await tryUnlockAudio();
-        if (!ctx) return;
-        audioState.introPlayed = true;
-        const start = ctx.currentTime + 0.04;
-        const notes = [392, 523, 659, 784, 659, 587, 523, 440];
-        notes.forEach((freq, index) => {
-          playTone(ctx, freq, start + index * 0.76, 0.66, 0.025, index % 2 === 0 ? "sine" : "triangle");
-        });
       }
 
       function playClickSound() {
@@ -1342,19 +1313,6 @@
         const start = ctx.currentTime;
         playTone(ctx, 880, start, 0.08, 0.018, "triangle");
       }
-
-      document.querySelectorAll(".language-switcher button").forEach((b) => {
-        b.addEventListener("click", () => setLang(b.dataset.lang));
-      });
-      document.addEventListener("pointerdown", () => {
-        playIntroTheme();
-      }, { once: true });
-      document.addEventListener("keydown", () => {
-        playIntroTheme();
-      }, { once: true });
-      window.addEventListener("load", () => {
-        playIntroTheme();
-      });
 
       document.addEventListener("click", (event) => {
         const target = event.target.closest("a, button, .showcase-card");
