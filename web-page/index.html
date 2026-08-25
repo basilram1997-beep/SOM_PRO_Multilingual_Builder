@@ -83,6 +83,10 @@
         color: white;
         border-color: var(--primary);
       }
+      body.lang-en .language-switcher {
+        left: auto;
+        right: 14px;
+      }
       header {
         position: sticky;
         top: 0;
@@ -106,6 +110,9 @@
         font-weight: 900;
         font-size: 24px;
         letter-spacing: 0;
+      }
+      body.lang-en .brand {
+        text-align: end;
       }
       .brand img {
         width: 60px;
@@ -139,6 +146,9 @@
         flex: 1;
         display: flex;
         justify-content: center;
+      }
+      body.lang-en .nav-wrap {
+        justify-content: flex-end;
       }
       .nav-links a {
         text-decoration: none;
@@ -1263,6 +1273,7 @@
         const d = dict[lang] || dict.ar;
         document.documentElement.lang = lang;
         document.documentElement.dir = d.dir;
+        document.body.classList.toggle("lang-en", lang === "en");
         document.querySelectorAll("[data-i18n]").forEach((el) => {
           const text = d[el.dataset.i18n];
           if (text) el.textContent = text;
