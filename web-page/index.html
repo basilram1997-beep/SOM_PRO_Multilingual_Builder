@@ -217,14 +217,13 @@
         order: 2;
       }
       .eyebrow {
+        position: relative;
         display: block;
-        align-items: center;
-        gap: 10px;
         overflow: hidden;
         background: rgba(255, 255, 255, 0.12);
         border: 1px solid rgba(255, 255, 255, 0.14);
         border-radius: 999px;
-        padding: 10px 16px;
+        min-height: 42px;
         color: rgba(255, 255, 255, 0.96);
         font-size: 14px;
         font-weight: 700;
@@ -232,11 +231,13 @@
         box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
       }
       .eyebrow-track {
-        display: inline-flex;
-        width: max-content;
+        position: absolute;
+        inset: 0;
+        display: flex;
         align-items: center;
+        padding-inline: 16px;
         white-space: nowrap;
-        animation: eyebrowScroll 10s linear infinite;
+        animation: eyebrowScroll 12s linear infinite;
         will-change: transform;
       }
       .eyebrow-segment {
@@ -244,10 +245,10 @@
       }
       @keyframes eyebrowScroll {
         from {
-          transform: translateX(0);
+          transform: translateX(110%);
         }
         to {
-          transform: translateX(-100%);
+          transform: translateX(-110%);
         }
       }
       .hero-title {
