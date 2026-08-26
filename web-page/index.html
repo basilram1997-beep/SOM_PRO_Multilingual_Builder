@@ -148,7 +148,8 @@
         justify-content: center;
       }
       body.lang-en .nav-wrap {
-        justify-content: flex-end;
+        justify-content: flex-start;
+        padding-inline-end: 96px;
       }
       .nav-links a {
         text-decoration: none;
@@ -295,17 +296,10 @@
         padding: 16px 18px;
         backdrop-filter: blur(8px);
         clip-path: polygon(
-          0 0,
-          100% 0,
-          100% 86%,
-          92% 90%,
-          84% 95%,
-          72% 98%,
-          50% 100%,
-          28% 98%,
-          16% 95%,
-          8% 90%,
-          0 86%
+          8% 0,
+          92% 0,
+          100% 100%,
+          0 100%
         );
       }
       .metric strong {
@@ -1252,8 +1246,8 @@
             <article class="showcase-group">
               <div class="showcase-group-head">
                 <div>
-                  <h3>واجهات الطالب</h3>
-                  <p>أربع لقطات ببيانات تجريبية فقط توضّح ما يراه الطالب في يومه الدراسي.</p>
+                  <h3 data-i18n="showcaseStudentGroupTitle">واجهات الطالب</h3>
+                  <p data-i18n="showcaseStudentGroupText">أربع لقطات ببيانات تجريبية فقط توضّح ما يراه الطالب في يومه الدراسي.</p>
                 </div>
               </div>
               <div class="showcase-tiles">
@@ -1291,8 +1285,8 @@
             <article class="showcase-group">
               <div class="showcase-group-head">
                 <div>
-                  <h3>واجهات المعلم</h3>
-                  <p>خمس لقطات ببيانات تجريبية فقط تمثل العمل اليومي للمعلم داخل المشروع.</p>
+                  <h3 data-i18n="showcaseTeacherGroupTitle">واجهات المعلم</h3>
+                  <p data-i18n="showcaseTeacherGroupText">خمس لقطات ببيانات تجريبية فقط تمثل العمل اليومي للمعلم داخل المشروع.</p>
                 </div>
               </div>
               <div class="showcase-tiles">
@@ -1337,8 +1331,8 @@
             <article class="showcase-group">
               <div class="showcase-group-head">
                 <div>
-                  <h3>واجهة المدير</h3>
-                  <p>لقطة واحدة ببيانات تجريبية توضّح برنامج الفراغ ومن هو متفرغ وبأي حصة.</p>
+                  <h3 data-i18n="showcaseAdminGroupTitle">واجهة المدير</h3>
+                  <p data-i18n="showcaseAdminGroupText">لقطة واحدة ببيانات تجريبية توضّح برنامج الفراغ ومن هو متفرغ وبأي حصة.</p>
                 </div>
               </div>
               <div class="showcase-tiles" style="max-width: 520px">
@@ -1554,12 +1548,12 @@
           showcaseTitle: "صور توضح الفكرة",
           showcaseText:
             "لقطات من داخل النظام تعرض واجهة الطالب والمعلم والمدير ببيانات تجريبية واضحة قبل التجربة.",
-          showcaseAdminTitle: "للمدير",
-          showcaseAdminText: "شاشة المدير تبرز المؤشرات والطلبات والبدائل والتفاصيل التجريبية في مساحة واحدة واضحة.",
-          showcaseTeacherTitle: "للصفوف والمربين",
-          showcaseTeacherText: "شاشة الصفوف والمربين تعرض توزيع الصفوف، مربي الصف، والحالة الحالية بسرعة واضحة.",
-          showcaseStudentTitle: "للبرنامج بعد الاستبدالات",
-          showcaseStudentText: "شاشة البرنامج المحدث تعرض الحصص المعدلة، البدلاء، والحالة النهائية بوضوح مباشر.",
+          showcaseStudentGroupTitle: "واجهات الطالب",
+          showcaseStudentGroupText: "أربع لقطات ببيانات تجريبية فقط توضّح ما يراه الطالب في يومه الدراسي.",
+          showcaseTeacherGroupTitle: "واجهات المعلم",
+          showcaseTeacherGroupText: "خمس لقطات ببيانات تجريبية فقط تمثل العمل اليومي للمعلم داخل المشروع.",
+          showcaseAdminGroupTitle: "واجهة المدير",
+          showcaseAdminGroupText: "لقطة واحدة ببيانات تجريبية توضّح برنامج الفراغ ومن هو متفرغ وبأي حصة.",
           pkg1Title: "نسخة سطح المكتب",
           pkg1Text: "مهيأة للأجهزة المكتبية واللابتوبات داخل المدرسة أو في بيئة داخلية مستقرة.",
           pkg2Title: "نسخة الويب",
@@ -1652,12 +1646,12 @@
           showcaseTitle: "Screens that explain the idea",
           showcaseText:
             "We show real in-app screenshots so visitors can see the student, teacher, and admin experiences with demo data before trying it.",
-          showcaseAdminTitle: "For administrators",
-          showcaseAdminText: "The admin screen highlights the dashboard, requests, substitutions, and trial details in one place.",
-          showcaseTeacherTitle: "For classes and homeroom teachers",
-          showcaseTeacherText: "The classes screen shows class distribution, homeroom assignments, and current status at a glance.",
-          showcaseStudentTitle: "For the updated program",
-          showcaseStudentText: "The updated program screen shows substitutions, alternate teachers, and the final status clearly.",
+          showcaseStudentGroupTitle: "Student screens",
+          showcaseStudentGroupText: "Four demo-only screenshots that show what the student sees during the school day.",
+          showcaseTeacherGroupTitle: "Teacher screens",
+          showcaseTeacherGroupText: "Five demo-only screenshots that represent the teacher’s daily work inside the project.",
+          showcaseAdminGroupTitle: "Admin screen",
+          showcaseAdminGroupText: "One demo screenshot that shows the free-period schedule and who is available for which period.",
           pkg1Title: "Desktop edition",
           pkg1Text: "Built for desktop and laptop school devices in a stable internal environment.",
           pkg2Title: "Web edition",
@@ -1750,12 +1744,12 @@
           showcaseTitle: "מסכים שמסבירים את הרעיון",
           showcaseText:
             "אנחנו מציגים צילומי מסך אמיתיים מתוך המערכת כדי שהמבקר יראה את חוויית התלמיד, המורה והמנהל עם נתוני דמו ברורים לפני הניסיון.",
-          showcaseAdminTitle: "למנהלים",
-          showcaseAdminText: "מסך המנהל מדגיש לוח בקרה, בקשות, החלפות ופרטי הדגמה במקום אחד.",
-          showcaseTeacherTitle: "לכיתות ולמחנכים",
-          showcaseTeacherText: "מסך הכיתות מציג חלוקת כיתות, מחנכים ומצב נוכחי במבט מהיר.",
-          showcaseStudentTitle: "לתוכנית המעודכנת",
-          showcaseStudentText: "מסך התוכנית המעודכנת מציג החלפות, מורים מחליפים והמצב הסופי בבירור.",
+          showcaseStudentGroupTitle: "מסכי תלמיד",
+          showcaseStudentGroupText: "ארבעה צילומי מסך עם נתוני דמו בלבד שמראים מה התלמיד רואה ביום הלימודים שלו.",
+          showcaseTeacherGroupTitle: "מסכי מורה",
+          showcaseTeacherGroupText: "חמישה צילומי מסך עם נתוני דמו בלבד שמייצגים את העבודה היומית של המורה במערכת.",
+          showcaseAdminGroupTitle: "מסך מנהל",
+          showcaseAdminGroupText: "צילום מסך אחד עם נתוני דמו שמציג את מערכת השעות הפנויה ומי פנוי ובאיזו שעה.",
           pkg1Title: "גרסת Desktop",
           pkg1Text: "מותאמת למחשבי desktop ו-laptop של בית הספר בסביבה פנימית יציבה.",
           pkg2Title: "גרסת Web",
