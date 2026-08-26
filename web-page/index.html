@@ -283,11 +283,26 @@
         max-width: 640px;
       }
       .metric {
+        position: relative;
+        overflow: hidden;
         background: rgba(255, 255, 255, 0.12);
         border: 1px solid rgba(255, 255, 255, 0.16);
         border-radius: 20px;
         padding: 16px 18px;
         backdrop-filter: blur(8px);
+        clip-path: polygon(
+          0 0,
+          100% 0,
+          100% 86%,
+          92% 90%,
+          84% 95%,
+          72% 98%,
+          50% 100%,
+          28% 98%,
+          16% 95%,
+          8% 90%,
+          0 86%
+        );
       }
       .metric strong {
         display: block;
