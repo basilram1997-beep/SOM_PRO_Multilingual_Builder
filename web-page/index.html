@@ -208,6 +208,9 @@
       }
       .hero-copy {
         order: 1;
+        display: grid;
+        gap: 16px;
+        align-content: start;
       }
       .hero-panel {
         order: 2;
@@ -226,18 +229,19 @@
         margin-bottom: 24px;
         box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
       }
-      .hero h1 {
-        margin: 0 0 18px;
-        font-size: clamp(42px, 5vw, 68px);
-        line-height: 1.15;
+      .hero-title {
+        margin: 0;
+        font-size: clamp(42px, 4.8vw, 66px);
+        line-height: 1.12;
         letter-spacing: 0;
-        max-width: 10ch;
+        max-width: 12ch;
+        color: white;
       }
       .hero .lede {
-        margin: 0 0 28px;
-        max-width: 700px;
-        font-size: clamp(18px, 1.9vw, 22px);
-        line-height: 1.95;
+        margin: 0;
+        max-width: 640px;
+        font-size: clamp(17px, 1.55vw, 20px);
+        line-height: 1.9;
         color: rgba(226, 239, 255, 0.92);
         white-space: pre-line;
       }
@@ -245,7 +249,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
-        margin-bottom: 30px;
+        margin-bottom: 2px;
       }
       .button {
         display: inline-flex;
@@ -279,8 +283,8 @@
       .hero-metrics {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
-        max-width: 640px;
+        gap: 14px;
+        max-width: 700px;
       }
       .metric {
         position: relative;
@@ -326,9 +330,10 @@
         background: rgba(255, 255, 255, 0.98);
         color: var(--ink);
         border-radius: 34px;
-        padding: 34px;
+        padding: 30px;
         box-shadow: 0 32px 80px rgba(0, 0, 0, 0.24);
         border: 1px solid rgba(255, 255, 255, 0.36);
+        border-top: 12px solid #1d4ed8;
       }
       .panel-card h2 {
         margin: 0 0 14px;
@@ -343,14 +348,32 @@
       }
       .bullet-list {
         margin: 0;
-        padding-inline-start: 20px;
+        padding: 0;
+        list-style: none;
         display: grid;
-        gap: 10px;
+        gap: 12px;
       }
       .bullet-list li {
+        position: relative;
+        padding: 16px 18px 16px 18px;
+        padding-inline-start: 40px;
+        background: linear-gradient(180deg, #f5f9ff 0%, #eef4ff 100%);
+        border: 1px solid rgba(37, 99, 235, 0.12);
+        border-radius: 18px;
+        box-shadow: 0 10px 18px rgba(15, 23, 42, 0.04);
         color: #16233e;
-        line-height: 1.9;
-        font-size: 16px;
+        line-height: 1.8;
+        font-size: 15px;
+      }
+      .bullet-list li::before {
+        content: "";
+        position: absolute;
+        inset-inline-start: 16px;
+        top: 22px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1d4ed8, #2563eb);
       }
       .section {
         padding: 74px 0;
@@ -999,7 +1022,7 @@
         .showcase-card img {
           height: 340px;
         }
-        .hero h1 {
+        .hero-title {
           max-width: none;
         }
         .panel-card,
@@ -1067,9 +1090,11 @@
       <section class="hero">
         <div class="shell hero-inner" id="about">
           <div class="hero-copy">
+            <p class="eyebrow" data-i18n="eyebrow">منصة مدرسة أكثر وضوحًا</p>
+            <h1 class="hero-title" data-i18n="heroTitle">تطبيق يقوم بتحويل المدارس والروضات إلى مدارس رقمية</h1>
             <p class="lede" data-i18n="heroText">
-              SOM PRO يجمع ما يحتاجه الطالب وولي الأمر والمعلم والإدارة في مكان واحد: البرنامج اليومي،
-              الدروس، الواجبات، العلامات، السلوك، الحضور، الشهادات، والتقارير.
+              SOM PRO يجمع الطالب وولي الأمر والمعلم والإدارة في مكان واحد، ويجعل المتابعة اليومية أوضح
+              وأسرع.
             </p>
             <div class="hero-actions">
               <a class="button primary" href="/request-demo/" data-i18n="heroPrimary">طلب تجربة</a>
@@ -1095,7 +1120,7 @@
             <div class="panel-card">
               <h2 data-i18n="panelTitle">ما الذي يقدمه النظام؟</h2>
               <p class="sub" data-i18n="panelText">
-                واجهة منظمة تركّز على أهم ما يحتاجه كل طرف في المدرسة، مع عرض واضح للمعلومات.
+                واجهة منظمة تعرض أهم ما يحتاجه كل طرف في المدرسة بوضوح، ومن دون ازدحام بصري.
               </p>
               <ul class="bullet-list">
                 <li data-i18n="panel1">لوحة الطالب تعرض برنامجه، دروسه، واجباته، علاماته، وسلوكه بشكل يومي.</li>
@@ -1455,10 +1480,10 @@
           navPackages: "الحزم",
           navPrivacy: "الخصوصية",
           navCTA: "طلب تجربة",
-          eyebrow: "",
-          heroTitle: "",
+          eyebrow: "منصة مدرسة أكثر وضوحًا",
+          heroTitle: "تطبيق يقوم بتحويل المدارس والروضات إلى مدارس رقمية",
           heroText:
-            "تطبيق يقوم بتحويل المدارس\nوالروضات إلى مدارس رقمية\n\nاستثمر في مستقبلك، ووفّر وقتك وجهودك.\nمنصتنا توفر لك الحلول الشاملة لإدارة مدرستك بكفاءة عالية جداً،\nوتعزيز التواصل بين جميع الأطراف من مدرسين وإداريين وأولياء أمور\nوطلاب، وتحسين أداء الطلاب.\nالطريقة الأفضل لأولياء الأمور لمراقبة أبنائهم خلال اليوم الدراسي\nلحظة بلحظة من خلال تقديم أدوات حديثة.",
+            "SOM PRO يجمع الطالب وولي الأمر والمعلم والإدارة في مكان واحد، ويجعل المتابعة اليومية أوضح وأسرع.",
           heroPrimary: "طلب تجربة",
           heroSecondary: "سياسة الخصوصية",
           metric1Value: "التوثيق الدراسي",
@@ -1472,7 +1497,7 @@
             "وقت أقل للإدارة والمزيد من الوقت لما هو مهم حقًا << الطلاب >>\nابدأ خلال 24 ساعة",
           panelTitle: "ما الذي يقدمه النظام؟",
           panelText:
-            "واجهة منظمة تركّز على أهم ما يحتاجه كل طرف في المدرسة، مع عرض واضح للمعلومات.",
+            "واجهة منظمة تعرض أهم ما يحتاجه كل طرف في المدرسة بوضوح، ومن دون ازدحام بصري.",
           panel1: "لوحة الطالب تعرض برنامجه، دروسه، واجباته، علاماته، وسلوكه بشكل يومي.",
           panel2: "لوحة ولي الأمر تتابع حضور الابن، تقدمه، واجباته، وملخص ما يحدث في يومه الدراسي.",
           panel3: "لوحة المعلم لإدخال العلامات والسلوك والدروس والواجبات والتحضير والشهادات.",
@@ -1553,10 +1578,10 @@
           navPackages: "Packages",
           navPrivacy: "Privacy",
           navCTA: "Request demo",
-          eyebrow: "",
-          heroTitle: "",
+          eyebrow: "A clearer school platform",
+          heroTitle: "An app that turns schools and kindergartens into digital schools",
           heroText:
-            "SOM PRO brings what students, parents, teachers, and administrators need into one place: schedules, lessons, homework, grades, behavior, attendance, certificates, and reports.",
+            "SOM PRO brings students, parents, teachers, and administrators into one place, making daily follow-up clearer and faster.",
           heroPrimary: "Request demo",
           heroSecondary: "Privacy policy",
           metric1Value: "Academic documentation",
@@ -1570,7 +1595,7 @@
             "Less time for administration and more time for what truly matters << students >>\nStart within 24 hours",
           panelTitle: "What does the system provide?",
           panelText:
-            "An organized interface focused on what each school audience actually needs, with clear information.",
+            "An organized interface that shows what each school audience needs clearly, without visual clutter.",
           panel1: "Student view for schedule, lessons, homework, grades, and behavior.",
           panel2: "Parent view for attendance, progress, homework, and daily follow-up.",
           panel3: "Teacher view for daily attendance, behavior points, official forms and documents, and direct communication with parents.",
@@ -1651,10 +1676,10 @@
           navPackages: "חבילות",
           navPrivacy: "פרטיות",
           navCTA: "בקשת ניסיון",
-          eyebrow: "",
-          heroTitle: "",
+          eyebrow: "פלטפורמה בית-ספרית ברורה יותר",
+          heroTitle: "אפליקציה שהופכת בתי ספר וגנים לבתי ספר דיגיטליים",
           heroText:
-            "SOM PRO מאחד את מה שתלמידים, הורים, מורים ומנהלים צריכים במקום אחד: מערכת שעות, שיעורים, שיעורי בית, ציונים, התנהגות, נוכחות, תעודות ודוחות.",
+            "SOM PRO מאחד תלמידים, הורים, מורים ומנהלים במקום אחד, ומאפשר מעקב יומי ברור ומהיר יותר.",
           heroPrimary: "בקשת ניסיון",
           heroSecondary: "מדיניות פרטיות",
           metric1Value: "תיעוד לימודי",
@@ -1668,7 +1693,7 @@
             "פחות זמן לניהול ויותר זמן למה שבאמת חשוב << תלמידים >>\nהתחילו בתוך 24 שעות",
           panelTitle: "מה המערכת מספקת?",
           panelText:
-            "ממשק מסודר שמתרכז במה שכל קהל בבית הספר באמת צריך, עם מידע ברור.",
+            "ממשק מסודר שמציג בבירור את מה שכל קהל בבית הספר צריך, בלי עומס ויזואלי.",
           panel1: "תצוגת תלמיד למערכת שעות, שיעורים, שיעורי בית, ציונים והתנהגות.",
           panel2: "תצוגת הורה למעקב אחר נוכחות, התקדמות, שיעורי בית והתנהלות יומית.",
           panel3: "תצוגת מורה לנוכחות יומית, נקודות התנהגות, טפסים ומסמכים רשמיים ותקשורת ישירה עם ההורים.",
