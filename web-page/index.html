@@ -532,6 +532,58 @@
         gap: 18px;
         align-items: stretch;
       }
+      #features {
+        background: #f5821f;
+      }
+      #features .section-head {
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 32px;
+      }
+      #features .section-head h2,
+      #features .section-head p {
+        color: white;
+        margin-inline: auto;
+      }
+      #features .grid.cards-3 {
+        gap: 28px;
+      }
+      #features .feature-card {
+        position: relative;
+        overflow: hidden;
+        min-height: 270px;
+        padding: 92px 30px 30px;
+        background: rgba(255, 255, 255, 0.98);
+        border: 0;
+        border-radius: 18px;
+        text-align: center;
+        box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
+      }
+      #features .feature-card .icon {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: 0;
+        width: 78px;
+        height: 78px;
+        border-radius: 0 0 0 28px;
+        background: #ff8a18;
+        color: white;
+        font-size: 32px;
+        box-shadow: none;
+      }
+      #features .feature-card h3 {
+        margin: 0 0 14px;
+        font-size: 24px;
+        line-height: 1.35;
+        color: #111827;
+      }
+      #features .feature-card p {
+        margin: 0;
+        color: #111827;
+        font-size: 16px;
+        line-height: 1.95;
+      }
       .feature-highlight {
         background:
           radial-gradient(circle at top right, rgba(255, 255, 255, 0.12), transparent 30%),
@@ -1013,26 +1065,49 @@
           <div class="section-head">
             <div>
               <h2 data-i18n="featuresTitle">ميزات التطبيق</h2>
-              <p data-i18n="featuresText">
-                بطاقات تعريفية توضّح أهم ما يقدمه SOM PRO داخل المدرسة، بشكل مرتب وسريع القراءة.
-              </p>
             </div>
           </div>
           <div class="grid cards-3">
-            <article class="card persona">
+            <article class="card feature-card">
               <div class="icon">📅</div>
-              <h3 data-i18n="stack1Title">برنامج يومي وبدائل</h3>
-              <p data-i18n="stack1Text">إعداد اليوم الدراسي، التغطيات، والبدائل من واجهة واحدة.</p>
+              <h3 data-i18n="stack1Title">التوثيق الدراسي</h3>
+              <p data-i18n="stack1Text">
+                ليس مجرد تسجيل للبيانات، بل هو أداة قوية لتحسين جودة التعليم وضمان الشفافية بين جميع الأطراف. من
+                خلال توثيق كل خطوة في العملية التعليمية، يمكن للإدارة اتخاذ قرارات أكثر دقة، وتحسين أداء الطلاب،
+                وتوفير الوقت والجهد على المعلمين وأولياء الأمور.
+              </p>
             </article>
-            <article class="card persona">
+            <article class="card feature-card">
               <div class="icon">📝</div>
-              <h3 data-i18n="stack2Title">الواجبات والامتحانات</h3>
-              <p data-i18n="stack2Text">عرض وإدارة العمل اليومي الدراسي دون تبديل صفحات كثيرة.</p>
+              <h3 data-i18n="stack2Title">الحل الذكي لإدارة حضور الطلاب وغيابهم</h3>
+              <p data-i18n="stack2Text">
+                يمكن للإدارة تسجيل حضور وانصراف وغياب الطلاب يومياً مع تقارير شهرية وأسبوعية. كما يمكن للأوصياء
+                الإبلاغ عن غياب أبنائهم بسهولة، مع وصول الإشعارات إلى الإدارة والأهل مباشرة.
+              </p>
             </article>
-            <article class="card persona">
+            <article class="card feature-card">
+              <div class="icon">👨‍👩‍👧</div>
+              <h3 data-i18n="stack3Title">لوحة تحكم فريدة خاصة بالأهالي والأوصياء</h3>
+              <p data-i18n="stack3Text">
+                تحديثات فورية تتيح للأهالي متابعة يوم أطفالهم عبر تحديثات مباشرة تشمل صوراً، فيديوهات، وملاحظات عن
+                التطور اليومي. كما توفر قناة اتصال سهلة مع المدرسة لمشاركة المعلومات والبقاء على اطلاع دائم.
+              </p>
+            </article>
+            <article class="card feature-card">
+              <div class="icon">🛡️</div>
+              <h3 data-i18n="stack4Title">آمن ومضمون حسب معايير الحماية الرقمية</h3>
+              <p data-i18n="stack4Text">
+                منصة متكاملة وآمنة تم تطويرها وفقاً لأعلى معايير الأمن السيبراني، مما يضمن حماية البيانات وسرية
+                المعلومات. العمل يتم بسلاسة واحترافية أكبر، مع تجربة منظمة وشفافة.
+              </p>
+            </article>
+            <article class="card feature-card">
               <div class="icon">🎓</div>
-              <h3 data-i18n="stack3Title">الشهادات والحضور</h3>
-              <p data-i18n="stack3Text">نتائج قابلة للمعاينة والطباعة مع مخرجات مرتبة ومفهومة.</p>
+              <h3 data-i18n="stack5Title">بوابة تعليمية لجميع أنواع المدارس</h3>
+              <p data-i18n="stack5Text">
+                يمكنك إنشاء ومتابعة التوثيق والتقييمات وإدارة الحضور والغياب والعمل المنهجي على جميع المستويات.
+                تجمع كل شيء في مكان واحد وتمنحك الفرصة لمتابعة تطور طفلك بغض النظر عن العمر ونوع المدرسة.
+              </p>
             </article>
           </div>
         </div>
@@ -1127,31 +1202,26 @@
           impactNote:
             "إذا لم يكن لديك حساب معنا، فاتصل بقسم المبيعات والدعم الرائع لدينا وسوف يساعدونك على البدء خلال 24 ساعة.",
           featuresTitle: "ميزات التطبيق",
-          featuresText:
-            "بطاقات تعريفية توضّح أهم ما يقدمه SOM PRO داخل المدرسة، بشكل مرتب وسريع القراءة.",
-          studentTitle: "الطالب",
-          studentText:
-            "يرى برنامجه اليومي والثابت وبرنامج الامتحانات، دروسه، واجباته، علاماته، سلوكه، وتقدمه الدراسي في شاشة واحدة واضحة.",
-          teacherTitle: "المعلم",
-          teacherText:
-            "يدخل العلامات والسلوك والتحضير والواجبات والدروس والشهادات من واجهة عملية وسريعة.",
-          adminTitle: "الإدارة",
-          adminText:
-            "لا تراقب وتعرض فقط، بل تقدم حلولًا ذكية بكبسة زر واحدة.",
-          parentTitle: "ولي الأمر",
-          parentText:
-            "يتابع ابنَه من خلال الحضور والواجبات والدرجات والسلوك والتقدم اليومي بصورة مفهومة ومختصرة.",
+          stack1Title: "التوثيق الدراسي",
+          stack1Text:
+            "ليس مجرد تسجيل للبيانات، بل هو أداة قوية لتحسين جودة التعليم وضمان الشفافية بين جميع الأطراف. من خلال توثيق كل خطوة في العملية التعليمية، يمكن للإدارة اتخاذ قرارات أكثر دقة، وتحسين أداء الطلاب، وتوفير الوقت والجهد على المعلمين وأولياء الأمور.",
+          stack2Title: "الحل الذكي لإدارة حضور الطلاب وغيابهم",
+          stack2Text:
+            "يمكن للإدارة تسجيل حضور وانصراف وغياب الطلاب يومياً مع تقارير شهرية وأسبوعية. كما يمكن للأوصياء الإبلاغ عن غياب أبنائهم بسهولة، مع وصول الإشعارات إلى الإدارة والأهل مباشرة.",
+          stack3Title: "لوحة تحكم فريدة خاصة بالأهالي والأوصياء",
+          stack3Text:
+            "تحديثات فورية تتيح للأهالي متابعة يوم أطفالهم عبر تحديثات مباشرة تشمل صوراً، فيديوهات، وملاحظات عن التطور اليومي. كما توفر قناة اتصال سهلة مع المدرسة لمشاركة المعلومات والبقاء على اطلاع دائم.",
+          stack4Title: "آمن ومضمون حسب معايير الحماية الرقمية",
+          stack4Text:
+            "منصة متكاملة وآمنة تم تطويرها وفقاً لأعلى معايير الأمن السيبراني، مما يضمن حماية البيانات وسرية المعلومات. العمل يتم بسلاسة واحترافية أكبر، مع تجربة منظمة وشفافة.",
+          stack5Title: "بوابة تعليمية لجميع أنواع المدارس",
+          stack5Text:
+            "يمكنك إنشاء ومتابعة التوثيق والتقييمات وإدارة الحضور والغياب والعمل المنهجي على جميع المستويات. تجمع كل شيء في مكان واحد وتمنحك الفرصة لمتابعة تطور طفلك بغض النظر عن العمر ونوع المدرسة.",
           featuresTitle: "المزايا التي تميّز SOM PRO",
           featuresText: "",
           highlightTitle: "",
           highlightButton1: "استعراض الحزم",
           highlightButton2: "تواصل سريع",
-          stack1Title: "برنامج يومي وبدائل",
-          stack1Text: "إعداد اليوم الدراسي، التغطيات، والبدائل من واجهة واحدة.",
-          stack2Title: "الواجبات والامتحانات",
-          stack2Text: "عرض وإدارة العمل اليومي الدراسي دون تبديل صفحات كثيرة.",
-          stack3Title: "الشهادات والحضور",
-          stack3Text: "نتائج قابلة للمعاينة والطباعة مع مخرجات مرتبة ومفهومة.",
           packagesTitle: "",
           packagesText: "",
           showcaseTitle: "صور توضح الفكرة",
@@ -1213,27 +1283,26 @@
           impactNote:
             "If you do not have an account with us, contact our wonderful sales and support team and they will help you get started within 24 hours.",
           featuresTitle: "Application features",
-          featuresText:
-            "Definition cards highlighting what SOM PRO delivers inside the school, in a neat and easy-to-scan layout.",
-          studentTitle: "Students",
-          studentText: "See the daily and fixed schedule, exam schedule, lessons, homework, grades, behavior, and progress in one clean view.",
-          teacherTitle: "Teachers",
-          teacherText: "Enter grades, behavior, lessons, homework, prep, and certificates from one practical screen.",
-          adminTitle: "Administrators",
-          adminText: "Do more than track and show data; provide smart solutions with one click.",
-          parentTitle: "Parents",
-          parentText: "Follow a child’s attendance, homework, grades, behavior, and daily progress with clarity.",
+          stack1Title: "Academic documentation",
+          stack1Text:
+            "It is more than just a data log; it is a powerful tool for improving educational quality and ensuring transparency across all parties. By documenting every step in the learning process, administrators can make more accurate decisions, improve student performance, and save teachers and parents time and effort.",
+          stack2Title: "Smart student attendance and absence management",
+          stack2Text:
+            "Administrators can record students’ attendance, arrival, and absence daily with monthly and weekly reports. Guardians can also report absences easily, with notifications reaching both the administration and families directly.",
+          stack3Title: "A unique dashboard for parents and guardians",
+          stack3Text:
+            "Real-time updates let parents follow their children’s day through live updates including photos, videos, and notes about daily progress. It also provides an easy communication channel with the school to share information and stay informed.",
+          stack4Title: "Safe and reliable by digital protection standards",
+          stack4Text:
+            "An integrated and secure platform built according to the highest cybersecurity standards, ensuring data protection and information privacy. Work becomes smoother and more professional, with an organized and transparent experience.",
+          stack5Title: "An educational gateway for every type of school",
+          stack5Text:
+            "You can create and follow documentation and assessments, manage attendance and absence, and run a disciplined workflow across all levels. Everything is gathered in one place, giving you the chance to follow your child’s progress regardless of age or school type.",
           featuresTitle: "What makes SOM PRO stand out",
           featuresText: "",
           highlightTitle: "",
           highlightButton1: "Explore packages",
           highlightButton2: "Quick contact",
-          stack1Title: "Daily program and substitutions",
-          stack1Text: "Build the school day, coverages, and substitutions from one interface.",
-          stack2Title: "Homework and exams",
-          stack2Text: "Manage daily academic work without jumping between many pages.",
-          stack3Title: "Certificates and attendance",
-          stack3Text: "Previewable and printable outputs that stay neat and easy to read.",
           packagesTitle: "",
           packagesText: "",
           showcaseTitle: "Screens that explain the idea",
@@ -1295,27 +1364,26 @@
           impactNote:
             "אם אין לכם חשבון אצלנו, צרו קשר עם צוות המכירות והתמיכה המדהים שלנו והם יעזרו לכם להתחיל בתוך 24 שעות.",
           featuresTitle: "תכונות האפליקציה",
-          featuresText:
-            "כרטיסי מידע שמציגים את מה ש-SOM PRO מספק בתוך בית הספר, בצורה מסודרת וקלה לקריאה.",
-          studentTitle: "תלמידים",
-          studentText: "צפייה במערכת היומית והקבועה, במערכת המבחנים, בשיעורים, בשיעורי הבית, בציונים, בהתנהגות ובהתקדמות במקום אחד.",
-          teacherTitle: "מורים",
-          teacherText: "הזנת ציונים, התנהגות, שיעורים, שיעורי בית, הכנה ותעודות ממסך אחד פרקטי.",
-          adminTitle: "מנהלים",
-          adminText: "לא רק לעקוב ולהציג, אלא להציע פתרונות חכמים בלחיצה אחת.",
-          parentTitle: "הורים",
-          parentText: "מעקב ברור אחרי נוכחות, שיעורי בית, ציונים, התנהגות והתקדמות יומית של הילד.",
+          stack1Title: "תיעוד לימודי",
+          stack1Text:
+            "זהו הרבה יותר מרישום נתונים; זהו כלי חזק לשיפור איכות החינוך ולהבטחת שקיפות בין כל הצדדים. באמצעות תיעוד כל שלב בתהליך הלמידה, ההנהלה יכולה לקבל החלטות מדויקות יותר, לשפר את ביצועי התלמידים ולחסוך זמן ומאמץ למורים ולהורים.",
+          stack2Title: "ניהול חכם של נוכחות והיעדרות תלמידים",
+          stack2Text:
+            "ההנהלה יכולה לרשום נוכחות, הגעה והיעדרות תלמידים מדי יום עם דוחות חודשיים ושבועיים. גם הורים יכולים לדווח בקלות על היעדרות ילדיהם, עם קבלת התראות מיידית להנהלה ולמשפחות.",
+          stack3Title: "לוח בקרה ייחודי להורים ואפוטרופוסים",
+          stack3Text:
+            "עדכונים בזמן אמת מאפשרים להורים לעקוב אחרי יומם של ילדיהם באמצעות תמונות, סרטונים והערות על התקדמות יומית. בנוסף, יש ערוץ תקשורת פשוט עם בית הספר לשיתוף מידע ולעדכון רציף.",
+          stack4Title: "בטוח ואמין לפי תקני ההגנה הדיגיטלית",
+          stack4Text:
+            "פלטפורמה משולבת ומאובטחת שפותחה לפי תקני אבטחת המידע הגבוהים ביותר, ומבטיחה הגנה על נתונים וסודיות. העבודה הופכת לחלקה ומקצועית יותר, עם חוויה מסודרת ושקופה.",
+          stack5Title: "שער חינוכי לכל סוגי בתי הספר",
+          stack5Text:
+            "ניתן ליצור ולעקוב אחר תיעוד והערכות, לנהל נוכחות והיעדרות, ולפעול באופן מסודר בכל הרמות. הכול מרוכז במקום אחד ומאפשר לעקוב אחר התקדמות ילדך ללא תלות בגיל או בסוג בית הספר.",
           featuresTitle: "מה מייחד את SOM PRO",
           featuresText: "",
           highlightTitle: "",
           highlightButton1: "עיון בחבילות",
           highlightButton2: "צור קשר",
-          stack1Title: "תוכנית יומית והחלפות",
-          stack1Text: "בניית יום הלימודים, הכיסויים וההחלפות מממשק אחד.",
-          stack2Title: "שיעורי בית ומבחנים",
-          stack2Text: "ניהול עבודה יומית מבלי לקפוץ בין דפים רבים.",
-          stack3Title: "תעודות ונוכחות",
-          stack3Text: "תוצרים לצפייה ולהדפסה שנשארים מסודרים וקריאים.",
           packagesTitle: "",
           packagesText: "",
           showcaseTitle: "מסכים שמסבירים את הרעיון",
