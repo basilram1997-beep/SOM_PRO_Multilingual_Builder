@@ -440,6 +440,96 @@
         font-weight: 700;
         line-height: 1.9;
       }
+      .problem-section {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(180deg, #f5821f 0%, #f57c00 100%);
+        color: white;
+      }
+      .problem-section::before,
+      .problem-section::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.16);
+        pointer-events: none;
+      }
+      .problem-section::before {
+        width: 18px;
+        height: 18px;
+        top: 120px;
+        left: 20%;
+        box-shadow:
+          220px 24px 0 0 rgba(255, 255, 255, 0.18),
+          420px 80px 0 0 rgba(255, 255, 255, 0.12),
+          58px 240px 0 0 rgba(255, 255, 255, 0.18),
+          300px 280px 0 0 rgba(255, 255, 255, 0.12),
+          520px 170px 0 0 rgba(255, 255, 255, 0.18);
+      }
+      .problem-section::after {
+        width: 14px;
+        height: 14px;
+        bottom: 120px;
+        right: 18%;
+        box-shadow:
+          -240px -60px 0 0 rgba(255, 255, 255, 0.18),
+          -460px -10px 0 0 rgba(255, 255, 255, 0.12),
+          -120px -250px 0 0 rgba(255, 255, 255, 0.16),
+          -360px -220px 0 0 rgba(255, 255, 255, 0.12);
+      }
+      .problem-section .shell {
+        position: relative;
+        z-index: 1;
+      }
+      .problem-title {
+        text-align: center;
+        font-size: clamp(28px, 3.4vw, 46px);
+        line-height: 1.35;
+        margin: 0 0 14px;
+        color: white;
+      }
+      .problem-lead {
+        text-align: center;
+        font-size: 20px;
+        line-height: 1.9;
+        margin: 0 0 34px;
+        color: rgba(255, 255, 255, 0.95);
+      }
+      .problem-grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .problem-card {
+        position: relative;
+        padding: 30px 28px 28px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(6px);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.08);
+      }
+      .problem-card::before {
+        content: "•";
+        position: absolute;
+        top: 18px;
+        left: 18px;
+        font-size: 44px;
+        line-height: 1;
+        color: rgba(255, 255, 255, 0.95);
+      }
+      .problem-card h3 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        line-height: 1.4;
+        color: white;
+      }
+      .problem-card p {
+        margin: 0;
+        font-size: 17px;
+        line-height: 2;
+        color: rgba(255, 255, 255, 0.94);
+      }
       .card ul {
         margin: 12px 0 0;
         padding-inline-start: 18px;
@@ -1011,6 +1101,37 @@
         </div>
       </section>
 
+      <section class="section problem-section" id="problem">
+        <div class="shell">
+          <h2 class="problem-title" data-i18n="problemTitle">ما هي الحاجة/المشكلة الواضحة التي تجعل تطبيقك ضروريًا؟</h2>
+          <p class="problem-lead" data-i18n="problemLead">
+            نحن نعمل على حل العديد من الاحتياجات الحرجة في أنشطة المدارس.
+          </p>
+          <div class="problem-grid">
+            <article class="problem-card">
+              <h3 data-i18n="problem1Title">قيود وقت الموظفين</h3>
+              <p data-i18n="problem1Text">
+                يتم تزويد المعلمين والإداريين بأدوات تعمل على أتمتة إدارة الحضور والتوثيق والتواصل، مما يوفّر المزيد
+                من الوقت للتركيز على الطلاب.
+              </p>
+            </article>
+            <article class="problem-card">
+              <h3 data-i18n="problem2Title">عدم وجود الشفافية بالنسبة للآباء والأمهات</h3>
+              <p data-i18n="problem2Text">
+                غالبًا ما يفتقر الأهالي إلى الرؤية الكافية للأنشطة اليومية لأطفالهم وتطورهم، ونوفّر تحديثات وتقارير
+                في الوقت الحقيقي لتوضيح الصورة بالكامل.
+              </p>
+            </article>
+            <article class="problem-card">
+              <h3 data-i18n="problem3Title">إدارة معقدة للقادة</h3>
+              <p data-i18n="problem3Text">
+                يحصل المسؤولون على منصة مركزية تعمل على تبسيط عملية التوثيق والتحليل وإعداد التقارير.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <section class="section" id="showcase">
         <div class="shell">
           <div class="section-head">
@@ -1290,6 +1411,17 @@
             "توفير الوقت والجهد: عن طريق تبسيط الإجراءات الإدارية وتحسين التواصل بين الإدارة والمعلمين وأولياء الأمور.\nرفع كفاءة المدرسة: من خلال تقديم أدوات حديثة.",
           impactNote:
             "إذا لم يكن لديك حساب معنا، فاتصل بقسم المبيعات والدعم الرائع لدينا وسوف يساعدونك على البدء خلال 24 ساعة.",
+          problemTitle: "ما هي الحاجة/المشكلة الواضحة التي تجعل تطبيقك ضروريًا؟",
+          problemLead: "نحن نعمل على حل العديد من الاحتياجات الحرجة في أنشطة المدارس.",
+          problem1Title: "قيود وقت الموظفين",
+          problem1Text:
+            "يتم تزويد المعلمين والإداريين بأدوات تعمل على أتمتة إدارة الحضور والتوثيق والتواصل، مما يوفّر المزيد من الوقت للتركيز على الطلاب.",
+          problem2Title: "عدم وجود الشفافية بالنسبة للآباء والأمهات",
+          problem2Text:
+            "غالبًا ما يفتقر الأهالي إلى الرؤية الكافية للأنشطة اليومية لأطفالهم وتطورهم، ونوفّر تحديثات وتقارير في الوقت الحقيقي لتوضيح الصورة بالكامل.",
+          problem3Title: "إدارة معقدة للقادة",
+          problem3Text:
+            "يحصل المسؤولون على منصة مركزية تعمل على تبسيط عملية التوثيق والتحليل وإعداد التقارير.",
           featuresTitle: "ميزات التطبيق",
           stack1Title: "التوثيق الدراسي",
           stack1Text:
@@ -1371,6 +1503,17 @@
             "Saving time and effort: by simplifying administrative procedures and improving communication between administration, teachers, and parents.\nRaising school efficiency: by providing modern tools.",
           impactNote:
             "If you do not have an account with us, contact our wonderful sales and support team and they will help you get started within 24 hours.",
+          problemTitle: "What is the clear need/problem that makes your app necessary?",
+          problemLead: "We work to solve many of the critical needs in school operations.",
+          problem1Title: "Staff time constraints",
+          problem1Text:
+            "Teachers and administrators are equipped with tools that automate attendance, documentation, and communication, giving them more time to focus on students.",
+          problem2Title: "Lack of transparency for parents",
+          problem2Text:
+            "Parents often lack enough visibility into their children’s daily activities and progress, so we provide real-time updates and reports to make everything clear.",
+          problem3Title: "Complex administration for leaders",
+          problem3Text:
+            "Administrators get a centralized platform that simplifies documentation, analysis, and reporting.",
           featuresTitle: "Application features",
           stack1Title: "Academic documentation",
           stack1Text:
@@ -1452,6 +1595,17 @@
             "חיסכון בזמן ובמאמץ: באמצעות פישוט ההליכים הניהוליים ושיפור התקשורת בין ההנהלה, המורים וההורים.\nהגברת היעילות של בית הספר: באמצעות כלים מודרניים.",
           impactNote:
             "אם אין לכם חשבון אצלנו, צרו קשר עם צוות המכירות והתמיכה המדהים שלנו והם יעזרו לכם להתחיל בתוך 24 שעות.",
+          problemTitle: "מהי הבעיה/הצורך הברור שהופך את האפליקציה שלך לחיונית?",
+          problemLead: "אנו עובדים על פתרון צרכים חיוניים רבים בפעילות בתי הספר.",
+          problem1Title: "מגבלות זמן של הצוות",
+          problem1Text:
+            "מורים ומנהלים מקבלים כלים שמבצעים אוטומציה לניהול נוכחות, תיעוד ותקשורת, ומפנים להם יותר זמן להתמקד בתלמידים.",
+          problem2Title: "חוסר שקיפות עבור הורים",
+          problem2Text:
+            "לרוב ההורים אין מספיק ראות על הפעילויות היומיומיות וההתפתחות של ילדיהם, ואנו מספקים עדכונים ודוחות בזמן אמת כדי להבהיר את התמונה.",
+          problem3Title: "ניהול מורכב למנהלים",
+          problem3Text:
+            "ההנהלה מקבלת פלטפורמה מרכזית שמפשטת תיעוד, ניתוח והפקת דוחות.",
           featuresTitle: "תכונות האפליקציה",
           stack1Title: "תיעוד לימודי",
           stack1Text:
