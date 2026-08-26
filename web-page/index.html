@@ -217,9 +217,10 @@
         order: 2;
       }
       .eyebrow {
-        display: inline-flex;
+        display: block;
         align-items: center;
         gap: 10px;
+        overflow: hidden;
         background: rgba(255, 255, 255, 0.12);
         border: 1px solid rgba(255, 255, 255, 0.14);
         border-radius: 999px;
@@ -229,6 +230,26 @@
         font-weight: 700;
         margin-bottom: 24px;
         box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+      }
+      .eyebrow-track {
+        display: inline-flex;
+        width: max-content;
+        align-items: center;
+        gap: 48px;
+        white-space: nowrap;
+        animation: eyebrowScroll 16s linear infinite;
+        will-change: transform;
+      }
+      .eyebrow-segment {
+        display: inline-block;
+      }
+      @keyframes eyebrowScroll {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-50%);
+        }
       }
       .hero-title {
         margin: 0;
@@ -1084,7 +1105,12 @@
       <section class="hero">
         <div class="shell hero-inner" id="about">
           <div class="hero-copy">
-            <p class="eyebrow" data-i18n="eyebrow">منصة مدرسة أكثر وضوحًا</p>
+            <p class="eyebrow" data-i18n="eyebrow" aria-label="منصة مدرسة أكثر وضوحًا">
+              <span class="eyebrow-track">
+                <span class="eyebrow-segment" data-marquee-segment>منصة مدرسة أكثر وضوحًا</span>
+                <span class="eyebrow-segment" data-marquee-segment aria-hidden="true">منصة مدرسة أكثر وضوحًا</span>
+              </span>
+            </p>
             <h1 class="hero-title" data-i18n="heroTitle">تطبيق يقوم بتحويل المدارس والروضات إلى مدارس رقمية</h1>
             <p class="lede" data-i18n="heroText">
               SOM PRO يجمع الطالب وولي الأمر والمعلم والإدارة في مكان واحد، ويجعل المتابعة اليومية أوضح
@@ -1779,8 +1805,17 @@
         document.documentElement.dir = d.dir;
         document.body.classList.toggle("lang-en", lang === "en");
         document.querySelectorAll("[data-i18n]").forEach((el) => {
+          if (el.classList.contains("eyebrow")) return;
           const text = d[el.dataset.i18n];
           if (text) el.textContent = text;
+        });
+        document.querySelectorAll(".eyebrow[data-i18n]").forEach((el) => {
+          const text = d[el.dataset.i18n];
+          if (!text) return;
+          el.setAttribute("aria-label", text);
+          el.querySelectorAll("[data-marquee-segment]").forEach((seg) => {
+            seg.textContent = text;
+          });
         });
         document
           .querySelectorAll(".language-switcher button")
