@@ -13,12 +13,21 @@ export default [
       "coverage/**",
       "docs/**",
       "assets/**",
+      ".codex_pydeps/**",
+      ".gradle-user-fresh/**",
       "web-page/**",
       "*.cmd"
     ]
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    files: ["apps/frontend/cypress/**/*.{js,cjs,mjs,ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-unused-expressions": "off",
+      "no-unused-expressions": "off"
+    }
+  },
   {
     files: ["**/*.{js,cjs}"],
     languageOptions: {

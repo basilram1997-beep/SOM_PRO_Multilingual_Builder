@@ -5,6 +5,7 @@ node_modules
 apps/license-server/data
 coverage
 package-lock.json
+.codex_pydeps
 *.exe
 *.blockmap
 *.bak

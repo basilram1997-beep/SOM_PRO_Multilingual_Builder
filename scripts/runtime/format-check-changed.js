@@ -18,8 +18,7 @@ const supportedExtensions = new Set([
   ".yml",
   ".yaml",
   ".sh",
-  ".cmd",
-  ".ps1"
+  ".cmd"
 ]);
 
 function runGit(args) {
