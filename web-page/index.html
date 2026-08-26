@@ -379,6 +379,17 @@
         position: relative;
         overflow: hidden;
         min-height: 230px;
+        padding: 0;
+        border: 0;
+        background: #ffffff;
+        transform: translateY(0) scale(1);
+        transition:
+          transform 0.22s ease,
+          box-shadow 0.22s ease;
+      }
+      .persona:hover {
+        transform: translateY(-8px) scale(1.03);
+        box-shadow: 0 24px 52px rgba(15, 23, 42, 0.14);
       }
       .persona::after {
         content: "";
@@ -389,27 +400,46 @@
         border-radius: 50%;
         background: radial-gradient(circle, rgba(37, 99, 235, 0.18), transparent 68%);
       }
-      .icon {
+      .persona-top {
+        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+        color: white;
+        padding: 26px 24px 22px;
+        min-height: 122px;
+      }
+      .persona-top .icon {
         width: 54px;
         height: 54px;
         border-radius: 18px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, rgba(37, 99, 235, 0.14), rgba(245, 158, 11, 0.16));
-        color: #1744a3;
+        background: rgba(255, 255, 255, 0.18);
+        color: #ffffff;
         font-size: 24px;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
+        backdrop-filter: blur(8px);
       }
-      .card h3 {
-        margin: 0 0 10px;
+      .persona-top h3 {
+        margin: 0;
         font-size: 22px;
+        line-height: 1.35;
+        color: white;
+      }
+      .persona-body {
+        padding: 22px 24px 24px;
+        background: #ffffff;
       }
       .card p,
       .card li {
         color: var(--muted);
         line-height: 1.9;
         font-size: 16px;
+      }
+      .persona-body p {
+        margin: 0;
+      }
+      .persona-body:hover {
+        cursor: default;
       }
       .impact-card {
         max-width: 980px;
@@ -1076,32 +1106,48 @@
           </div>
           <div class="grid cards-4">
             <article class="card persona">
-              <div class="icon">👩‍🎓</div>
-              <h3 data-i18n="studentTitle">الطالب</h3>
-              <p data-i18n="studentText">
-                يرى برنامجه اليومي والثابت وبرنامج الامتحانات، دروسه، واجباته، علاماته، سلوكه، وتقدمه الدراسي في شاشة واحدة واضحة.
-              </p>
+              <div class="persona-top">
+                <div class="icon">👩‍🎓</div>
+                <h3 data-i18n="studentTitle">الطالب</h3>
+              </div>
+              <div class="persona-body">
+                <p data-i18n="studentText">
+                  يرى برنامجه اليومي والثابت وبرنامج الامتحانات، دروسه، واجباته، علاماته، سلوكه، وتقدمه الدراسي في شاشة واحدة واضحة.
+                </p>
+              </div>
             </article>
             <article class="card persona">
-              <div class="icon">👩‍🏫</div>
-              <h3 data-i18n="teacherTitle">المعلم</h3>
-              <p data-i18n="teacherText">
-                يدخل العلامات والسلوك والتحضير والواجبات والدروس والشهادات من واجهة عملية وسريعة.
-              </p>
+              <div class="persona-top">
+                <div class="icon">👩‍🏫</div>
+                <h3 data-i18n="teacherTitle">المعلم</h3>
+              </div>
+              <div class="persona-body">
+                <p data-i18n="teacherText">
+                  يدخل العلامات والسلوك والتحضير والواجبات والدروس والشهادات من واجهة عملية وسريعة.
+                </p>
+              </div>
             </article>
             <article class="card persona">
-              <div class="icon">🏫</div>
-              <h3 data-i18n="adminTitle">الإدارة</h3>
-              <p data-i18n="adminText">
-                لا تراقب وتعرض فقط، بل تقدم حلولًا ذكية بكبسة زر واحدة.
-              </p>
+              <div class="persona-top">
+                <div class="icon">🏫</div>
+                <h3 data-i18n="adminTitle">الإدارة</h3>
+              </div>
+              <div class="persona-body">
+                <p data-i18n="adminText">
+                  لا تراقب وتعرض فقط، بل تقدم حلولًا ذكية بكبسة زر واحدة.
+                </p>
+              </div>
             </article>
             <article class="card persona">
-              <div class="icon">👨‍👩‍👧</div>
-              <h3 data-i18n="parentTitle">ولي الأمر</h3>
-              <p data-i18n="parentText">
-                يتابع ابنَه من خلال الحضور والواجبات والدرجات والسلوك والتقدم اليومي بصورة مفهومة ومختصرة.
-              </p>
+              <div class="persona-top">
+                <div class="icon">👨‍👩‍👧</div>
+                <h3 data-i18n="parentTitle">ولي الأمر</h3>
+              </div>
+              <div class="persona-body">
+                <p data-i18n="parentText">
+                  يتابع ابنَه من خلال الحضور والواجبات والدرجات والسلوك والتقدم اليومي بصورة مفهومة ومختصرة.
+                </p>
+              </div>
             </article>
           </div>
         </div>
