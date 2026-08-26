@@ -495,40 +495,23 @@
         margin: 0 0 34px;
         color: rgba(255, 255, 255, 0.95);
       }
-      .problem-grid {
-        display: grid;
-        gap: 18px;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+      .problem-copy {
+        max-width: 980px;
+        margin: 0 auto;
       }
-      .problem-card {
+      .problem-paragraph {
         position: relative;
-        padding: 30px 28px 28px;
-        border-radius: 22px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        backdrop-filter: blur(6px);
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.08);
-      }
-      .problem-card::before {
-        content: "•";
-        position: absolute;
-        top: 18px;
-        left: 18px;
-        font-size: 44px;
-        line-height: 1;
-        color: rgba(255, 255, 255, 0.95);
-      }
-      .problem-card h3 {
-        margin: 0 0 12px;
-        font-size: 24px;
-        line-height: 1.4;
-        color: white;
-      }
-      .problem-card p {
         margin: 0;
-        font-size: 17px;
-        line-height: 2;
-        color: rgba(255, 255, 255, 0.94);
+        font-size: 20px;
+        line-height: 2.15;
+        color: rgba(255, 255, 255, 0.96);
+        text-align: center;
+      }
+      .problem-paragraph + .problem-paragraph {
+        margin-top: 24px;
+      }
+      .problem-line {
+        display: block;
       }
       .card ul {
         margin: 12px 0 0;
@@ -1107,27 +1090,21 @@
           <p class="problem-lead" data-i18n="problemLead">
             نحن نعمل على حل العديد من الاحتياجات الحرجة في أنشطة المدارس.
           </p>
-          <div class="problem-grid">
-            <article class="problem-card">
-              <h3 data-i18n="problem1Title">قيود وقت الموظفين</h3>
-              <p data-i18n="problem1Text">
-                يتم تزويد المعلمين والإداريين بأدوات تعمل على أتمتة إدارة الحضور والتوثيق والتواصل، مما يوفّر المزيد
-                من الوقت للتركيز على الطلاب.
-              </p>
-            </article>
-            <article class="problem-card">
-              <h3 data-i18n="problem2Title">عدم وجود الشفافية بالنسبة للآباء والأمهات</h3>
-              <p data-i18n="problem2Text">
-                غالبًا ما يفتقر الأهالي إلى الرؤية الكافية للأنشطة اليومية لأطفالهم وتطورهم، ونوفّر تحديثات وتقارير
-                في الوقت الحقيقي لتوضيح الصورة بالكامل.
-              </p>
-            </article>
-            <article class="problem-card">
-              <h3 data-i18n="problem3Title">إدارة معقدة للقادة</h3>
-              <p data-i18n="problem3Text">
-                يحصل المسؤولون على منصة مركزية تعمل على تبسيط عملية التوثيق والتحليل وإعداد التقارير.
-              </p>
-            </article>
+          <div class="problem-copy">
+            <p class="problem-paragraph" data-i18n="problem1Text">
+              <span class="problem-line">نحن نعمل على حل العديد من الاحتياجات الحرجة في أنشطة المدارس.</span>
+            </p>
+            <p class="problem-paragraph" data-i18n="problem2Text">
+              <span class="problem-line">قيود وقت الموظفين: يتم تزويد المعلمين والإداريين بأدوات تعمل على أتمتة إدارة الحضور والتوثيق والتواصل،</span>
+              <span class="problem-line">مما يوفر المزيد من الوقت للتركيز على الطلاب.</span>
+            </p>
+            <p class="problem-paragraph" data-i18n="problem3Text">
+              <span class="problem-line">عدم وجود الشفافية بالنسبة للآباء والأمهات: غالبًا ما يفتقر الآباء والأمهات إلى الرؤية الكافية للأنشطة اليومية لأطفالهم وتطورهم،</span>
+              <span class="problem-line">نحن نقدم تحديثات وتقارير في الوقت الحقيقي تجذبهم.</span>
+            </p>
+            <p class="problem-paragraph" data-i18n="problem4Text">
+              <span class="problem-line">إدارة معقدة للقادة: يحصل المسؤولون على منصة مركزية تعمل على تبسيط عملية التوثيق والتحليل وإعداد التقارير.</span>
+            </p>
           </div>
         </div>
       </section>
@@ -1413,15 +1390,13 @@
             "إذا لم يكن لديك حساب معنا، فاتصل بقسم المبيعات والدعم الرائع لدينا وسوف يساعدونك على البدء خلال 24 ساعة.",
           problemTitle: "ما هي الحاجة/المشكلة الواضحة التي تجعل تطبيقك ضروريًا؟",
           problemLead: "نحن نعمل على حل العديد من الاحتياجات الحرجة في أنشطة المدارس.",
-          problem1Title: "قيود وقت الموظفين",
-          problem1Text:
-            "يتم تزويد المعلمين والإداريين بأدوات تعمل على أتمتة إدارة الحضور والتوثيق والتواصل، مما يوفّر المزيد من الوقت للتركيز على الطلاب.",
-          problem2Title: "عدم وجود الشفافية بالنسبة للآباء والأمهات",
+          problem1Text: "نحن نعمل على حل العديد من الاحتياجات الحرجة في أنشطة المدارس.",
           problem2Text:
-            "غالبًا ما يفتقر الأهالي إلى الرؤية الكافية للأنشطة اليومية لأطفالهم وتطورهم، ونوفّر تحديثات وتقارير في الوقت الحقيقي لتوضيح الصورة بالكامل.",
-          problem3Title: "إدارة معقدة للقادة",
+            "قيود وقت الموظفين: يتم تزويد المعلمين والإداريين بأدوات تعمل على أتمتة إدارة الحضور والتوثيق والتواصل، مما يوفر المزيد من الوقت للتركيز على الطلاب.",
           problem3Text:
-            "يحصل المسؤولون على منصة مركزية تعمل على تبسيط عملية التوثيق والتحليل وإعداد التقارير.",
+            "عدم وجود الشفافية بالنسبة للآباء والأمهات: غالبًا ما يفتقر الآباء والأمهات إلى الرؤية الكافية للأنشطة اليومية لأطفالهم وتطورهم، نحن نقدم تحديثات وتقارير في الوقت الحقيقي تجذبهم.",
+          problem4Text:
+            "إدارة معقدة للقادة: يحصل المسؤولون على منصة مركزية تعمل على تبسيط عملية التوثيق والتحليل وإعداد التقارير.",
           featuresTitle: "ميزات التطبيق",
           stack1Title: "التوثيق الدراسي",
           stack1Text:
@@ -1505,15 +1480,13 @@
             "If you do not have an account with us, contact our wonderful sales and support team and they will help you get started within 24 hours.",
           problemTitle: "What is the clear need/problem that makes your app necessary?",
           problemLead: "We work to solve many of the critical needs in school operations.",
-          problem1Title: "Staff time constraints",
-          problem1Text:
-            "Teachers and administrators are equipped with tools that automate attendance, documentation, and communication, giving them more time to focus on students.",
-          problem2Title: "Lack of transparency for parents",
+          problem1Text: "We work to solve many of the critical needs in school operations.",
           problem2Text:
-            "Parents often lack enough visibility into their children’s daily activities and progress, so we provide real-time updates and reports to make everything clear.",
-          problem3Title: "Complex administration for leaders",
+            "Staff time constraints: Teachers and administrators are equipped with tools that automate attendance, documentation, and communication, giving them more time to focus on students.",
           problem3Text:
-            "Administrators get a centralized platform that simplifies documentation, analysis, and reporting.",
+            "Lack of transparency for parents: Parents often lack enough visibility into their children’s daily activities and progress, and we provide real-time updates and reports to make everything clear.",
+          problem4Text:
+            "Complex administration for leaders: Administrators get a centralized platform that simplifies documentation, analysis, and reporting.",
           featuresTitle: "Application features",
           stack1Title: "Academic documentation",
           stack1Text:
@@ -1597,15 +1570,13 @@
             "אם אין לכם חשבון אצלנו, צרו קשר עם צוות המכירות והתמיכה המדהים שלנו והם יעזרו לכם להתחיל בתוך 24 שעות.",
           problemTitle: "מהי הבעיה/הצורך הברור שהופך את האפליקציה שלך לחיונית?",
           problemLead: "אנו עובדים על פתרון צרכים חיוניים רבים בפעילות בתי הספר.",
-          problem1Title: "מגבלות זמן של הצוות",
-          problem1Text:
-            "מורים ומנהלים מקבלים כלים שמבצעים אוטומציה לניהול נוכחות, תיעוד ותקשורת, ומפנים להם יותר זמן להתמקד בתלמידים.",
-          problem2Title: "חוסר שקיפות עבור הורים",
+          problem1Text: "אנו עובדים על פתרון צרכים חיוניים רבים בפעילות בתי הספר.",
           problem2Text:
-            "לרוב ההורים אין מספיק ראות על הפעילויות היומיומיות וההתפתחות של ילדיהם, ואנו מספקים עדכונים ודוחות בזמן אמת כדי להבהיר את התמונה.",
-          problem3Title: "ניהול מורכב למנהלים",
+            "מגבלות זמן של הצוות: מורים ומנהלים מקבלים כלים שמבצעים אוטומציה לניהול נוכחות, תיעוד ותקשורת, ומפנים להם יותר זמן להתמקד בתלמידים.",
           problem3Text:
-            "ההנהלה מקבלת פלטפורמה מרכזית שמפשטת תיעוד, ניתוח והפקת דוחות.",
+            "חוסר שקיפות עבור הורים: לרוב ההורים אין מספיק ראות על הפעילויות היומיומיות וההתפתחות של ילדיהם, ואנו מספקים עדכונים ודוחות בזמן אמת כדי להבהיר את התמונה.",
+          problem4Text:
+            "ניהול מורכב למנהלים: ההנהלה מקבלת פלטפורמה מרכזית שמפשטת תיעוד, ניתוח והפקת דוחות.",
           featuresTitle: "תכונות האפליקציה",
           stack1Title: "תיעוד לימודי",
           stack1Text:
