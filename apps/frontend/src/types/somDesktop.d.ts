@@ -2,6 +2,9 @@
   schoolName?: string;
   institutionCode?: string;
   licenseCode?: string;
+  plan?: string;
+  expiresAt?: string;
+  maxDevices?: number | string;
 };
 
 declare global {
@@ -21,6 +24,9 @@ declare global {
         arch?: string;
       };
       licenseSetup?: DesktopLicenseSetup | null;
+      saveLicenseSetup?: (
+        setup: DesktopLicenseSetup
+      ) => Promise<{ ok: boolean; filePath?: string; canceled?: boolean; error?: string }>;
       exportPdf?: (fileName: string) => Promise<{ ok: boolean; filePath?: string; canceled?: boolean; error?: string }>;
     };
     __somSetAuthToken?: (token: string) => void;

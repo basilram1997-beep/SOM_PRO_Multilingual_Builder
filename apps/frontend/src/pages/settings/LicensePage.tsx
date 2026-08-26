@@ -15,7 +15,7 @@ export function LicensePage() {
       </div>
 
       <LicenseStatusPanel licensePage={licensePage} />
-      <LicenseActivationPanel licensePage={licensePage} />
+      {(!licensePage.hasServerLicense || licensePage.readOnly) && <LicenseActivationPanel licensePage={licensePage} />}
     </section>
   );
 }

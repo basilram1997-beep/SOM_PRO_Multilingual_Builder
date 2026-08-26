@@ -77,6 +77,18 @@ export function useLicensePage() {
         if (activated?.data) {
           lastSuccessfulLicenseState = activated.data as LicenseStatus;
           setLicense(activated.data as LicenseStatus);
+          try {
+            await window.somDesktop?.saveLicenseSetup?.({
+              licenseCode: cleanKey,
+              schoolName: activated.data.schoolName,
+              institutionCode: activated.data.institutionCode,
+              plan: activated.data.plan,
+              expiresAt: activated.data.expiresAt,
+              maxDevices: activated.data.maxDevices
+            });
+          } catch {
+            // Best effort only. The activation state itself already succeeded.
+          }
         }
         setLicenseKey("");
         if (automatic) markAppliedInstallerLicense(cleanKey);

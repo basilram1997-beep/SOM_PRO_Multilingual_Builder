@@ -1,6 +1,6 @@
 ﻿const path = require("path");
 const fs = require("fs/promises");
-const { BrowserWindow, shell, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, shell, ipcMain, dialog } = require("electron");
 const { DEFAULT_WEB_URL, waitForUrl, bundledWebIndex, desktopRoot, runtimeConfig } = require("./paths");
 const { ensureLocalBackend } = require("./backendProcess");
 const { getDesktopDeviceInfo } = require("./desktopDevice");
@@ -82,10 +82,42 @@ function parseIni(content) {
   return data;
 }
 
+function getLicenseSetupPath(root) {
+  try {
+    return path.join(app.getPath("userData"), "license-setup.ini");
+  } catch {
+    return path.join(root, "license-setup.ini");
+  }
+}
+
+function sanitizeIniValue(value) {
+  return String(value || "")
+    .trim()
+    .replace(/[\r\n]+/g, " ");
+}
+
+function serializeLicenseSetup(setup) {
+  const lines = ["[license]"];
+  const entries = {
+    licenseCode: sanitizeIniValue(setup.licenseCode),
+    schoolName: sanitizeIniValue(setup.schoolName),
+    institutionCode: sanitizeIniValue(setup.institutionCode),
+    plan: sanitizeIniValue(setup.plan),
+    expiresAt: sanitizeIniValue(setup.expiresAt),
+    savedAt: new Date().toISOString()
+  };
+  for (const [key, value] of Object.entries(entries)) {
+    if (value) lines.push(`${key}=${value}`);
+  }
+  return `${lines.join("\n")}\n`;
+}
+
 function readLicenseSetupSync(root) {
   const syncFs = require("fs");
   const exeDir = process.execPath ? path.dirname(process.execPath) : "";
+  const userDataFile = getLicenseSetupPath(root);
   const candidates = [
+    userDataFile,
     path.join(exeDir, "license-setup.ini"),
     path.join(process.resourcesPath || "", "license-setup.ini"),
     path.join(root, "license-setup.ini")
@@ -101,6 +133,13 @@ function readLicenseSetupSync(root) {
     }
   }
   return null;
+}
+
+async function writeLicenseSetup(root, setup) {
+  const filePath = getLicenseSetupPath(root);
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  await fs.writeFile(filePath, serializeLicenseSetup(setup), "utf8");
+  return filePath;
 }
 
 function buildDesktopBridgeData(root) {
@@ -124,6 +163,15 @@ async function createWindow() {
   ipcMain.removeAllListeners("som-desktop-bridge-data");
   ipcMain.on("som-desktop-bridge-data", (event) => {
     event.returnValue = isTrustedSender(event) ? buildDesktopBridgeData(root) : null;
+  });
+
+  ipcMain.removeHandler("som-save-license-setup");
+  ipcMain.handle("som-save-license-setup", async (event, setup = {}) => {
+    if (!isTrustedSender(event)) {
+      return { ok: false, error: "UNTRUSTED_SENDER" };
+    }
+    const filePath = await writeLicenseSetup(root, setup);
+    return { ok: true, filePath };
   });
 
   const win = new BrowserWindow({
@@ -173,6 +221,7 @@ async function createWindow() {
   });
   win.on("closed", () => {
     ipcMain.removeHandler("som-repair-local-services");
+    ipcMain.removeHandler("som-save-license-setup");
     ipcMain.removeAllListeners("som-desktop-bridge-data");
   });
 

@@ -121,14 +121,14 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const enteredLicense = licenseCode.trim();
+    const enteredLicense = licenseCode.trim() || setupLicenseCode;
 
     if (!enteredLicense) {
       setMessage(labels.missingLicense);
       return;
     }
 
-    if (enteredLicense && setupLicenseCode && normalizeCode(enteredLicense) !== normalizeCode(setupLicenseCode)) {
+    if (licenseCode.trim() && setupLicenseCode && normalizeCode(enteredLicense) !== normalizeCode(setupLicenseCode)) {
       setMessage(labels.licenseMismatch);
       return;
     }
@@ -139,6 +139,11 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
     try {
       const res = await somApi.auth.login(email, password, enteredLicense);
       setAuthToken(res.data.token);
+      try {
+        await window.somDesktop?.saveLicenseSetup?.({ licenseCode: enteredLicense });
+      } catch {
+        // Best effort only. Login must still succeed if local persistence is unavailable.
+      }
 
       if (remember) {
         rememberedLoginEnabled = true;
