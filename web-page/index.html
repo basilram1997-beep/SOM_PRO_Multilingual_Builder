@@ -1011,13 +1011,57 @@
         .shell {
           width: min(100% - 24px, 1000px);
         }
+        .language-switcher {
+          position: static;
+          top: auto;
+          left: auto;
+          right: auto;
+          margin: 12px auto 0;
+          width: fit-content;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+        body.lang-en .language-switcher {
+          left: auto;
+          right: auto;
+        }
         .topbar {
           flex-direction: column;
           align-items: flex-start;
+          padding: 14px 0 16px;
+          gap: 14px;
+        }
+        .brand {
+          width: 100%;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 10px;
+          font-size: 20px;
+        }
+        .brand img {
+          width: 52px;
+          height: 52px;
+          border-radius: 14px;
+        }
+        .brand-subtitle {
+          max-width: min(100%, 230px);
+          font-size: 13px;
+          line-height: 1.5;
+        }
+        .nav-wrap {
+          width: 100%;
+          padding-inline-end: 0;
         }
         .nav-links {
-          justify-content: flex-start;
+          width: 100%;
+          justify-content: center;
           gap: 8px;
+          padding: 10px 12px;
+          border-radius: 18px;
+        }
+        .nav-links a {
+          padding: 9px 12px;
+          font-size: 13px;
         }
         .grid.cards-4,
         .grid.cards-3,
@@ -1105,9 +1149,9 @@
       <section class="hero">
         <div class="shell hero-inner" id="about">
           <div class="hero-copy">
-            <p class="eyebrow" data-i18n="eyebrow" aria-label="منصة مدرسة أكثر وضوحًا">
+            <p class="eyebrow" data-i18n="eyebrow" aria-label="منصة مدرسية ذكية تسهّل إدارة المدرسة وتعرض كل شيء بوضوح">
               <span class="eyebrow-track">
-                <span class="eyebrow-segment" data-marquee-segment>منصة مدرسة أكثر وضوحًا</span>
+                <span class="eyebrow-segment" data-marquee-segment>منصة مدرسية ذكية تسهّل إدارة المدرسة وتعرض كل شيء بوضوح</span>
               </span>
             </p>
             <h1 class="hero-title" data-i18n="heroTitle">تطبيق يقوم بتحويل المدارس والروضات إلى مدارس رقمية</h1>
@@ -1499,7 +1543,7 @@
           navPackages: "الحزم",
           navPrivacy: "الخصوصية",
           navCTA: "طلب تجربة",
-          eyebrow: "منصة مدرسة أكثر وضوحًا",
+          eyebrow: "منصة مدرسية ذكية تسهّل إدارة المدرسة وتعرض كل شيء بوضوح",
           heroTitle: "تطبيق يقوم بتحويل المدارس والروضات إلى مدارس رقمية",
           heroText:
             "SOM PRO يجمع الطالب وولي الأمر والمعلم والإدارة في مكان واحد، ويجعل المتابعة اليومية أوضح وأسرع.",
@@ -1597,7 +1641,7 @@
           navPackages: "Packages",
           navPrivacy: "Privacy",
           navCTA: "Request demo",
-          eyebrow: "A clearer school platform",
+          eyebrow: "A smart school platform that makes school management easier and everything clearer",
           heroTitle: "An app that turns schools and kindergartens into digital schools",
           heroText:
             "SOM PRO brings students, parents, teachers, and administrators into one place, making daily follow-up clearer and faster.",
@@ -1695,7 +1739,7 @@
           navPackages: "חבילות",
           navPrivacy: "פרטיות",
           navCTA: "בקשת ניסיון",
-          eyebrow: "פלטפורמה בית-ספרית ברורה יותר",
+          eyebrow: "פלטפורמה חכמה לניהול בית הספר שמפשטת את הניהול ומציגה הכול בבירור",
           heroTitle: "אפליקציה שהופכת בתי ספר וגנים לבתי ספר דיגיטליים",
           heroText:
             "SOM PRO מאחד תלמידים, הורים, מורים ומנהלים במקום אחד, ומאפשר מעקב יומי ברור ומהיר יותר.",
