@@ -533,9 +533,31 @@
         align-items: stretch;
       }
       #features {
-        background: #f5821f;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(180deg, #0d47a1 0%, #1d4ed8 100%);
+      }
+      #features .feature-ghost {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      #features .feature-ghost span {
+        position: absolute;
+        color: rgba(255, 255, 255, 0.16);
+        font-weight: 800;
+        font-size: clamp(56px, 7vw, 132px);
+        line-height: 1;
+        letter-spacing: 0.08em;
+        text-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+        user-select: none;
+        transform: rotate(-8deg);
       }
       #features .section-head {
+        position: relative;
+        z-index: 1;
         justify-content: center;
         text-align: center;
         margin-bottom: 32px;
@@ -545,7 +567,11 @@
         color: white;
         margin-inline: auto;
       }
-      #features .grid.cards-3 {
+      #features .features-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
         gap: 28px;
       }
       #features .feature-card {
@@ -558,6 +584,17 @@
         border-radius: 18px;
         text-align: center;
         box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
+      }
+      #features .feature-card:nth-child(1),
+      #features .feature-card:nth-child(2),
+      #features .feature-card:nth-child(3) {
+        grid-column: span 2;
+      }
+      #features .feature-card:nth-child(4) {
+        grid-column: 2 / span 2;
+      }
+      #features .feature-card:nth-child(5) {
+        grid-column: 4 / span 2;
       }
       #features .feature-card .icon {
         position: absolute;
@@ -731,6 +768,16 @@
         .grid.cards-3 {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+        #features .features-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        #features .feature-card {
+          grid-column: auto;
+        }
+        #features .feature-card:nth-child(4),
+        #features .feature-card:nth-child(5) {
+          grid-column: auto;
+        }
         .hero-copy,
         .hero-panel {
           order: initial;
@@ -756,6 +803,16 @@
         .grid.cards-3,
         .hero-metrics {
           grid-template-columns: 1fr;
+        }
+        #features .features-grid {
+          grid-template-columns: 1fr;
+        }
+        #features .feature-card:nth-child(1),
+        #features .feature-card:nth-child(2),
+        #features .feature-card:nth-child(3),
+        #features .feature-card:nth-child(4),
+        #features .feature-card:nth-child(5) {
+          grid-column: auto;
         }
         .showcase-card img {
           height: 340px;
@@ -1062,12 +1119,20 @@
 
       <section class="section" id="features">
         <div class="shell">
+          <div class="feature-ghost" aria-hidden="true">
+            <span style="top: 10%; right: 8%; transform: rotate(-8deg);">S</span>
+            <span style="top: 30%; left: 14%; transform: rotate(6deg);">O</span>
+            <span style="top: 16%; left: 44%; transform: rotate(-5deg);">M</span>
+            <span style="top: 52%; right: 18%; transform: rotate(8deg);">P</span>
+            <span style="top: 68%; left: 20%; transform: rotate(-8deg);">R</span>
+            <span style="top: 76%; left: 54%; transform: rotate(5deg);">O</span>
+          </div>
           <div class="section-head">
             <div>
               <h2 data-i18n="featuresTitle">ميزات التطبيق</h2>
             </div>
           </div>
-          <div class="grid cards-3">
+          <div class="grid features-grid">
             <article class="card feature-card">
               <div class="icon">📅</div>
               <h3 data-i18n="stack1Title">التوثيق الدراسي</h3>
