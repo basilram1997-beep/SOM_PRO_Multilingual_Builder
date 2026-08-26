@@ -239,6 +239,7 @@
         font-size: clamp(18px, 1.9vw, 22px);
         line-height: 1.95;
         color: rgba(226, 239, 255, 0.92);
+        white-space: pre-line;
       }
       .hero-actions {
         display: flex;
@@ -290,13 +291,15 @@
       }
       .metric strong {
         display: block;
-        font-size: 24px;
-        margin-bottom: 4px;
+        font-size: 20px;
+        line-height: 1.45;
+        margin-bottom: 8px;
       }
       .metric span {
         color: rgba(226, 239, 255, 0.86);
-        font-size: 13px;
-        line-height: 1.6;
+        font-size: 14px;
+        line-height: 1.75;
+        white-space: pre-line;
       }
       .hero-panel {
         display: flex;
@@ -407,6 +410,35 @@
         color: var(--muted);
         line-height: 1.9;
         font-size: 16px;
+      }
+      .impact-card {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 34px 34px 30px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 255, 0.98));
+        border: 1px solid rgba(37, 99, 235, 0.12);
+      }
+      .impact-card h2 {
+        margin: 0 0 14px;
+        font-size: clamp(26px, 2.8vw, 40px);
+        line-height: 1.25;
+      }
+      .impact-card p {
+        margin: 0;
+      }
+      .impact-body {
+        color: var(--text);
+        font-size: 18px;
+        line-height: 2;
+        max-width: 860px;
+        white-space: pre-line;
+      }
+      .impact-note {
+        margin-top: 16px !important;
+        color: #1d4ed8;
+        font-weight: 700;
+        line-height: 1.9;
       }
       .card ul {
         margin: 12px 0 0;
@@ -829,6 +861,23 @@
         </div>
       </section>
 
+      <section class="section" id="impact">
+        <div class="shell">
+          <div class="card impact-card">
+            <h2 data-i18n="impactTitle">ما الذي سيتغير عند استخدام SOM PRO</h2>
+            <p class="impact-body" data-i18n="impactText">
+              توفير الوقت والجهد: عن طريق تبسيط الإجراءات الإدارية وتحسين التواصل بين الإدارة والمعلمين وأولياء
+              الأمور.
+              رفع كفاءة المدرسة: من خلال تقديم أدوات حديثة.
+            </p>
+            <p class="impact-note" data-i18n="impactNote">
+              إذا لم يكن لديك حساب معنا، فاتصل بقسم المبيعات والدعم الرائع لدينا وسوف يساعدونك على البدء خلال 24
+              ساعة.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section class="section" id="showcase">
         <div class="shell">
           <div class="section-head">
@@ -1050,15 +1099,18 @@
           eyebrow: "",
           heroTitle: "",
           heroText:
-            "SOM PRO يجمع ما يحتاجه الطالب وولي الأمر والمعلم والإدارة في مكان واحد: البرنامج اليومي، الدروس، الواجبات، العلامات، السلوك، الحضور، الشهادات، والتقارير.",
+            "تطبيق يقوم بتحويل المدارس\nوالروضات إلى مدارس رقمية\n\nاستثمر في مستقبلك، ووفّر وقتك وجهودك.\nمنصتنا توفر لك الحلول الشاملة لإدارة مدرستك بكفاءة عالية جداً،\nوتعزيز التواصل بين جميع الأطراف من مدرسين وإداريين وأولياء أمور\nوطلاب، وتحسين أداء الطلاب.\nالطريقة الأفضل لأولياء الأمور لمراقبة أبنائهم خلال اليوم الدراسي\nلحظة بلحظة من خلال تقديم أدوات حديثة.",
           heroPrimary: "طلب تجربة",
           heroSecondary: "سياسة الخصوصية",
-          metric1Value: "1",
-          metric1Text: "لوحة موحّدة للمدرسة والمعلمين",
-          metric2Value: "2",
-          metric2Text: "لوحة موحدة للأهل والطلاب",
-          metric3Value: "3",
-          metric3Text: "واجهة عربية حديثة مع تعدد لغات",
+          metric1Value: "التوثيق الدراسي",
+          metric1Text:
+            "تشارك مع ولدك أوقات الدراسة لحظة بلحظة،\nولا تفوّت فرصة المتابعة والتحليل النفسي لتطور أولادك.",
+          metric2Value: "البساطة والمرونة",
+          metric2Text:
+            "كل الخطوات التي قمت بها بالفعل،\nمجمعة في مكان واحد،\nولكن بشكل أبسط وأكثر مرونة.",
+          metric3Value: "يوفّر الوقت والموارد",
+          metric3Text:
+            "وقت أقل للإدارة والمزيد من الوقت لما هو مهم حقًا << الطلاب >>\nابدأ خلال 24 ساعة",
           panelTitle: "ما الذي يقدمه النظام؟",
           panelText:
             "واجهة منظمة تركّز على أهم ما يحتاجه كل طرف في المدرسة، مع عرض واضح للمعلومات.",
@@ -1070,6 +1122,11 @@
           audienceTitle: "من يخدم SOM PRO؟",
           audienceText:
             "صممنا الواجهة لتخاطب أطراف المدرسة الأساسية بحيث كل فئة ترى ما يخصها مباشرة.",
+          impactTitle: "ما الذي سيتغير عند استخدام SOM PRO",
+          impactText:
+            "توفير الوقت والجهد: عن طريق تبسيط الإجراءات الإدارية وتحسين التواصل بين الإدارة والمعلمين وأولياء الأمور.\nرفع كفاءة المدرسة: من خلال تقديم أدوات حديثة.",
+          impactNote:
+            "إذا لم يكن لديك حساب معنا، فاتصل بقسم المبيعات والدعم الرائع لدينا وسوف يساعدونك على البدء خلال 24 ساعة.",
           studentTitle: "الطالب",
           studentText:
             "يرى برنامجه اليومي والثابت وبرنامج الامتحانات، دروسه، واجباته، علاماته، سلوكه، وتقدمه الدراسي في شاشة واحدة واضحة.",
@@ -1128,12 +1185,15 @@
             "SOM PRO brings what students, parents, teachers, and administrators need into one place: schedules, lessons, homework, grades, behavior, attendance, certificates, and reports.",
           heroPrimary: "Request demo",
           heroSecondary: "Privacy policy",
-          metric1Value: "1",
-          metric1Text: "Unified view for schools and teachers",
-          metric2Value: "2",
-          metric2Text: "Unified dashboard for parents and students",
-          metric3Value: "3",
-          metric3Text: "Modern Arabic UI with multilingual support",
+          metric1Value: "Academic documentation",
+          metric1Text:
+            "Share learning times with your child moment by moment,\nand never miss the chance to follow and understand their growth.",
+          metric2Value: "Simplicity and flexibility",
+          metric2Text:
+            "All the steps you have already taken,\ncollected in one place,\nbut in a simpler and more flexible way.",
+          metric3Value: "Saves time and resources",
+          metric3Text:
+            "Less time for administration and more time for what truly matters << students >>\nStart within 24 hours",
           panelTitle: "What does the system provide?",
           panelText:
             "An organized interface focused on what each school audience actually needs, with clear information.",
@@ -1145,6 +1205,11 @@
           audienceTitle: "Who does SOM PRO serve?",
           audienceText:
             "We designed the interface to speak clearly to the school’s core audiences so each group sees exactly what matters to them.",
+          impactTitle: "What changes when using SOM PRO",
+          impactText:
+            "Saving time and effort: by simplifying administrative procedures and improving communication between administration, teachers, and parents.\nRaising school efficiency: by providing modern tools.",
+          impactNote:
+            "If you do not have an account with us, contact our wonderful sales and support team and they will help you get started within 24 hours.",
           studentTitle: "Students",
           studentText: "See the daily and fixed schedule, exam schedule, lessons, homework, grades, behavior, and progress in one clean view.",
           teacherTitle: "Teachers",
@@ -1199,12 +1264,15 @@
             "SOM PRO מאחד את מה שתלמידים, הורים, מורים ומנהלים צריכים במקום אחד: מערכת שעות, שיעורים, שיעורי בית, ציונים, התנהגות, נוכחות, תעודות ודוחות.",
           heroPrimary: "בקשת ניסיון",
           heroSecondary: "מדיניות פרטיות",
-          metric1Value: "1",
-          metric1Text: "תצוגה אחידה לבית הספר ולמורים",
-          metric2Value: "2",
-          metric2Text: "לוח אחוד להורים ולתלמידים",
-          metric3Value: "3",
-          metric3Text: "ממשק עברי מודרני עם תמיכה רב-לשונית",
+          metric1Value: "תיעוד לימודי",
+          metric1Text:
+            "שתפו את ילדכם בשעות הלמידה רגע אחר רגע,\nואל תפספסו הזדמנות לעקוב ולהבין את התפתחותו.",
+          metric2Value: "פשטות וגמישות",
+          metric2Text:
+            "כל השלבים שכבר ביצעתם,\nמרוכזים במקום אחד,\nאבל בצורה פשוטה וגמישה יותר.",
+          metric3Value: "חוסך זמן ומשאבים",
+          metric3Text:
+            "פחות זמן לניהול ויותר זמן למה שבאמת חשוב << תלמידים >>\nהתחילו בתוך 24 שעות",
           panelTitle: "מה המערכת מספקת?",
           panelText:
             "ממשק מסודר שמתרכז במה שכל קהל בבית הספר באמת צריך, עם מידע ברור.",
@@ -1216,6 +1284,11 @@
           audienceTitle: "למי SOM PRO מיועד?",
           audienceText:
             "עיצבנו את הממשק כך שידבר אל קהלי היעד של בית הספר כך שכל קבוצה רואה בדיוק את מה שחשוב לה.",
+          impactTitle: "מה ישתנה כשמשתמשים ב-SOM PRO",
+          impactText:
+            "חיסכון בזמן ובמאמץ: באמצעות פישוט ההליכים הניהוליים ושיפור התקשורת בין ההנהלה, המורים וההורים.\nהגברת היעילות של בית הספר: באמצעות כלים מודרניים.",
+          impactNote:
+            "אם אין לכם חשבון אצלנו, צרו קשר עם צוות המכירות והתמיכה המדהים שלנו והם יעזרו לכם להתחיל בתוך 24 שעות.",
           studentTitle: "תלמידים",
           studentText: "צפייה במערכת היומית והקבועה, במערכת המבחנים, בשיעורים, בשיעורי הבית, בציונים, בהתנהגות ובהתקדמות במקום אחד.",
           teacherTitle: "מורים",
