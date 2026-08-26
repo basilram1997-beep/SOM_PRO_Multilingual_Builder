@@ -621,34 +621,37 @@
         position: absolute;
         color: rgba(255, 255, 255, 0.16);
         font-weight: 800;
-        font-size: clamp(24px, 3vw, 50px);
+        font-size: clamp(18px, 2vw, 34px);
         line-height: 1;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.02em;
         text-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
         user-select: none;
       }
       #features .feature-ghost i {
         display: inline-block;
         font-style: normal;
-        animation: ghostDrift var(--ghost-dur, 16s) ease-in-out var(--ghost-delay, 0s) infinite alternate;
+        animation: ghostSwim var(--ghost-dur, 16s) ease-in-out var(--ghost-delay, 0s) infinite;
         transform-origin: center;
         opacity: 0.9;
       }
-      @keyframes ghostDrift {
+      @keyframes ghostSwim {
         0% {
           transform: translate3d(0, 0, 0) rotate(0deg);
         }
-        25% {
-          transform: translate3d(var(--ghost-x1, 12px), var(--ghost-y1, -8px), 0) rotate(var(--ghost-r1, 4deg));
+        20% {
+          transform: translate3d(var(--ghost-x1, 10px), var(--ghost-y1, -12px), 0) rotate(var(--ghost-r1, 4deg));
         }
-        50% {
-          transform: translate3d(var(--ghost-x2, -10px), var(--ghost-y2, 12px), 0) rotate(var(--ghost-r2, -4deg));
+        40% {
+          transform: translate3d(var(--ghost-x2, -12px), var(--ghost-y2, 10px), 0) rotate(var(--ghost-r2, -4deg));
         }
-        75% {
-          transform: translate3d(var(--ghost-x3, 14px), var(--ghost-y3, 8px), 0) rotate(var(--ghost-r3, 5deg));
+        60% {
+          transform: translate3d(var(--ghost-x3, 14px), var(--ghost-y3, 14px), 0) rotate(var(--ghost-r3, 5deg));
+        }
+        80% {
+          transform: translate3d(var(--ghost-x4, -10px), var(--ghost-y4, -10px), 0) rotate(var(--ghost-r4, -3deg));
         }
         100% {
-          transform: translate3d(var(--ghost-x4, -8px), var(--ghost-y4, -8px), 0) rotate(var(--ghost-r4, -3deg));
+          transform: translate3d(var(--ghost-x5, 8px), var(--ghost-y5, 8px), 0) rotate(var(--ghost-r5, 2deg));
         }
       }
       #features .section-head {
@@ -1242,12 +1245,6 @@
       <section class="section" id="features">
         <div class="shell">
           <div class="feature-ghost" aria-hidden="true">
-            <span style="top: 4%; left: 8%;"><i>S</i></span>
-            <span style="top: 4%; right: 10%;"><i>O</i></span>
-            <span style="top: 18%; left: 44%;"><i>M</i></span>
-            <span style="top: 50%; left: 6%;"><i>P</i></span>
-            <span style="bottom: 18%; left: 16%;"><i>R</i></span>
-            <span style="bottom: 10%; right: 12%;"><i>O</i></span>
           </div>
           <div class="section-head">
             <div>
@@ -1737,27 +1734,48 @@
       });
 
       function randomizeFeatureGhost() {
-        const letters = document.querySelectorAll("#features .feature-ghost span");
-        letters.forEach((el) => {
+        const ghost = document.querySelector("#features .feature-ghost");
+        if (!ghost) return;
+        const baseLetters = ["S", "O", "M", "P", "R", "O"];
+        ghost.innerHTML = "";
+        const allLetters = Array.from({ length: 24 }, (_, index) => baseLetters[index % baseLetters.length]);
+        allLetters.forEach((letter) => {
+          const el = document.createElement("span");
+          const inner = document.createElement("i");
+          inner.textContent = letter;
+          el.appendChild(inner);
+          ghost.appendChild(el);
+        });
+        const letters = ghost.querySelectorAll("span");
+        letters.forEach((el, index) => {
           const rand = (min, max) => Math.round((min + Math.random() * (max - min)) * 10) / 10;
           const randDeg = (min, max) => Math.round((min + Math.random() * (max - min)) * 10) / 10;
-          el.style.setProperty("--ghost-dur", `${rand(18, 30)}s`);
-          el.style.setProperty("--ghost-delay", `${rand(-8, 0)}s`);
-          el.style.setProperty("--ghost-x1", `${rand(8, 18)}px`);
-          el.style.setProperty("--ghost-y1", `${rand(-10, -4)}px`);
-          el.style.setProperty("--ghost-x2", `${rand(-14, -6)}px`);
-          el.style.setProperty("--ghost-y2", `${rand(6, 14)}px`);
-          el.style.setProperty("--ghost-x3", `${rand(8, 16)}px`);
-          el.style.setProperty("--ghost-y3", `${rand(4, 10)}px`);
-          el.style.setProperty("--ghost-x4", `${rand(-10, -4)}px`);
-          el.style.setProperty("--ghost-y4", `${rand(-10, -4)}px`);
-          el.style.setProperty("--ghost-r1", `${randDeg(4, 10)}deg`);
-          el.style.setProperty("--ghost-r2", `${randDeg(-8, -3)}deg`);
-          el.style.setProperty("--ghost-r3", `${randDeg(5, 12)}deg`);
-          el.style.setProperty("--ghost-r4", `${randDeg(-7, -2)}deg`);
           const inner = el.querySelector("i");
+          const topSeed = index % 2 === 0 ? rand(4, 28) : rand(55, 92);
+          const leftSeed = index % 3 === 0 ? rand(4, 24) : index % 3 === 1 ? rand(38, 62) : rand(72, 94);
+          el.style.top = `${topSeed}%`;
+          el.style.left = `${leftSeed}%`;
+          el.style.right = "";
+          el.style.bottom = "";
+          el.style.setProperty("--ghost-dur", `${rand(16, 34)}s`);
+          el.style.setProperty("--ghost-delay", `${rand(-10, 0)}s`);
+          el.style.setProperty("--ghost-x1", `${rand(-14, 14)}px`);
+          el.style.setProperty("--ghost-y1", `${rand(-18, 18)}px`);
+          el.style.setProperty("--ghost-x2", `${rand(-18, 18)}px`);
+          el.style.setProperty("--ghost-y2", `${rand(-18, 18)}px`);
+          el.style.setProperty("--ghost-x3", `${rand(-18, 18)}px`);
+          el.style.setProperty("--ghost-y3", `${rand(-18, 18)}px`);
+          el.style.setProperty("--ghost-x4", `${rand(-16, 16)}px`);
+          el.style.setProperty("--ghost-y4", `${rand(-16, 16)}px`);
+          el.style.setProperty("--ghost-x5", `${rand(-12, 12)}px`);
+          el.style.setProperty("--ghost-y5", `${rand(-12, 12)}px`);
+          el.style.setProperty("--ghost-r1", `${randDeg(-8, 8)}deg`);
+          el.style.setProperty("--ghost-r2", `${randDeg(-8, 8)}deg`);
+          el.style.setProperty("--ghost-r3", `${randDeg(-8, 8)}deg`);
+          el.style.setProperty("--ghost-r4", `${randDeg(-8, 8)}deg`);
+          el.style.setProperty("--ghost-r5", `${randDeg(-8, 8)}deg`);
           if (inner) {
-            inner.style.animationDirection = Math.random() > 0.5 ? "normal" : "alternate-reverse";
+            inner.style.animationDirection = Math.random() > 0.5 ? "normal" : "reverse";
           }
         });
       }
