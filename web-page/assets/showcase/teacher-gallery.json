@@ -1,0 +1,32 @@
+[
+  {
+    "image": "assets/showcase/teacher-program-v1.png",
+    "alt": "برنامج المعلم",
+    "title": "برنامج المعلم",
+    "caption": "الحصص والصفوف والمواعيد في شاشة عملية واحدة."
+  },
+  {
+    "image": "assets/showcase/teacher-substitutions-v1.png",
+    "alt": "مناوبتي",
+    "title": "مناوبتي",
+    "caption": "البدائل والمناوبات المعتمدة مع الصف والحصة."
+  },
+  {
+    "image": "assets/showcase/teacher-grades-v1.png",
+    "alt": "إدخال العلامات",
+    "title": "إدخال العلامات",
+    "caption": "أسماء الطلاب والدرجات والتقدير والملاحظة."
+  },
+  {
+    "image": "assets/showcase/teacher-behavior-v1.png",
+    "alt": "إدخال السلوك",
+    "title": "إدخال السلوك",
+    "caption": "السلوك الإيجابي أو السلبي مع التاريخ والإجراء."
+  },
+  {
+    "image": "assets/showcase/teacher-exam-v1.png",
+    "alt": "إدخال امتحان",
+    "title": "إدخال امتحان",
+    "caption": "إنشاء امتحان جديد مع ربطه بالصف والمادة والحالة."
+  }
+]

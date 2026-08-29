@@ -1,0 +1,26 @@
+[
+  {
+    "image": "assets/showcase/student-homework-v1.png",
+    "alt": "واجباتي",
+    "title": "واجباتي",
+    "caption": "الواجبات المستحقة مع الموعد والحالة والتقدّم."
+  },
+  {
+    "image": "assets/showcase/student-lessons-v1.png",
+    "alt": "دروسي",
+    "title": "دروسي",
+    "caption": "الدروس مرتبة حسب اليوم مع ربط سريع بالمادة والمعلم."
+  },
+  {
+    "image": "assets/showcase/student-exams-v1.png",
+    "alt": "امتحاناتي",
+    "title": "امتحاناتي",
+    "caption": "مخطط الامتحانات مع التاريخ والنوع والحالة."
+  },
+  {
+    "image": "assets/showcase/student-program-v1.png",
+    "alt": "برنامجي",
+    "title": "برنامجي",
+    "caption": "البرنامج اليومي للحصص والمواد والمعلمين والزمن."
+  }
+]

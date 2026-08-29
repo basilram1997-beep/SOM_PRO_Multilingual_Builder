@@ -1378,35 +1378,8 @@
                   <p data-i18n="showcaseStudentGroupText">أربع لقطات ببيانات تجريبية فقط توضّح ما يراه الطالب في يومه الدراسي.</p>
                 </div>
               </div>
-              <div class="showcase-tiles">
-                <button class="showcase-card placeholder" type="button" aria-label="واجباتي - بانتظار الصورة الجديدة">
-                  <div class="placeholder-frame">واجباتي<br />بانتظار الصورة الجديدة</div>
-                  <figcaption>
-                    <h3>واجباتي</h3>
-                    <p>الواجبات المستحقة مع الموعد والحالة والتقدّم.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card placeholder" type="button" aria-label="دروسي - بانتظار الصورة الجديدة">
-                  <div class="placeholder-frame">دروسي<br />بانتظار الصورة الجديدة</div>
-                  <figcaption>
-                    <h3>دروسي</h3>
-                    <p>الدروس مرتبة حسب اليوم مع ربط سريع بالمادة والمعلم.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card placeholder" type="button" aria-label="امتحاناتي - بانتظار الصورة الجديدة">
-                  <div class="placeholder-frame">امتحاناتي<br />بانتظار الصورة الجديدة</div>
-                  <figcaption>
-                    <h3>امتحاناتي</h3>
-                    <p>مخطط الامتحانات مع التاريخ والنوع والحالة.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card placeholder" type="button" aria-label="برنامجي - بانتظار الصورة الجديدة">
-                  <div class="placeholder-frame">برنامجي<br />بانتظار الصورة الجديدة</div>
-                  <figcaption>
-                    <h3>برنامجي</h3>
-                    <p>البرنامج اليومي للحصص والمواد والمعلمين والزمن.</p>
-                  </figcaption>
-                </button>
+              <div class="showcase-tiles" id="student-gallery" aria-live="polite" data-showcase-label="صور الطالب" data-showcase-source="assets/showcase/student-gallery.json">
+                <p class="showcase-loading">جارٍ تحميل صور الطالب...</p>
               </div>
             </article>
 
@@ -1417,42 +1390,8 @@
                   <p data-i18n="showcaseTeacherGroupText">خمس لقطات ببيانات تجريبية فقط تمثل العمل اليومي للمعلم داخل المشروع.</p>
                 </div>
               </div>
-              <div class="showcase-tiles">
-                <button class="showcase-card placeholder" type="button" aria-label="برنامج المعلم - بانتظار الصورة الجديدة">
-                  <div class="placeholder-frame">برنامج المعلم<br />بانتظار الصورة الجديدة</div>
-                  <figcaption>
-                    <h3>برنامج المعلم</h3>
-                    <p>الحصص والصفوف والمواعيد في شاشة عملية واحدة.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card placeholder" type="button" aria-label="مناوبتي - بانتظار الصورة الجديدة">
-                  <div class="placeholder-frame">مناوبتي<br />بانتظار الصورة الجديدة</div>
-                  <figcaption>
-                    <h3>مناوبتي</h3>
-                    <p>البدائل والمناوبات المعتمدة مع الصف والحصة.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card placeholder" type="button" aria-label="إدخال العلامات - بانتظار الصورة الجديدة">
-                  <div class="placeholder-frame">إدخال العلامات<br />بانتظار الصورة الجديدة</div>
-                  <figcaption>
-                    <h3>إدخال العلامات</h3>
-                    <p>أسماء الطلاب والدرجات والتقدير والملاحظة.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card placeholder" type="button" aria-label="إدخال السلوك - بانتظار الصورة الجديدة">
-                  <div class="placeholder-frame">إدخال السلوك<br />بانتظار الصورة الجديدة</div>
-                  <figcaption>
-                    <h3>إدخال السلوك</h3>
-                    <p>السلوك الإيجابي أو السلبي مع التاريخ والإجراء.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card placeholder" type="button" aria-label="إدخال امتحان - بانتظار الصورة الجديدة">
-                  <div class="placeholder-frame">إدخال امتحان<br />بانتظار الصورة الجديدة</div>
-                  <figcaption>
-                    <h3>إدخال امتحان</h3>
-                    <p>إنشاء امتحان جديد مع ربطه بالصف والمادة والحالة.</p>
-                  </figcaption>
-                </button>
+              <div class="showcase-tiles" id="teacher-gallery" aria-live="polite" data-showcase-label="صور المعلم" data-showcase-source="assets/showcase/teacher-gallery.json">
+                <p class="showcase-loading">جارٍ تحميل صور المعلم...</p>
               </div>
             </article>
 
@@ -1463,7 +1402,7 @@
                   <p data-i18n="showcaseAdminGroupText">ثماني لقطات إدارية منفصلة، وكل صورة تفتح بالحجم الكامل عند الضغط عليها.</p>
                 </div>
               </div>
-              <div class="showcase-tiles admin-gallery" id="admin-gallery" aria-live="polite" data-showcase-source="assets/showcase/admin-gallery.json">
+              <div class="showcase-tiles admin-gallery" id="admin-gallery" aria-live="polite" data-showcase-label="صور الإدارة" data-showcase-source="assets/showcase/admin-gallery.json">
                 <p class="showcase-loading">جارٍ تحميل صور الإدارة...</p>
               </div>
             </article>
@@ -1995,10 +1934,8 @@
         });
       }
 
-      async function loadAdminGallery() {
-        const adminGallery = document.querySelector("#admin-gallery");
-        if (!adminGallery) return;
-        const source = adminGallery.dataset.showcaseSource;
+      async function loadShowcaseGallery(container) {
+        const source = container.dataset.showcaseSource;
         if (!source) return;
         try {
           const response = await fetch(source, { cache: "no-store" });
@@ -2010,11 +1947,12 @@
             throw new Error("Invalid showcase payload");
           }
           const cards = items.filter((item) => item && item.image && item.title && item.caption);
-          adminGallery.replaceChildren(...cards.map(createShowcaseCard));
-          wireShowcaseCards(adminGallery);
+          container.replaceChildren(...cards.map(createShowcaseCard));
+          wireShowcaseCards(container);
         } catch (error) {
-          adminGallery.innerHTML = '<p class="showcase-error">تعذّر تحميل صور الإدارة.</p>';
-          console.warn("Failed to load admin gallery:", error);
+          const label = container.dataset.showcaseLabel || "الصور";
+          container.innerHTML = `<p class="showcase-error">تعذّر تحميل ${label}.</p>`;
+          console.warn("Failed to load showcase gallery:", source, error);
         }
       }
 
@@ -2064,7 +2002,9 @@
       });
 
       wireShowcaseCards(document);
-      loadAdminGallery();
+      document.querySelectorAll("[data-showcase-source]").forEach((container) => {
+        loadShowcaseGallery(container);
+      });
 
       function randomizeFeatureGhost() {
         const ghost = document.querySelector("#features .feature-ghost");
