@@ -3,13 +3,25 @@
     "image": "assets/showcase/admin-notifications.png",
     "alt": "إشعارات المدرسة",
     "title": "إشعارات المدرسة",
-    "caption": "ملخص الإشعارات والتنبيهات المرسلة خلال اليوم."
+    "caption": "قائمة الإشعارات والتنبيهات المرسلة خلال اليوم."
   },
   {
     "image": "assets/showcase/admin-exams-trips.png",
     "alt": "الامتحانات والفعاليات والرحلات",
     "title": "الامتحانات والفعاليات والرحلات",
-    "caption": "مواعيد وحالات وأنشطة مع صفوف محددة."
+    "caption": "مواعيد الامتحانات والفعاليات والرحلات مع الحالات والصفوف."
+  },
+  {
+    "image": "assets/showcase/admin-daily-program.png",
+    "alt": "البرنامج اليومي",
+    "title": "البرنامج اليومي",
+    "caption": "واجهة البرنامج اليومي بعد التحديث."
+  },
+  {
+    "image": "assets/showcase/admin-daily-program-table.png",
+    "alt": "البرنامج اليومي - الجدول",
+    "title": "البرنامج اليومي - الجدول",
+    "caption": "جدول البرنامج اليومي بعد تعبئة الحصص والمواد."
   },
   {
     "image": "assets/showcase/admin-free-teachers.png",
