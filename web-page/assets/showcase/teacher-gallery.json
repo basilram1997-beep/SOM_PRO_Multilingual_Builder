@@ -1,32 +1,44 @@
 [
   {
-    "image": "assets/showcase/teacher-program-v1.png",
-    "alt": "برنامج المعلم",
-    "title": "برنامج المعلم",
-    "caption": "الحصص والصفوف والمواعيد في شاشة عملية واحدة."
+    "image": "assets/showcase/teacher-referral-lesson.png",
+    "alt": "إحالة الدرس",
+    "title": "إحالة الدرس",
+    "caption": "إحالة الدرس مع تحديد الصف والمادة والحصة."
   },
   {
-    "image": "assets/showcase/teacher-substitutions-v1.png",
-    "alt": "مناوبتي",
-    "title": "مناوبتي",
-    "caption": "البدائل والمناوبات المعتمدة مع الصف والحصة."
-  },
-  {
-    "image": "assets/showcase/teacher-grades-v1.png",
+    "image": "assets/showcase/teacher-grades-entry.png",
     "alt": "إدخال العلامات",
     "title": "إدخال العلامات",
-    "caption": "أسماء الطلاب والدرجات والتقدير والملاحظة."
+    "caption": "إدخال علامات الطلاب مع التقدير والملاحظات."
   },
   {
-    "image": "assets/showcase/teacher-behavior-v1.png",
-    "alt": "إدخال السلوك",
-    "title": "إدخال السلوك",
-    "caption": "السلوك الإيجابي أو السلبي مع التاريخ والإجراء."
+    "image": "assets/showcase/teacher-exam-add.png",
+    "alt": "إضافة امتحان",
+    "title": "إضافة امتحان",
+    "caption": "إضافة امتحان جديد وربطه بالصف والمادة."
   },
   {
-    "image": "assets/showcase/teacher-exam-v1.png",
-    "alt": "إدخال امتحان",
-    "title": "إدخال امتحان",
-    "caption": "إنشاء امتحان جديد مع ربطه بالصف والمادة والحالة."
+    "image": "assets/showcase/teacher-homework-add.png",
+    "alt": "إضافة واجب",
+    "title": "إضافة واجب",
+    "caption": "إنشاء واجب مع وصف واضح وتاريخ الاستحقاق."
+  },
+  {
+    "image": "assets/showcase/teacher-attendance.png",
+    "alt": "الحضور والغياب",
+    "title": "الحضور والغياب",
+    "caption": "ملخص الحضور اليومي مع الحالات المختلفة للطلاب."
+  },
+  {
+    "image": "assets/showcase/teacher-student-behavior.png",
+    "alt": "سلوك الطالب",
+    "title": "سلوك الطالب",
+    "caption": "تسجيل السلوك الإيجابي أو السلبي مع الملاحظة."
+  },
+  {
+    "image": "assets/showcase/teacher-student-behavior-detail.png",
+    "alt": "سلوك الطالب - التفاصيل",
+    "title": "سلوك الطالب - التفاصيل",
+    "caption": "عرض تفاصيل الملاحظة والإجراء الخاص بالسلوك."
   }
 ]
