@@ -108,20 +108,6 @@ function roomLabel(value: { room?: { name?: string | null } | string | null }, f
   return fallback;
 }
 
-function uniqueClasses(slots: Array<{ classId: string; class?: { id?: string; name?: string } }>) {
-  const map = new Map<string, { id?: string; name: string }>();
-  slots.forEach((slot) => {
-    if (!slot.classId) return;
-    map.set(slot.classId, {
-      id: slot.class?.id || slot.classId,
-      name: slot.class?.name || slot.classId
-    });
-  });
-  return sortSchoolClasses(
-    Array.from(map.values()).filter((item): item is { id: string; name: string } => Boolean(item.id && item.name))
-  );
-}
-
 function eventTypeLabel(t: (key: string) => string, type?: string) {
   if (type === "EXAM") return t("daily.eventExam");
   if (type === "TRIP") return t("daily.eventTrip");
@@ -320,67 +306,38 @@ export function TimetablePage({ currentUser }: Props) {
     setBaseDay((current) => (current && baseDayOptions.includes(current) ? current : day || baseDayOptions[0]));
   }, [baseDayOptions, day]);
 
-  const selectedBaseRows = useMemo(() => {
-    if (!baseDay) return [];
-    return weeklyRows.filter((slot) => canonicalDay(slot.day || "") === baseDay);
-  }, [baseDay, weeklyRows]);
-
   const currentDailyBaseRows = useMemo(() => {
     if (!day) return [];
     return weeklyRows.filter((slot) => canonicalDay(slot.day || "") === day);
   }, [day, weeklyRows]);
 
-  const dailyRows = useMemo(() => {
-    const slots =
-      dailyDetails?.baseSlots && dailyDetails.baseSlots.length > 0
-        ? (dailyDetails.baseSlots as ScheduleSlot[])
-        : currentDailyBaseRows;
-    return sortRows(buildDailyRows(slots, dailyDetails?.substitutions || [], dailyDetails?.events || []));
-  }, [currentDailyBaseRows, dailyDetails?.baseSlots, dailyDetails?.events, dailyDetails?.substitutions]);
+  const selectedBaseDayRows = useMemo(() => {
+    if (!baseDay) return [];
+    const rows = weeklyRows.filter((slot) => canonicalDay(slot.day || "") === baseDay);
+    if (!isStudentViewer) return rows;
+    return studentContextLoaded && studentClassId ? rows.filter((slot) => slot.classId === studentClassId) : [];
+  }, [baseDay, isStudentViewer, studentClassId, studentContextLoaded, weeklyRows]);
 
-  const periodNumbers = useMemo(() => {
-    const maxPeriod =
-      Math.max(
-        0,
-        ...periodDefinitions.map((item) => item.period || 0),
-        ...weeklyRows.map((slot) => slot.period || 0),
-        ...dailyRows.map((slot) => slot.period || 0)
-      ) || 7;
-    return Array.from({ length: maxPeriod }, (_, index) => index + 1);
-  }, [dailyRows, periodDefinitions, weeklyRows]);
+  const selectedDailyDayRows = useMemo(() => {
+    const sourceRows =
+      dailyDetails?.baseSlots && dailyDetails.baseSlots.length > 0 ? (dailyDetails.baseSlots as ScheduleSlot[]) : currentDailyBaseRows;
+    const rows = isStudentViewer
+      ? studentContextLoaded && studentClassId
+        ? sourceRows.filter((slot) => slot.classId === studentClassId)
+        : []
+      : sourceRows;
+    return sortRows(buildDailyRows(rows, dailyDetails?.substitutions || [], dailyDetails?.events || []));
+  }, [currentDailyBaseRows, dailyDetails?.baseSlots, dailyDetails?.events, dailyDetails?.substitutions, isStudentViewer, studentClassId, studentContextLoaded]);
 
-  const baseDisplayClasses = useMemo(() => {
-    if (isStudentViewer) {
-      return studentContextLoaded && studentClassId
-        ? [{ id: studentClassId, name: studentClassName || t("common.class") }]
-        : [];
-    }
-    return uniqueClasses(selectedBaseRows);
-  }, [isStudentViewer, selectedBaseRows, studentClassId, studentClassName, studentContextLoaded, t]);
-
-  const dailyDisplayClasses = useMemo(() => {
-    if (isStudentViewer) {
-      return studentContextLoaded && studentClassId
-        ? [{ id: studentClassId, name: studentClassName || t("common.class") }]
-        : [];
-    }
-    return uniqueClasses(dailyRows);
-  }, [dailyRows, isStudentViewer, studentClassId, studentClassName, studentContextLoaded, t]);
-
-  const selectedBaseRowMap = useMemo(
-    () => new Map(selectedBaseRows.map((slot) => [`${slot.classId}:${slot.period}`, slot])),
-    [selectedBaseRows]
-  );
-  const dailyRowMap = useMemo(
-    () => new Map(dailyRows.map((slot) => [`${slot.classId}:${slot.period}`, slot])),
-    [dailyRows]
-  );
+  const baseColumnCount = isStudentViewer ? 5 : 6;
+  const dailyColumnCount = isStudentViewer ? 7 : 8;
 
   return (
     <div className="page timetable-page daily-page">
       <h2>{isStudentViewer ? t("nav.studentTimetable") : t("timetable.title")}</h2>
+      <p className="muted">{t("timetable.info")}</p>
 
-      <Card title={t("nav.teacherBaseSchedule")}>
+      <Card title={isStudentViewer ? `${t("timetable.title")} - ${studentClassName || t("common.class")}` : t("nav.teacherBaseSchedule")}>
         <div className="timetable-base-controls">
           <label>
             <span>{t("timetable.day")}:</span>
@@ -395,59 +352,35 @@ export function TimetablePage({ currentUser }: Props) {
         </div>
 
         <div className="table-wrap lesson-table-wrap">
-          <table className="daily-grid-table flipped-daily-grid timetable-grid">
+          <table className="daily-grid-table timetable-grid timetable-day-table">
             <thead>
               <tr>
-                <th>{t("common.class")}</th>
-                {periodNumbers.map((period) => {
-                  const display = periodTime(periodDefinitions, period);
-                  const definition = periodDefinitions.find((item) => item.period === period);
-                  const title = definition?.label || `${t("common.period")} ${period}`;
-                  return (
-                    <th key={period} className="period-time-header">
-                      <strong>{title}</strong>
-                      {display ? <span>{display}</span> : null}
-                    </th>
-                  );
-                })}
+                <th>{t("common.period")}</th>
+                <th>{t("timetable.time")}</th>
+                {!isStudentViewer && <th>{t("common.class")}</th>}
+                <th>{t("timetable.subject")}</th>
+                <th>{t("timetable.teacher")}</th>
+                <th>{t("timetable.room")}</th>
               </tr>
             </thead>
             <tbody>
-              {baseDisplayClasses.length === 0 && (
+              {selectedBaseDayRows.length === 0 && (
                 <tr>
-                  <td colSpan={periodNumbers.length + 1}>{t("common.loading")}</td>
+                  <td colSpan={baseColumnCount}>{t("timetable.emptyWeekly")}</td>
                 </tr>
               )}
-              {baseDisplayClasses.map((cls) => (
-                <tr key={cls.id || cls.name}>
-                  <th className="period-time-header">{localizeClassName(cls.name, language)}</th>
-                  {periodNumbers.map((period) => {
-                    const slot = selectedBaseRowMap.get(`${cls.id || cls.name}:${period}`);
-                    return (
-                      <td
-                        key={`${cls.id || cls.name}-${period}`}
-                        className={slot ? "daily-cell teacher-color-cell" : "free-period"}
-                        style={slot ? teacherColorStyle(slot.teacher) : undefined}
-                      >
-                        {slot ? (
-                          <>
-                            <strong>{localizeSubjectName(slot.subject?.name || "", language)}</strong>
-                            <span className="teacher-name">
-                              {localizeTeacherName(slot.teacher?.name || "", language)}
-                            </span>
-                            {slot.room ? (
-                              <span className="schedule-room-cell">
-                                {t("timetable.room")}:
-                                {` ${roomLabel(slot, t("timetable.roomEmpty"))}`}
-                              </span>
-                            ) : null}
-                          </>
-                        ) : (
-                          <span className="muted">{t("daily.free")}</span>
-                        )}
-                      </td>
-                    );
-                  })}
+              {selectedBaseDayRows.map((slot) => (
+                <tr key={`${slot.classId}-${slot.period}`}>
+                  <th className="period-time-header">
+                    {t("common.period")} {slot.period}
+                  </th>
+                  <td>{periodTime(periodDefinitions, slot.period) || "-"}</td>
+                  {!isStudentViewer && <td>{localizeClassName(slot.class?.name || "", language)}</td>}
+                  <td className="teacher-color-cell" style={teacherColorStyle(slot.teacher)}>
+                    {localizeSubjectName(slot.subject?.name || "", language)}
+                  </td>
+                  <td>{localizeTeacherName(slot.teacher?.name || "", language)}</td>
+                  <td>{roomLabel(slot, t("timetable.roomEmpty"))}</td>
                 </tr>
               ))}
             </tbody>
@@ -457,83 +390,72 @@ export function TimetablePage({ currentUser }: Props) {
 
       <Card title={t("timetable.dailyTitle")}>
         <div className="table-wrap lesson-table-wrap">
-          <table className="daily-grid-table flipped-daily-grid timetable-grid">
+          <table className="daily-grid-table timetable-grid timetable-day-table">
             <thead>
               <tr>
-                <th>{t("common.class")}</th>
-                {periodNumbers.map((period) => {
-                  const display = periodTime(periodDefinitions, period);
-                  const definition = periodDefinitions.find((item) => item.period === period);
-                  const title = definition?.label || `${t("common.period")} ${period}`;
-                  return (
-                    <th key={period} className="period-time-header">
-                      <strong>{title}</strong>
-                      {display ? <span>{display}</span> : null}
-                    </th>
-                  );
-                })}
+                <th>{t("common.period")}</th>
+                <th>{t("timetable.time")}</th>
+                {!isStudentViewer && <th>{t("common.class")}</th>}
+                <th>{t("timetable.subject")}</th>
+                <th>{t("timetable.teacher")}</th>
+                <th>{t("timetable.room")}</th>
+                <th>{t("timetable.updated")}</th>
+                <th>{t("common.details")}</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={periodNumbers.length + 1}>{t("common.loading")}</td>
+                  <td colSpan={dailyColumnCount}>{t("common.loading")}</td>
+                </tr>
+              )}
+              {!loading && selectedDailyDayRows.length === 0 && (
+                <tr>
+                  <td colSpan={dailyColumnCount}>{t("timetable.emptyDaily")}</td>
                 </tr>
               )}
               {!loading &&
-                dailyDisplayClasses.map((cls) => (
-                  <tr key={cls.id || cls.name}>
-                    <th className="period-time-header">{localizeClassName(cls.name, language)}</th>
-                    {periodNumbers.map((period) => {
-                      const slot = dailyRowMap.get(`${cls.id || cls.name}:${period}`);
-                      const cellClass = slot
-                        ? slot.event
-                          ? `daily-cell event-cell event-${String(slot.event.type || "").toLowerCase()}`
-                          : slot.status === "SUBSTITUTION"
-                            ? "daily-cell substitution-cell teacher-color-cell"
-                            : "daily-cell teacher-color-cell"
-                        : "free-period";
+                selectedDailyDayRows.map((slot) => {
+                  const subjectLabel = slot.event
+                    ? eventTypeLabel(t, slot.event.type)
+                    : localizeSubjectName(slot.subject?.name || "", language);
+                  const teacherLabel = slot.teacher?.name ? localizeTeacherName(slot.teacher.name, language) : "";
+                  const roomText = roomLabel(slot, t("timetable.roomEmpty"));
+                  const statusText = slot.event
+                    ? t("timetable.updated")
+                    : slot.updated
+                      ? t("timetable.updated")
+                      : t("timetable.notUpdated");
+                  const detailsText = slot.event
+                    ? slot.event.note || t("timetable.updatedNote")
+                    : slot.note || t("timetable.noChanges");
+                  const cellClass = slot.event
+                    ? `daily-cell event-cell event-${String(slot.event.type || "").toLowerCase()}`
+                    : slot.updated
+                      ? "daily-cell teacher-color-cell"
+                      : "free-period";
 
-                      return (
-                        <td
-                          key={`${cls.id || cls.name}-${period}`}
-                          className={cellClass}
-                          style={slot ? teacherColorStyle(slot.teacher) : undefined}
-                        >
-                          {slot ? (
-                            <>
-                              <strong>
-                                {slot.event
-                                  ? eventTypeLabel(t, slot.event.type)
-                                  : localizeSubjectName(slot.subject?.name || "", language)}
-                              </strong>
-                              {slot.event ? (
-                                <span>{slot.event.note || t("timetable.noChange")}</span>
-                              ) : (
-                                <>
-                                  <span className="teacher-name">
-                                    {localizeTeacherName(slot.teacher?.name || "", language)}
-                                  </span>
-                                  {slot.room ? (
-                                    <span className="schedule-room-cell">
-                                      {t("timetable.room")}: {roomLabel(slot, t("timetable.roomEmpty"))}
-                                    </span>
-                                  ) : null}
-                                  <span className={slot.updated ? "timetable-status-badge" : "timetable-status-muted"}>
-                                    {slot.updated ? t("timetable.updated") : t("timetable.notUpdated")}
-                                  </span>
-                                  {slot.note ? <span>{slot.note}</span> : null}
-                                </>
-                              )}
-                            </>
-                          ) : (
-                            <span className="muted">{t("daily.free")}</span>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
+                  return (
+                    <tr key={`${slot.classId}-${slot.period}-${slot.subject?.name || "subject"}`}>
+                      <th className="period-time-header">
+                        {t("common.period")} {slot.period}
+                      </th>
+                      <td>{periodTime(periodDefinitions, slot.period) || "-"}</td>
+                      {!isStudentViewer && <td>{localizeClassName(slot.class?.name || "", language)}</td>}
+                      <td className={cellClass} style={!slot.event ? teacherColorStyle(slot.teacher) : undefined}>
+                        {subjectLabel}
+                      </td>
+                      <td>{teacherLabel}</td>
+                      <td>{roomText}</td>
+                      <td>
+                        <span className={slot.updated ? "timetable-status-badge" : "timetable-status-muted"}>
+                          {statusText}
+                        </span>
+                      </td>
+                      <td>{detailsText}</td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>

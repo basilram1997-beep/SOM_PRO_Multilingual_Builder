@@ -11,6 +11,6 @@ export function canAccessPage(role: string | undefined, page: PageKey) {
 export function fallbackPageForRole(role: string | undefined): PageKey {
   if (role === "TEACHER") return "homeroomPortal";
   if (role === "SCHEDULER") return "daily";
-  if (role === "STUDENT" || role === "PARENT") return "studentPortal";
+  if (role === "STUDENT" || role === "PARENT") return "studentTimetable";
   return "dashboard";
 }
