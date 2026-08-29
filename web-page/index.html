@@ -721,6 +721,17 @@
         line-height: 1.6;
         font-size: 16px;
       }
+      .showcase-loading,
+      .showcase-error {
+        margin: 0;
+        padding: 20px;
+        border-radius: 18px;
+        border: 1px dashed rgba(148, 163, 184, 0.8);
+        color: #475569;
+        background: rgba(248, 250, 252, 0.92);
+        text-align: center;
+        font-weight: 700;
+      }
       .showcase-card img {
         display: block;
         width: 100%;
@@ -1452,63 +1463,8 @@
                   <p data-i18n="showcaseAdminGroupText">ثماني لقطات إدارية منفصلة، وكل صورة تفتح بالحجم الكامل عند الضغط عليها.</p>
                 </div>
               </div>
-              <div class="showcase-tiles admin-gallery">
-                <button class="showcase-card" type="button" data-full="assets/showcase/admin-notifications.png" data-title="إشعارات المدرسة" data-caption="واجهة إشعارات المدرسة مع بيانات تجريبية مكتملة." aria-label="إشعارات المدرسة">
-                  <img src="assets/showcase/admin-notifications.png" alt="إشعارات المدرسة" />
-                  <figcaption>
-                    <h3>إشعارات المدرسة</h3>
-                    <p>ملخص الإشعارات والتنبيهات المرسلة خلال اليوم.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/admin-exams-trips.png" data-title="الامتحانات والفعاليات والرحلات" data-caption="شاشة الامتحانات والفعاليات والرحلات مع جدول تجريبي كامل." aria-label="الامتحانات والفعاليات والرحلات">
-                  <img src="assets/showcase/admin-exams-trips.png" alt="الامتحانات والفعاليات والرحلات" />
-                  <figcaption>
-                    <h3>الامتحانات والفعاليات والرحلات</h3>
-                    <p>مواعيد وحالات وأنشطة مع صفوف محددة.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/admin-free-teachers.png" data-title="برنامج المتفرغين" data-caption="مؤشرات المتفرغين حسب الحصة والصف بشكل تجريبي." aria-label="برنامج المتفرغين">
-                  <img src="assets/showcase/admin-free-teachers.png" alt="برنامج المتفرغين" />
-                  <figcaption>
-                    <h3>برنامج المتفرغين</h3>
-                    <p>تلخيص سريع للصفوف والمتفرغين وإجمالي التفرغ.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/admin-homeroom.png" data-title="برنامج المربين" data-caption="تعيين المربين للصفوف مع بيانات تجريبية واضحة." aria-label="برنامج المربين">
-                  <img src="assets/showcase/admin-homeroom.png" alt="برنامج المربين" />
-                  <figcaption>
-                    <h3>برنامج المربين</h3>
-                    <p>توزيع المربين على الصفوف مع الحصص المعتمدة.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/admin-duties.png" data-title="برنامج المناوبات" data-caption="جدول المناوبات اليومي مع أوقات ومواقع تجريبية." aria-label="برنامج المناوبات">
-                  <img src="assets/showcase/admin-duties.png" alt="برنامج المناوبات" />
-                  <figcaption>
-                    <h3>برنامج المناوبات</h3>
-                    <p>مناوبات صباحية ومسائية مع مربين ومواقع.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/admin-substitutions.png" data-title="برنامج الاستبدالات" data-caption="استبدالات المعلمين والحصص مع بيانات تجريبية مكتملة." aria-label="برنامج الاستبدالات">
-                  <img src="assets/showcase/admin-substitutions.png" alt="برنامج الاستبدالات" />
-                  <figcaption>
-                    <h3>برنامج الاستبدالات</h3>
-                    <p>استبدال الحصص حسب الصف والمادة والمعلم البديل.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/admin-teacher-program.png" data-title="برنامج المعلم" data-caption="برنامج المعلم اليومي بعد تعبئته ببيانات تجريبية." aria-label="برنامج المعلم">
-                  <img src="assets/showcase/admin-teacher-program.png" alt="برنامج المعلم" />
-                  <figcaption>
-                    <h3>برنامج المعلم</h3>
-                    <p>جدول حصة المعلم ومهامه داخل اليوم الدراسي.</p>
-                  </figcaption>
-                </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/admin-dashboard.png" data-title="لوحة المدير" data-caption="لوحة المدير مع مؤشرات وإحصاءات تجريبية مملوءة." aria-label="لوحة المدير">
-                  <img src="assets/showcase/admin-dashboard.png" alt="لوحة المدير" />
-                  <figcaption>
-                    <h3>لوحة المدير</h3>
-                    <p>المؤشرات العامة وملخص النشاط المدرسي.</p>
-                  </figcaption>
-                </button>
+              <div class="showcase-tiles admin-gallery" id="admin-gallery" aria-live="polite" data-showcase-source="assets/showcase/admin-gallery.json">
+                <p class="showcase-loading">جارٍ تحميل صور الإدارة...</p>
               </div>
             </article>
           </div>
@@ -2004,6 +1960,64 @@
         playTone(ctx, 880, start, 0.08, 0.018, "triangle");
       }
 
+      function createShowcaseCard(item) {
+        const button = document.createElement("button");
+        button.className = "showcase-card";
+        button.type = "button";
+        button.dataset.full = item.image;
+        button.dataset.title = item.title;
+        button.dataset.caption = item.caption;
+        button.setAttribute("aria-label", item.title);
+
+        const image = document.createElement("img");
+        image.src = item.image;
+        image.alt = item.alt || item.title;
+        image.loading = "lazy";
+
+        const caption = document.createElement("figcaption");
+        const heading = document.createElement("h3");
+        heading.textContent = item.title;
+        const body = document.createElement("p");
+        body.textContent = item.caption;
+        caption.appendChild(heading);
+        caption.appendChild(body);
+
+        button.appendChild(image);
+        button.appendChild(caption);
+        return button;
+      }
+
+      function wireShowcaseCards(scope) {
+        scope.querySelectorAll(".showcase-card[data-full]").forEach((card) => {
+          if (card.dataset.bound === "true") return;
+          card.dataset.bound = "true";
+          card.addEventListener("click", () => openLightbox(card));
+        });
+      }
+
+      async function loadAdminGallery() {
+        const adminGallery = document.querySelector("#admin-gallery");
+        if (!adminGallery) return;
+        const source = adminGallery.dataset.showcaseSource;
+        if (!source) return;
+        try {
+          const response = await fetch(source, { cache: "no-store" });
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          const items = await response.json();
+          if (!Array.isArray(items)) {
+            throw new Error("Invalid showcase payload");
+          }
+          const cards = items.filter((item) => item && item.image && item.title && item.caption);
+          adminGallery.replaceChildren(...cards.map(createShowcaseCard));
+          wireShowcaseCards(adminGallery);
+        } catch (error) {
+          adminGallery.innerHTML = '<p class="showcase-error">تعذّر تحميل صور الإدارة.</p>';
+          console.warn("Failed to load admin gallery:", error);
+        }
+      }
+
       document.addEventListener("click", (event) => {
         const target = event.target.closest("a, button, .showcase-card");
         if (target) {
@@ -2037,10 +2051,6 @@
         document.body.style.overflow = "";
       }
 
-      document.querySelectorAll(".showcase-card:not(.placeholder)").forEach((card) => {
-        card.addEventListener("click", () => openLightbox(card));
-      });
-
       lightbox.addEventListener("click", (event) => {
         if (event.target === lightbox || event.target === lightboxClose) {
           closeLightbox();
@@ -2052,6 +2062,9 @@
           closeLightbox();
         }
       });
+
+      wireShowcaseCards(document);
+      loadAdminGallery();
 
       function randomizeFeatureGhost() {
         const ghost = document.querySelector("#features .feature-ghost");

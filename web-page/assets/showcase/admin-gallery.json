@@ -1,0 +1,50 @@
+[
+  {
+    "image": "assets/showcase/admin-notifications.png",
+    "alt": "إشعارات المدرسة",
+    "title": "إشعارات المدرسة",
+    "caption": "ملخص الإشعارات والتنبيهات المرسلة خلال اليوم."
+  },
+  {
+    "image": "assets/showcase/admin-exams-trips.png",
+    "alt": "الامتحانات والفعاليات والرحلات",
+    "title": "الامتحانات والفعاليات والرحلات",
+    "caption": "مواعيد وحالات وأنشطة مع صفوف محددة."
+  },
+  {
+    "image": "assets/showcase/admin-free-teachers.png",
+    "alt": "برنامج المتفرغين",
+    "title": "برنامج المتفرغين",
+    "caption": "تلخيص سريع للصفوف والمتفرغين وإجمالي التفرغ."
+  },
+  {
+    "image": "assets/showcase/admin-homeroom.png",
+    "alt": "برنامج المربين",
+    "title": "برنامج المربين",
+    "caption": "توزيع المربين على الصفوف مع الحصص المعتمدة."
+  },
+  {
+    "image": "assets/showcase/admin-duties.png",
+    "alt": "برنامج المناوبات",
+    "title": "برنامج المناوبات",
+    "caption": "مناوبات صباحية ومسائية مع مربين ومواقع."
+  },
+  {
+    "image": "assets/showcase/admin-substitutions.png",
+    "alt": "برنامج الاستبدالات",
+    "title": "برنامج الاستبدالات",
+    "caption": "استبدال الحصص حسب الصف والمادة والمعلم البديل."
+  },
+  {
+    "image": "assets/showcase/admin-teacher-program.png",
+    "alt": "برنامج المعلم",
+    "title": "برنامج المعلم",
+    "caption": "جدول حصة المعلم ومهامه داخل اليوم الدراسي."
+  },
+  {
+    "image": "assets/showcase/admin-dashboard.png",
+    "alt": "لوحة المدير",
+    "title": "لوحة المدير",
+    "caption": "المؤشرات العامة وملخص النشاط المدرسي."
+  }
+]
