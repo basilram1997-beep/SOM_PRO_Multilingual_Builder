@@ -3,6 +3,7 @@ import { localizeClassName, localizeDay } from "../../i18n/displayNames";
 import { useI18n } from "../../i18n/i18n";
 import { BehaviorPerformanceTable } from "../../features/students/BehaviorPerformanceTable";
 import { BehaviorRecordModal } from "../../features/students/BehaviorRecordModal";
+import { getBehaviorCategoryLabelKey } from "../../features/students/behaviorTemplates";
 import { useBehaviorPerformance } from "../../features/students/useBehaviorPerformance";
 import type { AuthUser } from "../auth/LoginPage";
 
@@ -83,7 +84,7 @@ export function BehaviorPerformancePage({ currentUser }: { currentUser: AuthUser
                 )}
                 {behavior.categorySummary.map((item) => (
                   <tr key={item.category}>
-                    <td>{t(`behavior.categories.${item.category}`) || item.category}</td>
+                    <td>{t(getBehaviorCategoryLabelKey(item.category)) || item.category}</td>
                     <td>{item.total}</td>
                     <td>{item.positive}</td>
                     <td>{item.negative}</td>

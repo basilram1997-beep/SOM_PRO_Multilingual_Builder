@@ -3,7 +3,11 @@ import type { SchoolClass } from "@som/shared";
 import { sortSchoolClasses } from "@som/shared";
 import { somApi } from "../../api/somApi";
 import { useI18n } from "../../i18n/i18n";
-import { behaviorCategories, getBehaviorTemplates } from "./behaviorTemplates";
+import {
+  behaviorCategories,
+  getBehaviorTemplates,
+  normalizeBehaviorCategoryKey
+} from "./behaviorTemplates";
 import {
   emptyBehaviorForm,
   type BehaviorListResponse,
@@ -21,7 +25,7 @@ function dayForDate(date: string) {
 
 function buildForm(studentId: string, date: string, day: string, row?: BehaviorRow | null): StudentBehaviorForm {
   const existing = row?.behaviorRecords?.[0];
-  const category = existing?.category || behaviorCategories[0].key;
+  const category = existing?.category ? normalizeBehaviorCategoryKey(existing.category) : behaviorCategories[0].key;
   const tone = existing?.tone || "POSITIVE";
   const templates = getBehaviorTemplates(category, tone);
   return {
@@ -39,7 +43,7 @@ function buildForm(studentId: string, date: string, day: string, row?: BehaviorR
 
 function sortCategorySummary(items: BehaviorListResponse["categorySummary"]) {
   const order = new Map<string, number>(behaviorCategories.map((item, index) => [item.key, index]));
-  return [...items].sort((left, right) => (order.get(left.category) ?? 999) - (order.get(right.category) ?? 999));
+  return [...items].sort((left, right) => (order.get(normalizeBehaviorCategoryKey(left.category)) ?? 999) - (order.get(normalizeBehaviorCategoryKey(right.category)) ?? 999));
 }
 
 function resolveBehaviorTemplate(form: StudentBehaviorForm) {

@@ -1,7 +1,7 @@
 ﻿import { X } from "lucide-react";
 import { localizeDay } from "../../i18n/displayNames";
 import type { LanguageCode } from "../../i18n/i18n";
-import { behaviorCategories, getBehaviorCategory, getBehaviorTemplates } from "./behaviorTemplates";
+import { behaviorCategories, getBehaviorCategory, getBehaviorCategoryLabelKey, getBehaviorTemplates } from "./behaviorTemplates";
 import type { BehaviorRow, StudentBehaviorForm } from "./studentTypes";
 
 type Props = {
@@ -142,7 +142,7 @@ export function BehaviorRecordModal({
             <div className="behavior-existing-list">
               {row.behaviorRecords.map((record) => (
                 <article key={record.id || `${record.category}-${record.tone}-${record.template}`}>
-                  <span>{t(`behavior.categories.${record.category}`) || record.category}</span>
+                  <span>{t(getBehaviorCategoryLabelKey(record.category)) || record.category}</span>
                   <strong>{record.tone === "POSITIVE" ? t("behavior.positive") : t("behavior.negative")}</strong>
                   <p>{record.template}</p>
                   {record.note && <small>{record.note}</small>}

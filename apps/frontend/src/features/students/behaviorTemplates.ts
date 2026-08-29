@@ -10,6 +10,21 @@ export type BehaviorCategory = {
   negative: string[];
 };
 
+const legacyBehaviorCategoryAliases: Record<string, BehaviorCategoryKey> = {
+  الانضباط: "discipline",
+  المشاركة: "participation",
+  "المشاركة والتعلم": "participation",
+  الاحترام: "respect",
+  "الاحترام والتعامل مع الآخرين": "respect",
+  المسؤولية: "responsibility",
+  "المسؤولية والمحافظة على المقتنيات": "responsibility",
+  "العمل الجماعي": "teamwork",
+  "ضبط النفس": "selfControl",
+  "ضبط النفس وإدارة المشاعر": "selfControl",
+  السلامة: "safety",
+  "السلامة والسلوك داخل المدرسة": "safety"
+};
+
 export const behaviorCategories: BehaviorCategory[] = [
   {
     key: "discipline",
@@ -180,10 +195,19 @@ export const behaviorCategories: BehaviorCategory[] = [
 ];
 
 export function getBehaviorCategory(key: string) {
-  return behaviorCategories.find((category) => category.key === key) || behaviorCategories[0];
+  const normalizedKey = normalizeBehaviorCategoryKey(key);
+  return behaviorCategories.find((category) => category.key === normalizedKey) || behaviorCategories[0];
 }
 
 export function getBehaviorTemplates(categoryKey: string, tone: BehaviorTone) {
   const category = getBehaviorCategory(categoryKey);
   return tone === "POSITIVE" ? category.positive : category.negative;
+}
+
+export function getBehaviorCategoryLabelKey(categoryKey: string) {
+  return getBehaviorCategory(categoryKey).labelKey;
+}
+
+export function normalizeBehaviorCategoryKey(key: string) {
+  return legacyBehaviorCategoryAliases[String(key || "").trim()] || String(key || "").trim();
 }
