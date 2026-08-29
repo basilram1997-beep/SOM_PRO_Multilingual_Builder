@@ -25,7 +25,14 @@ import {
 type UseDailyScheduleOptions = {
   initialDate: string;
   language: AppLanguage;
+  currentUser: { role: string; studentId?: string | null; studentIds?: string[] | null };
   onArchiveComplete?: () => void;
+};
+
+type StudentContextResponse = {
+  student?: { id?: string; name?: string } | null;
+  class?: { id?: string; name?: string } | null;
+  subjects?: Array<{ id?: string; name?: string }>;
 };
 
 function localizePeriodName(language: AppLanguage, label: string | null | undefined, period: number) {
@@ -70,7 +77,7 @@ function mapStatuses(statuses: DailyStatusDraft[]) {
   }));
 }
 
-export function useDailySchedule({ initialDate, language, onArchiveComplete }: UseDailyScheduleOptions) {
+export function useDailySchedule({ initialDate, language, currentUser, onArchiveComplete }: UseDailyScheduleOptions) {
   const [date, setDate] = useState(initialDate);
   const [workingDays, setWorkingDays] = useState<string[]>(defaultWorkingDays);
   const [periodsPerDay, setPeriodsPerDay] = useState(7);
@@ -99,6 +106,11 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
   const [loadingTeacherPrograms, setLoadingTeacherPrograms] = useState(false);
   const [subModal, setSubModal] = useState<DailySubstitution | null>(null);
   const [allClasses, setAllClasses] = useState<Array<{ id: string; name: string }>>([]);
+  const [studentClassId, setStudentClassId] = useState("");
+  const [studentClassName, setStudentClassName] = useState("");
+  const [studentContextLoaded, setStudentContextLoaded] = useState(
+    currentUser.role !== "STUDENT" && currentUser.role !== "PARENT"
+  );
   const [dayBaseSlots, setDayBaseSlots] = useState<DailyBaseSlot[]>([]);
   const [events, setEvents] = useState<DailyEvent[]>([]);
   const [eventForm, setEventForm] = useState<DailyEventForm>(emptyEventForm());
@@ -112,6 +124,46 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
   useEffect(() => {
     setDate(initialDate);
   }, [initialDate]);
+
+  useEffect(() => {
+    if (currentUser.role !== "STUDENT" && currentUser.role !== "PARENT") {
+      setStudentClassId("");
+      setStudentClassName("");
+      setStudentContextLoaded(true);
+      return;
+    }
+
+    const linkedStudentId = currentUser.studentId || currentUser.studentIds?.[0] || "";
+    if (!linkedStudentId) {
+      setStudentClassId("");
+      setStudentClassName("");
+      setStudentContextLoaded(true);
+      return;
+    }
+
+    let active = true;
+    setStudentContextLoaded(false);
+    somApi.students
+      .context(linkedStudentId)
+      .then((response) => {
+        if (!active) return;
+        const context = (response.data || {}) as StudentContextResponse;
+        setStudentClassId(context.class?.id || "");
+        setStudentClassName(context.class?.name || "");
+      })
+      .catch(() => {
+        if (!active) return;
+        setStudentClassId("");
+        setStudentClassName("");
+      })
+      .finally(() => {
+        if (active) setStudentContextLoaded(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [currentUser.role, currentUser.studentId, currentUser.studentIds]);
 
   function periodDisplay(period: number) {
     const def = periodDefinitions.find((p) => p.period === period);
@@ -324,10 +376,14 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
   const dailyDuties = result?.duties || [];
 
   const classes = useMemo(() => {
+    if ((currentUser.role === "STUDENT" || currentUser.role === "PARENT") && studentContextLoaded && studentClassId) {
+      const matched = allClasses.find((item) => item.id === studentClassId);
+      return matched ? [matched] : [];
+    }
     const map = new Map<string, { id?: string; name: string }>();
     baseSlots.forEach((slot) => map.set(slot.classId, slot.class));
     return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, "ar"));
-  }, [baseSlots]);
+  }, [allClasses, baseSlots, currentUser.role, studentClassId, studentContextLoaded]);
 
   function slotFor(classId: string, period: number) {
     return baseSlots.find((slot) => slot.classId === classId && slot.period === period);
@@ -488,6 +544,9 @@ export function useDailySchedule({ initialDate, language, onArchiveComplete }: U
     openSubstitutionCell,
     availableTeachersFor,
     applyManualSubstitute,
-    visibleTeacherPrograms
+    visibleTeacherPrograms,
+    studentClassId,
+    studentClassName,
+    studentContextLoaded
   };
 }

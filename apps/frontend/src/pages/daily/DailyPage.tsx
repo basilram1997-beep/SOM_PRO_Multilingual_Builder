@@ -57,7 +57,7 @@ export function DailyPage({
 }) {
   const { t, language } = useI18n();
   const resolvedInitialDate = initialDate || new Date().toISOString().slice(0, 10);
-  const daily = useDailySchedule({ initialDate: resolvedInitialDate, language, onArchiveComplete });
+  const daily = useDailySchedule({ initialDate: resolvedInitialDate, language, currentUser, onArchiveComplete });
   const isTeacher = currentUser.role === "TEACHER";
 
   useEffect(() => {

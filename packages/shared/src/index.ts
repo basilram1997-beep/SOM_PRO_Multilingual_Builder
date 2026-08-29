@@ -128,6 +128,15 @@ export const SchoolInfoSchema = z.object({
   address: z.string().optional().nullable()
 });
 
+export const DesktopLicenseSetupSchema = z.object({
+  schoolName: z.string().optional(),
+  institutionCode: z.string().optional(),
+  licenseCode: z.string().trim().min(1),
+  plan: z.string().optional(),
+  expiresAt: z.string().optional(),
+  maxDevices: z.union([z.number().int().min(1), z.string().trim().min(1)]).optional()
+});
+
 export const PeriodDefinitionSchema = z.object({
   period: PeriodSchema,
   label: z.string().min(1),
@@ -551,6 +560,7 @@ export const GenerateDailyScheduleSchema = z.object({
 });
 
 export type SchoolInfo = z.infer<typeof SchoolInfoSchema>;
+export type DesktopLicenseSetup = z.infer<typeof DesktopLicenseSetupSchema>;
 export type SchoolSettings = z.infer<typeof SchoolSettingsSchema>;
 export type PeriodDefinition = z.infer<typeof PeriodDefinitionSchema>;
 export type Teacher = z.infer<typeof TeacherSchema>;

@@ -3,6 +3,7 @@ import { somApi } from "../../api/somApi";
 import { setAuthToken } from "../../api/http";
 import type { AuthUser } from "./authTypes";
 import { useI18n } from "../../i18n/i18n";
+import { loadPersistedLicenseSetup, savePersistedLicenseSetup } from "../licensing/licensePersistence";
 
 let rememberedLoginEmail = "";
 let rememberedLoginEnabled = false;
@@ -111,12 +112,24 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
       setLicenseCode(installCode);
     }
 
+    let cancelled = false;
+    loadPersistedLicenseSetup()
+      .then((setup) => {
+        if (cancelled || !setup?.licenseCode) return;
+        setLicenseCode((current) => (current.trim() ? current : setup.licenseCode!.trim()));
+      })
+      .catch(() => null);
+
     if (rememberedLoginEnabled) {
       setRemember(true);
       if (rememberedLoginEmail) {
         setEmail(rememberedLoginEmail);
       }
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [setupLicenseCode]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -140,7 +153,7 @@ export function useLogin(onLogin: (user: AuthUser) => void) {
       const res = await somApi.auth.login(email, password, enteredLicense);
       setAuthToken(res.data.token);
       try {
-        await window.somDesktop?.saveLicenseSetup?.({ licenseCode: enteredLicense });
+        await savePersistedLicenseSetup({ licenseCode: enteredLicense });
       } catch {
         // Best effort only. Login must still succeed if local persistence is unavailable.
       }

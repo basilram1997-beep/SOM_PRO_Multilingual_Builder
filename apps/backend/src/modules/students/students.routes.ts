@@ -239,6 +239,28 @@ async function canManageCertificateNotesForClass(schoolId: string, classId: stri
   return isHomeroomTeacherForClass(schoolId, classId, user);
 }
 
+function normalizeStudentDisplayName(student: {
+  name: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  class?: { name?: string | null } | null;
+}) {
+  const firstName = student.firstName?.trim() || "";
+  const lastName = student.lastName?.trim() || "";
+  if (firstName || lastName) {
+    return `${firstName} ${lastName}`.trim();
+  }
+
+  const name = student.name?.trim() || "";
+  const className = student.class?.name?.trim() || "";
+  const classSuffix = className ? ` - ${className}` : "";
+  if (classSuffix && name.endsWith(classSuffix)) {
+    return name.slice(0, -classSuffix.length).trim();
+  }
+
+  return name;
+}
+
 async function saveAttendanceRecord(req: any, res: any) {
   const schoolId = await getRequestSchoolId(req);
   const teacherScope = await getTeacherScopeForRequest(req, schoolId);
@@ -1185,7 +1207,16 @@ studentsRouter.get("/", async (req, res) => {
       where: { schoolId, id: viewerStudent.id },
       include: { class: true }
     });
-    return res.json({ data: ownStudent ? [ownStudent] : [] });
+    return res.json({
+      data: ownStudent
+        ? [
+            {
+              ...ownStudent,
+              name: normalizeStudentDisplayName(ownStudent)
+            }
+          ]
+        : []
+    });
   }
   if (teacherScope && classId && !teacherCanAccessClass(teacherScope, classId)) {
     return res.status(403).json({
@@ -1208,7 +1239,12 @@ studentsRouter.get("/", async (req, res) => {
     include: { class: true },
     orderBy: [{ class: { name: "asc" } }, { name: "asc" }]
   });
-  res.json({ data: students });
+  res.json({
+    data: students.map((student) => ({
+      ...student,
+      name: normalizeStudentDisplayName(student)
+    }))
+  });
 });
 studentsRouter.post("/", requirePermissionForWrite("manageSettings"), validateBody(StudentSchema), async (req, res) => {
   if (req.user?.role === "TEACHER") return teacherWriteForbidden(res);

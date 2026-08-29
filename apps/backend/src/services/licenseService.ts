@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import os from "node:os";
 import { LicenseStatus, Prisma, UserRole } from "@prisma/client";
+import { DesktopLicenseSetupSchema, type DesktopLicenseSetup } from "@som/shared";
 import { prisma } from "../db/prisma";
 import { getDefaultSchoolId } from "./schoolContext";
 import { evaluateLicensePolicy } from "./licensePolicy";
@@ -76,6 +77,9 @@ type LicenseMetadata = Record<string, unknown> & {
   centralLastSuccessAt?: string;
   gracePeriodUntil?: string;
   device?: Required<LicenseDeviceInfo>;
+  licenseCode?: string;
+  licenseSetup?: DesktopLicenseSetup;
+  licenseSetupSavedAt?: string;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -137,7 +141,12 @@ function parseShortLicenseKey(licenseKey: string): LicensePayload {
   }
 
   const payloadPart = institutionCode.toUpperCase();
-  if (shortLicenseSignature(payloadPart) !== String(signature || "").trim().toUpperCase()) {
+  if (
+    shortLicenseSignature(payloadPart) !==
+    String(signature || "")
+      .trim()
+      .toUpperCase()
+  ) {
     throw new Error("INVALID_LICENSE_SIGNATURE");
   }
 
@@ -319,12 +328,66 @@ function buildActivationMetadata(
   device: Required<LicenseDeviceInfo>,
   cleanLicense: string
 ): LicenseMetadata {
+  const licenseSetup: DesktopLicenseSetup = {
+    schoolName: payload.schoolName,
+    institutionCode: payload.institutionCode,
+    licenseCode: cleanLicense,
+    plan: payload.plan,
+    expiresAt: payload.expiresAt,
+    maxDevices: payload.maxDevices
+  };
   return {
     ...payload,
     codeType: cleanLicense.includes(".") ? "SIGNED_KEY" : "SHORT_CODE",
     device,
     centralLastSuccessAt: new Date().toISOString(),
-    allowedFeatures: payload.allowedFeatures || []
+    allowedFeatures: payload.allowedFeatures || [],
+    licenseCode: cleanLicense,
+    licenseSetup,
+    licenseSetupSavedAt: new Date().toISOString()
+  };
+}
+
+function normalizeLicenseSetup(value: unknown): DesktopLicenseSetup | null {
+  const parsed = DesktopLicenseSetupSchema.safeParse(value);
+  if (!parsed.success) return null;
+  return {
+    schoolName: parsed.data.schoolName?.trim() || undefined,
+    institutionCode: parsed.data.institutionCode?.trim() || undefined,
+    licenseCode: parsed.data.licenseCode.trim(),
+    plan: parsed.data.plan?.trim() || undefined,
+    expiresAt: parsed.data.expiresAt?.trim() || undefined,
+    maxDevices: typeof parsed.data.maxDevices === "string" ? parsed.data.maxDevices.trim() : parsed.data.maxDevices
+  };
+}
+
+function licenseSetupFromActivation(activation: {
+  schoolName: string | null;
+  institutionCode: string | null;
+  plan: string;
+  expiresAt: Date;
+  maxDevices: number;
+  metadata: unknown;
+}): DesktopLicenseSetup | null {
+  const metadata = metadataObject(activation.metadata);
+  const saved = normalizeLicenseSetup(metadata.licenseSetup);
+  const licenseCode = typeof metadata.licenseCode === "string" ? metadata.licenseCode.trim() : "";
+
+  if (saved) {
+    return {
+      ...saved,
+      licenseCode: saved.licenseCode || licenseCode
+    };
+  }
+
+  if (!licenseCode) return null;
+  return {
+    schoolName: activation.schoolName || undefined,
+    institutionCode: activation.institutionCode || undefined,
+    licenseCode,
+    plan: activation.plan || undefined,
+    expiresAt: activation.expiresAt.toISOString(),
+    maxDevices: activation.maxDevices
   };
 }
 
@@ -403,6 +466,52 @@ export async function activateLicense(licenseKey: string, schoolIdOverride?: str
     adminUser,
     adminAccount: buildAdminAccountResult(payload.adminAccount)
   };
+}
+
+export async function getPersistedLicenseSetup(schoolIdOverride?: string) {
+  const schoolId = schoolIdOverride || (await getDefaultSchoolId());
+  const activation = await getPrimaryLicenseActivation(schoolId);
+  return licenseSetupFromActivation(activation);
+}
+
+export async function savePersistedLicenseSetup(
+  setup: DesktopLicenseSetup,
+  schoolIdOverride?: string,
+  deviceInfo?: LicenseDeviceInfo
+) {
+  const schoolId = schoolIdOverride || (await getDefaultSchoolId());
+  const activation = await getPrimaryLicenseActivation(schoolId);
+  const normalizedDevice = normalizeDeviceInfo(deviceInfo);
+  const cleanSetup = normalizeLicenseSetup(setup);
+  if (!cleanSetup) throw new Error("INVALID_LICENSE_SETUP");
+
+  const metadata = metadataObject(activation.metadata);
+  const nextMetadata = {
+    ...metadata,
+    licenseCode: cleanSetup.licenseCode,
+    licenseSetup: cleanSetup,
+    licenseSetupSavedAt: new Date().toISOString(),
+    device: normalizedDevice
+  };
+
+  const expiresAt = cleanSetup.expiresAt ? new Date(cleanSetup.expiresAt) : activation.expiresAt;
+  await prisma.licenseActivation.update({
+    where: { id: activation.id },
+    data: {
+      schoolName: cleanSetup.schoolName || activation.schoolName,
+      institutionCode: cleanSetup.institutionCode || activation.institutionCode,
+      plan: cleanSetup.plan || activation.plan,
+      maxDevices:
+        typeof cleanSetup.maxDevices === "string"
+          ? Number(cleanSetup.maxDevices) || activation.maxDevices
+          : cleanSetup.maxDevices || activation.maxDevices,
+      expiresAt: Number.isNaN(expiresAt.getTime()) ? activation.expiresAt : expiresAt,
+      lastCheckAt: new Date(),
+      metadata: nextMetadata as Prisma.InputJsonValue
+    }
+  });
+
+  return cleanSetup;
 }
 
 export async function bootstrapLicenseAccess(licenseKey: string, deviceInfo?: LicenseDeviceInfo) {

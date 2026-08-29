@@ -76,6 +76,7 @@ import type {
   StudentAttendance,
   StudentCertificate
 } from "@som/shared";
+import type { DesktopLicenseSetup } from "../types/somDesktop";
 
 type BootstrapLicenseResponse = {
   ok: boolean;
@@ -200,7 +201,9 @@ export const somApi = {
   license: {
     status: () => api.get<{ data: LicenseState }>("/api/license/status"),
     activate: (licenseCode: string) =>
-      api.post<{ data: LicenseState }>("/api/license/activate", optionalLoginLicenseFields(licenseCode))
+      api.post<{ data: LicenseState }>("/api/license/activate", optionalLoginLicenseFields(licenseCode)),
+    setup: () => api.get<{ data: DesktopLicenseSetup | null }>("/api/license/setup"),
+    saveSetup: (data: DesktopLicenseSetup) => api.put<{ data: DesktopLicenseSetup }>("/api/license/setup", data)
   },
   stats: {
     get: (date?: string) => api.get<{ data: ApiRecord }>(`/api/stats${date ? `?date=${encodeURIComponent(date)}` : ""}`)

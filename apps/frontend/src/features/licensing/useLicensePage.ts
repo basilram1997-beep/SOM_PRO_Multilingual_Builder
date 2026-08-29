@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { somApi } from "../../api/somApi";
 import { useI18n } from "../../i18n/i18n";
 import type { DesktopLicenseSetup } from "../../types/somDesktop";
+import { loadPersistedLicenseSetup, savePersistedLicenseSetup } from "./licensePersistence";
 import { formatDate, parseLicensePayload } from "./licenseHelpers";
 import { buildLicenseLabels, type LicenseStatus } from "./licenseTypes";
 
@@ -78,13 +79,13 @@ export function useLicensePage() {
           lastSuccessfulLicenseState = activated.data as LicenseStatus;
           setLicense(activated.data as LicenseStatus);
           try {
-            await window.somDesktop?.saveLicenseSetup?.({
+            await savePersistedLicenseSetup({
               licenseCode: cleanKey,
-              schoolName: activated.data.schoolName,
-              institutionCode: activated.data.institutionCode,
-              plan: activated.data.plan,
+              schoolName: activated.data.schoolName || undefined,
+              institutionCode: activated.data.institutionCode || undefined,
+              plan: activated.data.plan || undefined,
               expiresAt: activated.data.expiresAt,
-              maxDevices: activated.data.maxDevices
+              maxDevices: activated.data.maxDevices ?? undefined
             });
           } catch {
             // Best effort only. The activation state itself already succeeded.
@@ -104,15 +105,27 @@ export function useLicensePage() {
   );
 
   useEffect(() => {
-    const setup = window.somDesktop?.licenseSetup || null;
-    setInstallerSetup(setup);
-    load().catch(() => setMessage(setup ? labels.setupFallback : labels.loadError));
-    const setupKey = setup?.licenseCode?.trim();
-    if (setupKey) setLicenseKey(setupKey);
-    if (setupKey && readAppliedInstallerLicense() !== setupKey) {
-      activateWithKey(setupKey, true);
-    }
+    let cancelled = false;
+    loadPersistedLicenseSetup()
+      .then((setup) => {
+        if (cancelled) return;
+        setInstallerSetup(setup);
+        const setupKey = setup?.licenseCode?.trim();
+        if (setupKey) setLicenseKey(setupKey);
+        if (setupKey && readAppliedInstallerLicense() !== setupKey) {
+          activateWithKey(setupKey, true);
+        }
+        load().catch(() => setMessage(setup ? labels.setupFallback : labels.loadError));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setInstallerSetup(window.somDesktop?.licenseSetup || null);
+        load().catch(() => setMessage(labels.loadError));
+      });
     // Labels depend on the active locale, so rebuild them when the language changes.
+    return () => {
+      cancelled = true;
+    };
   }, [labels, activateWithKey, load]);
 
   async function activate() {

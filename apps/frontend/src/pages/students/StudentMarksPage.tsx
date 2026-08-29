@@ -352,11 +352,6 @@ export function StudentMarksPage({ currentUser }: Props) {
             />
           </div>
         )}
-        {isStudentViewer && gradeEntry.subjectId && (
-          <button type="button" className="secondary" onClick={() => gradeEntry.setSubjectId("")}>
-            {t("common.back")}
-          </button>
-        )}
       </div>
 
       <Card>

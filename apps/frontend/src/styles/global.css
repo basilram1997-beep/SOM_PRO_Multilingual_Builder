@@ -1630,24 +1630,29 @@ html[dir="rtl"] .teachers-page .wide-table tbody tr.selected td:first-child {
   border-collapse: separate;
   border-spacing: 0;
   background: #ffffff;
+  table-layout: fixed;
 }
 #base-schedule-grid .daily-grid-table th,
 #base-schedule-grid .daily-grid-table td {
   border-inline-end: 1.5px solid #94a3b8;
   border-bottom: 1.5px solid #94a3b8;
   background-clip: padding-box;
+  text-align: center;
 }
 #base-schedule-grid .daily-grid-table thead th {
   border-top: 1.5px solid #94a3b8;
-  background: #dbeafe;
-  color: #0f172a;
+  background: linear-gradient(180deg, #ffe96a 0%, #ffd93d 100%);
+  color: #b42318;
   font-weight: 900;
+  font-size: 12px;
 }
 #base-schedule-grid .daily-grid-table th:first-child,
 #base-schedule-grid .daily-grid-table td:first-child,
 #base-schedule-grid .daily-grid-table .period-time-header {
   border-inline-start: 1.5px solid #94a3b8;
-  background: #e6eefc;
+  background: linear-gradient(180deg, #fff280 0%, #ffe24d 100%);
+  color: #b42318;
+  font-weight: 900;
 }
 #base-schedule-grid .daily-grid-table tbody tr:nth-child(even) td:not(.free-period) {
   background: #f8fafc;
@@ -1657,8 +1662,36 @@ html[dir="rtl"] .teachers-page .wide-table tbody tr.selected td:first-child {
   background: #eff6ff;
 }
 #base-schedule-grid .daily-grid-table .free-period {
-  background: #f1f5f9;
+  background: #fffdf0;
   color: #64748b;
+}
+#base-schedule-grid .daily-grid-table .period-time-header strong {
+  display: block;
+  font-size: 12px;
+}
+#base-schedule-grid .daily-grid-table .period-time-header span {
+  display: block;
+  color: #9a3412;
+  font-size: 11px;
+  margin-top: 3px;
+}
+#base-schedule-grid .daily-grid-table .daily-cell {
+  min-width: 120px;
+  padding: 10px 8px;
+}
+#base-schedule-grid .daily-grid-table .daily-cell strong {
+  font-size: 12px;
+  color: #111827;
+}
+#base-schedule-grid .daily-grid-table .daily-cell span {
+  font-size: 11px;
+  color: #111827;
+}
+#base-schedule-grid .daily-grid-table tbody tr td {
+  background: #fffef8;
+}
+#base-schedule-grid .daily-grid-table tbody tr:nth-child(even) td {
+  background: #fffaf0;
 }
 
 /* Daily page clear table borders */

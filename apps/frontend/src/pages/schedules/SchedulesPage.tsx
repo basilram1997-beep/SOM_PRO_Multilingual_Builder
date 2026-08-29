@@ -506,7 +506,7 @@ export function SchedulesPage({ currentUser }: { currentUser: AuthUser }) {
           <table className="daily-grid-table flipped-daily-grid">
             <thead>
               <tr>
-                <th>{t("common.period")}</th>
+                <th>{language === "ar" ? "الحصة / الصف" : `${t("timetable.period")} / ${t("timetable.class")}`}</th>
                 {schedules.classes.map((cls) => (
                   <th key={cls.id || cls.name}>{localizeClassName(cls.name, language)}</th>
                 ))}
@@ -522,7 +522,6 @@ export function SchedulesPage({ currentUser }: { currentUser: AuthUser }) {
               {schedules.classes.length > 0 &&
                 schedules.periods.map((period) => {
                   const display = schedules.periodDisplay(period);
-
                   return (
                     <tr key={period}>
                       <th className="period-time-header">
@@ -535,7 +534,7 @@ export function SchedulesPage({ currentUser }: { currentUser: AuthUser }) {
 
                         return (
                           <td
-                            key={classKey}
+                            key={`${classKey}-${period}`}
                             className={slot ? "daily-cell teacher-color-cell" : "free-period"}
                             style={slot ? teacherColorStyle(slot.teacher) : undefined}
                           >
@@ -543,16 +542,6 @@ export function SchedulesPage({ currentUser }: { currentUser: AuthUser }) {
                               <>
                                 <strong>{localizeSubjectName(slot.subject?.name || "", language)}</strong>
                                 <span>{localizeTeacherName(slot.teacher?.name || "", language)}</span>
-                                {slot.room ? (
-                                  <span className="schedule-room-cell">
-                                    {ui.roomLabel}: {slot.room}
-                                  </span>
-                                ) : null}
-                                {!isTeacher ? (
-                                  <button className="light" onClick={() => openRoomEditor(slot)}>
-                                    {ui.editRoom}
-                                  </button>
-                                ) : null}
                               </>
                             ) : (
                               t("daily.free")

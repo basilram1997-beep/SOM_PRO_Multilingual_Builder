@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { apiErrorMessage, isLocalApiUrl, readResponseBody } from "./httpUtils";
 import { readStoredValue, removeStoredValue, writeStoredValue } from "../lib/browserStorage";
 
@@ -12,6 +13,8 @@ const LOCAL_API_CONNECTION_MESSAGE =
 const SAAS_CONNECTION_MESSAGE = "تعذر الاتصال بخادم SOM PRO. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.";
 const GENERIC_API_ERROR_MESSAGE = "حدث خطأ في الاتصال بالخادم";
 const PRODUCTION_HTTPS_ERROR = "يجب ضبط عنوان الخادم في بيئة الإنتاج ليكون HTTPS. نسخ SaaS لا يجب أن تعتمد على HTTP.";
+const MOBILE_API_URL_ERROR =
+  "نسخة الهاتف تحتاج عنوان API خارجي عبر VITE_API_URL ويجب أن يكون HTTPS قبل التصدير إلى Google Play أو App Store.";
 
 function fileNameFromDisposition(header: string | null) {
   if (!header) return "";
@@ -57,9 +60,7 @@ function clearCurrentAuthTokenStorage() {
 export function getAuthToken() {
   if (authTokenMemory) return authTokenMemory;
   const storedToken =
-    readStoredValue("sessionStorage", SESSION_AUTH_TOKEN_KEY) ||
-    readStoredValue("localStorage", AUTH_TOKEN_KEY) ||
-    "";
+    readStoredValue("sessionStorage", SESSION_AUTH_TOKEN_KEY) || readStoredValue("localStorage", AUTH_TOKEN_KEY) || "";
   authTokenMemory = storedToken;
   return authTokenMemory;
 }
@@ -87,6 +88,12 @@ function resolveApiUrl() {
   const desktopApiUrl = window.somDesktop?.apiUrl?.trim();
   if (desktopApiUrl) return desktopApiUrl;
   if (desktopMode === "local-trial" || desktopMode === "development") return LOCAL_API_URL;
+  if (Capacitor.isNativePlatform()) {
+    if (!ENV_API_URL) {
+      throw new Error(MOBILE_API_URL_ERROR);
+    }
+    return ENV_API_URL;
+  }
   if (window.location.protocol === "file:" || isLoopbackHost(window.location.hostname)) return LOCAL_API_URL;
   return ENV_API_URL || SAME_ORIGIN_API_URL;
 }
@@ -105,6 +112,12 @@ function ensureProductionApiIsSecure() {
   if (!import.meta.env.PROD) return;
   if (window.somDesktop?.mode === "local-trial" || window.somDesktop?.mode === "development") return;
   if (window.location.protocol === "file:") return;
+  if (Capacitor.isNativePlatform()) {
+    if (!ENV_API_URL || !/^https:\/\//i.test(ENV_API_URL)) {
+      throw new Error(MOBILE_API_URL_ERROR);
+    }
+    return;
+  }
   if (isLocalApiUrl(API_URL)) return;
   if (window.somDesktop) return;
   if (/^https:\/\//i.test(API_URL) || !/^http:\/\//i.test(API_URL)) return;

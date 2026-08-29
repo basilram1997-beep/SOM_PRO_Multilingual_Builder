@@ -1,10 +1,16 @@
 import { Router, type Request, type Response } from "express";
 import { Prisma } from "@prisma/client";
+import { DesktopLicenseSetupSchema } from "@som/shared";
 import { authenticateRequest, requirePermission } from "../../middleware/auth";
 import { validateBody } from "../../middleware/validate";
 import { createRateLimitMiddleware, rejectMultipartContent } from "../../middleware/requestProtections";
 import { prisma } from "../../db/prisma";
-import { activateLicense, getLicenseState } from "../../services/licenseService";
+import {
+  activateLicense,
+  getLicenseState,
+  getPersistedLicenseSetup,
+  savePersistedLicenseSetup
+} from "../../services/licenseService";
 import { getRequestDeviceInfo } from "../../services/deviceContext";
 import { recordAuditLog } from "../../services/auditLog";
 import { logSafeError } from "../../lib/safeLog";
@@ -80,6 +86,38 @@ licenseRouter.get("/status", licenseStatusRateLimit, attachOptionalAuth, async (
 licenseRouter.post("/status", licenseStatusRateLimit, attachOptionalAuth, async (req, res) => {
   await sendLicenseState(req, res);
 });
+
+licenseRouter.get("/setup", authenticateRequest, requirePermission("manageLicense"), async (req, res) => {
+  const setup = await getPersistedLicenseSetup(req.user!.schoolId);
+  res.json({ data: setup });
+});
+
+licenseRouter.put(
+  "/setup",
+  authenticateRequest,
+  requirePermission("manageLicense"),
+  validateBody(DesktopLicenseSetupSchema),
+  async (req, res) => {
+    try {
+      const setup = await savePersistedLicenseSetup(req.body, req.user!.schoolId, getRequestDeviceInfo(req));
+      recordAuditLog(prisma, {
+        schoolId: req.user!.schoolId,
+        userId: req.user?.id || req.user?.userId || null,
+        action: "LICENSE_SETUP_SAVE",
+        entity: "License",
+        entityId: req.user!.schoolId,
+        after: setup as Prisma.InputJsonValue
+      });
+      res.json({ data: setup });
+    } catch (error: unknown) {
+      logSafeError("license.setup.save", error);
+      res.status(400).json({
+        error: "LICENSE_SETUP_SAVE_FAILED",
+        message: "تعذر حفظ إعدادات الترخيص"
+      });
+    }
+  }
+);
 
 licenseRouter.post(
   "/activate",

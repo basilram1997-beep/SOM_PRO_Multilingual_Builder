@@ -71,6 +71,16 @@ export function useGradeEntry(currentUser: AuthUser, language: AppLanguage) {
     () => new Set(teacherAssignments.map((assignment) => assignment.classId)),
     [teacherAssignments]
   );
+  const accessibleClasses = useMemo(() => {
+    if (currentUser.role !== "TEACHER") return classes;
+    if (!currentTeacher) return [];
+    if (teacherClassIds.size === 0) return [];
+    return classes.filter((item) => {
+      const id = item.id;
+      if (!id) return false;
+      return teacherClassIds.has(id);
+    });
+  }, [classes, currentTeacher, currentUser.role, teacherClassIds]);
 
   const selectedClassAccessible = useMemo(() => {
     if (!currentTeacher) return true;
@@ -90,7 +100,10 @@ export function useGradeEntry(currentUser: AuthUser, language: AppLanguage) {
     return subjects.filter((item) => Boolean(item.id) && subjectIds.has(item.id || ""));
   }, [classId, currentTeacher, selectedClassAccessible, subjects, teacherAssignments]);
 
-  const selectedClass = useMemo(() => classes.find((item) => item.id === classId) || null, [classes, classId]);
+  const selectedClass = useMemo(() => accessibleClasses.find((item) => item.id === classId) || null, [
+    accessibleClasses,
+    classId
+  ]);
   const selectedSubject = useMemo(() => subjects.find((item) => item.id === subjectId) || null, [subjects, subjectId]);
   const selectedSubjectAccessible = useMemo(() => {
     if (!currentTeacher) return true;
@@ -135,15 +148,22 @@ export function useGradeEntry(currentUser: AuthUser, language: AppLanguage) {
         setTeacher(nextTeacher);
         setTeacherAssignments(nextAssignments);
 
-        setClassId(
-          (previous) =>
-            previous ||
-            (currentUser.role === "TEACHER"
-              ? nextClasses.find((item) => nextAssignments.some((assignment) => assignment.classId === item.id))?.id ||
-                nextClasses[0]?.id ||
-                ""
-              : nextClasses[0]?.id || "")
-        );
+        const nextTeacherClassIds = new Set(nextAssignments.map((assignment) => assignment.classId));
+        const nextAccessibleClasses =
+          currentUser.role === "TEACHER"
+            ? nextClasses.filter((item) => {
+                const id = item.id;
+                if (!id) return false;
+                return nextTeacherClassIds.has(id);
+              })
+            : nextClasses;
+        const nextClassId = nextAccessibleClasses[0]?.id || "";
+        setClassId((previous) => {
+          if (previous && nextAccessibleClasses.some((item) => item.id === previous)) {
+            return previous;
+          }
+          return nextClassId;
+        });
         setSubjectId(
           (previous) =>
             previous ||
@@ -417,8 +437,8 @@ export function useGradeEntry(currentUser: AuthUser, language: AppLanguage) {
 
   const totalWeight = sections.reduce((sum, section) => sum + (Number(section.percentage) || 0), 0);
 
-  return {
-    classes,
+    return {
+    classes: accessibleClasses,
     students,
     subjects: accessibleSubjects,
     teacher,

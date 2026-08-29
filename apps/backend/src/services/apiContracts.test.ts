@@ -155,6 +155,13 @@ test("API route contracts consistently use data wrappers for success responses",
   }
 });
 
+test("license routes expose persistent setup endpoints", () => {
+  const source = readFileSync("src/modules/license/license.routes.ts", "utf8");
+  assert.match(source, /licenseRouter\.get\("\/setup"/, "license setup lookup route should exist");
+  assert.match(source, /licenseRouter\.put\([\s\S]*?"\/setup"/, "license setup save route should exist");
+  assert.match(source, /savePersistedLicenseSetup\(/, "license setup route should store data centrally");
+});
+
 test("student certificates routes expose persistent storage endpoints", () => {
   const source = readFileSync("src/modules/students/students.routes.ts", "utf8");
   assert.match(source, /studentsRouter\.get\("\/certificates"/, "certificates lookup route should exist");
