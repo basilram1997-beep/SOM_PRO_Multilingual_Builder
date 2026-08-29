@@ -24,6 +24,12 @@
     "caption": "جدول البرنامج اليومي بعد تعبئة الحصص والمواد."
   },
   {
+    "image": "assets/showcase/admin-reports.png",
+    "alt": "التقارير",
+    "title": "التقارير",
+    "caption": "صفحة التقارير مع رسومات الاستبدالات ومخطط الجودة."
+  },
+  {
     "image": "assets/showcase/admin-free-teachers.png",
     "alt": "برنامج المتفرغين",
     "title": "برنامج المتفرغين",
