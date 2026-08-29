@@ -310,18 +310,14 @@
       }
       .metric {
         position: relative;
-        overflow: hidden;
+        overflow: visible;
         background: rgba(255, 255, 255, 0.12);
         border: 1px solid rgba(255, 255, 255, 0.16);
-        border-radius: 20px;
+        border-radius: 14px;
         padding: 16px 18px;
         backdrop-filter: blur(8px);
-        clip-path: polygon(
-          14% 0,
-          100% 0,
-          86% 100%,
-          0 100%
-        );
+        min-width: 0;
+        text-align: start;
       }
       .metric strong {
         display: block;
@@ -330,9 +326,11 @@
         margin-bottom: 8px;
       }
       .metric span {
+        display: block;
         color: rgba(226, 239, 255, 0.86);
         font-size: 14px;
         line-height: 1.75;
+        overflow-wrap: anywhere;
         white-space: pre-line;
       }
       .hero-panel {
@@ -669,6 +667,9 @@
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 18px;
       }
+      .admin-gallery {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
       .showcase-card {
         appearance: none;
         border: 1px solid var(--line);
@@ -687,14 +688,38 @@
           box-shadow 0.18s ease,
           border-color 0.18s ease;
       }
+      .showcase-card.placeholder {
+        cursor: default;
+      }
       .showcase-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 22px 48px rgba(15, 23, 42, 0.1);
         border-color: rgba(37, 99, 235, 0.26);
       }
+      .showcase-card.placeholder:hover {
+        transform: none;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.07);
+        border-color: var(--line);
+      }
       .showcase-card:focus-visible {
         outline: 3px solid rgba(37, 99, 235, 0.45);
         outline-offset: 3px;
+      }
+      .showcase-card.placeholder .placeholder-frame {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 280px;
+        border-radius: 20px;
+        border: 1px dashed rgba(148, 163, 184, 0.75);
+        background:
+          linear-gradient(135deg, rgba(248, 250, 252, 0.96), rgba(255, 255, 255, 0.98));
+        color: #334155;
+        text-align: center;
+        padding: 18px;
+        font-weight: 800;
+        line-height: 1.6;
+        font-size: 16px;
       }
       .showcase-card img {
         display: block;
@@ -704,6 +729,11 @@
         border-radius: 20px;
         border: 1px solid rgba(214, 223, 235, 0.9);
         background: #e7eef8;
+      }
+      .admin-gallery .showcase-card img {
+        height: 320px;
+        object-fit: contain;
+        background: #f8fafc;
       }
       .showcase-card figcaption {
         display: grid;
@@ -1068,6 +1098,24 @@
         .hero-metrics {
           grid-template-columns: 1fr;
         }
+        .hero-metrics {
+          gap: 16px;
+          max-width: none;
+        }
+        .metric {
+          padding: 20px 22px;
+          border-radius: 14px;
+          min-height: 128px;
+        }
+        .metric strong {
+          font-size: 22px;
+          line-height: 1.35;
+          margin-bottom: 10px;
+        }
+        .metric span {
+          font-size: 15px;
+          line-height: 1.8;
+        }
         #features .features-grid {
           grid-template-columns: 1fr;
         }
@@ -1320,29 +1368,29 @@
                 </div>
               </div>
               <div class="showcase-tiles">
-                <button class="showcase-card" type="button" data-full="assets/showcase/student-homework-v1.png" data-title="واجباتي" data-caption="صفحة الطالب تعرض الواجبات المستحقة مع الموعد والحالة والتقدّم.">
-                  <img src="assets/showcase/student-homework-v1.png" alt="واجباتي - بيانات تجريبية من داخل المشروع" />
+                <button class="showcase-card placeholder" type="button" aria-label="واجباتي - بانتظار الصورة الجديدة">
+                  <div class="placeholder-frame">واجباتي<br />بانتظار الصورة الجديدة</div>
                   <figcaption>
                     <h3>واجباتي</h3>
                     <p>الواجبات المستحقة مع الموعد والحالة والتقدّم.</p>
                   </figcaption>
                 </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/student-lessons-v1.png" data-title="دروسي" data-caption="لقطة توضّح دروس الطالب خلال يومه الدراسي.">
-                  <img src="assets/showcase/student-lessons-v1.png" alt="دروسي - بيانات تجريبية من داخل المشروع" />
+                <button class="showcase-card placeholder" type="button" aria-label="دروسي - بانتظار الصورة الجديدة">
+                  <div class="placeholder-frame">دروسي<br />بانتظار الصورة الجديدة</div>
                   <figcaption>
                     <h3>دروسي</h3>
                     <p>الدروس مرتبة حسب اليوم مع ربط سريع بالمادة والمعلم.</p>
                   </figcaption>
                 </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/student-exams-v1.png" data-title="امتحاناتي" data-caption="مخطط امتحانات الطالب مع التاريخ والنوع والحالة الحالية.">
-                  <img src="assets/showcase/student-exams-v1.png" alt="امتحاناتي - بيانات تجريبية من داخل المشروع" />
+                <button class="showcase-card placeholder" type="button" aria-label="امتحاناتي - بانتظار الصورة الجديدة">
+                  <div class="placeholder-frame">امتحاناتي<br />بانتظار الصورة الجديدة</div>
                   <figcaption>
                     <h3>امتحاناتي</h3>
                     <p>مخطط الامتحانات مع التاريخ والنوع والحالة.</p>
                   </figcaption>
                 </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/student-program-v1.png" data-title="برنامجي" data-caption="البرنامج اليومي للطالب مع الحصص والمواد والمعلمين والزمن.">
-                  <img src="assets/showcase/student-program-v1.png" alt="برنامجي - بيانات تجريبية من داخل المشروع" />
+                <button class="showcase-card placeholder" type="button" aria-label="برنامجي - بانتظار الصورة الجديدة">
+                  <div class="placeholder-frame">برنامجي<br />بانتظار الصورة الجديدة</div>
                   <figcaption>
                     <h3>برنامجي</h3>
                     <p>البرنامج اليومي للحصص والمواد والمعلمين والزمن.</p>
@@ -1359,36 +1407,36 @@
                 </div>
               </div>
               <div class="showcase-tiles">
-                <button class="showcase-card" type="button" data-full="assets/showcase/teacher-program-v1.png" data-title="برنامج المعلم" data-caption="برنامج المعلم اليومي مع الحصص والصفوف والمواعيد.">
-                  <img src="assets/showcase/teacher-program-v1.png" alt="برنامج المعلم - بيانات تجريبية من داخل المشروع" />
+                <button class="showcase-card placeholder" type="button" aria-label="برنامج المعلم - بانتظار الصورة الجديدة">
+                  <div class="placeholder-frame">برنامج المعلم<br />بانتظار الصورة الجديدة</div>
                   <figcaption>
                     <h3>برنامج المعلم</h3>
                     <p>الحصص والصفوف والمواعيد في شاشة عملية واحدة.</p>
                   </figcaption>
                 </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/teacher-substitutions-v1.png" data-title="مناوبتي" data-caption="البدائل والمناوبات المعتمدة مع الصف والحصة الأصلية والبديل.">
-                  <img src="assets/showcase/teacher-substitutions-v1.png" alt="مناوبتي - بيانات تجريبية من داخل المشروع" />
+                <button class="showcase-card placeholder" type="button" aria-label="مناوبتي - بانتظار الصورة الجديدة">
+                  <div class="placeholder-frame">مناوبتي<br />بانتظار الصورة الجديدة</div>
                   <figcaption>
                     <h3>مناوبتي</h3>
                     <p>البدائل والمناوبات المعتمدة مع الصف والحصة.</p>
                   </figcaption>
                 </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/teacher-grades-v1.png" data-title="إدخال العلامات" data-caption="صفحة إدخال العلامات تعرض الطلاب ودرجاتهم والتقدير والملاحظة.">
-                  <img src="assets/showcase/teacher-grades-v1.png" alt="إدخال العلامات - بيانات تجريبية من داخل المشروع" />
+                <button class="showcase-card placeholder" type="button" aria-label="إدخال العلامات - بانتظار الصورة الجديدة">
+                  <div class="placeholder-frame">إدخال العلامات<br />بانتظار الصورة الجديدة</div>
                   <figcaption>
                     <h3>إدخال العلامات</h3>
                     <p>أسماء الطلاب والدرجات والتقدير والملاحظة.</p>
                   </figcaption>
                 </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/teacher-behavior-v1.png" data-title="إدخال السلوك" data-caption="تسجيل السلوك الإيجابي أو السلبي مع التاريخ والإجراء والمتابعة.">
-                  <img src="assets/showcase/teacher-behavior-v1.png" alt="إدخال السلوك - بيانات تجريبية من داخل المشروع" />
+                <button class="showcase-card placeholder" type="button" aria-label="إدخال السلوك - بانتظار الصورة الجديدة">
+                  <div class="placeholder-frame">إدخال السلوك<br />بانتظار الصورة الجديدة</div>
                   <figcaption>
                     <h3>إدخال السلوك</h3>
                     <p>السلوك الإيجابي أو السلبي مع التاريخ والإجراء.</p>
                   </figcaption>
                 </button>
-                <button class="showcase-card" type="button" data-full="assets/showcase/teacher-exam-v1.png" data-title="إدخال امتحان" data-caption="إنشاء امتحان جديد مع ربطه بالصف والمادة والحالة النهائية.">
-                  <img src="assets/showcase/teacher-exam-v1.png" alt="إدخال امتحان - بيانات تجريبية من داخل المشروع" />
+                <button class="showcase-card placeholder" type="button" aria-label="إدخال امتحان - بانتظار الصورة الجديدة">
+                  <div class="placeholder-frame">إدخال امتحان<br />بانتظار الصورة الجديدة</div>
                   <figcaption>
                     <h3>إدخال امتحان</h3>
                     <p>إنشاء امتحان جديد مع ربطه بالصف والمادة والحالة.</p>
@@ -1400,16 +1448,65 @@
             <article class="showcase-group">
               <div class="showcase-group-head">
                 <div>
-                  <h3 data-i18n="showcaseAdminGroupTitle">واجهة المدير</h3>
-                  <p data-i18n="showcaseAdminGroupText">لقطة واحدة ببيانات تجريبية توضّح برنامج الفراغ ومن هو متفرغ وبأي حصة.</p>
+                  <h3 data-i18n="showcaseAdminGroupTitle">صور الإدارة</h3>
+                  <p data-i18n="showcaseAdminGroupText">ثماني لقطات إدارية منفصلة، وكل صورة تفتح بالحجم الكامل عند الضغط عليها.</p>
                 </div>
               </div>
-              <div class="showcase-tiles" style="max-width: 520px">
-                <button class="showcase-card" type="button" data-full="assets/showcase/admin-free-slot-v1.png" data-title="برنامج الفراغ" data-caption="يعرض من هو متفرغ وبأي حصة، مع حالة السدّ والاستدعاء والبديل.">
-                  <img src="assets/showcase/admin-free-slot-v1.png" alt="برنامج الفراغ - بيانات تجريبية من داخل المشروع" />
+              <div class="showcase-tiles admin-gallery">
+                <button class="showcase-card" type="button" data-full="assets/showcase/admin-notifications.png" data-title="إشعارات المدرسة" data-caption="واجهة إشعارات المدرسة مع بيانات تجريبية مكتملة." aria-label="إشعارات المدرسة">
+                  <img src="assets/showcase/admin-notifications.png" alt="إشعارات المدرسة" />
                   <figcaption>
-                    <h3>برنامج الفراغ</h3>
-                    <p>من هو متفرغ وبأي حصة مع حالة السدّ والاستدعاء.</p>
+                    <h3>إشعارات المدرسة</h3>
+                    <p>ملخص الإشعارات والتنبيهات المرسلة خلال اليوم.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/admin-exams-trips.png" data-title="الامتحانات والفعاليات والرحلات" data-caption="شاشة الامتحانات والفعاليات والرحلات مع جدول تجريبي كامل." aria-label="الامتحانات والفعاليات والرحلات">
+                  <img src="assets/showcase/admin-exams-trips.png" alt="الامتحانات والفعاليات والرحلات" />
+                  <figcaption>
+                    <h3>الامتحانات والفعاليات والرحلات</h3>
+                    <p>مواعيد وحالات وأنشطة مع صفوف محددة.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/admin-free-teachers.png" data-title="برنامج المتفرغين" data-caption="مؤشرات المتفرغين حسب الحصة والصف بشكل تجريبي." aria-label="برنامج المتفرغين">
+                  <img src="assets/showcase/admin-free-teachers.png" alt="برنامج المتفرغين" />
+                  <figcaption>
+                    <h3>برنامج المتفرغين</h3>
+                    <p>تلخيص سريع للصفوف والمتفرغين وإجمالي التفرغ.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/admin-homeroom.png" data-title="برنامج المربين" data-caption="تعيين المربين للصفوف مع بيانات تجريبية واضحة." aria-label="برنامج المربين">
+                  <img src="assets/showcase/admin-homeroom.png" alt="برنامج المربين" />
+                  <figcaption>
+                    <h3>برنامج المربين</h3>
+                    <p>توزيع المربين على الصفوف مع الحصص المعتمدة.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/admin-duties.png" data-title="برنامج المناوبات" data-caption="جدول المناوبات اليومي مع أوقات ومواقع تجريبية." aria-label="برنامج المناوبات">
+                  <img src="assets/showcase/admin-duties.png" alt="برنامج المناوبات" />
+                  <figcaption>
+                    <h3>برنامج المناوبات</h3>
+                    <p>مناوبات صباحية ومسائية مع مربين ومواقع.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/admin-substitutions.png" data-title="برنامج الاستبدالات" data-caption="استبدالات المعلمين والحصص مع بيانات تجريبية مكتملة." aria-label="برنامج الاستبدالات">
+                  <img src="assets/showcase/admin-substitutions.png" alt="برنامج الاستبدالات" />
+                  <figcaption>
+                    <h3>برنامج الاستبدالات</h3>
+                    <p>استبدال الحصص حسب الصف والمادة والمعلم البديل.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/admin-teacher-program.png" data-title="برنامج المعلم" data-caption="برنامج المعلم اليومي بعد تعبئته ببيانات تجريبية." aria-label="برنامج المعلم">
+                  <img src="assets/showcase/admin-teacher-program.png" alt="برنامج المعلم" />
+                  <figcaption>
+                    <h3>برنامج المعلم</h3>
+                    <p>جدول حصة المعلم ومهامه داخل اليوم الدراسي.</p>
+                  </figcaption>
+                </button>
+                <button class="showcase-card" type="button" data-full="assets/showcase/admin-dashboard.png" data-title="لوحة المدير" data-caption="لوحة المدير مع مؤشرات وإحصاءات تجريبية مملوءة." aria-label="لوحة المدير">
+                  <img src="assets/showcase/admin-dashboard.png" alt="لوحة المدير" />
+                  <figcaption>
+                    <h3>لوحة المدير</h3>
+                    <p>المؤشرات العامة وملخص النشاط المدرسي.</p>
                   </figcaption>
                 </button>
               </div>
@@ -1621,8 +1718,8 @@
           showcaseStudentGroupText: "أربع لقطات ببيانات تجريبية فقط توضّح ما يراه الطالب في يومه الدراسي.",
           showcaseTeacherGroupTitle: "واجهات المعلم",
           showcaseTeacherGroupText: "خمس لقطات ببيانات تجريبية فقط تمثل العمل اليومي للمعلم داخل المشروع.",
-          showcaseAdminGroupTitle: "واجهة المدير",
-          showcaseAdminGroupText: "لقطة واحدة ببيانات تجريبية توضّح برنامج الفراغ ومن هو متفرغ وبأي حصة.",
+          showcaseAdminGroupTitle: "صور الإدارة",
+          showcaseAdminGroupText: "ثماني لقطات إدارية منفصلة، وكل صورة تفتح بالحجم الكامل عند الضغط عليها.",
           pkg1Title: "نسخة سطح المكتب",
           pkg1Text: "مهيأة للأجهزة المكتبية واللابتوبات داخل المدرسة أو في بيئة داخلية مستقرة.",
           pkg2Title: "نسخة الويب",
@@ -1719,8 +1816,8 @@
           showcaseStudentGroupText: "Four demo-only screenshots that show what the student sees during the school day.",
           showcaseTeacherGroupTitle: "Teacher screens",
           showcaseTeacherGroupText: "Five demo-only screenshots that represent the teacher’s daily work inside the project.",
-          showcaseAdminGroupTitle: "Admin screen",
-          showcaseAdminGroupText: "One demo screenshot that shows the free-period schedule and who is available for which period.",
+          showcaseAdminGroupTitle: "Admin images",
+          showcaseAdminGroupText: "Eight separate admin screenshots, each opening in full size when clicked.",
           pkg1Title: "Desktop edition",
           pkg1Text: "Built for desktop and laptop school devices in a stable internal environment.",
           pkg2Title: "Web edition",
@@ -1817,8 +1914,8 @@
           showcaseStudentGroupText: "ארבעה צילומי מסך עם נתוני דמו בלבד שמראים מה התלמיד רואה ביום הלימודים שלו.",
           showcaseTeacherGroupTitle: "מסכי מורה",
           showcaseTeacherGroupText: "חמישה צילומי מסך עם נתוני דמו בלבד שמייצגים את העבודה היומית של המורה במערכת.",
-          showcaseAdminGroupTitle: "מסך מנהל",
-          showcaseAdminGroupText: "צילום מסך אחד עם נתוני דמו שמציג את מערכת השעות הפנויה ומי פנוי ובאיזו שעה.",
+          showcaseAdminGroupTitle: "תמונות ניהול",
+          showcaseAdminGroupText: "שמונה צילומי מסך נפרדים של המנהל, וכל תמונה נפתחת בגודל מלא בלחיצה.",
           pkg1Title: "גרסת Desktop",
           pkg1Text: "מותאמת למחשבי desktop ו-laptop של בית הספר בסביבה פנימית יציבה.",
           pkg2Title: "גרסת Web",
@@ -1922,6 +2019,7 @@
 
       function openLightbox(card) {
         const full = card.dataset.full;
+        if (!full) return;
         const title = card.dataset.title || "";
         const caption = card.dataset.caption || "";
         lightboxImage.src = full;
@@ -1939,7 +2037,7 @@
         document.body.style.overflow = "";
       }
 
-      document.querySelectorAll(".showcase-card").forEach((card) => {
+      document.querySelectorAll(".showcase-card:not(.placeholder)").forEach((card) => {
         card.addEventListener("click", () => openLightbox(card));
       });
 
