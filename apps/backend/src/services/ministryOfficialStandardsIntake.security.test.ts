@@ -1,15 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+
+const repoRoot = resolve(__dirname, "../../../../");
 
 function read(relativePath: string) {
-  return readFileSync(relativePath, "utf8");
+  return readFileSync(join(repoRoot, relativePath), "utf8");
 }
 
 function parseRegisterRows(markdown: string) {
   return markdown
     .split(/\r?\n/)
-    .filter((line) => /^\| MOS-\d{3} \|/.test(line))
+    .filter((line) => /^\|\s*MOS-\d{3}\s*\|/.test(line))
     .map((line) =>
       line
         .split("|")
@@ -19,12 +22,12 @@ function parseRegisterRows(markdown: string) {
 }
 
 test("official Ministry standards intake register blocks formal compliance claims until archived standards are mapped and approved", () => {
-  const intake = read("../../docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md");
-  const archiveReadme = read("../../docs/official-ministry-standards/README.md");
-  const packageJson = JSON.parse(read("../../package.json")) as { scripts: Record<string, string> };
-  const script = read("../../scripts/runtime/ministry-standards-intake.js");
+  const intake = read("docs/MINISTRY_OFFICIAL_STANDARDS_INTAKE.md");
+  const archiveReadme = read("docs/official-ministry-standards/README.md");
+  const packageJson = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
+  const script = read("scripts/runtime/ministry-standards-intake.js");
 
-  assert.ok(existsSync("../../docs/official-ministry-standards/.gitkeep"));
+  assert.ok(existsSync(join(repoRoot, "docs/official-ministry-standards/.gitkeep")));
   assert.equal(packageJson.scripts["ministry:standards:intake"], "node scripts/runtime/ministry-standards-intake.js");
   assert.match(intake, /sapakim\.education\.gov\.il/);
   assert.match(intake, /Security readiness evidence/);
@@ -38,7 +41,7 @@ test("official Ministry standards intake register blocks formal compliance claim
   assert.match(intake, /SHA-256/);
 
   const rows = parseRegisterRows(intake);
-  assert.equal(rows.length, 7, "intake register should track all required official document families");
+  assert.equal(new Set(rows.map((row) => row[0])).size, 7, "intake register should track all required official document families");
 
   const statuses = rows.map((row) => row[9]);
   assert.deepEqual(statuses, Array(7).fill("Missing"), "no official standard may be treated as mapped/approved yet");
@@ -69,9 +72,9 @@ test("official Ministry standards intake register blocks formal compliance claim
 });
 
 test("Ministry-facing docs distinguish security readiness from formal official compliance evidence", () => {
-  const matrix = read("../../docs/MINISTRY_COMPLIANCE_MATRIX.md");
-  const evidence = read("../../docs/MINISTRY_EVIDENCE_INDEX.md");
-  const testPlan = read("../../docs/MINISTRY_TEST_PLAN.md");
+  const matrix = read("docs/MINISTRY_COMPLIANCE_MATRIX.md");
+  const evidence = read("docs/MINISTRY_EVIDENCE_INDEX.md");
+  const testPlan = read("docs/MINISTRY_TEST_PLAN.md");
 
   for (const doc of [matrix, evidence, testPlan]) {
     assert.match(doc, /MINISTRY_OFFICIAL_STANDARDS_INTAKE\.md/);

@@ -77,7 +77,7 @@ test("inactive auth sessions are rejected after the configured timeout", async (
 });
 
 test("license activation does not force reset the school admin password", () => {
-  const source = readFileSync("src/services/licenseService.ts", "utf8");
+  const source = readFileSync("src/services/licenseActivationService.ts", "utf8");
   assert.match(source, /ensureLicenseAdminAccount\(payload\.adminAccount, payload, false\)/);
   assert.match(source, /ensureLicenseAdminAccount\(account, central\?\.data as LicensePayload, true\)/);
   const recoveryStart = source.indexOf("export async function recoverLicenseAdminAccess");

@@ -1,20 +1,15 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const os = require("node:os");
-const path = require("node:path");
+const crypto = require("node:crypto");
 
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "som-license-security-"));
 process.env.NODE_ENV = "test";
+process.env.LICENSE_REQUEST_BACKING = "memory";
 process.env.LICENSE_ADMIN_TOKEN = "test-admin-token-with-more-than-32-characters";
 process.env.SOM_PRO_LICENSE_SECRET = "test-license-secret-with-more-than-32-characters";
-process.env.LICENSE_DATA_FILE = path.join(tempDir, "licenses.json");
-process.env.LICENSE_ACCOUNTS_FILE = path.join(tempDir, "accounts.json");
-process.env.LICENSE_RESET_TOKENS_FILE = path.join(tempDir, "reset-tokens.json");
-process.env.LICENSE_SECURITY_EVENTS_FILE = path.join(tempDir, "security-events.jsonl");
 process.env.LICENSE_REQUIRE_CLIENT_NONCE = "true";
 process.env.LICENSE_RESET_TOKEN_TTL_MS = "900000";
 
+const { prisma } = require("./db");
 const { createLicenseServer, licenseCodeHash } = require("./server");
 
 function listen(server) {
@@ -35,6 +30,18 @@ async function post(baseUrl, pathName, body, headers = {}) {
   return { status: response.status, body: await response.json() };
 }
 
+async function cleanupLicense(licenseId) {
+  if (!licenseId) return;
+  const activation = await prisma.licenseActivation
+    .findUnique({ where: { id: licenseId }, select: { schoolId: true } })
+    .catch(() => null);
+  if (activation?.schoolId) {
+    await prisma.school.delete({ where: { id: activation.schoolId } }).catch(() => null);
+  } else {
+    await prisma.licenseActivation.deleteMany({ where: { id: licenseId } }).catch(() => null);
+  }
+}
+
 async function withServer(fn) {
   const server = createLicenseServer();
   const baseUrl = await listen(server);
@@ -46,13 +53,15 @@ async function withServer(fn) {
 }
 
 test("admin recovery issues a one-time reset token and never returns a plaintext password", async () => {
+  let licenseId = null;
+  const tag = `${Date.now()}-${crypto.randomBytes(3).toString("hex")}`;
   await withServer(async (baseUrl) => {
     const created = await post(
       baseUrl,
       "/api/admin/licenses",
       {
-        schoolName: "Security School",
-        institutionCode: "SEC-001",
+        schoolName: `Security School ${tag}`,
+        institutionCode: `SEC-001-${tag}`,
         adminEmail: "admin-security@example.test",
         adminPassword: "Initial-Admin-123!",
         days: 30
@@ -61,6 +70,7 @@ test("admin recovery issues a one-time reset token and never returns a plaintext
     );
     assert.equal(created.status, 201);
     assert.ok(created.body.data.licenseCode);
+    licenseId = created.body.data.id;
 
     const deniedRecovery = await post(
       baseUrl,
@@ -85,10 +95,13 @@ test("admin recovery issues a one-time reset token and never returns a plaintext
     assert.equal(recovered.body.data.adminAccount.password, undefined);
     assert.doesNotMatch(JSON.stringify(recovered.body), /Initial-Admin-123!/);
 
-    const tokenRows = JSON.parse(fs.readFileSync(process.env.LICENSE_RESET_TOKENS_FILE, "utf8"));
-    assert.equal(tokenRows.length, 1);
-    assert.notEqual(tokenRows[0].tokenHash, recovered.body.data.resetToken);
-    assert.equal(tokenRows[0].usedAt, null);
+    const activation = await prisma.licenseActivation.findUnique({ where: { id: licenseId } });
+    assert.ok(activation);
+    const metadata = activation.metadata && typeof activation.metadata === "object" ? activation.metadata : {};
+    assert.equal(Array.isArray(metadata.resetTokens), true);
+    assert.equal(metadata.resetTokens.length, 1);
+    assert.notEqual(metadata.resetTokens[0].tokenHash, recovered.body.data.resetToken);
+    assert.equal(metadata.resetTokens[0].usedAt, null);
 
     const reset = await post(
       baseUrl,
@@ -113,21 +126,26 @@ test("admin recovery issues a one-time reset token and never returns a plaintext
     assert.equal(replay.status, 400);
     assert.equal(replay.body.error, "INVALID_OR_EXPIRED_RESET_TOKEN");
 
-    const securityEvents = fs.readFileSync(process.env.LICENSE_SECURITY_EVENTS_FILE, "utf8");
-    assert.match(securityEvents, /ADMIN_RESET_TOKEN_ISSUED/);
-    assert.match(securityEvents, /ADMIN_RESET_TOKEN_CONSUME/);
-    assert.doesNotMatch(securityEvents, /Replacement-Admin/);
+    const events = await prisma.auditLog.findMany({
+      where: { entityId: licenseId, entity: "LICENSE_SERVER" },
+      orderBy: { createdAt: "asc" }
+    });
+    assert.ok(events.some((event) => event.action === "ADMIN_RESET_TOKEN_ISSUED"));
+    assert.ok(events.some((event) => event.action === "ADMIN_RESET_TOKEN_CONSUME"));
   });
+  await cleanupLicense(licenseId);
 });
 
 test("client nonce replay protection rejects repeated activation requests", async () => {
+  let licenseId = null;
+  const tag = `${Date.now()}-${crypto.randomBytes(3).toString("hex")}`;
   await withServer(async (baseUrl) => {
     const created = await post(
       baseUrl,
       "/api/admin/licenses",
       {
-        schoolName: "Replay School",
-        institutionCode: "SEC-002",
+        schoolName: `Replay School ${tag}`,
+        institutionCode: `SEC-002-${tag}`,
         adminEmail: "admin-replay@example.test",
         adminPassword: "Initial-Admin-123!",
         days: 30,
@@ -136,6 +154,7 @@ test("client nonce replay protection rejects repeated activation requests", asyn
       { Authorization: `Bearer ${process.env.LICENSE_ADMIN_TOKEN}` }
     );
     assert.equal(created.status, 201);
+    licenseId = created.body.data.id;
     const licenseCode = created.body.data.licenseCode;
 
     const activationBody = {
@@ -165,4 +184,5 @@ test("client nonce replay protection rejects repeated activation requests", asyn
     );
     assert.equal(status.status, 200);
   });
+  await cleanupLicense(licenseId);
 });

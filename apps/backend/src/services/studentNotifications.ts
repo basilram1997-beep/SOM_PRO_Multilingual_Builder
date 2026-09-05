@@ -92,6 +92,7 @@ async function deliverNotification(payload: NotificationDeliveryPayload) {
       method: "POST",
       headers: {
         "content-type": "application/json",
+        connection: "close",
         ...(process.env.SOM_NOTIFICATION_WEBHOOK_TOKEN
           ? { authorization: `Bearer ${process.env.SOM_NOTIFICATION_WEBHOOK_TOKEN}` }
           : {})

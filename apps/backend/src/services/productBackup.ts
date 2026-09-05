@@ -1,7 +1,9 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
+import { pipeline } from "node:stream/promises";
+import { once } from "node:events";
 
 type ProductBackupInput = {
   schoolId: string;
@@ -41,30 +43,38 @@ function commandError(command: string, status: number | null, stderr: string) {
   return `${command} failed${status === null ? "" : ` with status ${status}`}${cleanStderr ? `: ${cleanStderr}` : ""}`;
 }
 
-function runNativePgDump(outputPath: string) {
+function runProcess(command: string, args: string[], stderrLabel: string) {
+  const child = spawn(command, args, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
+  const stderrChunks: string[] = [];
+  child.stderr?.on("data", (chunk) => {
+    stderrChunks.push(String(chunk));
+  });
+
+  return new Promise<void>((resolve, reject) => {
+    child.on("error", reject);
+    child.on("close", (status) => {
+      if (status === 0) {
+        resolve();
+        return;
+      }
+      reject(new Error(commandError(stderrLabel, status, stderrChunks.join(""))));
+    });
+  });
+}
+
+async function runNativePgDump(outputPath: string) {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is not configured.");
   }
 
   const pgDump = process.env.SOM_PG_DUMP_PATH || "pg_dump";
-  const result = spawnSync(
-    pgDump,
-    ["--dbname", databaseUrl, "--no-owner", "--no-acl", "--clean", "--if-exists", "--file", outputPath],
-    { encoding: "utf8", windowsHide: true, maxBuffer: 512 * 1024 * 1024 }
-  );
-
-  if (result.error) {
-    throw result.error;
-  }
-  if (result.status !== 0) {
-    throw new Error(commandError(pgDump, result.status, result.stderr || ""));
-  }
+  await runProcess(pgDump, ["--dbname", databaseUrl, "--no-owner", "--no-acl", "--clean", "--if-exists", "--file", outputPath], pgDump);
 }
 
-function runDockerPgDump(outputPath: string) {
+async function runDockerPgDump(outputPath: string) {
   const docker = process.env.SOM_DOCKER_PATH || (process.platform === "win32" ? "docker.exe" : "docker");
-  const result = spawnSync(
+  const child = spawn(
     docker,
     [
       "compose",
@@ -75,25 +85,33 @@ function runDockerPgDump(outputPath: string) {
       "-c",
       'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --no-owner --no-acl --clean --if-exists'
     ],
-    { encoding: "buffer", windowsHide: true, maxBuffer: 512 * 1024 * 1024 }
+    { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] }
   );
+  const stderrChunks: string[] = [];
+  child.stderr?.on("data", (chunk) => {
+    stderrChunks.push(String(chunk));
+  });
 
-  if (result.error) {
-    throw result.error;
-  }
-  if (result.status !== 0 || !result.stdout?.length) {
-    throw new Error(commandError(docker, result.status, result.stderr?.toString("utf8") || ""));
+  if (!child.stdout) {
+    throw new Error(commandError(docker, null, "docker stdout unavailable"));
   }
 
-  fs.writeFileSync(outputPath, result.stdout);
+  const outputStream = fs.createWriteStream(outputPath);
+  await Promise.all([
+    pipeline(child.stdout, outputStream),
+    once(child, "close").then(([status]) => {
+      if (status === 0) return;
+      throw new Error(commandError(docker, status as number | null, stderrChunks.join("")));
+    })
+  ]);
 }
 
-function createPostgresDump(outputPath: string) {
+async function createPostgresDump(outputPath: string) {
   try {
-    runNativePgDump(outputPath);
+    await runNativePgDump(outputPath);
   } catch (nativeError) {
     try {
-      runDockerPgDump(outputPath);
+      await runDockerPgDump(outputPath);
     } catch (dockerError) {
       throw new Error(
         `PostgreSQL backup failed. pg_dump: ${
@@ -105,13 +123,13 @@ function createPostgresDump(outputPath: string) {
   }
 }
 
-function copyLicenseData(targetDir: string) {
+async function copyLicenseData(targetDir: string) {
   const sourceDir = resolveLicenseDataDir();
   if (!fs.existsSync(sourceDir)) {
     return false;
   }
 
-  fs.cpSync(sourceDir, targetDir, {
+  await fs.promises.cp(sourceDir, targetDir, {
     recursive: true,
     force: true,
     filter: (source) => !path.basename(source).toLowerCase().endsWith(".env")
@@ -119,27 +137,28 @@ function copyLicenseData(targetDir: string) {
   return true;
 }
 
-function listFilesRecursive(root: string): string[] {
+async function listFilesRecursive(root: string): Promise<string[]> {
   if (!fs.existsSync(root)) {
     return [];
   }
 
-  const entries = fs.readdirSync(root, { withFileTypes: true });
-  return entries
-    .flatMap((entry): string[] => {
+  const entries = await fs.promises.readdir(root, { withFileTypes: true });
+  const nested = await Promise.all(
+    entries.map(async (entry): Promise<string[]> => {
       const fullPath = path.join(root, entry.name);
       if (entry.isDirectory()) return listFilesRecursive(fullPath);
       if (entry.isFile() && entry.name !== "manifest.json") return [fullPath];
       return [];
     })
-    .sort((left, right) => left.localeCompare(right));
+  );
+  return nested.flat().sort((left, right) => left.localeCompare(right));
 }
 
-function checksumBackup(backupDir: string) {
+async function checksumBackup(backupDir: string) {
   const hash = crypto.createHash("sha256");
-  for (const filePath of listFilesRecursive(backupDir)) {
+  for (const filePath of await listFilesRecursive(backupDir)) {
     hash.update(path.relative(backupDir, filePath).replace(/\\/g, "/"));
-    hash.update(fs.readFileSync(filePath));
+    hash.update(await fs.promises.readFile(filePath));
   }
   return hash.digest("hex");
 }
@@ -159,22 +178,22 @@ function backupEncryptionKey() {
     .digest();
 }
 
-function encryptFileInPlace(filePath: string) {
+async function encryptFileInPlace(filePath: string) {
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv("aes-256-gcm", backupEncryptionKey(), iv);
-  const plaintext = fs.readFileSync(filePath);
+  const plaintext = await fs.promises.readFile(filePath);
   const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
   const tag = cipher.getAuthTag();
   const encryptedPath = `${filePath}.enc`;
-  fs.writeFileSync(encryptedPath, Buffer.concat([Buffer.from("SOMENC1:"), iv, tag, encrypted]));
-  fs.rmSync(filePath, { force: true });
+  await fs.promises.writeFile(encryptedPath, Buffer.concat([Buffer.from("SOMENC1:"), iv, tag, encrypted]));
+  await fs.promises.rm(filePath, { force: true });
   return encryptedPath;
 }
 
-function encryptFilesRecursive(root: string) {
-  for (const filePath of listFilesRecursive(root)) {
+async function encryptFilesRecursive(root: string) {
+  for (const filePath of await listFilesRecursive(root)) {
     if (filePath.endsWith(".enc")) continue;
-    encryptFileInPlace(filePath);
+    await encryptFileInPlace(filePath);
   }
 }
 
@@ -185,16 +204,16 @@ export async function createProductBackup(input: ProductBackupInput): Promise<Pr
   const licenseTargetDir = path.join(backupDir, "license-data");
   const manifestPath = path.join(backupDir, "manifest.json");
 
-  fs.mkdirSync(backupDir, { recursive: true });
-  createPostgresDump(postgresDumpPath);
-  const licenseDataCopied = copyLicenseData(licenseTargetDir);
-  const encryptedPostgresDumpPath = encryptFileInPlace(postgresDumpPath);
+  await fs.promises.mkdir(backupDir, { recursive: true });
+  await createPostgresDump(postgresDumpPath);
+  const licenseDataCopied = await copyLicenseData(licenseTargetDir);
+  const encryptedPostgresDumpPath = await encryptFileInPlace(postgresDumpPath);
   if (licenseDataCopied) {
-    encryptFilesRecursive(licenseTargetDir);
+    await encryptFilesRecursive(licenseTargetDir);
   }
-  const checksum = checksumBackup(backupDir);
+  const checksum = await checksumBackup(backupDir);
 
-  fs.writeFileSync(
+  await fs.promises.writeFile(
     manifestPath,
     `${JSON.stringify(
       {
@@ -216,7 +235,7 @@ export async function createProductBackup(input: ProductBackupInput): Promise<Pr
           postgres: true,
           licenseData: licenseDataCopied
         },
-        files: listFilesRecursive(backupDir).map((filePath) => path.relative(backupDir, filePath).replace(/\\/g, "/"))
+        files: (await listFilesRecursive(backupDir)).map((filePath) => path.relative(backupDir, filePath).replace(/\\/g, "/"))
       },
       null,
       2

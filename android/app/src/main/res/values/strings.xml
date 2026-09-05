@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SOM PRO</string>
+    <string name="title_activity_main">SOM PRO</string>
+    <string name="package_name">com.sompro.schooloperations</string>
+    <string name="custom_url_scheme">com.sompro.schooloperations</string>
+</resources>

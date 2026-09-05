@@ -1,10 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { isAbsolute, join, resolve } from "node:path";
+
+const repoRoot = resolve(__dirname, "../../../../");
 
 function read(relativePath: string) {
-  return readFileSync(relativePath, "utf8");
+  return readFileSync(isAbsolute(relativePath) ? relativePath : join(repoRoot, relativePath), "utf8");
 }
 
 function parseEnv(text: string) {
@@ -20,9 +22,10 @@ function parseEnv(text: string) {
 }
 
 function listSourceFiles(dir: string): string[] {
-  const entries = readdirSync(dir);
+  const baseDir = resolve(repoRoot, dir);
+  const entries = readdirSync(baseDir);
   return entries.flatMap((entry) => {
-    const fullPath = join(dir, entry);
+    const fullPath = join(baseDir, entry);
     const stat = statSync(fullPath);
     if (stat.isDirectory()) return listSourceFiles(fullPath);
     if (!/\.(ts|tsx|js|cjs|mjs)$/.test(entry)) return [];
@@ -32,14 +35,14 @@ function listSourceFiles(dir: string): string[] {
 }
 
 test("multi-environment architecture documents one source tree and same-origin routing", () => {
-  const doc = read("../../docs/ENVIRONMENT_ARCHITECTURE.md");
+  const doc = read("docs/ENVIRONMENT_ARCHITECTURE.md");
 
   assert.match(doc, /one repository, one source tree, and one build architecture/i);
   assert.match(doc, /https:\/\/sompro\.duckdns\.org/);
   assert.match(doc, /https:\/\/app\.example\.com/);
   assert.match(
     doc,
-    /\| `VITE_API_URL` \| `http:\/\/localhost:4000` for direct dev, or `\/api` with a local proxy \| `\/api` \| `\/api` \|/
+    /\| `VITE_API_URL`[\s\S]*?`http:\/\/localhost:4000` for direct dev, or `\/api` with a local proxy[\s\S]*?\| `\/api`[\s\S]*?\| `\/api`/s
   );
   assert.match(doc, /https:\/\/DOMAIN\/api\/\*/);
   assert.match(doc, /https:\/\/DOMAIN\/license\/\*/);
@@ -47,10 +50,10 @@ test("multi-environment architecture documents one source tree and same-origin r
 });
 
 test("staging and production examples use same-origin web API config", () => {
-  const staging = parseEnv(read("../../.env.staging.example"));
-  const production = parseEnv(read("../../.env.production.example"));
-  const frontendStaging = parseEnv(read("../../apps/frontend/.env.staging.example"));
-  const frontendProduction = parseEnv(read("../../apps/frontend/.env.production.example"));
+  const staging = parseEnv(read(".env.staging.example"));
+  const production = parseEnv(read(".env.production.example"));
+  const frontendStaging = parseEnv(read("apps/frontend/.env.staging.example"));
+  const frontendProduction = parseEnv(read("apps/frontend/.env.production.example"));
 
   assert.equal(staging.APP_URL, "https://sompro.duckdns.org");
   assert.equal(staging.PUBLIC_APP_URL, "https://sompro.duckdns.org");
@@ -71,10 +74,10 @@ test("staging and production examples use same-origin web API config", () => {
 });
 
 test("frontend and reverse proxy default web deployments to /api without hard-coded deployment domains", () => {
-  const frontend = read("../../apps/frontend/src/api/http.ts");
-  const dockerfile = read("../../apps/frontend/Dockerfile.production");
-  const compose = read("../../docker-compose.production.yml");
-  const nginx = read("../../deploy/nginx/sompro.conf");
+  const frontend = read("apps/frontend/src/api/http.ts");
+  const dockerfile = read("apps/frontend/Dockerfile.production");
+  const compose = read("docker-compose.production.yml");
+  const nginx = read("deploy/nginx/sompro.conf");
 
   assert.match(frontend, /const SAME_ORIGIN_API_URL = "\/api"/);
   assert.match(frontend, /return ENV_API_URL \|\| SAME_ORIGIN_API_URL/);
@@ -93,15 +96,15 @@ test("frontend and reverse proxy default web deployments to /api without hard-co
 
 test("application source logic does not hard-code staging or future production domains", () => {
   const sourceRoots = [
-    "../../apps/frontend/src",
-    "../../apps/backend/src",
-    "../../apps/desktop/src",
-    "../../apps/license-server/src"
+    "apps/frontend/src",
+    "apps/backend/src",
+    "apps/desktop/src",
+    "apps/license-server/src"
   ];
 
   for (const root of sourceRoots) {
     for (const file of listSourceFiles(root)) {
-      const content = readFileSync(file, "utf8");
+      const content = read(file);
       assert.doesNotMatch(
         content,
         /sompro\.duckdns\.org|app\.sompro\.co\.il/i,

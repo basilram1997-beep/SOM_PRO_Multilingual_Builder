@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   getLocalFallbackLicenseStatus,
   shouldFallbackToLocalLicense,
@@ -29,6 +30,9 @@ test("local runtime falls back from missing central license", () => {
 });
 
 test("central license calls include a replay nonce header", () => {
-  const source = readFileSync("src/services/licenseService.ts", "utf8");
-  assert.match(source, /"X-Request-Nonce": crypto\.randomBytes\(24\)\.toString\("hex"\)/);
+  const centralClient = readFileSync(join(__dirname, "licenseCentralClient.ts"), "utf8");
+  const stateCache = readFileSync(join(__dirname, "licenseRuntimeCache.ts"), "utf8");
+  assert.match(centralClient, /"X-Request-Nonce": crypto\.randomBytes\(24\)\.toString\("hex"\)/);
+  assert.match(stateCache, /LICENSE_STATE_CACHE_TTL_MS/);
+  assert.match(stateCache, /clearLicenseStateCache\(/);
 });

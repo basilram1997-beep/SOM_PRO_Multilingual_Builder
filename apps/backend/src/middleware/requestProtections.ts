@@ -2,7 +2,6 @@ import type { NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import Redis from "ioredis";
 import { env } from "../config/env";
-import { prisma } from "../db/prisma";
 import { logSafeError } from "../lib/safeLog";
 
 type RateLimitOptions = {
@@ -22,6 +21,16 @@ type RateLimitRule = {
   match: (req: Request) => boolean;
   middleware: ReturnType<typeof createRateLimitMiddleware>;
 };
+
+type AuditLogEntry = {
+  schoolId: string | null;
+  userId: string | null;
+  action: string;
+  entity: string;
+  after: Prisma.InputJsonValue;
+};
+
+type AuditLogWriter = (entry: AuditLogEntry) => Promise<void>;
 
 const rateLimitBuckets = new Map<string, RateLimitBucket>();
 const sensitiveKeys = new Set([
@@ -47,20 +56,36 @@ const sensitiveKeys = new Set([
   "jwt"
 ]);
 const writeMethods = new Set(["POST", "PUT", "PATCH", "DELETE"]);
-const redisRateLimitEnabled = process.env.SOM_PRO_RATE_LIMIT_BACKING === "redis";
-const redisRateLimitClient = new Redis(env.redisUrl, {
-  lazyConnect: true,
-  enableOfflineQueue: false,
-  maxRetriesPerRequest: 1,
-  connectTimeout: 1000
-});
+const redisRateLimitMode = String(process.env.SOM_PRO_RATE_LIMIT_BACKING || "").trim().toLowerCase();
+const isTestRuntime =
+  Boolean(process.env.NODE_TEST_CONTEXT) ||
+  String(process.env.NODE_ENV || process.env.APP_ENV || "").trim().toLowerCase() === "test" ||
+  process.argv.includes("--test") ||
+  process.execArgv.includes("--test");
+const redisRateLimitEnabled = isTestRuntime ? false : redisRateLimitMode !== "memory";
+const rateLimitMemoryFallbackEnabled =
+  redisRateLimitMode === "memory" || (redisRateLimitMode === "" && env.appEnv !== "production");
+const redisRateLimitClient = redisRateLimitEnabled
+  ? new Redis(env.redisUrl, {
+      lazyConnect: true,
+      enableOfflineQueue: false,
+      maxRetriesPerRequest: 1,
+      connectTimeout: 1000
+    })
+  : null;
 let redisConnectStarted = false;
+let degradedFallbackWarned = false;
 const studentHighVolumeWritePaths = new Set([
   "/api/students/import",
   "/api/students/attendance",
   "/api/students/grade-entries",
   "/api/students/certificates"
 ]);
+
+let auditLogWriter: AuditLogWriter = async (entry: AuditLogEntry) => {
+  const { prisma } = await import("../db/prisma");
+  await prisma.auditLog.create({ data: entry });
+};
 
 const sensitiveRouteRateLimitRules: RateLimitRule[] = [
   {
@@ -263,33 +288,36 @@ function redactSensitive(value: unknown): unknown {
   );
 }
 
+export function setRequestProtectionAuditLogWriter(writer: AuditLogWriter | null) {
+  auditLogWriter = writer || (async (entry: AuditLogEntry) => {
+    const { prisma } = await import("../db/prisma");
+    await prisma.auditLog.create({ data: entry });
+  });
+}
+
 function appendAuditLog(req: Request, action: string, details: Record<string, unknown>) {
   const schoolId = req.user?.schoolId || null;
   const userId = req.user?.id || req.user?.userId || null;
-  void prisma.auditLog
-    .create({
-      data: {
-        schoolId,
-        userId,
-        action,
-        entity: "HTTP_SECURITY",
-        after: details as Prisma.InputJsonValue
-      }
-    })
-    .catch(() => null);
+  void auditLogWriter({
+    schoolId,
+    userId,
+    action,
+    entity: "HTTP_SECURITY",
+    after: details as Prisma.InputJsonValue
+  }).catch(() => null);
 }
 
 function tryStartRedisConnection() {
   if (!redisRateLimitEnabled) return;
   if (redisConnectStarted) return;
   redisConnectStarted = true;
-  void redisRateLimitClient.connect().catch(() => null);
+  void redisRateLimitClient?.connect().catch(() => null);
 }
 
 async function checkRedisRateLimit(bucketKey: string, windowMs: number, max: number) {
   if (!redisRateLimitEnabled) return null;
   tryStartRedisConnection();
-  if (redisRateLimitClient.status !== "ready") return null;
+  if (!redisRateLimitClient || redisRateLimitClient.status !== "ready") return null;
 
   const redisKey = `som-pro:rate-limit:${bucketKey}`;
   const count = await redisRateLimitClient.incr(redisKey);
@@ -412,6 +440,31 @@ export function createRateLimitMiddleware(options: RateLimitOptions) {
         }
         next();
         return;
+      }
+
+      if (!rateLimitMemoryFallbackEnabled) {
+        appendAuditLog(req, options.auditAction || "RATE LIMITED", {
+          path: req.path,
+          method: req.method,
+          key: options.key,
+          windowMs: options.windowMs,
+          max: options.max,
+          store: "redis-unavailable",
+          body: redactSensitive(req.body || null)
+        });
+        res.status(503).json({
+          error: "RATE_LIMIT_BACKEND_UNAVAILABLE",
+          message: "تعذر تطبيق قيود الطلبات لأن مخزن القيود غير متاح"
+        });
+        return;
+      }
+
+      if (env.appEnv === "production" && !degradedFallbackWarned) {
+        degradedFallbackWarned = true;
+        logSafeError(
+          "requestProtections.rateLimit.redisFallback",
+          new Error("Redis-backed rate limiting is unavailable; falling back to in-memory buckets outside production")
+        );
       }
 
       const now = Date.now();

@@ -1,0 +1,30 @@
+{
+  "bundleId": "com.sompro.schooloperations",
+  "name": "SOM PRO",
+  "subtitle": "School operations for teachers and administrators",
+  "description": "SOM PRO helps schools manage lessons, homework, exams, attendance, behavior, grades, certificates, timetables, and daily classroom workflows in one multilingual app.",
+  "keywords": [
+    "school",
+    "education",
+    "teachers",
+    "students",
+    "homework",
+    "exams",
+    "attendance",
+    "behavior",
+    "certificates",
+    "multilingual"
+  ],
+  "primaryCategory": "Education",
+  "supportUrl": "https://som-pro.pages.dev",
+  "marketingUrl": "https://som-pro.pages.dev",
+  "privacyPolicyUrl": "https://som-pro.pages.dev/privacy/",
+  "defaultLanguage": "en",
+  "localizations": {
+    "ar": {
+      "name": "SOM PRO",
+      "subtitle": "إدارة شؤون المدرسة للمعلمين والإدارة",
+      "description": "يساعد SOM PRO المدارس على إدارة الدروس والواجبات والامتحانات والحضور والسلوك والدرجات والشهادات والجداول والعمل اليومي داخل تطبيق متعدد اللغات."
+    }
+  }
+}

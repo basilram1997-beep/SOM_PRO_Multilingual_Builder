@@ -125,7 +125,9 @@ writeEnv("apps/license-server/.env.production", [
   ["SOM_PRO_LICENSE_SECRET", licenseSecret],
   ["LICENSE_ADMIN_TOKEN", licenseAdminToken],
   ["PUBLIC_BASE_URL", licenseUrl],
-  ["CORS_ORIGIN", appUrl]
+  ["CORS_ORIGIN", appUrl],
+  ["LICENSE_REQUEST_BACKING", "redis"],
+  ["LICENSE_REDIS_URL", `redis://:${redisPassword}@redis:6379`]
 ]);
 
 success("DuckDNS staging env prepared for:", appUrl);

@@ -19,11 +19,8 @@ import {
   getMfaProductionReadiness,
   verifyTotpCode
 } from "../../services/mfaService";
-import {
-  bootstrapLicenseAccess,
-  recoverLicenseAdminAccess,
-  syncLicenseAdminAccountForLogin
-} from "../../services/licenseService";
+import { bootstrapLicenseAccess } from "../../services/licenseBootstrap";
+import { recoverLicenseAdminAccess, syncLicenseAdminAccountForLogin } from "../../services/licenseService";
 import { getDefaultSchoolId } from "../../services/schoolContext";
 import { getRequestDeviceInfo } from "../../services/deviceContext";
 import { createRateLimitMiddleware, rejectMultipartContent } from "../../middleware/requestProtections";

@@ -53,8 +53,8 @@ test("backend product backups encrypt PostgreSQL and license artifacts before re
   );
   assert.match(
     productBackup,
-    /fs\.rmSync\(filePath, \{ force: true \}\)/,
-    "plaintext product backup files should be deleted"
+    /fs\.promises\.rm\(filePath, \{ force: true \}\)/,
+    "plaintext product backup files should be deleted asynchronously"
   );
   assert.match(productBackup, /encrypted:\s*true/, "product backup manifest should declare encryption");
   assert.doesNotMatch(productBackup, /postgresDumpPath:\s*postgresDumpPath/, "result must not expose raw SQL path");

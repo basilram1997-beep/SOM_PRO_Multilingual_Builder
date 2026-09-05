@@ -82,8 +82,6 @@
     restart: unless-stopped
     env_file:
       - apps/license-server/.env.production
-    volumes:
-      - sompro_license_data:/app/apps/license-server/data
     expose:
       - "4100"
     healthcheck:
@@ -173,6 +171,5 @@
 volumes:
   sompro_pg_data:
   sompro_redis_data:
-  sompro_license_data:
   sompro_certbot_www:
   sompro_letsencrypt:

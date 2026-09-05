@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "node src/server.js",
     "start": "node src/server.js",
-    "test": "node --test src/server.security.test.js"
+    "test": "node --test src/server.security.test.js src/requestProtectionStore.test.js"
+  },
+  "dependencies": {
+    "ioredis": "^5.4.1"
   }
 }

@@ -6,15 +6,14 @@ This file lists the remaining issues that are not fully closed yet.
 
 - None currently confirmed in local checks.
 
-## P1 - Important before sale
+## P1 - Important follow-up items
 
 | Issue                                                                 | Impact                                        | Recommendation                                            |
 | --------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------- |
-| Real staging validation is still required                             | Commercial SaaS readiness is not fully proven | Run the staging plan on a real domain with HTTPS          |
 | Windows installer is not code-signed unless a certificate is provided | Trust and install warnings may appear         | Sign the installer before broad distribution              |
 | License server storage still relies on local JSON for some flows      | Long-term SaaS durability is weaker           | Move production license storage to managed server storage |
 
-## P2 - Good improvement but does not block sale
+## P2 - Good improvement items
 
 | Issue                                                                | Impact                                            | Recommendation                          |
 | -------------------------------------------------------------------- | ------------------------------------------------- | --------------------------------------- |

@@ -53,7 +53,7 @@ function artifact(pathname, description, requiredForSubmission = true) {
 function collectOfficialRows(intake) {
   return intake
     .split(/\r?\n/)
-    .filter((line) => /^\| MOS-\d{3} \|/.test(line))
+    .filter((line) => /^\|\s*MOS-\d{3}\s*\|/.test(line))
     .map((line) => {
       const cells = line
         .split("|")

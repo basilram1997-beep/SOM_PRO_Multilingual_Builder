@@ -42,6 +42,10 @@ This creates local ignored files:
 
 The script writes random local secrets. These files are intentionally ignored by Git.
 
+For the shared Redis settings used by backend and license-server, see:
+
+- [Redis Settings for Backend + License Server](/C:/Users/asus/Desktop/SOM_PRO_Multilingual_Builder_v1_5_5_Database_ENV_Fixed/docs/REDIS_SETTINGS_BACKEND_LICENSE_SERVER.md)
+
 Use `--force` only if you intentionally want to replace existing local staging secrets:
 
 ```bash
@@ -59,6 +63,10 @@ node scripts/runtime/prepare-duckdns-staging-env.js --force
 | `CORS_ORIGIN`                | `https://sompro.duckdns.org`         |
 | `SOM_LICENSE_SERVER_URL`     | `https://sompro.duckdns.org/license` |
 | `SOM_PRO_LICENSE_SERVER_URL` | `https://sompro.duckdns.org/license` |
+
+The Redis request-protection settings are documented in the shared runbook:
+
+- [Redis Settings for Backend + License Server](/C:/Users/asus/Desktop/SOM_PRO_Multilingual_Builder_v1_5_5_Database_ENV_Fixed/docs/REDIS_SETTINGS_BACKEND_LICENSE_SERVER.md)
 
 ## TLS Certificate Requirement
 

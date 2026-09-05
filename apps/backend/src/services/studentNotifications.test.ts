@@ -80,6 +80,8 @@ async function withMockWebhookServer(
   try {
     await fn(`http://127.0.0.1:${address.port}`, received);
   } finally {
+    server.closeIdleConnections?.();
+    server.closeAllConnections?.();
     await new Promise<void>((resolve) => {
       server.close(() => resolve());
     });

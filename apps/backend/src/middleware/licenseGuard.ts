@@ -1,5 +1,5 @@
 ﻿import type { Request, Response, NextFunction } from "express";
-import { getLicenseState } from "../services/licenseService";
+import { getLicenseGuardState } from "../services/licenseService";
 import { getRequestDeviceInfo } from "../services/deviceContext";
 
 const publicPaths = ["/health", "/api/license/status", "/api/license/activate"];
@@ -10,7 +10,7 @@ const LICENSE_READ_ONLY_MESSAGE = "الترخيص لا يسمح بالتعديل
 
 export async function licenseGuard(req: Request, res: Response, next: NextFunction) {
   if (publicPaths.includes(req.path)) return next();
-  const state = await getLicenseState(req.user?.schoolId, getRequestDeviceInfo(req));
+  const state = await getLicenseGuardState(req.user?.schoolId, getRequestDeviceInfo(req));
   res.setHeader(LICENSE_STATUS_HEADER, state.status);
   res.setHeader(LICENSE_READ_ONLY_HEADER, String(state.readOnly));
 

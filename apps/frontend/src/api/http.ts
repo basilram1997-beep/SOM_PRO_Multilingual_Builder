@@ -1,6 +1,6 @@
 import { Capacitor } from "@capacitor/core";
 import { apiErrorMessage, isLocalApiUrl, readResponseBody } from "./httpUtils";
-import { readStoredValue, removeStoredValue, writeStoredValue } from "../lib/browserStorage";
+import { clearAuthToken, getAuthToken, setAuthToken } from "../lib/authTokenStorage";
 
 const LOCAL_API_URL = "http://localhost:4000";
 const SAME_ORIGIN_API_URL = "/api";
@@ -39,42 +39,6 @@ function desktopDeviceHeaders(): Record<string, string> {
     "X-SOM-Platform": DESKTOP_DEVICE.platform || "desktop"
   };
 }
-
-const AUTH_TOKEN_KEY = "som-pro-auth-token-v2";
-const SESSION_AUTH_TOKEN_KEY = "som-pro-session-auth-token-v2";
-const OLD_AUTH_KEYS = ["som-pro-auth-token", "som-pro-session-auth-token"];
-let authTokenMemory = "";
-
-export function clearLegacyAuthTokens() {
-  for (const key of OLD_AUTH_KEYS) {
-    removeStoredValue("localStorage", key);
-    removeStoredValue("sessionStorage", key);
-  }
-}
-
-function clearCurrentAuthTokenStorage() {
-  removeStoredValue("localStorage", AUTH_TOKEN_KEY);
-  removeStoredValue("sessionStorage", SESSION_AUTH_TOKEN_KEY);
-}
-
-export function getAuthToken() {
-  if (authTokenMemory) return authTokenMemory;
-  const storedToken =
-    readStoredValue("sessionStorage", SESSION_AUTH_TOKEN_KEY) || readStoredValue("localStorage", AUTH_TOKEN_KEY) || "";
-  authTokenMemory = storedToken;
-  return authTokenMemory;
-}
-
-export function setAuthToken(token: string) {
-  clearLegacyAuthTokens();
-  const cleanToken = String(token || "").trim();
-  authTokenMemory = cleanToken;
-  clearCurrentAuthTokenStorage();
-  if (!cleanToken) return;
-  writeStoredValue("sessionStorage", SESSION_AUTH_TOKEN_KEY, cleanToken);
-}
-
-clearLegacyAuthTokens();
 
 function isLoopbackHost(hostname: string) {
   const normalized = String(hostname || "")
@@ -220,3 +184,5 @@ export const api = {
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
   download
 };
+
+export { clearAuthToken, getAuthToken, setAuthToken };

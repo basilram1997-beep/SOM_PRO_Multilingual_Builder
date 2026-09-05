@@ -5,18 +5,15 @@ import { authenticateRequest, requirePermission } from "../../middleware/auth";
 import { validateBody } from "../../middleware/validate";
 import { createRateLimitMiddleware, rejectMultipartContent } from "../../middleware/requestProtections";
 import { prisma } from "../../db/prisma";
-import {
-  activateLicense,
-  getLicenseState,
-  getPersistedLicenseSetup,
-  savePersistedLicenseSetup
-} from "../../services/licenseService";
+import { activateLicense, getLicenseState } from "../../services/licenseService";
+import { getPersistedLicenseSetup, savePersistedLicenseSetup } from "../../services/licenseBootstrap";
 import { getRequestDeviceInfo } from "../../services/deviceContext";
 import { recordAuditLog } from "../../services/auditLog";
 import { logSafeError } from "../../lib/safeLog";
 import { resolveAuthenticatedUserFromToken } from "../../middleware/auth";
 import { z } from "zod";
 
+export const licenseStatusRouter = Router();
 export const licenseRouter = Router();
 const LicenseActivationSchema = z
   .object({
@@ -41,7 +38,15 @@ const licenseActivateRateLimit = createRateLimitMiddleware({
   message: "تم تكرار تفعيل الترخيص بسرعة زائدة. انتظر قليلًا ثم حاول مرة أخرى.",
   auditAction: "RATE LIMITED LICENSE ACTIVATE"
 });
+const licenseSetupRateLimit = createRateLimitMiddleware({
+  key: "license:setup",
+  windowMs: 60_000,
+  max: 6,
+  message: "تم تكرار تعديل إعدادات الترخيص بسرعة زائدة. انتظر قليلًا ثم حاول مرة أخرى.",
+  auditAction: "RATE LIMITED LICENSE SETUP"
+});
 
+licenseStatusRouter.use(rejectMultipartContent);
 licenseRouter.use(rejectMultipartContent);
 
 async function attachOptionalAuth(req: Request, _res: Response, next: () => void) {
@@ -79,21 +84,22 @@ async function sendLicenseState(req: Request, res: Response) {
   res.json({ data: state });
 }
 
-licenseRouter.get("/status", licenseStatusRateLimit, attachOptionalAuth, async (req, res) => {
+licenseStatusRouter.get("/status", licenseStatusRateLimit, attachOptionalAuth, async (req, res) => {
   await sendLicenseState(req, res);
 });
 
-licenseRouter.post("/status", licenseStatusRateLimit, attachOptionalAuth, async (req, res) => {
+licenseStatusRouter.post("/status", licenseStatusRateLimit, attachOptionalAuth, async (req, res) => {
   await sendLicenseState(req, res);
 });
 
-licenseRouter.get("/setup", authenticateRequest, requirePermission("manageLicense"), async (req, res) => {
+licenseRouter.get("/setup", licenseSetupRateLimit, authenticateRequest, requirePermission("manageLicense"), async (req, res) => {
   const setup = await getPersistedLicenseSetup(req.user!.schoolId);
   res.json({ data: setup });
 });
 
 licenseRouter.put(
   "/setup",
+  licenseSetupRateLimit,
   authenticateRequest,
   requirePermission("manageLicense"),
   validateBody(DesktopLicenseSetupSchema),

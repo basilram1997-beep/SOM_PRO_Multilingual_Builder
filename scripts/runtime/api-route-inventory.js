@@ -155,14 +155,15 @@ function classifyRoute(match, nextIndex, source, mount) {
   const permission = routePermission || mount.inheritedPermission || selfServicePermission;
   const upload = mount.mountPath === "/api/uploads" || /express\.raw|multer|Content-Type|content-type/i.test(block);
   const validatesBody = /validateBody\(|\.parse\(|safeParse\(|z\.object/.test(block);
+  const optionalAuthOnly = /attachOptionalAuth\(/.test(block) && !routeRequiresAuth;
 
   return {
     method: match.method,
     path: fullPath,
     router: mount.routerName,
     source: normalizeSlashes(path.relative(findRepoRoot(), mount.sourceFile)),
-    public: !authRequired && publicByMount,
-    authRequired,
+    public: (!authRequired || optionalAuthOnly) && publicByMount,
+    authRequired: optionalAuthOnly ? false : authRequired,
     licenseGuard: mount.mountedAfterAuthGate,
     rbac: Boolean(permission),
     permission,

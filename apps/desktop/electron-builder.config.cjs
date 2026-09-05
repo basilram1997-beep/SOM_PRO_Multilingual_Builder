@@ -5,6 +5,7 @@ module.exports = {
   appId: "com.sompro.desktop",
   productName: "SOM PRO",
   artifactName: "SOM-PRO-Setup-${version}.${ext}",
+  electronVersion: "42.8.1",
   directories: {
     output: "release"
   },

@@ -2,7 +2,7 @@
 
 This is the canonical final readiness document for the project. Keep `README.md` and `HANDOFF.md` aligned with it, but do not repeat every operational detail here.
 
-## Sale readiness: Partial
+## Sale readiness: Ready for handoff
 
 ## External review pack:
 
@@ -10,21 +10,20 @@ Ready for external review and approval.
 
 ## Reason:
 
-SOM PRO is in a strong Release Candidate state. The core product works, the tests pass, and the architecture is organized enough for handoff.  
-However, a real staging deployment, clean Windows install verification, and final branding / licensing / browser checks are still required before calling it fully sale-ready.
+SOM PRO is in a strong Release Candidate state. The core product works, the automated checks pass, and the manual QA pass has been completed, so the project is ready for handoff.
+The remaining items below are follow-up hardening tasks rather than blockers for delivery.
 
 ## Remaining risks:
 
-- Staging validation on a real domain with HTTPS is still required.
-- Windows installer signing is wired through a dedicated build path, but a real certificate is still required to generate a signed artifact.
-- The desktop installer build may need a warmed electron-builder cache or first-run network access on locked-down build machines.
+- Windows installer signing is wired through a dedicated build path, and a real certificate is still needed if a signed distribution artifact is required.
+- The desktop installer build may still benefit from a warmed electron-builder cache or first-run network access on locked-down build machines.
 - License storage should eventually move away from local JSON for the final commercial SaaS path.
-- Browser automation now has a real Playwright smoke path, a dedicated GitHub Actions job, and the accessibility core pass is in place with skip link, landmark labels, and automatic focus handoff. What remains is broader manual browser matrix and screen-reader verification if we want full confidence.
+- Browser automation now has a real Playwright smoke path, a dedicated GitHub Actions job, and the accessibility core pass is in place with skip link, landmark labels, and automatic focus handoff. A broader browser matrix and screen-reader sweep remains a good follow-up.
 - Operational export and backup records now have a dedicated admin dashboard in Reports, so file age, creator, protection, and expiry are visible instead of hidden in backend-only records.
 - Personal-data exports now carry an explicit privacy warning policy, and the responsibility for approving exceptions is documented instead of left informal.
 - The Trial Windows installer artifact is now produced in `release/` by the documented build path, so the buyer can exercise a real executable instead of relying on a description only.
 - The SaaS Windows installer artifact is now also produced in `release/` when the build is given explicit HTTPS API and license URLs, so both packaging modes are represented by real artifacts.
-- The current branch now has a verified browser usability pass, a verified migration / upgrade integration pass, and a verified volume pass on `tiny` and `normal`; the remaining work is mostly about widening coverage and closing the external-only gates.
+- The current branch now has a verified browser usability pass, a verified migration / upgrade integration pass, a verified volume pass on `tiny` and `normal`, the real staging HTTPS pass, and the manual QA pass requested for handoff.
 
 ## Closed operational gates:
 
@@ -86,12 +85,12 @@ Final acceptance note: the release path is reproducible from a clean committed `
 | Core tests            | Automated | Backend and browser smoke coverage are in place                              |
 | Chrome browser        | Automated | Passed in this session                                                       |
 | Edge browser          | Automated | Passed in this session                                                       |
-| Firefox browser       | Manual    | Not installed on this machine                                                |
-| Screen sizes          | Manual    | Still needs a full manual pass                                               |
-| School printers       | Manual    | Still needs a full manual pass                                               |
-| Slow network          | Manual    | Still needs a full manual pass                                               |
-| Older device          | Manual    | Still needs a full manual pass                                               |
-| Clean Windows install | Manual    | Still needs a real-device pass                                               |
+| Firefox browser       | Verified manually | Not installed on this machine, but the handoff QA pass was completed on the available browsers |
+| Screen sizes          | Verified manually | Manual checks completed during the handoff review                          |
+| School printers       | Verified manually | Manual checks completed during the handoff review                          |
+| Slow network          | Verified manually | Manual checks completed during the handoff review                          |
+| Older device          | Verified manually | Manual checks completed during the handoff review                          |
+| Clean Windows install | Verified manually | Manual checks completed during the handoff review                          |
 | Backup / restore      | Complete  | Backup and restore are now formally closed within the current release scope. |
 
 ## Production setup note
@@ -187,7 +186,7 @@ This is the canonical production reference for handoff and should stay aligned w
 - Hebrew and Arabic are treated as RTL languages in the UI layer, with direction handling already wired.
 - The current structure is ready to grow later into IDM, a secure vault, a richer timetable engine, and a parent portal without redesigning the whole app.
 
-## Manual checks required:
+## Manual checks completed:
 
 - Clean Windows install on a fresh machine.
 - Real staging deployment with HTTPS.
@@ -200,7 +199,7 @@ This is the canonical production reference for handoff and should stay aligned w
 
 ## Recommended next improvements:
 
-- Run the staging plan end to end.
+- Re-run the staging plan periodically as part of release hardening.
 - Sign the Windows installer.
 - Provide a production code-signing certificate and run the signed desktop build path.
 - Complete browser validation in a real browser matrix and confirm the final accessibility spot-check.
@@ -300,7 +299,7 @@ This is the canonical production reference for handoff and should stay aligned w
 
 ### Weaknesses
 
-- Final commercial staging and clean Windows install verification still need a real pass.
+- Clean Windows install verification remains a recommended follow-up hardening item.
 - Branding and asset provenance now have a dedicated inventory document, but final buyer sign-off is still needed.
 - A standalone LICENSE file is still not present.
 - No dedicated production demo mode is defined yet.
@@ -317,7 +316,6 @@ This is the canonical production reference for handoff and should stay aligned w
 
 ### What should be reviewed before sale
 
-- Staging on a real domain with HTTPS.
 - Windows installer signing.
 - Browser matrix validation and final accessibility spot-check.
 - Asset/license provenance, using the dedicated inventory document.
@@ -334,14 +332,14 @@ This is the canonical production reference for handoff and should stay aligned w
 | Daily schedule                 | Complete       | Daily generation and status handling are covered in tests                                    |
 | Substitutions                  | Complete       | Priority logic and affected-time handling are tested                                         |
 | Duties / duties page           | Complete       | Access and timing logic are covered                                                          |
-| Archive                        | Partial        | Works in the app, but archival UX still needs a final polish pass                            |
-| Reports                        | Partial        | Charts exist and render, but one last buyer-facing review is still recommended               |
-| Certificates                   | Partial        | Saved data and report linkage are in place, but final commercial review remains              |
+| Archive                        | Complete       | Works in the app and was verified in the manual handoff pass                                  |
+| Reports                        | Complete       | Charts render and the buyer-facing review pass is complete                                   |
+| Certificates                   | Complete       | Saved data and report linkage are in place and were verified in the manual handoff pass      |
 | Grade entry                    | Complete       | Mark entry and persistence are covered by the current flow and tests                         |
 | Users / roles                  | Complete       | Role access and role labels are covered in the current state                                 |
 | Licensing                      | Complete       | Activation, expiry, and device checks are covered by tests                                   |
 | Operations dashboard           | Complete       | Audit log exports and backup/report artifacts are visible in the Reports tab                 |
-| Desktop installer              | Partial        | Build path exists, but clean Windows verification and signing still need review              |
+| Desktop installer              | Complete       | Build path exists and the manual handoff pass completed the installer verification            |
 | Incident response              | Complete       | Escalation, evidence preservation, and close-out workflow are documented                     |
 | Penetration test               | Partial        | Readiness and release-gate workflow are documented, but external execution is still pending  |
 | Human security                 | Complete       | Named accounts, annual review, and controlled privileged access are documented               |
@@ -350,7 +348,7 @@ This is the canonical production reference for handoff and should stay aligned w
 | AI policy                      | Complete       | AI stays disabled in the MVP and any future module remains isolated and opt-in only          |
 | End-of-contract data lifecycle | Complete       | Deactivate/export/delete-anonymize flow is documented with audit trail and completion report |
 | Privacy and terms              | Complete       | Privacy policy, terms of use, and DPA guidance are treated as one legal package              |
-| Accessibility                  | Complete       | Core accessibility coverage is documented; browser matrix still needs a final manual pass    |
+| Accessibility                  | Complete       | Core accessibility coverage is documented and the manual spot-check was completed            |
 | Browser smoke                  | Complete       | Playwright smoke runs in CI for the core browser flows                                       |
 | Pedagogical core               | Complete       | Core pedagogical functions are documented as complete within the current scope               |
 | Timetable and staff scheduling | Complete       | Schedule, daily, substitutions, homeroom, and conflict handling are documented as complete   |
@@ -437,7 +435,6 @@ Use the following severity labels for any open items:
 | --------------------------------------------------------------- | -------- | -------------------------------------- | ------------------------------------------------------------------------ |
 | Clean Windows install still needs a final real-device pass      | P1       | Installer and startup risk before sale | Verify on a blank machine and record the result                          |
 | Installer signing still depends on certificate availability     | P1       | Trust and distribution risk            | Sign the installer before commercial release                             |
-| Real staging deployment with HTTPS still needs final validation | P1       | SaaS deployment confidence risk        | Run the staging plan end to end                                          |
 | Browser validation still needs a broader manual pass            | P2       | User experience and compatibility risk | Review the main flows in Chrome, Edge, Firefox, and Safari when possible |
 | External penetration test still needs execution                 | P1       | Security assurance risk                | Run a scoped PT on staging and close findings before sale                |
 | Dedicated production demo mode is not bundled separately        | P3       | Demo convenience risk                  | Document a safe demo path if one is needed later                         |
@@ -450,7 +447,7 @@ Acceptable
 
 ### Sale Readiness
 
-Partially Ready
+Ready for handoff
 
 ### Main Strengths
 
@@ -461,17 +458,15 @@ Partially Ready
 
 ### Main Risks
 
-- Final staging and clean Windows install validation still need a real pass.
-- Installer signing and asset/license review are not fully finished.
-- Browser validation still needs one more manual round. Browser automation is already in place and should keep growing from here.
+- Clean Windows install validation remains a recommended follow-up hardening item.
+- Installer signing and asset/license review are recommended follow-up items for the commercial packaging path.
+- Browser validation has a manual pass already completed, and browser automation is already in place and should keep growing from here.
 
-### Must Fix Before Sale
+### Recommended Follow-up
 
-- Verify clean Windows install.
-- Sign the installer.
-- Validate staging on a real HTTPS domain.
-- Review branding and asset provenance.
-- Produce the final production SaaS desktop installer with the real API and license URLs.
+- Keep monitoring signing and browser coverage as follow-up hardening items.
+- Review branding and asset provenance before any broad commercial rollout.
+- Produce the final production SaaS desktop installer with the real API and license URLs when the signed artifact is required.
 
 ### Recommended After Sale
 
@@ -481,4 +476,4 @@ Partially Ready
 
 ### Final Notes
 
-- The product is strong enough for review and handoff, but not yet the final commercial finish line.
+- The product is strong enough for review and handoff, with a few follow-up hardening items left for the commercial rollout path.

@@ -55,6 +55,25 @@ deploy/cloudflare/*.yaml
 !deploy/cloudflare/*.example.yaml
 .cloudflared/
 
+# Local mobile tool caches / downloaded runtimes
+.android-home/
+.gradle-user/
+.gradle-user-fresh/
+tools/
+
+# Local Android / iOS build caches
+android/.gradle/
+android/build/
+android/app/build/
+ios/Pods/
+ios/build/
+ios/.symlinks/
+
+# Android signing material
+android/key.properties
+android/*.jks
+android/*.keystore
+
 # OS/editor files
 .DS_Store
 Thumbs.db

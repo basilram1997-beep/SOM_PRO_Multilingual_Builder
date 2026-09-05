@@ -18,9 +18,9 @@ const publicRoutes = new Set([
   "GET /api/auth/sso/oidc/config",
   "POST /api/auth/sso/oidc/callback",
   "GET /api/license/status",
-  "POST /api/license/status"
 ]);
 
+const optionalAuthRoutes = new Set(["POST /api/license/status"]);
 const intentionallyUnauditedProtectedRoutes = new Set(["GET /api/stats"]);
 const intentionallyUnauditedSelfServiceReads = new Set(["GET /api/auth/me", "GET /api/auth/mfa/readiness"]);
 
@@ -56,6 +56,11 @@ test("API route inventory classifies every backend route with security controls"
     const key = routeKey(route);
     if (publicRoutes.has(key)) {
       assert.equal(route.public, true, `${key} should be explicitly classified as public`);
+      continue;
+    }
+
+    if (optionalAuthRoutes.has(key)) {
+      assert.equal(route.rateLimited, true, `${key} must have rate-limit evidence`);
       continue;
     }
 

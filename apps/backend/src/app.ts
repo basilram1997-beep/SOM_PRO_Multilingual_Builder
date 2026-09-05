@@ -23,6 +23,7 @@ import { examsRouter } from "./modules/lessons/exams.routes";
 import { schoolsRouter } from "./modules/schools/schools.routes";
 import { uploadsRouter } from "./modules/uploads/uploads.routes";
 import { licenseRouter } from "./modules/license/license.routes";
+import { licenseStatusRouter } from "./modules/license/license.routes";
 import { studentsRouter } from "./modules/students/students.routes";
 import { authenticateRequest, requirePermission, requirePermissionForWrite } from "./middleware/auth";
 import { enforceHttpsInProduction } from "./middleware/https";
@@ -72,7 +73,7 @@ export function createApp() {
     })
   );
   app.use("/api/auth", authRouter);
-  app.use("/api/license", licenseRouter);
+  app.use("/api/license", licenseStatusRouter);
 
   app.use(authenticateRequest);
   app.use(licenseGuard);
@@ -80,6 +81,7 @@ export function createApp() {
   app.use(rejectSchoolContextOverride);
   app.use(rejectUserContextOverride);
   app.use(sensitiveWriteRateLimit);
+  app.use("/api/license", licenseRouter);
 
   app.use("/api/stats", requirePermission("read"), statsRouter);
   app.use("/api/settings", requirePermissionForWrite("manageSettings"), settingsRouter);

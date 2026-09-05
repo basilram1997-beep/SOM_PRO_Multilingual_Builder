@@ -31,6 +31,14 @@ cp apps/frontend/.env.production.example apps/frontend/.env.production
 
 غيّر كل قيم `change-me` إلى أسرار قوية. لا تستخدم أي كلمة مرور افتراضية.
 
+## Redis والـ License Server
+
+لإعداد Redis المشترك بين Backend و License Server، راجع:
+
+- [Redis Settings for Backend + License Server](/C:/Users/asus/Desktop/SOM_PRO_Multilingual_Builder_v1_5_5_Database_ENV_Fixed/docs/REDIS_SETTINGS_BACKEND_LICENSE_SERVER.md)
+
+الملف يوضح القيم المطلوبة في `REDIS_URL` و `LICENSE_REQUEST_BACKING` و `LICENSE_REDIS_URL`، ومتى يُسمح بوضع `memory` محليًا فقط.
+
 ## Redis في production
 
 - لا تفتح Redis للعالم الخارجي.

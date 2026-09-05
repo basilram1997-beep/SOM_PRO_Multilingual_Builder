@@ -2,18 +2,20 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
+const repoRoot = resolve(__dirname, "../../../../");
+
 function read(relativePath: string) {
-  return readFileSync(relativePath, "utf8");
+  return readFileSync(join(repoRoot, relativePath), "utf8");
 }
 
 test("Ministry review pack generator writes manifest and markdown with required evidence categories", () => {
   const reportDir = mkdtempSync(join(tmpdir(), "som-ministry-review-"));
   try {
-    const result = spawnSync(process.execPath, ["../../scripts/runtime/ministry-review-pack.js"], {
-      cwd: process.cwd(),
+    const result = spawnSync(process.execPath, [join(repoRoot, "scripts/runtime/ministry-review-pack.js")], {
+      cwd: repoRoot,
       env: {
         ...process.env,
         MINISTRY_REVIEW_REPORT_DIR: reportDir
@@ -68,8 +70,8 @@ test("Ministry review pack generator writes manifest and markdown with required 
 test("Ministry review pack strict mode fails while pending evidence remains and docs expose canonical command", () => {
   const reportDir = mkdtempSync(join(tmpdir(), "som-ministry-review-strict-"));
   try {
-    const result = spawnSync(process.execPath, ["../../scripts/runtime/ministry-review-pack.js"], {
-      cwd: process.cwd(),
+    const result = spawnSync(process.execPath, [join(repoRoot, "scripts/runtime/ministry-review-pack.js")], {
+      cwd: repoRoot,
       env: {
         ...process.env,
         MINISTRY_REVIEW_REPORT_DIR: reportDir,
@@ -77,9 +79,9 @@ test("Ministry review pack strict mode fails while pending evidence remains and 
       },
       encoding: "utf8"
     });
-    const pkg = JSON.parse(read("../../package.json")) as { scripts: Record<string, string> };
-    const evidence = read("../../docs/MINISTRY_EVIDENCE_INDEX.md");
-    const testPlan = read("../../docs/MINISTRY_TEST_PLAN.md");
+    const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
+    const evidence = read("docs/MINISTRY_EVIDENCE_INDEX.md");
+    const testPlan = read("docs/MINISTRY_TEST_PLAN.md");
 
     assert.notEqual(result.status, 0, "strict mode must fail until pending evidence categories are closed");
     assert.equal(pkg.scripts["ministry:review-pack"], "node scripts/runtime/ministry-review-pack.js");

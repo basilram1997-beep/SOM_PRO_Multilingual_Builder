@@ -74,7 +74,7 @@ SOM_PRO_LICENSE_GRACE_DAYS=3
 
 ## أين تحفظ بيانات التفعيل؟
 
-- في License Server: داخل `apps/license-server/data/licenses.json` في وضع التطوير المحلي.
+- في License Server: داخل قاعدة البيانات المركزية عبر Prisma، مع Redis للقيود المؤقتة المشتركة بين instances.
 - في backend: داخل جدول `LicenseActivation` لحالة ترخيص المدرسة محليًا داخل النظام.
 - في Desktop: فقط `deviceId` محلي غير حساس داخل مجلد بيانات التطبيق.
 
@@ -90,7 +90,7 @@ SOM_PRO_LICENSE_GRACE_DAYS=3
 
 ## المتبقي قبل الإنتاج الحقيقي
 
-- نقل License Server من JSON file إلى قاعدة بيانات إنتاجية.
+- License Server أصبح DB-backed، لكن يجب الاستمرار في استخدام Redis وبيئة نشر مركزية موثقة.
 - تشغيله خلف HTTPS ودومين حقيقي.
 - إضافة rate limiting و audit log مفصل لعمليات المالك.
 - توقيع Windows installer.
