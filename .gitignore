@@ -15,6 +15,7 @@ tests/perf/artifacts/
 tests/e2e/artifacts/
 reports/
 deliverables/
+site-package.tgz
 
 # Desktop installers and generated release artifacts
 apps/desktop/release/
