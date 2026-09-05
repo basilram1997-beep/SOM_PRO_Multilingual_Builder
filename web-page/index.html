@@ -1824,6 +1824,33 @@
         }
       };
 
+      const galleryTranslations = {
+        "student-homework-v1.png": { en: ["My homework", "Due assignments with deadlines, status, and progress."], he: ["שיעורי הבית שלי", "מטלות להגשה עם מועד, סטטוס והתקדמות."] },
+        "student-lessons-v1.png": { en: ["My lessons", "Lessons arranged by day with quick links to the subject and teacher."], he: ["השיעורים שלי", "השיעורים מסודרים לפי יום עם קישור מהיר למקצוע ולמורה."] },
+        "student-exams-v1.png": { en: ["My exams", "An exam planner with date, type, and status."], he: ["הבחינות שלי", "תכנון הבחינות עם תאריך, סוג וסטטוס."] },
+        "student-program-v1.png": { en: ["My schedule", "The daily schedule for lessons, subjects, teachers, and times."], he: ["המערכת שלי", "מערכת יומית של שיעורים, מקצועות, מורים ושעות."] },
+        "teacher-referral-lesson.png": { en: ["Refer a lesson", "Refer a lesson by selecting the class, subject, and period."], he: ["הפניית שיעור", "הפניית שיעור באמצעות בחירת הכיתה, המקצוע והשיעור."] },
+        "teacher-grades-entry.png": { en: ["Enter grades", "Enter student grades with assessment and notes."], he: ["הזנת ציונים", "הזנת ציוני תלמידים עם הערכה והערות."] },
+        "teacher-exam-add.png": { en: ["Add an exam", "Add a new exam and link it to the class and subject."], he: ["הוספת בחינה", "הוספת בחינה חדשה וקישורה לכיתה ולמקצוע."] },
+        "teacher-homework-add.png": { en: ["Add homework", "Create homework with a clear description and due date."], he: ["הוספת שיעורי בית", "יצירת מטלה עם תיאור ברור ומועד הגשה."] },
+        "teacher-attendance.png": { en: ["Attendance", "A daily attendance summary with the students' different statuses."], he: ["נוכחות והיעדרות", "סיכום הנוכחות היומית עם הסטטוסים השונים של התלמידים."] },
+        "teacher-student-behavior.png": { en: ["Student behavior", "Record positive or negative behavior with a note."], he: ["התנהגות התלמיד", "תיעוד התנהגות חיובית או שלילית עם הערה."] },
+        "teacher-student-behavior-detail.png": { en: ["Student behavior details", "View the note details and the action taken for the behavior."], he: ["פרטי התנהגות התלמיד", "צפייה בפרטי ההערה ובפעולה שננקטה בעקבות ההתנהגות."] },
+        "admin-notifications.png": { en: ["School notifications", "A list of notifications and alerts sent during the day."], he: ["התראות בית הספר", "רשימת ההתראות וההודעות שנשלחו במהלך היום."] },
+        "admin-exams-trips.png": { en: ["Exams, events, and trips", "Dates for exams, events, and trips with statuses and classes."], he: ["בחינות, אירועים וטיולים", "מועדי בחינות, אירועים וטיולים עם סטטוסים וכיתות."] },
+        "admin-daily-program.png": { en: ["Daily schedule", "The daily schedule interface after an update."], he: ["המערכת היומית", "ממשק המערכת היומית לאחר העדכון."] },
+        "admin-daily-program-table-2026-08-29.png": { en: ["Daily schedule table", "The daily schedule after lessons and subjects have been entered."], he: ["טבלת המערכת היומית", "מערכת היום לאחר מילוי השיעורים והמקצועות."] },
+        "admin-reports.png": { en: ["Reports", "The reports page with substitution charts and a quality graph."], he: ["דוחות", "דף הדוחות עם תרשימי החלפות וגרף איכות."] },
+        "admin-free-teachers.png": { en: ["Available teachers", "A quick summary of classes, available teachers, and total availability."], he: ["מורים פנויים", "סיכום מהיר של הכיתות, המורים הפנויים וסך הזמינות."] },
+        "admin-homeroom.png": { en: ["Homeroom teachers", "Assign homeroom teachers to classes with approved periods."], he: ["מחנכים", "הקצאת מחנכים לכיתות עם השיעורים המאושרים."] },
+        "admin-duties.png": { en: ["Duty schedule", "Morning and afternoon duties with teachers and locations."], he: ["מערכת תורנויות", "תורנויות בוקר וערב עם מורים ומיקומים."] },
+        "admin-substitutions.png": { en: ["Substitutions", "Replace lessons by class, subject, and substitute teacher."], he: ["החלפות", "החלפת שיעורים לפי כיתה, מקצוע ומורה מחליף."] },
+        "admin-teacher-program.png": { en: ["Teacher schedule", "The teacher's lesson schedule and tasks during the school day."], he: ["מערכת המורה", "מערכת השיעורים והמשימות של המורה במהלך יום הלימודים."] },
+        "admin-dashboard.png": { en: ["Admin dashboard", "Overall indicators and a summary of school activity."], he: ["לוח הבקרה", "מדדים כלליים וסיכום הפעילות בבית הספר."] }
+      };
+      let activeLang = "ar";
+      const galleryData = new Map();
+
       function getStoredLang() {
         try {
           return localStorage.getItem("som-pro-web-lang");
@@ -1838,6 +1865,7 @@
       }
       function setLang(lang) {
         const d = dict[lang] || dict.ar;
+        activeLang = dict[lang] ? lang : "ar";
         document.documentElement.lang = lang;
         document.documentElement.dir = d.dir;
         document.body.classList.toggle("lang-en", lang === "en");
@@ -1858,6 +1886,7 @@
           .querySelectorAll(".language-switcher button")
           .forEach((b) => b.classList.toggle("active", b.dataset.lang === lang));
         setStoredLang(lang);
+        refreshShowcaseGalleries();
       }
 
       document.querySelectorAll(".language-switcher button").forEach((b) => {
@@ -1901,7 +1930,15 @@
         playTone(ctx, 880, start, 0.08, 0.018, "triangle");
       }
 
+      function getLocalizedGalleryItem(item) {
+        const key = item.image.split("/").pop();
+        const translation = galleryTranslations[key]?.[activeLang];
+        if (!translation) return item;
+        return { ...item, alt: translation[0], title: translation[0], caption: translation[1] };
+      }
+
       function createShowcaseCard(item) {
+        item = getLocalizedGalleryItem(item);
         const button = document.createElement("button");
         button.className = "showcase-card";
         button.type = "button";
@@ -1949,13 +1986,23 @@
             throw new Error("Invalid showcase payload");
           }
           const cards = items.filter((item) => item && item.image && item.title && item.caption);
-          container.replaceChildren(...cards.map(createShowcaseCard));
-          wireShowcaseCards(container);
+          galleryData.set(container, cards);
+          renderShowcaseGallery(container);
         } catch (error) {
           const label = container.dataset.showcaseLabel || "الصور";
           container.innerHTML = `<p class="showcase-error">تعذّر تحميل ${label}.</p>`;
           console.warn("Failed to load showcase gallery:", source, error);
         }
+      }
+
+      function renderShowcaseGallery(container) {
+        const cards = galleryData.get(container) || [];
+        container.replaceChildren(...cards.map(createShowcaseCard));
+        wireShowcaseCards(container);
+      }
+
+      function refreshShowcaseGalleries() {
+        galleryData.forEach((_items, container) => renderShowcaseGallery(container));
       }
 
       document.addEventListener("click", (event) => {
