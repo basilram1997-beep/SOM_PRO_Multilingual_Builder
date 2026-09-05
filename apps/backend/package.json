@@ -21,7 +21,7 @@
     "prisma:migrate:deploy": "node ../../scripts/runtime/prisma-cli.js migrate deploy",
     "test:contracts": "node --test --import tsx src/services/apiContracts.test.ts",
     "test:e2e": "node --test --import tsx src/services/releaseReadiness.test.ts",
-    "test:all": "npm test \u0026\u0026 npm run test:contracts \u0026\u0026 npm run test:e2e"
+    "test:all": "npm test && npm run test:contracts && npm run test:e2e"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -42,6 +42,7 @@
     "@types/node": "^22.9.0",
     "prisma": "^5.22.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "xlsx": "^0.18.5"
   }
 }
