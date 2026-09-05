@@ -5,15 +5,14 @@
   "main": "src/main.js",
   "scripts": {
     "dev": "electron .",
-    "build:win": "npx electron-builder --config electron-builder.config.cjs --win nsis",
-    "build:win:signed": "set SOM_ENABLE_CODESIGN=true&& npx electron-builder --config electron-builder.config.cjs --win nsis",
-    "build:dir": "npx electron-builder --config electron-builder.config.cjs --dir",
-    "build:dir:signed": "set SOM_ENABLE_CODESIGN=true&& npx electron-builder --config electron-builder.config.cjs --dir",
+    "build:win": "npx -y electron-builder@26.15.3 --config electron-builder.config.cjs --win nsis",
+    "build:win:signed": "set SOM_ENABLE_CODESIGN=true&& npx -y electron-builder@26.15.3 --config electron-builder.config.cjs --win nsis",
+    "build:dir": "npx -y electron-builder@26.15.3 --config electron-builder.config.cjs --dir",
+    "build:dir:signed": "set SOM_ENABLE_CODESIGN=true&& npx -y electron-builder@26.15.3 --config electron-builder.config.cjs --dir",
     "check": "node src/desktopCheck.js && node --test security.test.js"
   },
   "devDependencies": {
-    "electron": "^42.8.1",
-    "electron-builder": "26.15.3"
+    "electron": "^42.8.1"
   },
   "description": "SOM PRO desktop application",
   "author": "SOM PRO",

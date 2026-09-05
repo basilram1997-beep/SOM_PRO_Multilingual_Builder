@@ -70,7 +70,7 @@ export async function downloadStudentExportWorkbook({
     }
   }
 
-  const XLSX = await import("xlsx");
+  const XLSX = await import("@e965/xlsx");
   const rows = [
     [title],
     [finalNotice?.privacyWarning || ""],

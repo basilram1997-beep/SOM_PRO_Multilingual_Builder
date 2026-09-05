@@ -160,7 +160,7 @@ test("uploaded spreadsheet is scanned before acceptance and imported through the
         const baseUrl = `http://127.0.0.1:${address.port}`;
         const token = await login(baseUrl, email, password, licenseCode);
 
-        const workbookModule = await import("xlsx");
+        const workbookModule = await import("@e965/xlsx");
         const workbook = workbookModule.utils.book_new();
         const importRow = {
           name: `Upload Import Student ${runId}`,

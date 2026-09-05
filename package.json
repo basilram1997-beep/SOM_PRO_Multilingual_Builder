@@ -166,7 +166,7 @@
     "staging:check": "node scripts/staging-check.js",
     "staging:smoke": "node scripts/staging-smoke.js",
     "mobile:build:web": "npm run build:frontend",
-    "mobile:assets": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/runtime/generate-mobile-assets.ps1 && node -r ./scripts/runtime/capacitor-userinfo-shim.cjs ./node_modules/@capacitor/assets/bin/capacitor-assets generate --ios --android --assetPath assets",
+    "mobile:assets": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/runtime/generate-mobile-assets.ps1",
     "mobile:sync": "npm run mobile:build:web && node -r ./scripts/runtime/capacitor-userinfo-shim.cjs ./node_modules/@capacitor/cli/bin/capacitor sync",
     "mobile:release:check": "node scripts/runtime/mobile-release-check.js",
     "mobile:release:android": "npm run mobile:sync && cd android && .\\gradlew.bat bundleRelease",
@@ -182,7 +182,6 @@
   },
   "devDependencies": {
     "@capacitor/android": "^7.4.3",
-    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^7.4.3",
     "@capacitor/ios": "^7.4.3",
     "@eslint/js": "^10.0.1",
@@ -202,9 +201,14 @@
     "@prisma/client@5.22.0": true,
     "@prisma/engines@5.22.0": true,
     "cypress@15.18.1": true,
-    "electron-winstaller@5.4.0": true,
     "esbuild@0.28.1": true,
     "prisma@5.22.0": true
+  },
+  "overrides": {
+    "@xmldom/xmldom": "0.9.12",
+    "browserslist": "4.28.9",
+    "fast-uri": "4.1.4",
+    "qs": "6.16.0"
   },
   "packageManager": "npm@11.16.0"
 }

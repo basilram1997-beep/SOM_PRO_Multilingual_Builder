@@ -85,7 +85,7 @@ function readFromColumns(row: unknown[], columns: Map<keyof StudentImportRow, nu
 
 export async function parseStudentImportFile(file: File): Promise<StudentImportRow[]> {
   assertSpreadsheetImportFile(file);
-  const XLSX = await import("xlsx");
+  const XLSX = await import("@e965/xlsx");
   const buffer = await file.arrayBuffer();
   const workbook = XLSX.read(buffer, { type: "array" });
   const sheetName = workbook.SheetNames[0];
@@ -107,7 +107,7 @@ export async function parseStudentImportFile(file: File): Promise<StudentImportR
 }
 
 export async function downloadStudentImportTemplate() {
-  const XLSX = await import("xlsx");
+  const XLSX = await import("@e965/xlsx");
   const workbook = XLSX.utils.book_new();
   const sheet = XLSX.utils.aoa_to_sheet([IMPORT_HEADERS]);
   XLSX.utils.book_append_sheet(workbook, sheet, "نموذج الطلاب");
