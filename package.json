@@ -29,6 +29,7 @@
     "local:deps": "node scripts/runtime/local-data-services.js",
     "test:db:prepare": "node scripts/runtime/prepare-test-database.js",
     "test:db:verify": "node scripts/runtime/run-database-verification.js",
+    "delivery:verify": "node scripts/runtime/verify-delivery-state.js",
     "setup:local": "npm run local:deps && npm run setup:db",
     "setup:env": "node scripts/ensure-env.js",
     "build:web": "npm run build:frontend",
