@@ -34,6 +34,7 @@ Before claiming a real production deployment is complete, archive:
 - Signed Windows installer or documented unsigned-distribution exception.
 - Mobile signing/build account confirmation if mobile builds are in scope.
 - `reports/security/production-external-evidence.json` from `PRODUCTION_URL=https://... npm run production:external:verify`.
+- Current Cloudflare Pages evidence is tracked at `docs/test-reports/production-external-evidence-2026-09-06T21-29-40-487Z.md`.
 
 ## Non-Repository Boundary
 
