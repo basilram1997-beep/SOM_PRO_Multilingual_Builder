@@ -57,6 +57,20 @@ function run(command, options = {}) {
   };
 }
 
+function runGit(args, options = {}) {
+  const result = spawnSync("git", args, {
+    cwd: options.cwd || projectRoot,
+    encoding: "utf8",
+    maxBuffer: 40 * 1024 * 1024,
+    shell: false,
+    windowsHide: true
+  });
+  return {
+    status: result.status ?? 1,
+    output: `${result.stdout || ""}${result.stderr || ""}`.trim()
+  };
+}
+
 function assertGitSuccess(label, command) {
   const result = run(command);
   if (result.status !== 0) {
@@ -96,7 +110,7 @@ function verifyIgnoredPolicy(tracked) {
 function verifyCleanClone() {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "sompro-clean-clone-"));
   const clonePath = path.join(tempRoot, "repo");
-  const clone = run(`git clone --local --no-hardlinks "${projectRoot}" "${clonePath}"`);
+  const clone = runGit(["clone", "--local", "--no-hardlinks", projectRoot, clonePath]);
   if (clone.status !== 0) {
     throw new Error(`Clean clone failed:\n${clone.output}`);
   }
