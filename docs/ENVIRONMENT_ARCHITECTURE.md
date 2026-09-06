@@ -10,16 +10,16 @@ No source code copy should be created for staging or production.
 
 | Setting                | Local                                                                       | Staging                              | Production                        |
 | ---------------------- | --------------------------------------------------------------------------- | ------------------------------------ | --------------------------------- |
-| Public app URL         | `http://localhost:5173`                                                     | `https://sompro.duckdns.org`         | `https://app.example.com`         |
+| Public app URL         | `http://localhost:5173`                                                     | `https://sompro.duckdns.org`         | `https://som-pro.pages.dev`       |
 | Browser API base       | `http://localhost:4000` in direct Vite dev; `/api` when local proxy is used | `/api`                               | `/api`                            |
-| Backend public URL     | `http://localhost:4000`                                                     | `https://sompro.duckdns.org/api`     | `https://app.example.com/api`     |
-| License server URL     | `http://localhost:4100`                                                     | `https://sompro.duckdns.org/license` | `https://app.example.com/license` |
-| CORS origin            | `http://localhost:5173,http://127.0.0.1:5173`                               | `https://sompro.duckdns.org`         | `https://app.example.com`         |
+| Backend public URL     | `http://localhost:4000`                                                     | `https://sompro.duckdns.org/api`     | `https://som-pro.pages.dev/api`   |
+| License server URL     | `http://localhost:4100`                                                     | `https://sompro.duckdns.org/license` | `https://som-pro.pages.dev/license` |
+| CORS origin            | `http://localhost:5173,http://127.0.0.1:5173`                               | `https://sompro.duckdns.org`         | `https://som-pro.pages.dev`       |
 | Cookie secure behavior | `false` unless using HTTPS locally                                          | `true`                               | `true`                            |
 | Trust proxy            | `false` by default                                                          | `1` or `true` behind Nginx           | `1` or `true` behind Nginx        |
 | TLS/HSTS               | Not required                                                                | Required                             | Required                          |
 
-`https://app.example.com` is a placeholder. Replace it in deployment configuration only after the official domain is chosen.
+`https://som-pro.pages.dev` is the approved commercial Cloudflare Pages origin. A custom domain may be added later, but it is not required for delivery unless the customer explicitly requests branded DNS.
 
 ## 1. Local Environment
 
@@ -47,12 +47,14 @@ DuckDNS is a deployment configuration value only. It must not appear in business
 
 Production uses the same source and build architecture as staging:
 
-- Public app placeholder: `https://app.example.com`
+- Public app: `https://som-pro.pages.dev`
 - Browser API base: `/api`
-- Backend public path: `https://app.example.com/api`
-- License public path: `https://app.example.com/license`
+- Backend public path: `https://som-pro.pages.dev/api` when API routing/proxying is attached to the Pages origin.
+- License public path: `https://som-pro.pages.dev/license` when license routing/proxying is attached to the Pages origin.
 
-When the real domain is selected, update DNS, TLS certificates, `.env.production`, and deployment secrets. Do not change application source code.
+The current commercial web site is served by Cloudflare Pages. If backend and license services are not routed under `/api` and `/license` on this origin, set `SOM_API_URL`, `SOM_LICENSE_SERVER_URL`, and `SOM_PRO_LICENSE_SERVER_URL` to the operator-owned HTTPS service URLs while keeping `APP_URL`/`PUBLIC_APP_URL` on `https://som-pro.pages.dev`.
+
+Do not change application source code to move between the Pages commercial origin, a custom domain, or separate backend/license service hosts; make those changes through Cloudflare routing, DNS, TLS, and environment configuration.
 
 ## 4. Required Environment Variables
 
@@ -61,12 +63,12 @@ When the real domain is selected, update DNS, TLS certificates, `.env.production
 | `APP_ENV`                                               | `development`                                                        | `staging` or `production` runtime mode with staging release channel | `production`                      |
 | `NODE_ENV`                                              | optional/dev                                                         | `production`                                                        | `production`                      |
 | `SOM_RUNTIME_MODE`                                      | `development` or `local-trial`                                       | `saas`                                                              | `saas`                            |
-| `APP_URL` / `PUBLIC_APP_URL`                            | `http://localhost:5173`                                              | `https://sompro.duckdns.org`                                        | `https://app.example.com`         |
+| `APP_URL` / `PUBLIC_APP_URL`                            | `http://localhost:5173`                                              | `https://sompro.duckdns.org`                                        | `https://som-pro.pages.dev`       |
 | `VITE_API_URL`                                          | `http://localhost:4000` for direct dev, or `/api` with a local proxy | `/api`                                                              | `/api`                            |
-| `SOM_API_URL`                                           | `http://localhost:4000`                                              | `https://sompro.duckdns.org/api`                                    | `https://app.example.com/api`     |
-| `CORS_ORIGIN`                                           | localhost origins                                                    | `https://sompro.duckdns.org`                                        | `https://app.example.com`         |
-| `SOM_LICENSE_SERVER_URL` / `SOM_PRO_LICENSE_SERVER_URL` | `http://localhost:4100`                                              | `https://sompro.duckdns.org/license`                                | `https://app.example.com/license` |
-| `PUBLIC_BASE_URL`                                       | `http://localhost:4100` if needed                                    | `https://sompro.duckdns.org/license`                                | `https://app.example.com/license` |
+| `SOM_API_URL`                                           | `http://localhost:4000`                                              | `https://sompro.duckdns.org/api`                                    | `https://som-pro.pages.dev/api`   |
+| `CORS_ORIGIN`                                           | localhost origins                                                    | `https://sompro.duckdns.org`                                        | `https://som-pro.pages.dev`       |
+| `SOM_LICENSE_SERVER_URL` / `SOM_PRO_LICENSE_SERVER_URL` | `http://localhost:4100`                                              | `https://sompro.duckdns.org/license`                                | `https://som-pro.pages.dev/license` |
+| `PUBLIC_BASE_URL`                                       | `http://localhost:4100` if needed                                    | `https://sompro.duckdns.org/license`                                | `https://som-pro.pages.dev/license` |
 | `SOM_TRUST_PROXY` / `TRUST_PROXY`                       | `false`                                                              | `1`                                                                 | `1`                               |
 
 ## 5. Secret Variables
@@ -118,7 +120,7 @@ Backend CORS still stays explicit:
 
 - Local: allow localhost frontend origins.
 - Staging: allow only `https://sompro.duckdns.org`.
-- Production: allow only the final production origin, represented here by `https://app.example.com`.
+- Production: allow only the commercial production origin, `https://som-pro.pages.dev`, plus any explicitly approved custom domain if added later.
 
 Do not use `*` for authenticated backend APIs in staging or production.
 
@@ -185,6 +187,6 @@ Current token-based frontend auth should still avoid leaking tokens to URLs, log
 ## Guardrails
 
 - `sompro.duckdns.org` may appear in env examples and documentation only.
-- Production placeholder must remain `https://app.example.com` until a real domain is chosen.
+- Production commercial origin is `https://som-pro.pages.dev`; custom domains are optional additions, not a delivery blocker by themselves.
 - Browser production builds should default to `/api`, not localhost.
 - Changing staging to production must be a configuration, DNS, TLS, and deployment operation only.

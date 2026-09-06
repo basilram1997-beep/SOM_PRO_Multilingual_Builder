@@ -102,6 +102,13 @@ function assertCommercialInstallDependencies() {
   assertEnvEquals(backendProductionEnv, "REDIS_URL", "redis://:change-me-strong-redis-password@redis:6379");
   assertEnvEquals(productionEnv, "SOM_PRO_RATE_LIMIT_BACKING", "redis");
   assertEnvEquals(backendProductionEnv, "SOM_PRO_RATE_LIMIT_BACKING", "redis");
+  assertEnvEquals(productionEnv, "APP_URL", "https://som-pro.pages.dev");
+  assertEnvEquals(productionEnv, "PUBLIC_APP_URL", "https://som-pro.pages.dev");
+  assertEnvEquals(productionEnv, "APP_DOMAIN", "som-pro.pages.dev");
+  assertEnvEquals(productionEnv, "CORS_ORIGIN", "https://som-pro.pages.dev");
+  assertEnvEquals(productionEnv, "SOM_API_URL", "https://som-pro.pages.dev/api");
+  assertEnvEquals(productionEnv, "SOM_LICENSE_SERVER_URL", "https://som-pro.pages.dev/license");
+  assertEnvEquals(backendProductionEnv, "CORS_ORIGIN", "https://som-pro.pages.dev");
   assertEnvEquals(productionEnv, "SOM_FILE_UPLOAD_SCANNING_ENABLED", "true");
   assertEnvEquals(backendProductionEnv, "SOM_FILE_UPLOAD_SCANNING_ENABLED", "true");
   assertEnvMatches(productionEnv, "SOM_FILE_UPLOAD_SCANNER_URL", /^(tcp|clamav):\/\//);

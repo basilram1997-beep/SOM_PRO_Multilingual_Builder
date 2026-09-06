@@ -12,11 +12,12 @@
 - مساحة تخزين تبدأ من 40GB مع نسخ احتياطي خارجي.
 - دومينات موجهة إلى السيرفر.
 
-## الدومينات المقترحة
+## الموقع التجاري الحالي
 
-- `api.your-domain.com` للـ backend.
-- `license.your-domain.com` لخادم الترخيص.
-- `app.your-domain.com` للواجهة web.
+- الموقع التجاري المعتمد حاليًا هو `https://som-pro.pages.dev/` على Cloudflare Pages.
+- الدومين المخصص اختياري وليس blocker للتسليم إلا إذا طلبه العميل تعاقديًا.
+- يمكن توجيه backend تحت `https://som-pro.pages.dev/api` وخادم الترخيص تحت `https://som-pro.pages.dev/license` فقط إذا كانت Cloudflare Pages/Workers/Tunnel أو reverse proxy تربط هذه المسارات فعليًا بالخدمات.
+- إذا كانت الخدمات على hosts منفصلة، اترك `APP_URL` و`PUBLIC_APP_URL` على `https://som-pro.pages.dev` واضبط `SOM_API_URL` و`SOM_LICENSE_SERVER_URL` و`SOM_PRO_LICENSE_SERVER_URL` على endpoints التشغيل الحقيقية.
 
 ## تجهيز ملفات البيئة
 
@@ -127,9 +128,10 @@ npm run prisma:seed -w apps/backend
 ## فحص الصحة
 
 ```bash
-curl https://api.your-domain.com/health
-curl https://license.your-domain.com/health
-curl https://app.your-domain.com
+curl https://som-pro.pages.dev/
+curl https://som-pro.pages.dev/healthz
+curl https://som-pro.pages.dev/api/health
+curl https://som-pro.pages.dev/license/health
 ```
 
 ## إثبات Cloudflare / Production الخارجي
@@ -137,7 +139,7 @@ curl https://app.your-domain.com
 بعد ربط الدومين في Cloudflare وتشغيل الخدمات، شغّل من جهاز يستطيع الوصول للدومين:
 
 ```bash
-PRODUCTION_URL=https://app.your-domain.com npm run production:external:verify
+PRODUCTION_URL=https://som-pro.pages.dev/ npm run production:external:verify
 ```
 
 الفحص يكتب:
@@ -150,14 +152,14 @@ PRODUCTION_URL=https://app.your-domain.com npm run production:external:verify
 إذا كان الدومين لا يمر عبر Cloudflare عمدًا، استخدم:
 
 ```bash
-PRODUCTION_EXPECT_CLOUDFLARE=false PRODUCTION_URL=https://app.your-domain.com npm run production:external:verify
+PRODUCTION_EXPECT_CLOUDFLARE=false PRODUCTION_URL=https://som-pro.pages.dev/ npm run production:external:verify
 ```
 
 ## اختبار تسجيل الدخول والترخيص
 
-1. افتح لوحة المالك على `https://license.your-domain.com`.
+1. افتح لوحة المالك على `https://som-pro.pages.dev/license` إذا كان مسار الترخيص مربوطًا، أو على URL خادم الترخيص التشغيلي إذا كان منفصلًا.
 2. أنشئ ترخيصًا لمدرسة.
-3. شغّل نسخة Desktop SaaS مبنية على `https://api.your-domain.com`.
+3. شغّل نسخة Desktop SaaS مبنية على `https://som-pro.pages.dev/api` إذا كان backend مربوطًا، أو على URL الـ backend التشغيلي إذا كان منفصلًا.
 4. أدخل الترخيص وسجل الدخول.
 5. راقب عدد الأجهزة المفعلة من لوحة المالك.
 
@@ -166,10 +168,10 @@ PRODUCTION_EXPECT_CLOUDFLARE=false PRODUCTION_URL=https://app.your-domain.com np
 على جهاز البناء:
 
 ```cmd
-set SOM_API_URL=https://api.your-domain.com
-set VITE_API_URL=https://api.your-domain.com
-set SOM_LICENSE_SERVER_URL=https://license.your-domain.com
-set SOM_PRO_LICENSE_SERVER_URL=https://license.your-domain.com
+set SOM_API_URL=https://som-pro.pages.dev/api
+set VITE_API_URL=https://som-pro.pages.dev/api
+set SOM_LICENSE_SERVER_URL=https://som-pro.pages.dev/license
+set SOM_PRO_LICENSE_SERVER_URL=https://som-pro.pages.dev/license
 npm run desktop:build:saas
 ```
 

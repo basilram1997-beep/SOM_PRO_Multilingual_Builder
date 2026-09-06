@@ -10,8 +10,8 @@ Use this checklist before transferring SOM PRO to a buyer, customer, or operatio
 | --- | --- | --- |
 | GitHub repository | Repository owner and admin maintainers | Transfer repository or add customer admins, review branch protection, and document release tags. |
 | GitHub Actions secrets | GitHub org/repo administrator | Recreate secrets in the buyer-owned repo or environment; never export plaintext secrets through Git. |
-| DNS/domain | Domain registrar owner | Transfer domain or delegate DNS zone administration; archive final records for app/API/license hostnames. |
-| Cloudflare account/tunnel | Cloudflare account owner | Transfer zone/tunnel ownership or create a buyer-owned Named Tunnel; rotate tunnel credentials after handoff. |
+| DNS/domain | Domain registrar owner, if a custom domain is required | Transfer domain or delegate DNS zone administration; archive final records for app/API/license hostnames when branded DNS is used. `https://som-pro.pages.dev` is acceptable as the commercial web origin when no custom domain is required. |
+| Cloudflare account/tunnel | Cloudflare account owner | Transfer Cloudflare Pages project ownership for `https://som-pro.pages.dev`, and transfer zone/tunnel ownership or create a buyer-owned Named Tunnel if backend/license routing uses Cloudflare. Rotate tunnel credentials after handoff. |
 | VPS/server | Hosting account owner | Transfer billing/admin access, SSH key policy, firewall rules, backup paths, and recovery contacts. |
 | PostgreSQL | Database administrator | Rotate `POSTGRES_PASSWORD` and `DATABASE_URL`; verify least-privilege runtime and migration users. |
 | Redis | Platform/database administrator | Rotate `REDIS_PASSWORD`, `REDIS_URL`, and `LICENSE_REDIS_URL`; keep Redis private to the deployment network. |
@@ -25,7 +25,7 @@ Use this checklist before transferring SOM PRO to a buyer, customer, or operatio
 
 Before claiming a real production deployment is complete, archive:
 
-- HTTPS app/API/license URLs on the final domain.
+- HTTPS commercial web URL: `https://som-pro.pages.dev/`, plus API/license URLs if routed under Pages or deployed separately.
 - DNS or Cloudflare route evidence.
 - Successful production migration log from the target environment.
 - Successful smoke test after migration.
@@ -34,7 +34,7 @@ Before claiming a real production deployment is complete, archive:
 - Signed Windows installer or documented unsigned-distribution exception.
 - Mobile signing/build account confirmation if mobile builds are in scope.
 - `reports/security/production-external-evidence.json` from `PRODUCTION_URL=https://... npm run production:external:verify`.
-- Current Cloudflare Pages evidence is tracked at `docs/test-reports/production-external-evidence-2026-09-06T21-29-40-487Z.md`.
+- Current Cloudflare Pages commercial site evidence is tracked at `docs/test-reports/production-external-evidence-2026-09-06T22-54-35-733Z.md`.
 
 ## Non-Repository Boundary
 

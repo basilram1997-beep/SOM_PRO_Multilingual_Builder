@@ -39,7 +39,7 @@ test("multi-environment architecture documents one source tree and same-origin r
 
   assert.match(doc, /one repository, one source tree, and one build architecture/i);
   assert.match(doc, /https:\/\/sompro\.duckdns\.org/);
-  assert.match(doc, /https:\/\/app\.example\.com/);
+  assert.match(doc, /https:\/\/som-pro\.pages\.dev/);
   assert.match(
     doc,
     /\| `VITE_API_URL`[\s\S]*?`http:\/\/localhost:4000` for direct dev, or `\/api` with a local proxy[\s\S]*?\| `\/api`[\s\S]*?\| `\/api`/s
@@ -62,12 +62,12 @@ test("staging and production examples use same-origin web API config", () => {
   assert.equal(staging.SOM_API_URL, "https://sompro.duckdns.org/api");
   assert.equal(staging.SOM_LICENSE_SERVER_URL, "https://sompro.duckdns.org/license");
 
-  assert.equal(production.APP_URL, "https://app.example.com");
-  assert.equal(production.PUBLIC_APP_URL, "https://app.example.com");
+  assert.equal(production.APP_URL, "https://som-pro.pages.dev");
+  assert.equal(production.PUBLIC_APP_URL, "https://som-pro.pages.dev");
   assert.equal(production.VITE_API_URL, "/api");
-  assert.equal(production.CORS_ORIGIN, "https://app.example.com");
-  assert.equal(production.SOM_API_URL, "https://app.example.com/api");
-  assert.equal(production.SOM_LICENSE_SERVER_URL, "https://app.example.com/license");
+  assert.equal(production.CORS_ORIGIN, "https://som-pro.pages.dev");
+  assert.equal(production.SOM_API_URL, "https://som-pro.pages.dev/api");
+  assert.equal(production.SOM_LICENSE_SERVER_URL, "https://som-pro.pages.dev/license");
 
   assert.equal(frontendStaging.VITE_API_URL, "/api");
   assert.equal(frontendProduction.VITE_API_URL, "/api");

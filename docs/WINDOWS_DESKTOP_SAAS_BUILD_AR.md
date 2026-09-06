@@ -16,10 +16,10 @@
 قبل البناء ضع المتغيرات التالية في نافذة CMD أو PowerShell:
 
 ```cmd
-set SOM_API_URL=https://api.your-domain.com
-set VITE_API_URL=https://api.your-domain.com
-set SOM_LICENSE_SERVER_URL=https://license.your-domain.com
-set SOM_PRO_LICENSE_SERVER_URL=https://license.your-domain.com
+set SOM_API_URL=https://som-pro.pages.dev/api
+set VITE_API_URL=https://som-pro.pages.dev/api
+set SOM_LICENSE_SERVER_URL=https://som-pro.pages.dev/license
+set SOM_PRO_LICENSE_SERVER_URL=https://som-pro.pages.dev/license
 set SOM_RUNTIME_MODE=saas
 ```
 

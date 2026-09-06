@@ -19,8 +19,8 @@
 افحص:
 
 ```bash
-curl https://api.your-domain.com/health
-curl https://license.your-domain.com/health
+curl https://som-pro.pages.dev/api/health
+curl https://som-pro.pages.dev/license/health
 ```
 
 النتيجة المتوقعة تحتوي `ok: true`.
@@ -39,7 +39,7 @@ docker compose -f docker-compose.production.yml exec postgres psql -U "$POSTGRES
 
 ## كيف أفحص الترخيص؟
 
-- افتح `https://license.your-domain.com/health`.
+- افتح `https://som-pro.pages.dev/license/health` إذا كان مسار الترخيص مربوطًا تحت Cloudflare Pages، أو افتح health endpoint لخادم الترخيص التشغيلي إذا كان منفصلًا.
 - افتح لوحة المالك.
 - تحقق من وجود التراخيص والأجهزة.
 - جرّب تفعيل جهاز اختبار.

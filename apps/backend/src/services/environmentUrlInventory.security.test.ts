@@ -21,7 +21,7 @@ test("environment URL inventory classifies deployment assumptions before config 
   assert.match(inventory, /WebSocket\/SSE/);
   assert.match(inventory, /VITE_API_URL=\/api/);
   assert.match(inventory, /https:\/\/sompro\.duckdns\.org/);
-  assert.match(inventory, /https:\/\/app\.example\.com/);
+  assert.match(inventory, /https:\/\/som-pro\.pages\.dev/);
 });
 
 test("environment URL inventory does not treat staging or production domains as source logic", () => {
