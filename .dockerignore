@@ -1,0 +1,68 @@
+# Dependency and tool caches
+node_modules/
+**/node_modules/
+.codex_pydeps/
+.codex_pydeps/**
+.electron-builder-cache/
+.gradle-user/
+.gradle-user-fresh/
+.android-home/
+tools/
+
+# Build, test, and release output
+dist/
+build/
+coverage/
+test-results/
+tmp/
+reports/
+deliverables/
+site-package.tgz
+apps/desktop/release/
+release/*.exe
+release/*.blockmap
+tests/stress/artifacts/
+tests/load/artifacts/
+tests/perf/artifacts/
+tests/e2e/artifacts/
+
+# Runtime data, backups, and local databases
+apps/license-server/data/
+deploy/backup/
+*.sqlite
+*.sqlite3
+
+# Logs and temporary editor files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.bak
+*.old
+*.orig
+*~
+
+# Local secrets and deployment credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+apps/*/.env
+apps/*/.env.*
+!apps/*/.env.example
+!apps/*/.env.*.example
+deploy/cloudflare/*.yml
+deploy/cloudflare/*.yaml
+!deploy/cloudflare/*.example.yml
+!deploy/cloudflare/*.example.yaml
+.cloudflared/
+android/key.properties
+android/*.jks
+android/*.keystore
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
