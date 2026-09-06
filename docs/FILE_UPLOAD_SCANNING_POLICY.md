@@ -4,9 +4,10 @@
 
 This control is complete by design for the current product scope:
 
-- SOM PRO does not currently provide a general file upload workflow for school data.
+- SOM PRO supports constrained spreadsheet upload flows and scans before acceptance.
 - The product intentionally fails closed on multipart upload paths that could carry protected school content.
-- No production workflow should depend on ad hoc file transfer as a normal school-data path.
+- No production workflow should depend on ad hoc file transfer as an unscanned school-data path.
+- Production must provide a private ClamAV-compatible scanner and set `SOM_FILE_UPLOAD_SCANNING_ENABLED=true` plus `SOM_FILE_UPLOAD_SCANNER_URL`.
 
 If a future upload feature is ever added, it must follow this order:
 

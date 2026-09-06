@@ -60,12 +60,23 @@ REDIS_URL=redis://:change-me-strong-redis-password@redis:6379
 - في التشغيل المحلي فقط، يستخدم `docker-compose.yml` الربط الآمن `127.0.0.1:5432:5432`.
 - في الإنتاج، الـ Backend فقط يجب أن يصل إلى PostgreSQL عبر شبكة Docker الداخلية باسم الخدمة `postgres`.
 
+## File upload scanner
+
+- اضبط `SOM_FILE_UPLOAD_SCANNING_ENABLED=true` في production.
+- اضبط `SOM_FILE_UPLOAD_SCANNER_URL` على خدمة ClamAV-compatible حقيقية داخل الشبكة الخاصة، مثل `tcp://scanner.internal:3310`.
+- لا تستخدم scanner عامًا على الإنترنت، ولا تترك URL فارغًا.
+- إذا كان scanner غير متاح أو URL غير صحيح، مسار الرفع يفشل مغلقًا ولا يقبل الملف.
+- `docker-compose.production.yml` لا ينشئ scanner تلقائيًا؛ يجب توفيره كخدمة داخلية مدارة أو إضافته صراحة إلى stack التشغيل.
+
 ## تشغيل الخدمات
 
 ```bash
 docker compose --env-file .env.production -f docker-compose.production.yml build
+docker compose --env-file .env.production -f docker-compose.production.yml up migrate
 docker compose --env-file .env.production -f docker-compose.production.yml up -d
 ```
+
+نفذ خدمة `migrate` قبل تشغيل `backend` في كل نشر production. في `docker-compose.production.yml` ينتظر `backend` اكتمال `migrate` بنجاح، لذلك أي migration فاشلة توقف النشر بدل تشغيل نسخة نصف محدثة.
 
 ## Prisma migrations
 
@@ -83,6 +94,17 @@ npm run prisma:migrate:deploy
 ```
 
 لا تستخدم `prisma db push` على قاعدة production.
+
+## Rollback وقاعدة البيانات
+
+لا يوجد rollback migration تلقائي لكل migration. مسار الرجوع المعتمد في production هو:
+
+1. إيقاف الخدمات التي تكتب على قاعدة البيانات.
+2. استعادة backup معروف وسليم حسب [BACKUP_RESTORE_RUNBOOK_AR.md](./BACKUP_RESTORE_RUNBOOK_AR.md).
+3. تشغيل `docker compose --env-file .env.production -f docker-compose.production.yml up migrate` على نسخة التطبيق المراد الرجوع إليها.
+4. تشغيل الخدمات وفحص `/health` وتسجيل الدخول والترخيص.
+
+لا تعتمد على حذف migration أو تشغيل `db push` كإجراء rollback.
 
 ## إنشاء أول مدرسة أو seed
 

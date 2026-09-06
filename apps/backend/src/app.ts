@@ -58,7 +58,7 @@ export function createApp() {
     })
   );
   app.use(express.json({ limit: "2mb" }));
-  app.use(morgan("dev"));
+  app.use(morgan(env.appEnv === "production" ? "combined" : "dev"));
 
   app.get("/health", (_req, res) => res.json({ ok: true, service: "som-backend" }));
   app.get("/api/version", (_req, res) =>

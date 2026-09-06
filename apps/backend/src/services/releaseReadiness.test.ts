@@ -51,6 +51,7 @@ function assertCommercialInstallDependencies() {
   const compose = readRepoFile("docker-compose.yml");
   const productionCompose = readRepoFile("docker-compose.production.yml");
   const productionGuide = readRepoFile("docs/PRODUCTION_DEPLOYMENT_GUIDE_AR.md");
+  const backendApp = readRepoFile("apps/backend/src/app.ts");
   const complianceDoc = readRepoFile("docs/COMPLIANCE_AND_DESTRUCTIVE_TESTING.md");
   const externalReviewPack = readRepoFile("docs/EXTERNAL_REVIEW_PACK_AR.md");
   const retentionPolicy = readRepoFile("docs/RETENTION_AND_DELETION_POLICY.md");
@@ -99,9 +100,16 @@ function assertCommercialInstallDependencies() {
   assertEnvEquals(backendProductionEnv, "REDIS_URL", "redis://:change-me-strong-redis-password@redis:6379");
   assertEnvEquals(productionEnv, "SOM_PRO_RATE_LIMIT_BACKING", "redis");
   assertEnvEquals(backendProductionEnv, "SOM_PRO_RATE_LIMIT_BACKING", "redis");
+  assertEnvEquals(productionEnv, "SOM_FILE_UPLOAD_SCANNING_ENABLED", "true");
+  assertEnvEquals(backendProductionEnv, "SOM_FILE_UPLOAD_SCANNING_ENABLED", "true");
+  assertEnvMatches(productionEnv, "SOM_FILE_UPLOAD_SCANNER_URL", /^(tcp|clamav):\/\//);
+  assertEnvMatches(backendProductionEnv, "SOM_FILE_UPLOAD_SCANNER_URL", /^(tcp|clamav):\/\//);
+  assert.match(backendApp, /morgan\(env\.appEnv === "production" \? "combined" : "dev"\)/);
   assert.match(productionGuide, /لا تضف `ports: 5432:5432`/);
   assert.match(productionGuide, /127\.0\.0\.1:5432:5432/);
   assert.match(productionGuide, /docker compose --env-file \.env\.production -f docker-compose\.production\.yml/);
+  assert.match(productionGuide, /up migrate/);
+  assert.match(productionGuide, /لا يوجد rollback migration تلقائي/);
   assert.match(doctor, /SOM PRO install doctor/);
   assert.match(doctor, /initialServicesReady/);
   assert.match(doctor, /SKIP/);
