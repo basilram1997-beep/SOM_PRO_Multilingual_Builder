@@ -11,7 +11,8 @@ This file lists the remaining issues that are not fully closed yet.
 | Issue                                                                 | Impact                                        | Recommendation                                            |
 | --------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------- |
 | Windows installer is not code-signed unless a certificate is provided | Trust and install warnings may appear         | Sign the installer before broad distribution              |
-| License server storage still relies on local JSON for some flows      | Long-term SaaS durability is weaker           | Move production license storage to managed server storage |
+| External production ownership is not transferable from source alone    | Real deployment needs account/DNS/secret owners | Complete `docs/OWNERSHIP_AND_EXTERNAL_SERVICES_HANDOFF.md` |
+| Vendor tarball commercial redistribution needs legal sign-off          | Commercial packaging may need notice review   | Review `docs/DEPENDENCIES_AND_LICENSES_AR.md`             |
 
 ## P2 - Good improvement items
 

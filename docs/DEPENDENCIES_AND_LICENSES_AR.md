@@ -37,6 +37,12 @@
 | Lucide React                              | آمنة ومعتادة                                     |
 | dotenv / cors / helmet / morgan / ioredis | آمنة ومعتادة                                     |
 
+## Vendor tarball
+
+| الملف | المصدر داخل الحزمة | الترخيص المعلن | الإجراء قبل البيع |
+| --- | --- | --- | --- |
+| `vendor/xlsx-0.20.3.tgz` | `package/package.json` يعلن `name: xlsx`, `version: 0.20.3`, وrepository `https://git.sheetjs.com/SheetJS/sheetjs` | `Apache-2.0` حسب `package/package.json` و`package/LICENSE` | احتفظ بالحزمة فقط إذا كان مسار التوزيع التجاري يسمح بإعادة تضمينها، وأرفق license notice ضمن release pack عند الطلب. |
+
 ## ما يحتاج مراجعة قبل البيع النهائي
 
 حتى لو كانت الحزم آمنة، فإن بعض التحديثات الكبيرة ليست مجرد “ترقية عادية”:

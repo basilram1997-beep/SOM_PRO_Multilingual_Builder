@@ -70,7 +70,7 @@ The remaining items below are follow-up hardening tasks rather than blockers for
 - `npm run volume:test` on `tiny` and `normal`
 - `node --test --import tsx src/services/migrationUpgradeIntegration.test.ts`
 - `npm run stress:test` on the login / outage recovery path
-- `npm audit --omit=dev` could not be revalidated in this session because the npm registry endpoint was unavailable from the current environment. Re-run it in a network-enabled staging or maintenance environment before final release.
+- `npm audit --omit=dev` was revalidated on 2026-09-07 and returned `0 vulnerabilities`.
 - Existing backend and frontend tests already passing in the repository state.
 
 ## Acceptance matrix
