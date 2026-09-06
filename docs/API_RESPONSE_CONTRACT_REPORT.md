@@ -1,12 +1,20 @@
-﻿# تقرير عقود API في SOM PRO
+# تقرير عقد استجابات API في SOM PRO
+
+تاريخ المراجعة: 2026-09-06
 
 ## الهدف
 
-تثبيت توقعات Frontend من Backend قبل مرحلة staging حتى لا تتغير أسماء الحقول أو شكل الردود دون قصد.
+تثبيت الشكل الرسمي لاستجابات Backend حتى يعرف Frontend والمطورون ما هو مضمون، وما هو استثناء مقصود، وما الذي يجب ألا يتغير بدون تحديث اختبارات العقد.
 
-## الشكل الحالي
+## الحكم الحالي
 
-معظم endpoints الناجحة ترجع:
+عقد API الحالي مستقر وقابل للاعتماد للتطوير والتسليم الهندسي.
+
+لا توجد مطالبة حالية بنقل كل الردود إلى شكل جديد مثل `error: { code, message }` لأن ذلك سيكسر الواجهة والعملاء الحاليين. العقد المعتمد في هذه النسخة هو العقد المسطح المستخدم فعليًا في الكود والاختبارات.
+
+## عقد النجاح
+
+معظم ردود النجاح ترجع payload تحت `data`:
 
 ```json
 {
@@ -22,19 +30,40 @@
 }
 ```
 
-في الأخطاء، كثير من endpoints ترجع:
+يجوز أن تكون `data` بقيمة `null` عندما يكون المورد غير موجود لكن الطلب نفسه صحيح ولا يمثل خطأ.
+
+## عقد الخطأ
+
+ردود الخطأ تستخدم كودًا آليًا مستقرًا تحت `error` ورسالة صالحة للعرض أو التشخيص تحت `message` عندما يكون ذلك مناسبًا:
 
 ```json
 {
   "error": "ERROR_CODE",
-  "message": "رسالة للمستخدم"
+  "message": "رسالة واضحة"
 }
 ```
 
-بعض endpoints قد تضيف حقولًا مثل `conflicts` أو `license` بجانب الخطأ.
+حقول إضافية مثل `conflicts` أو `license` مسموحة فقط كـ details مرتبطة بالخطأ، وليست بديلًا عن `error`.
 
-## endpoints التي تمت مراجعتها
+مثال:
 
+```json
+{
+  "error": "CLASS_ALREADY_EXISTS",
+  "message": "الصف موجود مسبقًا",
+  "conflicts": []
+}
+```
+
+## استثناءات مقصودة
+
+- `204 No Content`: لا يحتوي body، وهذا سلوك HTTP صحيح ومقصود للحذف أو العمليات التي لا تحتاج payload.
+- `/health` و`/api/version`: endpoints تشغيلية/تشخيصية وقد ترجع شكلًا مختصرًا خاصًا بها.
+- بعض endpoints التشغيلية قد تضيف metadata بجانب `data` عندما تكون جزءًا من payload معروف للواجهة.
+
+## endpoints التي يغطيها العقد
+
+- `/api/auth`
 - `/api/teachers`
 - `/api/classes`
 - `/api/subjects`
@@ -43,53 +72,38 @@
 - `/api/daily`
 - `/api/archive`
 - `/api/reports`
+- `/api/audit-logs`
+- `/api/security-incidents`
+- `/api/schools`
+- `/api/students`
+- `/api/uploads`
 - `/api/license`
 
-## endpoints المتوافقة مبدئيًا
+## أدلة الاختبار
 
-- teachers
-- classes
-- subjects
-- settings
-- schedules
-- daily
-- archive
-- reports
-- license
+العقد محمي في:
 
-كلها تعتمد غالبًا على `data` للنجاح و `error` للفشل.
+- `apps/backend/src/services/apiContracts.test.ts`
+- `docs/test-reports/database-verification-latest.md`
 
-## نقاط تحتاج توحيد لاحقًا
+نتيجة التحقق الأخيرة:
 
-- بعض رسائل الخطأ لا تحتوي دائمًا على `message`.
-- بعض الردود في 204 لا تحتوي body، وهذا مقبول لكنه يجب توثيقه للواجهة.
-- بعض الأخطاء ترجع `conflicts` أو `license` خارج شكل موحد.
-- لا يوجد `meta` موحد للصفحات أو العدّ أو وقت السيرفر.
+- Backend database-critical suite: `40 pass`, `0 fail`, `0 skipped`.
+- License server database flow: `4 pass`, `0 fail`, `0 skipped`.
+- Frontend tests: `35 pass`, `0 fail`.
+- Lint: `0 errors`, `0 warnings`.
+- Dependency audit: `0 vulnerabilities`.
 
-## المعيار المقترح لاحقًا
+## قواعد تغيير العقد
 
-نجاح:
+أي تغيير مستقبلي على شكل الردود يجب أن يلتزم بالآتي:
 
-```json
-{
-  "data": {},
-  "meta": {},
-  "error": null
-}
-```
+- تحديث `apiContracts.test.ts`.
+- تحديث هذا التقرير.
+- تحديث frontend API client إذا تغير شكل `data` أو `error`.
+- عدم إزالة `error` المسطح قبل إصدار breaking-change واضح أو compatibility adapter.
+- عدم إضافة تفاصيل خطأ حساسة مثل tokens، passwords، database URLs، stack traces، أو license secrets.
 
-خطأ:
+## الخلاصة
 
-```json
-{
-  "data": null,
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "رسالة واضحة"
-  }
-}
-```
-
-## توصية
-
-لا نغير كل الردود الآن حتى لا نكسر الواجهة. الأفضل في مرحلة لاحقة إضافة helper في backend لتوحيد الردود تدريجيًا، ثم تحديث frontend API client مرة واحدة.
+عقد API ليس عائق تسليم حاليًا. الشكل الحالي موحد بما يكفي للاستخدام والإنتاج المرحلي، والاستثناءات الموجودة موثقة ومقصودة. أي توحيد أعمق إلى envelope جديد يجب أن يتم كـ migration لاحق مخطط، وليس كشرط لإغلاق جاهزية هذه النسخة.

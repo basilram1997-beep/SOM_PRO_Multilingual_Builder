@@ -495,6 +495,17 @@ test("API route contracts expose stable error codes for failure responses", () =
   );
 });
 
+test("API response contract report documents the supported envelope and intentional exceptions", () => {
+  const report = readFileSync("../../docs/API_RESPONSE_CONTRACT_REPORT.md", "utf8");
+
+  assert.match(report, /عقد API الحالي مستقر وقابل للاعتماد/, "API contract report should mark the current contract as stable");
+  assert.match(report, /"data": \{\}/, "API contract report should document the success data envelope");
+  assert.match(report, /"error": "ERROR_CODE"/, "API contract report should document flat machine-readable errors");
+  assert.match(report, /204 No Content/, "API contract report should document no-body 204 responses as intentional");
+  assert.match(report, /conflicts.*license/s, "API contract report should classify conflict/license fields as error details");
+  assert.doesNotMatch(report, /Partial|توحيد لاحقًا|المعيار المقترح لاحقًا/, "API contract report should not describe the supported contract as deferred");
+});
+
 test("report routes expose entity summary reporting for class, student, teacher, subject, and homeroom", () => {
   const source = readFileSync("src/modules/reports/reports.routes.ts", "utf8");
 

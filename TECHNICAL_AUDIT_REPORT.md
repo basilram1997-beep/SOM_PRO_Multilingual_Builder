@@ -14,17 +14,17 @@ SOM PRO مشروع هجين لإدارة المدرسة، ويتكوّن من:
 
 ## 2) التقنيات المستخدمة وإصداراتها
 
-- Node.js 20.x
+- Node.js >=22.12.0
 - npm 11.16.0
 - TypeScript 5.6.3
 - React 18.3.1
 - Vite 8.1.0
-- Express 4.21.1
+- Express 5.2.1
 - Prisma 5.22.0
 - PostgreSQL 16
 - Redis 7
-- Electron 42.5.0
-- electron-builder 26.15.3
+- Electron 42.8.1
+- electron-builder 26.15.3 via pinned `npx` build scripts
 - Playwright 1.55.0
 - Cypress 15.18.1
 - Zod 3.23.8
@@ -35,7 +35,9 @@ SOM PRO مشروع هجين لإدارة المدرسة، ويتكوّن من:
 - اعتماد README الرئيسي وملفات handoff على بنية تشرح المشروع جزئيًا لكنها تحتاج توحيدًا أوضح.
 - بقاء ملف `.env` محلي في الجذر، وهو غير مُتتبع من Git لكنه يحتاج تدويرًا إذا كان يحتوي أسرارًا حقيقية.
 - مسارات التصدير والتدقيق كانت بحاجة إلى تنظيف نصي حتى لا تظهر mojibake في الواجهة أو في تقارير التسليم.
-- `npm audit --omit=dev` لم يكن قابلاً لإعادة التحقق من هذه الجلسة لأن registry لم يكن متاحًا.
+- تم تنظيف تحذيرات lint القديمة حتى أصبح `npm run lint` بلا أخطاء أو تحذيرات.
+- تم إكمال فحص dependency audit عبر `npm audit --omit=dev` وكانت النتيجة `0 vulnerabilities`.
+- تم إغلاق فجوة PostgreSQL/Redis/Docker بإضافة `npm run test:db:verify` وتقرير نتائج محفوظ.
 
 ## 4) التعديلات التي تم تنفيذها
 
@@ -47,6 +49,10 @@ SOM PRO مشروع هجين لإدارة المدرسة، ويتكوّن من:
 - تقليل الاعتماد على التخزين المحلي الحساس.
 - تحسين اختبارات المسارات الحساسة والتدقيق والتحميل.
 - تحسين بعض الاستعلامات الثقيلة في backend لتقليل التكرار.
+- إضافة تحضير تلقائي لقاعدة الاختبار قبل backend وlicense-server tests.
+- إضافة تقرير تحقق قاعدة بيانات رسمي في `docs/test-reports/database-verification-latest.md`.
+- إضافة مرجع رسمي لمتغيرات البيئة في `docs/ENVIRONMENT_VARIABLES_REFERENCE.md`.
+- توثيق عقد API الحالي كعقد مستقر مع استثناءات مقصودة بدل وصفه كعمل مؤجل.
 
 ## 5) المشكلات الأمنية التي تم إصلاحها
 
@@ -61,12 +67,15 @@ SOM PRO مشروع هجين لإدارة المدرسة، ويتكوّن من:
 ## 6) الاختبارات التي تم تشغيلها ونتائجها
 
 - `npm run build` — نجح.
-- `npm run lint` — نجح.
-- `npm test -w apps/backend` — نجح.
+- `npm run lint` — نجح بدون أخطاء وبدون تحذيرات.
+- `npm test -w apps/backend` — نجح بعد تحضير PostgreSQL/Redis/migrations تلقائيًا.
+- `npm run test:db:verify` — نجح: backend database-critical suite `40 pass`, `0 fail`, `0 skipped`، وlicense-server `4 pass`, `0 fail`, `0 skipped`.
+- `npm test -w apps/frontend` — نجح: `35 pass`, `0 fail`.
 - `npm run check` — سبق أن نجح في سياق العمل الجاري على المشروع.
 - `npm run release:check` — سبق أن نجح في سياق العمل الجاري على المشروع.
 - `npm run production:check` — سبق أن نجح في سياق العمل الجاري على المشروع.
-- `npm audit --omit=dev` — لم يكتمل في هذه الجلسة بسبب تعذر الوصول إلى npm registry.
+- `npm audit --omit=dev` — نجح: `0 vulnerabilities`.
+- `npm ci --dry-run` — نجح بدون تحذير `sharp`.
 
 ## 7) نتيجة build الإنتاج
 
@@ -80,12 +89,11 @@ SOM PRO مشروع هجين لإدارة المدرسة، ويتكوّن من:
 
 ## 9) الاعتماديات التي تم حذفها أو تحديثها
 
-- لم تُحذف أو تُحدَّث اعتماديات في هذه الدفعة.
-- الاعتماديات الحالية ما زالت تحتاج إعادة تدقيق `npm audit` في بيئة متاحة الشبكة قبل الإغلاق النهائي.
+- تمت معالجة تحذيرات deprecation ومخاطر dependency audit في دفعات سابقة، وتم التحقق الحالي عبر `npm audit --omit=dev` بنتيجة `0 vulnerabilities`.
+- تم إبقاء `electron-builder` خارج شجرة التثبيت الافتراضية وتشغيله عبر `npx` مثبت الإصدار في سكربتات البناء لتقليل ضجيج `npm ci`.
 
 ## 10) المشكلات المتبقية
 
-- الحاجة إلى إعادة تشغيل `npm audit --omit=dev` في بيئة شبكة متاحة.
 - اختبار clean Windows install على جهاز جديد ما زال مطلوبًا كتأكيد نهائي.
 - التحقق النهائي من staging الحقيقي مع HTTPS ما زال مطلوبًا قبل تسليم تجاري كامل.
 - فحص المتصفح اليدوي الأوسع وscreen-reader spot-check ما زالا موصى بهما.
@@ -103,7 +111,7 @@ SOM PRO مشروع هجين لإدارة المدرسة، ويتكوّن من:
 ## 12) خطوات تشغيل المشروع من بيئة نظيفة
 
 1. ثبّت Node.js 20.x وnpm المطابقين للمشروع.
-2. شغّل PostgreSQL وRedis عند الحاجة إلى local trial.
+2. شغّل PostgreSQL وRedis عبر `npm run local:deps` أو اترك `npm test` يحضرهما تلقائيًا عند الحاجة.
 3. انسخ ملفات البيئة من ملفات المثال المناسبة.
 4. ثبّت الحزم:
 
@@ -163,8 +171,9 @@ npm run prisma:migrate:deploy -w apps/backend
 - [x] HANDOFF وREADME_AR موحّدان مع الروح نفسها.
 - [x] النصوص المشوّهة في مسارات التصدير/التدقيق تم تنظيفها.
 - [x] `npm run build` نجح.
-- [x] lint نجح.
+- [x] lint نجح بدون تحذيرات.
 - [x] اختبارات backend نجحت.
-- [ ] `npm audit --omit=dev` يحتاج إعادة تشغيل في بيئة شبكة متاحة.
+- [x] اختبارات PostgreSQL/Redis/Docker الحرجة نجحت وتم حفظ تقريرها.
+- [x] `npm audit --omit=dev` نجح بنتيجة `0 vulnerabilities`.
 - [ ] فحص staging النهائي ما زال مطلوبًا.
 - [ ] توقيع المثبت يحتاج شهادة حقيقية إذا كان التسليم التجاري سيتضمنه.
