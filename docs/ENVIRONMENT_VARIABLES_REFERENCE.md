@@ -12,6 +12,9 @@ This is the canonical handoff reference for SOM PRO runtime, deployment, securit
 - Treat every URL with embedded credentials as a secret.
 - Values marked `Production-safe: No` are acceptable only for local development or isolated test runs.
 - Values marked `Required in production` must be configured before a production or Ministry-facing staging handoff.
+- Production and staging must set Redis-backed request protection explicitly: `SOM_PRO_RATE_LIMIT_BACKING=redis` for the backend and `LICENSE_REQUEST_BACKING=redis` for the license server.
+- Demo seed scripts may print demo credentials for local test data. Do not run `demo:*` scripts against staging or production databases.
+- The license server may print a generated owner token only in non-production local runs when `LICENSE_ADMIN_TOKEN` is intentionally absent. Production must provide `LICENSE_ADMIN_TOKEN`.
 
 ## Runtime Core
 
@@ -172,3 +175,11 @@ npm test
 ```
 
 `npm run test:db:verify` is the required command for closing database-related delivery evidence. It runs the database-critical backend suite and the license-server database flow on PostgreSQL, Redis, and Docker, then writes `docs/test-reports/database-verification-latest.md`.
+
+## Handoff Audit Notes
+
+- `@e965/xlsx` is used for spreadsheet import/export paths and is locked through `package-lock.json`. Confirm commercial redistribution/license terms during contract handoff before shipping paid builds.
+- `vendor/xlsx-0.20.3.tgz` is a tracked vendor artifact. Keep it only if the commercial license review confirms this packaging path is allowed.
+- `npm run security:licenses` generates `reports/security/license-report.json`; any `UNKNOWN` license entries require human legal review before commercial redistribution.
+- Localhost fallbacks in development files are not production blockers when production builds use the environment variables listed above.
+- Placeholder values such as `change-me` and `CHANGE_ME` are allowed only in examples and documentation. They must be rotated before external handoff.

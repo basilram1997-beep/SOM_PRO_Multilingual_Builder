@@ -61,7 +61,7 @@ if (require.main === module) {
   server.listen(PORT, () => {
     console.log("SOM License Server running on http://localhost:" + PORT);
     console.log("Owner login: http://localhost:" + PORT);
-    if (!process.env.LICENSE_ADMIN_TOKEN) {
+    if (!IS_PRODUCTION && !process.env.LICENSE_ADMIN_TOKEN) {
       console.log("Owner token for this process: " + ADMIN_TOKEN);
     }
   });
