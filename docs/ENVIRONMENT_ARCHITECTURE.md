@@ -88,6 +88,10 @@ Staging and production must receive these values from a deployment secret store,
 
 Detailed secret inventory, KMS readiness, and rotation rules are tracked in `docs/SECRETS_AND_KMS_READINESS.md`.
 
+The complete environment variable contract, including required/optional/default/production-safe status for runtime,
+security, backups, license server, Cloudflare, and test prefixes, is tracked in
+`docs/ENVIRONMENT_VARIABLES_REFERENCE.md`.
+
 ## 6. Domain Change Procedure
 
 To move from DuckDNS staging to a future professional domain:
