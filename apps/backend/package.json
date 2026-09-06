@@ -5,9 +5,9 @@
   "type": "commonjs",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "prebuild": "npm run prisma:generate",
+    "prebuild": "node ../../scripts/runtime/prisma-generate-if-needed.js",
     "build": "tsc",
-    "pretypecheck": "npm run prisma:generate",
+    "pretypecheck": "node ../../scripts/runtime/prisma-generate-if-needed.js",
     "typecheck": "tsc --noEmit",
     "start": "node dist/src/server.js",
     "prisma:generate": "node ../../scripts/runtime/prisma-cli.js generate",

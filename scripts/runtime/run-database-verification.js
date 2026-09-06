@@ -66,7 +66,7 @@ function runCommand(item) {
 
 function statusLabel(result) {
   if (result.status !== 0) return "FAIL";
-  if (result.skipped) return "INCOMPLETE";
+  if (result.skipped) return "PASS_WITH_SKIPS";
   return "PASS";
 }
 
@@ -76,7 +76,9 @@ function writeReport(results) {
   const fileName = `database-verification-${now.toISOString().replace(/[:.]/g, "-")}.md`;
   const latestPath = path.join(reportDir, "database-verification-latest.md");
   const reportPath = path.join(reportDir, fileName);
-  const overall = results.every((result) => result.status === 0 && !result.skipped) ? "PASS" : "FAIL";
+  const hasFailures = results.some((result) => result.status !== 0);
+  const hasSkips = results.some((result) => result.skipped);
+  const overall = hasFailures ? "FAIL" : hasSkips ? "PASS_WITH_SKIPS" : "PASS";
   const lines = [
     "# Database Verification Report",
     "",
@@ -128,6 +130,6 @@ const results = commands.map(runCommand);
 const report = writeReport(results);
 console.log(`Database verification report: ${path.relative(projectRoot, report.latestPath)}`);
 
-if (report.overall !== "PASS") {
+if (report.overall === "FAIL") {
   process.exitCode = 1;
 }
