@@ -132,6 +132,27 @@ curl https://license.your-domain.com/health
 curl https://app.your-domain.com
 ```
 
+## إثبات Cloudflare / Production الخارجي
+
+بعد ربط الدومين في Cloudflare وتشغيل الخدمات، شغّل من جهاز يستطيع الوصول للدومين:
+
+```bash
+PRODUCTION_URL=https://app.your-domain.com npm run production:external:verify
+```
+
+الفحص يكتب:
+
+- `reports/security/production-external-evidence.json`
+- `reports/security/production-external-evidence.md`
+
+ويتحقق من DNS، وHTTPS redirect، وHSTS، وhealth endpoint، ووجود Cloudflare edge headers، وأن دليل قاعدة البيانات المحلي مغلق بـ `PASS`.
+
+إذا كان الدومين لا يمر عبر Cloudflare عمدًا، استخدم:
+
+```bash
+PRODUCTION_EXPECT_CLOUDFLARE=false PRODUCTION_URL=https://app.your-domain.com npm run production:external:verify
+```
+
 ## اختبار تسجيل الدخول والترخيص
 
 1. افتح لوحة المالك على `https://license.your-domain.com`.

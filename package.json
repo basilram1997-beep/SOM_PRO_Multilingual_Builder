@@ -147,6 +147,7 @@
     "compatibility:test": "node scripts/compatibility-test.js",
     "prisma:migrate:deploy": "npm run prisma:migrate:deploy -w apps/backend",
     "production:check": "node scripts/production-check.js",
+    "production:external:verify": "node scripts/runtime/production-external-evidence.js",
     "test:contracts": "npm run test:contracts -w apps/backend",
     "test:e2e": "npm run test:e2e -w apps/backend",
     "test:all": "npm run test && npm run test:contracts && npm run test:e2e",

@@ -33,6 +33,7 @@ Before claiming a real production deployment is complete, archive:
 - Secret rotation confirmation after handoff.
 - Signed Windows installer or documented unsigned-distribution exception.
 - Mobile signing/build account confirmation if mobile builds are in scope.
+- `reports/security/production-external-evidence.json` from `PRODUCTION_URL=https://... npm run production:external:verify`.
 
 ## Non-Repository Boundary
 
