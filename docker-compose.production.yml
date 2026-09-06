@@ -44,6 +44,18 @@
         max-size: "5m"
         max-file: "2"
 
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile.production
+      target: migrations
+    env_file:
+      - apps/backend/.env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   backend:
     build:
       context: .
@@ -52,8 +64,8 @@
     env_file:
       - apps/backend/.env.production
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
     expose:

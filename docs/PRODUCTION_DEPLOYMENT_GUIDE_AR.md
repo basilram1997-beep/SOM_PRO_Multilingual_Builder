@@ -69,7 +69,14 @@ docker compose --env-file .env.production -f docker-compose.production.yml up -d
 
 ## Prisma migrations
 
-في التطوير يمكن استخدام `db push`، لكن في production يجب استخدام migrations:
+في التطوير يمكن استخدام `db push`، لكن في production يجب استخدام migrations. ملف `docker-compose.production.yml` يحتوي خدمة `migrate` تعمل مرة واحدة بعد جاهزية PostgreSQL وقبل تشغيل الـ Backend:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml up migrate
+docker compose --env-file .env.production -f docker-compose.production.yml up -d
+```
+
+إذا كنت تشغّل migrations خارج Docker من نسخة source نظيفة، استخدم:
 
 ```bash
 npm run prisma:migrate:deploy
