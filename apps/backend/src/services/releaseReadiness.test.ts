@@ -53,6 +53,7 @@ function assertCommercialInstallDependencies() {
   const productionGuide = readRepoFile("docs/PRODUCTION_DEPLOYMENT_GUIDE_AR.md");
   const backendApp = readRepoFile("apps/backend/src/app.ts");
   const cloudflarePagesHeaders = readRepoFile("apps/frontend/public/_headers");
+  const publicSiteHeaders = readRepoFile("web-page/_headers");
   const complianceDoc = readRepoFile("docs/COMPLIANCE_AND_DESTRUCTIVE_TESTING.md");
   const externalReviewPack = readRepoFile("docs/EXTERNAL_REVIEW_PACK_AR.md");
   const retentionPolicy = readRepoFile("docs/RETENTION_AND_DELETION_POLICY.md");
@@ -108,6 +109,8 @@ function assertCommercialInstallDependencies() {
   assert.match(backendApp, /morgan\(env\.appEnv === "production" \? "combined" : "dev"\)/);
   assert.match(cloudflarePagesHeaders, /Strict-Transport-Security: max-age=31536000; includeSubDomains; preload/);
   assert.match(cloudflarePagesHeaders, /X-Frame-Options: DENY/);
+  assert.match(publicSiteHeaders, /Strict-Transport-Security: max-age=31536000; includeSubDomains; preload/);
+  assert.match(publicSiteHeaders, /X-Frame-Options: DENY/);
   assert.match(productionGuide, /لا تضف `ports: 5432:5432`/);
   assert.match(productionGuide, /127\.0\.0\.1:5432:5432/);
   assert.match(productionGuide, /docker compose --env-file \.env\.production -f docker-compose\.production\.yml/);
