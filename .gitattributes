@@ -19,6 +19,11 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 *.conf text eol=lf
+Dockerfile* text eol=lf
 *.env text eol=lf
 .env.* text eol=lf
 apps/*/.env.* text eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.nsh text eol=crlf
