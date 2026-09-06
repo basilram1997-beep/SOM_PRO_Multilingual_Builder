@@ -1148,6 +1148,7 @@ model LicenseActivation {
   id                String        @id @default(cuid())
   schoolId          String
   licenseKeyHash    String        @unique
+  licenseCodeHash   String?       @unique
   schoolName        String?
   institutionCode   String?
   plan              String        @default("TRIAL")
@@ -1163,7 +1164,24 @@ model LicenseActivation {
   updatedAt         DateTime      @updatedAt
 
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  resetTokens LicenseResetToken[]
 
   @@index([schoolId, status])
   @@index([deviceFingerprint])
+}
+
+model LicenseResetToken {
+  id        String    @id @default(cuid())
+  licenseId String
+  tokenHash String    @unique
+  email     String
+  expiresAt DateTime
+  usedAt    DateTime?
+  issuedAt  DateTime  @default(now())
+  ip        String?
+
+  license LicenseActivation @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+
+  @@index([licenseId])
+  @@index([expiresAt])
 }

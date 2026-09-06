@@ -17,7 +17,7 @@ The remaining items below are follow-up hardening tasks rather than blockers for
 
 - Windows installer signing is wired through a dedicated build path, and a real certificate is still needed if a signed distribution artifact is required.
 - The desktop installer build may still benefit from a warmed electron-builder cache or first-run network access on locked-down build machines.
-- License storage should eventually move away from local JSON for the final commercial SaaS path.
+- License storage now uses database-backed records for the commercial path; continue monitoring indexing and archival policy as tenant/license counts grow.
 - Browser automation now has a real Playwright smoke path, a dedicated GitHub Actions job, and the accessibility core pass is in place with skip link, landmark labels, and automatic focus handoff. A broader browser matrix and screen-reader sweep remains a good follow-up.
 - Operational export and backup records now have a dedicated admin dashboard in Reports, so file age, creator, protection, and expiry are visible instead of hidden in backend-only records.
 - Personal-data exports now carry an explicit privacy warning policy, and the responsibility for approving exceptions is documented instead of left informal.
@@ -48,8 +48,8 @@ The remaining items below are follow-up hardening tasks rather than blockers for
 - Encryption in transit and encryption at rest are now documented as operational baselines in `docs/ENCRYPTION_AND_KEYS_AR.md`, `docs/HOSTING_REQUIREMENTS.md`, and `docs/SECURITY_REQUIREMENTS.md`.
 - Key management is now treated as an operational control with secret-manager/KMS guidance, audit logging for sensitive changes, and rotation/recovery rules in `docs/ENCRYPTION_AND_KEYS_AR.md`.
 - Production database cloning into development is now explicitly fail-closed unless masking or anonymization is performed first, and that rule is documented in `docs/SECURITY_REQUIREMENTS.md`, `docs/BACKUP_RESTORE_SECURITY_AR.md`, and `docs/BUSINESS_CONTINUITY.md`.
-- `npm audit --omit=dev` could not be revalidated in this session because the npm registry endpoint was unavailable from the current environment. Re-run it in a network-enabled staging or maintenance environment before final release.
-- Backup / restore was exercised with a real round-trip integration test and verified to preserve the expected school data after restore; if the local Docker API is unavailable in a given session, that contract is skipped only for that session and the workflow remains available for later rerun.
+- `npm audit --omit=dev` was revalidated on 2026-09-06 and returned `0 vulnerabilities`.
+- Backup / restore was exercised with a real round-trip integration test and verified to preserve the expected school data after restore in `docs/test-reports/database-verification-latest.md`.
 
 ## Performance notes:
 
@@ -286,7 +286,7 @@ This is the canonical production reference for handoff and should stay aligned w
 | Data storage     | Sensitive data exposure         | Secrets are kept out of Git and browser storage was reduced        | Keep exported logs and local storage free of secrets                                                                                                                                        |
 | localStorage     | Stale or sensitive browser data | Only non-sensitive fields should remain                            | Continue to avoid storing owner tokens or sensitive data                                                                                                                                    |
 | Licensing        | License bypass or replay        | License tests exist for activation, expiry, and device checks      | Keep server-side checks authoritative                                                                                                                                                       |
-| Backup / restore | Data loss or broken restore     | Documented as a manual requirement only                            | Test restore before production handoff; if the local Docker API is unavailable during a session, the automated backup/restore contract can be skipped for that session only and rerun later |
+| Backup / restore | Data loss or broken restore     | Automated local Docker/PostgreSQL round-trip evidence exists        | Repeat the restore drill on final staging/production infrastructure and archive the provider-specific evidence |
 
 ## Buyer Review Notes
 

@@ -46,6 +46,7 @@ function assertEnvMatches(values: Record<string, string>, key: string, pattern: 
 function assertCommercialInstallDependencies() {
   const gitignore = readRepoFile(".gitignore");
   const packageJson = readRepoFile("package.json");
+  const readme = readRepoFile("README.md");
   const ciWorkflow = readRepoFile(".github/workflows/ci.yml");
   const compose = readRepoFile("docker-compose.yml");
   const productionCompose = readRepoFile("docker-compose.production.yml");
@@ -71,6 +72,9 @@ function assertCommercialInstallDependencies() {
   assert.match(gitignore, /^\.env\.\*$/m);
   assert.match(gitignore, /^apps\/\*\/\.env\.\*$/m);
   assert.match(packageJson, /"security:secrets": "node scripts\/security-secrets-check\.js"/);
+  assert.match(packageJson, /"node": ">=22\.12\.0"/);
+  assert.match(readme, /Node\.js 22\.12\.0\+/);
+  assert.doesNotMatch(readme, /Node\.js 20\+/);
   assert.match(ciWorkflow, /resilience_smoke/);
   assert.match(ciWorkflow, /chaos:test/);
   assert.match(secretsCheck, /runGit\(\["ls-files"\]\)/);

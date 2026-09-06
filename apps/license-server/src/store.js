@@ -106,7 +106,7 @@ function licenseFromActivation(activation) {
     id: activation.id,
     schoolId: activation.schoolId,
     licenseKeyHash: activation.licenseKeyHash,
-    licenseCodeHash: String(metadata.licenseCodeHash || "").trim(),
+    licenseCodeHash: String(activation.licenseCodeHash || metadata.licenseCodeHash || "").trim(),
     licenseKey: String(metadata.licenseKey || "").trim(),
     licenseCode: String(metadata.licenseCode || "").trim(),
     schoolName: repairMojibakeText(activation.schoolName || ""),
@@ -160,7 +160,7 @@ function licenseMatchesCredential(license, credential) {
 }
 
 async function listLicenses() {
-  const rows = await prisma.licenseActivation.findMany({ orderBy: { createdAt: "desc" } });
+  const rows = await prisma.licenseActivation.findMany({ orderBy: { createdAt: "desc" }, take: 500 });
   return rows.map(licenseFromActivation);
 }
 
@@ -173,22 +173,55 @@ async function findLicenseById(id) {
 async function findLicenseByCredential(credential) {
   const clean = String(credential || "").trim();
   if (!clean) return null;
-  const rows = await prisma.licenseActivation.findMany({ orderBy: { createdAt: "desc" } });
-  for (const activation of rows) {
-    const license = licenseFromActivation(activation);
-    if (licenseMatchesCredential(license, clean)) return license;
-  }
-  return null;
+  const hashes = [...credentialHashes(clean)];
+  const activation = await prisma.licenseActivation.findFirst({
+    where: {
+      OR: [{ licenseKeyHash: { in: hashes } }, { licenseCodeHash: { in: hashes } }]
+    },
+    orderBy: { createdAt: "desc" }
+  });
+  if (activation) return licenseFromActivation(activation);
+
+  return findLegacyLicenseByCredential(clean);
 }
 
 async function findLicenseByCredentialHash(credentialHash) {
   const clean = String(credentialHash || "").trim();
   if (!clean) return null;
-  const rows = await prisma.licenseActivation.findMany({ orderBy: { createdAt: "desc" } });
+  const activation = await prisma.licenseActivation.findFirst({
+    where: {
+      OR: [{ licenseKeyHash: clean }, { licenseCodeHash: clean }]
+    },
+    orderBy: { createdAt: "desc" }
+  });
+  if (activation) return licenseFromActivation(activation);
+
+  return findLegacyLicenseByCredentialHash(clean);
+}
+
+async function findLegacyLicenseByCredential(credential) {
+  const clean = String(credential || "").trim();
+  const hashes = credentialHashes(clean);
+  const rows = await prisma.licenseActivation.findMany({
+    where: { licenseCodeHash: null },
+    orderBy: { createdAt: "desc" }
+  });
+  for (const activation of rows) {
+    const license = licenseFromActivation(activation);
+    if (licenseMatchesCredential(license, clean) || hashes.has(String(license.licenseCodeHash || ""))) return license;
+  }
+  return null;
+}
+
+async function findLegacyLicenseByCredentialHash(credentialHash) {
+  const clean = String(credentialHash || "").trim();
+  const rows = await prisma.licenseActivation.findMany({
+    where: { licenseCodeHash: null },
+    orderBy: { createdAt: "desc" }
+  });
   for (const activation of rows) {
     const license = licenseFromActivation(activation);
     if (
-      String(license.licenseKeyHash || "") === clean ||
       String(license.licenseCodeHash || "") === clean ||
       hash(String(license.licenseKey || "")) === clean ||
       hash(String(license.licenseCode || "")) === clean
@@ -224,6 +257,7 @@ async function mutateLicenseById(id, mutator) {
       institutionCode: merged.institutionCode || null,
       plan: merged.plan || "PAID",
       status: merged.status || "ACTIVE",
+      licenseCodeHash: merged.licenseCodeHash || null,
       expiresAt: new Date(merged.expiresAt || current.expiresAt),
       maxDevices: Number(merged.maxDevices || 1),
       deviceFingerprint: String(merged.deviceFingerprint || current.deviceFingerprint || ""),
@@ -247,9 +281,9 @@ async function createLicenseRecord(body = {}) {
     allowedFeatures: Array.isArray(body.allowedFeatures) ? body.allowedFeatures : ["core"]
   };
   const licenseKey = makeLicenseKey(payload);
-  const licenses = await listLicenses();
-  const licenseCode = generateUniqueLicenseCode(licenses);
+  const licenseCode = await generateUnusedLicenseCode();
   const licenseKeyHash = hash(licenseKey);
+  const generatedLicenseCodeHash = licenseCodeHash(licenseCode);
   const adminPassword = String(body.adminPassword || "").trim() || crypto.randomBytes(12).toString("hex");
   const adminAccount = normalizeAdminAccount(
     {
@@ -284,6 +318,7 @@ async function createLicenseRecord(body = {}) {
     data: {
       schoolId,
       licenseKeyHash,
+      licenseCodeHash: generatedLicenseCodeHash,
       schoolName: payload.schoolName,
       institutionCode: payload.institutionCode,
       plan: payload.plan,
@@ -295,7 +330,7 @@ async function createLicenseRecord(body = {}) {
         ...buildMetadata({
           licenseKey,
           licenseCode,
-          licenseCodeHash: licenseCodeHash(licenseCode),
+          licenseCodeHash: generatedLicenseCodeHash,
           adminAccount,
           devices: [],
           installations: [],
@@ -308,6 +343,18 @@ async function createLicenseRecord(body = {}) {
   });
 
   return licenseFromActivation(activation);
+}
+
+async function generateUnusedLicenseCode() {
+  for (let attempt = 0; attempt < 25; attempt += 1) {
+    const code = generateUniqueLicenseCode([]);
+    const existing = await prisma.licenseActivation.findFirst({
+      where: { licenseCodeHash: licenseCodeHash(code) },
+      select: { id: true }
+    });
+    if (!existing) return code;
+  }
+  throw new Error("LICENSE_CODE_GENERATION_FAILED");
 }
 
 async function deleteLicenseById(id) {
@@ -440,6 +487,15 @@ async function createResetToken(license, account, ip) {
     return { ...current, resetTokens };
   });
   if (next) {
+    await prisma.licenseResetToken.create({
+      data: {
+        licenseId: license.id,
+        tokenHash,
+        email: String(account.email || "").trim().toLowerCase(),
+        expiresAt: new Date(expiresAt),
+        ip: String(ip || "")
+      }
+    });
     await recordSecurityEvent({
       type: "ADMIN_RESET_TOKEN_ISSUED",
       result: "OK",
@@ -453,47 +509,73 @@ async function createResetToken(license, account, ip) {
 
 async function consumeResetToken(token, newPassword, ip) {
   const tokenHash = hash(String(token || "").trim());
-  const rows = await prisma.licenseActivation.findMany({ orderBy: { createdAt: "desc" } });
+  const resetToken = await prisma.licenseResetToken.findUnique({
+    where: { tokenHash },
+    include: { license: true }
+  });
+  if (resetToken) {
+    if (resetToken.usedAt || resetToken.expiresAt.getTime() < Date.now()) return null;
+    const license = licenseFromActivation(resetToken.license);
+    const updated = await consumeResetTokenForLicense(license, tokenHash, newPassword);
+    if (!updated) return null;
+    await prisma.licenseResetToken.update({ where: { tokenHash }, data: { usedAt: new Date() } });
+    await recordResetTokenConsumeEvent(license, ip);
+    return { email: license.adminAccount?.email || "", licenseId: license.id };
+  }
+
+  return consumeLegacyResetToken(tokenHash, newPassword, ip);
+}
+
+async function consumeResetTokenForLicense(license, tokenHash, newPassword) {
+  return mutateLicenseById(license.id, (current) => {
+    const currentTokens = Array.isArray(current.resetTokens) ? [...current.resetTokens] : [];
+    const tokenEntry = currentTokens.find((item) => item.tokenHash === tokenHash && !item.usedAt);
+    if (tokenEntry) tokenEntry.usedAt = new Date().toISOString();
+    const adminAccount = normalizeAdminAccount(
+      {
+        name: current.adminAccount?.name || "مدير المدرسة",
+        email: current.adminAccount?.email || "",
+        password: newPassword,
+        role: current.adminAccount?.role || "ADMIN"
+      },
+      makeDefaultAdminEmail(current.institutionCode)
+    );
+    return {
+      ...current,
+      adminAccount,
+      resetTokens: currentTokens
+    };
+  });
+}
+
+async function consumeLegacyResetToken(tokenHash, newPassword, ip) {
+  const rows = await prisma.licenseActivation.findMany({
+    where: { licenseCodeHash: null },
+    orderBy: { createdAt: "desc" }
+  });
   for (const activation of rows) {
     const license = licenseFromActivation(activation);
     const resetTokens = Array.isArray(license.resetTokens) ? license.resetTokens : [];
-    const index = resetTokens.findIndex((item) => item.tokenHash === tokenHash && !item.usedAt && new Date(item.expiresAt).getTime() >= Date.now());
-    if (index === -1) continue;
-
-    const updated = await mutateLicenseById(license.id, (current) => {
-      const currentTokens = Array.isArray(current.resetTokens) ? [...current.resetTokens] : [];
-      const tokenEntry = currentTokens.find((item) => item.tokenHash === tokenHash && !item.usedAt);
-      if (!tokenEntry || new Date(tokenEntry.expiresAt).getTime() < Date.now()) return null;
-      tokenEntry.usedAt = new Date().toISOString();
-      const adminAccount = normalizeAdminAccount(
-        {
-          name: current.adminAccount?.name || "مدير المدرسة",
-          email: current.adminAccount?.email || "",
-          password: newPassword,
-          role: current.adminAccount?.role || "ADMIN"
-        },
-        makeDefaultAdminEmail(current.institutionCode)
-      );
-      return {
-        ...current,
-        adminAccount,
-        resetTokens: currentTokens
-      };
-    });
-
+    const tokenEntry = resetTokens.find(
+      (item) => item.tokenHash === tokenHash && !item.usedAt && new Date(item.expiresAt).getTime() >= Date.now()
+    );
+    if (!tokenEntry) continue;
+    const updated = await consumeResetTokenForLicense(license, tokenHash, newPassword);
     if (!updated) return null;
-
-    await recordSecurityEvent({
-      type: "ADMIN_RESET_TOKEN_CONSUME",
-      result: "OK",
-      licenseId: license.id,
-      email: license.adminAccount?.email || "",
-      ip
-    });
-
+    await recordResetTokenConsumeEvent(license, ip);
     return { email: license.adminAccount?.email || "", licenseId: license.id };
   }
   return null;
+}
+
+async function recordResetTokenConsumeEvent(license, ip) {
+  await recordSecurityEvent({
+    type: "ADMIN_RESET_TOKEN_CONSUME",
+    result: "OK",
+    licenseId: license.id,
+    email: license.adminAccount?.email || "",
+    ip
+  });
 }
 
 async function recordSecurityEvent(event) {

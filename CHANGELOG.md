@@ -22,4 +22,5 @@ Release Candidate for staging and controlled validation. This is not the final p
 - The project is ready for staging and controlled pilot validation.
 - The compliance bundle is ready for external review and approval.
 - Windows installer signing still depends on a certificate being supplied.
-- Final production release should wait for real staging, clean install, backup/restore, and browser verification.
+- Local database verification, clean-clone delivery verification, and manual handoff QA evidence are now available in the repository.
+- Final broad production release should still wait for provider/KMS proof, signed installer evidence, and external penetration-test sign-off.

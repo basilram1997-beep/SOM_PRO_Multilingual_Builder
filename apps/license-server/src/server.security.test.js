@@ -1,6 +1,8 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
+const fs = require("node:fs");
+const path = require("node:path");
 
 process.env.NODE_ENV = "test";
 process.env.LICENSE_REQUEST_BACKING = "memory";
@@ -11,6 +13,8 @@ process.env.LICENSE_RESET_TOKEN_TTL_MS = "900000";
 
 const { prisma } = require("./db");
 const { createLicenseServer, licenseCodeHash } = require("./server");
+
+const storeSource = fs.readFileSync(path.join(__dirname, "store.js"), "utf8");
 
 function listen(server) {
   return new Promise((resolve) => {
@@ -185,4 +189,13 @@ test("client nonce replay protection rejects repeated activation requests", asyn
     assert.equal(status.status, 200);
   });
   await cleanupLicense(licenseId);
+});
+
+test("license lookup paths use indexed database access instead of full-table credential scans", () => {
+  assert.match(storeSource, /licenseCodeHash:\s*generatedLicenseCodeHash/);
+  assert.match(storeSource, /prisma\.licenseResetToken\.findUnique/);
+  assert.match(storeSource, /prisma\.licenseActivation\.findFirst\(\{\s*[\s\S]*licenseKeyHash[\s\S]*licenseCodeHash/);
+  assert.doesNotMatch(storeSource, /const licenses = await listLicenses\(\);/);
+  assert.match(storeSource, /async function findLegacyLicenseByCredential/);
+  assert.match(storeSource, /where: \{ licenseCodeHash: null \}/);
 });

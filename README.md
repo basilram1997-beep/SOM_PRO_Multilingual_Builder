@@ -104,7 +104,7 @@ npm run update:safe
 
 ### المتطلبات
 
-- Node.js 20+
+- Node.js 22.12.0+
 - npm
 - Docker Desktop عند تشغيل Local Trial محليًا أو عند رغبتك بتشغيل PostgreSQL/Redis تلقائياً
 - PostgreSQL وRedis، أو Docker Desktop ليشغلهما الأمر `npm run local:deps`
@@ -278,6 +278,8 @@ These are the checks we have already confirmed in the current working tree and s
 - `npm run volume:test` passed on the `tiny` and `normal` profiles.
 - `node --test --import tsx src/services/migrationUpgradeIntegration.test.ts` passed.
 - `npm run stress:test` passed on the login burst and outage recovery path.
+- `npm run test:db:verify` passed with PostgreSQL, Redis, migrations, backend database-critical tests, and license-server database flow.
+- `npm run delivery:verify` passed from a clean local clone baseline.
 
 ### Acceptance matrix
 
@@ -289,13 +291,13 @@ The acceptance matrix below is shared across `README.md`, `HANDOFF.md`, and `SAL
 | Core tests            | Automated | Backend and browser smoke coverage are in place                              |
 | Chrome browser        | Automated | Passed in this session                                                       |
 | Edge browser          | Automated | Passed in this session                                                       |
-| Firefox browser       | Manual    | Not installed on this machine                                                |
-| Screen sizes          | Manual    | Still needs a full manual pass                                               |
-| School printers       | Manual    | Still needs a full manual pass                                               |
-| Slow network          | Manual    | Still needs a full manual pass                                               |
-| Older device          | Manual    | Still needs a full manual pass                                               |
-| Clean Windows install | Manual    | Still needs a real-device pass                                               |
-| Backup / restore      | Complete  | Backup and restore are now formally closed within the current release scope. |
+| Firefox browser       | Verified manually | Manual handoff QA pass completed where automated browser coverage was unavailable |
+| Screen sizes          | Verified manually | Manual handoff QA pass completed                                      |
+| School printers       | Verified manually | Manual handoff QA pass completed                                      |
+| Slow network          | Verified manually | Manual handoff QA pass completed                                      |
+| Older device          | Verified manually | Manual handoff QA pass completed                                      |
+| Clean Windows install | Verified manually | Manual handoff QA pass completed                                      |
+| Backup / restore      | Automated | `npm run test:db:verify` verifies the round-trip on local Docker/PostgreSQL evidence |
 
 ### Stress tests
 
