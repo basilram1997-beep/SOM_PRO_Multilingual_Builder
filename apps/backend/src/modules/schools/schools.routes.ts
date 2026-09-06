@@ -8,7 +8,7 @@ import { z } from "zod";
 import { SchoolInfoSchema } from "@som/shared";
 import { env } from "../../config/env";
 import { prisma } from "../../db/prisma";
-import { rejectMultipartContent } from "../../middleware/requestProtections";
+import { createRateLimitMiddleware, rejectMultipartContent } from "../../middleware/requestProtections";
 import { validateBody } from "../../middleware/validate";
 import { canRole } from "../../services/accessPolicy";
 import { logSafeError } from "../../lib/safeLog";
@@ -36,6 +36,13 @@ const SchoolDeletionSchema = z.object({
 });
 
 const SCHOOL_EXPORT_RETENTION_DAYS = Number(process.env.SOM_SCHOOL_EXPORT_RETENTION_DAYS || 30);
+const operatorHealthRateLimit = createRateLimitMiddleware({
+  key: "schools:operator-health",
+  windowMs: 60_000,
+  max: 20,
+  message: "تم تكرار فحص صحة التشغيل بسرعة زائدة. انتظر قليلًا ثم حاول مرة أخرى.",
+  auditAction: "RATE LIMITED OPERATOR HEALTH"
+});
 
 const lifecycleRedactedKeys = new Set(
   [
@@ -724,7 +731,7 @@ schoolsRouter.post("/backups", async (req, res) => {
   }
 });
 
-schoolsRouter.get("/operator-health", async (req, res) => {
+schoolsRouter.get("/operator-health", operatorHealthRateLimit, async (req, res) => {
   const schoolId = await getRequestSchoolId(req);
   if (!canManageSchoolOperations(req.user?.role)) {
     return res.status(403).json({ error: "FORBIDDEN", message: "ليس لديك صلاحية عرض صحة التشغيل" });

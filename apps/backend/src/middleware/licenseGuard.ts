@@ -1,6 +1,7 @@
 ﻿import type { Request, Response, NextFunction } from "express";
 import { getLicenseGuardState } from "../services/licenseService";
 import { getRequestDeviceInfo } from "../services/deviceContext";
+import { sendErrorResponse } from "../lib/httpResponses";
 
 const publicPaths = ["/health", "/api/license/status", "/api/license/activate"];
 const writeMethods = new Set(["POST", "PUT", "PATCH", "DELETE"]);
@@ -15,9 +16,7 @@ export async function licenseGuard(req: Request, res: Response, next: NextFuncti
   res.setHeader(LICENSE_READ_ONLY_HEADER, String(state.readOnly));
 
   if (state.readOnly && writeMethods.has(req.method)) {
-    return res.status(402).json({
-      error: "LICENSE_READ_ONLY",
-      message: state.readOnlyReason || LICENSE_READ_ONLY_MESSAGE,
+    return sendErrorResponse(res, 402, "LICENSE_READ_ONLY", state.readOnlyReason || LICENSE_READ_ONLY_MESSAGE, {
       license: state
     });
   }

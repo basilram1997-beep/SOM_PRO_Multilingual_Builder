@@ -1,6 +1,6 @@
 # Redis Settings for Backend + License Server
 
-Date: 2026-08-30
+Date: 2026-09-06
 
 This runbook defines the shared Redis settings used by:
 
@@ -8,6 +8,8 @@ This runbook defines the shared Redis settings used by:
 - `apps/license-server`
 
 Its goal is simple: keep rate limiting, nonce replay protection, and backend cache/state behavior consistent across multiple instances.
+
+Use this file as the single Redis handoff reference for developers and operators. If another document disagrees with it, update that document or this one before delivery.
 
 ## Why this matters
 
@@ -73,6 +75,15 @@ For any real shared environment:
 4. Use the same Redis credentials from both backend and license server.
 5. Avoid `memory` mode unless you intentionally want local, per-process behavior.
 
+## Pre-delivery checklist
+
+- Confirm `SOM_PRO_RATE_LIMIT_BACKING=redis` in backend staging and production config.
+- Confirm `LICENSE_REQUEST_BACKING=redis` in license-server staging and production config.
+- Confirm `REDIS_URL` and `LICENSE_REDIS_URL` point to the same Redis service or the same managed Redis cluster.
+- Confirm Redis credentials are stored in the deployment secret store, not in tracked source.
+- Confirm the backend and license server can both reach Redis after deployment.
+- Confirm `/api/license/status` and `/api/schools/operator-health` are protected by request throttling.
+
 ## Verification
 
 After deployment, verify:
@@ -89,5 +100,7 @@ If the site is healthy but Redis is not shared, you will still see inconsistent 
 
 - [docs/DUCKDNS_STAGING_DEPLOYMENT.md](/C:/Users/asus/Desktop/SOM_PRO_Multilingual_Builder_v1_5_5_Database_ENV_Fixed/docs/DUCKDNS_STAGING_DEPLOYMENT.md)
 - [docs/PRODUCTION_DEPLOYMENT_GUIDE_AR.md](/C:/Users/asus/Desktop/SOM_PRO_Multilingual_Builder_v1_5_5_Database_ENV_Fixed/docs/PRODUCTION_DEPLOYMENT_GUIDE_AR.md)
+- [docs/ENVIRONMENT_VARIABLES_REFERENCE.md](./ENVIRONMENT_VARIABLES_REFERENCE.md)
+- [docs/DELIVERY_INDEX.md](./DELIVERY_INDEX.md)
 - [apps/license-server/src/requestProtectionStore.js](/C:/Users/asus/Desktop/SOM_PRO_Multilingual_Builder_v1_5_5_Database_ENV_Fixed/apps/license-server/src/requestProtectionStore.js)
 - [scripts/runtime/prepare-duckdns-staging-env.js](/C:/Users/asus/Desktop/SOM_PRO_Multilingual_Builder_v1_5_5_Database_ENV_Fixed/scripts/runtime/prepare-duckdns-staging-env.js)
