@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import Redis from "ioredis";
 import { env } from "../config/env";
+import { sendErrorResponse } from "../lib/httpResponses";
 import { logSafeError } from "../lib/safeLog";
 
 type RateLimitOptions = {
@@ -347,10 +348,10 @@ export function rejectMultipartContent(req: Request, res: Response, next: NextFu
       contentType: String(req.headers["content-type"] || "multipart/form-data"),
       body: redactSensitive(req.body || null)
     });
-    return res.status(415).json({
-      error: "UNSUPPORTED_MEDIA_TYPE",
-      message: "لا يمكن إرسال ملفات في هذه العملية. استخدم نموذجًا نصيًا فقط."
-    });
+  return res.status(415).json({
+    error: "UNSUPPORTED_MEDIA_TYPE",
+    message: "لا يمكن إرسال ملفات في هذه العملية. استخدم نموذجًا نصيًا فقط."
+  });
   }
 
   return next();
@@ -386,10 +387,7 @@ export function rejectSchoolContextOverride(req: Request, res: Response, next: N
     body: redactSensitive(req.body || null)
   });
 
-  return res.status(400).json({
-    error: "INVALID_SCHOOL_CONTEXT",
-    message: "لا يمكن تغيير مدرسة الجلسة من الطلب"
-  });
+  return sendErrorResponse(res, 400, "INVALID_SCHOOL_CONTEXT", "لا يمكن تغيير مدرسة الجلسة من الطلب");
 }
 
 export function rejectUserContextOverride(req: Request, res: Response, next: NextFunction) {
@@ -402,10 +400,7 @@ export function rejectUserContextOverride(req: Request, res: Response, next: Nex
     body: redactSensitive(req.body || null)
   });
 
-  return res.status(400).json({
-    error: "INVALID_USER_CONTEXT",
-    message: "لا يمكن تغيير هوية المستخدم من الطلب"
-  });
+  return sendErrorResponse(res, 400, "INVALID_USER_CONTEXT", "لا يمكن تغيير هوية المستخدم من الطلب");
 }
 
 export function createRateLimitMiddleware(options: RateLimitOptions) {
@@ -432,10 +427,7 @@ export function createRateLimitMiddleware(options: RateLimitOptions) {
             store: "redis",
             body: redactSensitive(req.body || null)
           });
-          res.status(429).json({
-            error: "RATE_LIMITED",
-            message: options.message
-          });
+          sendErrorResponse(res, 429, "RATE_LIMITED", options.message);
           return;
         }
         next();
@@ -452,10 +444,7 @@ export function createRateLimitMiddleware(options: RateLimitOptions) {
           store: "redis-unavailable",
           body: redactSensitive(req.body || null)
         });
-        res.status(503).json({
-          error: "RATE_LIMIT_BACKEND_UNAVAILABLE",
-          message: "تعذر تطبيق قيود الطلبات لأن مخزن القيود غير متاح"
-        });
+        sendErrorResponse(res, 503, "RATE_LIMIT_BACKEND_UNAVAILABLE", "تعذر تطبيق قيود الطلبات لأن مخزن القيود غير متاح");
         return;
       }
 
@@ -491,10 +480,7 @@ export function createRateLimitMiddleware(options: RateLimitOptions) {
           store: "memory",
           body: redactSensitive(req.body || null)
         });
-        res.status(429).json({
-          error: "RATE_LIMITED",
-          message: options.message
-        });
+        sendErrorResponse(res, 429, "RATE_LIMITED", options.message);
         return;
       }
 

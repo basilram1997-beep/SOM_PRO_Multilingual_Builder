@@ -3,6 +3,7 @@ import { DutyAssignmentSchema } from "@som/shared";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { validateBody } from "../../middleware/validate";
+import { sendErrorResponse } from "../../lib/httpResponses";
 import { getRequestSchoolId } from "../../services/schoolContext";
 import { buildDailyDutyRows } from "../../services/dutySchedule";
 import { ensureSchoolSettings } from "../../services/schoolSettings";
@@ -47,7 +48,7 @@ dutiesRouter.post("/", validateBody(SaveDutySchema), async (req, res) => {
   const data = req.body;
 
   if (!(await ensureTeacherBelongsToSchool(schoolId, data.teacherId))) {
-    return res.status(400).json({ error: "INVALID_TEACHER", message: "المعلم غير صحيح" });
+    return sendErrorResponse(res, 400, "INVALID_TEACHER", "المعلم غير صحيح");
   }
 
   const payload = {
@@ -62,7 +63,7 @@ dutiesRouter.post("/", validateBody(SaveDutySchema), async (req, res) => {
 
   if (data.id) {
     const existing = await prisma.dutyAssignment.findFirst({ where: { id: data.id, schoolId } });
-    if (!existing) return res.status(404).json({ error: "NOT_FOUND" });
+    if (!existing) return sendErrorResponse(res, 404, "NOT_FOUND", "لم يتم العثور على المناوبة");
     const updated = await prisma.dutyAssignment.update({
       where: { id: data.id },
       data: payload,
@@ -78,6 +79,6 @@ dutiesRouter.post("/", validateBody(SaveDutySchema), async (req, res) => {
 dutiesRouter.delete("/:id", async (req, res) => {
   const schoolId = await getRequestSchoolId(req);
   const result = await prisma.dutyAssignment.deleteMany({ where: { id: req.params.id, schoolId } });
-  if (result.count === 0) return res.status(404).json({ error: "NOT_FOUND" });
+  if (result.count === 0) return sendErrorResponse(res, 404, "NOT_FOUND", "لم يتم العثور على المناوبة");
   res.status(204).send();
 });

@@ -35,6 +35,7 @@ import {
   sensitiveWriteRateLimit
 } from "./middleware/requestProtections";
 import { logSafeError } from "./lib/safeLog";
+import { sendErrorResponse } from "./lib/httpResponses";
 
 export function createApp() {
   const app = express();
@@ -64,8 +65,8 @@ export function createApp() {
     res.json({
       data: {
         product: "SOM PRO",
-        version: process.env.SOM_VERSION || "0.9.0-rc.1",
-        releaseChannel: process.env.SOM_RELEASE_CHANNEL || "release-candidate",
+        version: process.env.SOM_VERSION || "0.9.0",
+        releaseChannel: process.env.SOM_RELEASE_CHANNEL || "release",
         runtimeMode: process.env.SOM_RUNTIME_MODE || env.appEnv,
         apiEnvironment: process.env.SOM_API_ENV || env.appEnv
       },
@@ -111,27 +112,15 @@ export function createApp() {
     const type = String((err as { type?: string })?.type || "");
 
     if (type === "entity.parse.failed" || error instanceof SyntaxError) {
-      return res.status(400).json({
-        error: "MALFORMED_JSON",
-        message: "Invalid JSON request body",
-        data: null
-      });
+      return sendErrorResponse(res, 400, "MALFORMED_JSON", "Invalid JSON request body");
     }
 
     if (type === "entity.too.large" || status === 413) {
-      return res.status(413).json({
-        error: "PAYLOAD_TOO_LARGE",
-        message: "Request body is too large",
-        data: null
-      });
+      return sendErrorResponse(res, 413, "PAYLOAD_TOO_LARGE", "Request body is too large");
     }
 
     logSafeError("app.unhandled", error);
-    res.status(500).json({
-      error: "INTERNAL_SERVER_ERROR",
-      message: "حدث خطأ داخلي في الخادم",
-      data: null
-    });
+    sendErrorResponse(res, 500, "INTERNAL_SERVER_ERROR", "حدث خطأ داخلي في الخادم");
   });
 
   return app;

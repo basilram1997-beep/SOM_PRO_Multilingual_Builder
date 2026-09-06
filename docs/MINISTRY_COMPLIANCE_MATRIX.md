@@ -4,7 +4,7 @@ Review date: 2026-08-15
 
 Repository commit reviewed: `0c44347865c83bf8c4450879d73dc55c7455b00b`
 
-SOM PRO version: `0.9.0-rc.1` from root `package.json`
+SOM PRO version: `0.9.0` from root `package.json`
 
 Assessment type: Technical Compliance Assessment. This is not legal advice and is not an official Ministry certification.
 

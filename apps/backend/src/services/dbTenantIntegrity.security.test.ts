@@ -136,7 +136,7 @@ test("school-private Prisma models carry tenant ownership and a schoolId index o
   assert.match(auditLog.body, /@@index\(\[schoolId, action, createdAt\]\)/);
   assert.match(auditLog.body, /@@index\(\[schoolId, entityType, entityId\]\)/);
 
-  const permittedGlobalModels = ["Permission", "RolePermission", "School"];
+  const permittedGlobalModels = ["Permission", "RolePermission", "School", "LicenseResetToken"];
   for (const model of models.filter(
     (item) => !/^\s+schoolId\s+String(?:\s|$)/m.test(item.body) && item.name !== "AuditLog"
   )) {

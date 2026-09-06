@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { Prisma } from "@prisma/client";
 import { env } from "../config/env";
 import { prisma } from "../db/prisma";
+import { sendErrorResponse } from "../lib/httpResponses";
 import { canRole, Permission } from "../services/accessPolicy";
 import { verifyAuthToken } from "../services/authService";
 import { recordAuditLog } from "../services/auditLog";
@@ -67,14 +68,14 @@ export async function authenticateRequest(req: Request, res: Response, next: Nex
   const token = header.startsWith("Bearer ") ? header.slice("Bearer ".length).trim() : "";
   if (!token) {
     logDeniedAccess(req, "missing_token");
-    return res.status(401).json({ error: "AUTH_REQUIRED", message: "تسجيل الدخول مطلوب" });
+    return sendErrorResponse(res, 401, "AUTH_REQUIRED", "تسجيل الدخول مطلوب");
   }
 
   try {
     const user = await resolveAuthenticatedUserFromToken(token);
     if (!user) {
       logDeniedAccess(req, "invalid_session");
-      return res.status(401).json({ error: "AUTH_INVALID", message: "جلسة الدخول غير صالحة" });
+      return sendErrorResponse(res, 401, "AUTH_INVALID", "جلسة الدخول غير صالحة");
     }
     const studentIds =
       user.role === "PARENT"
@@ -93,7 +94,7 @@ export async function authenticateRequest(req: Request, res: Response, next: Nex
     return next();
   } catch {
     logDeniedAccess(req, "invalid_token");
-    return res.status(401).json({ error: "AUTH_INVALID", message: "جلسة الدخول منتهية أو غير صالحة" });
+    return sendErrorResponse(res, 401, "AUTH_INVALID", "جلسة الدخول منتهية أو غير صالحة");
   }
 }
 
@@ -101,11 +102,11 @@ export function requirePermission(permission: Permission) {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       logDeniedAccess(req, "missing_user", permission);
-      return res.status(401).json({ error: "AUTH_REQUIRED", message: "تسجيل الدخول مطلوب" });
+      return sendErrorResponse(res, 401, "AUTH_REQUIRED", "تسجيل الدخول مطلوب");
     }
     if (!canRole(req.user.role, permission)) {
       await logDeniedAccess(req, "forbidden_permission", permission);
-      return res.status(403).json({ error: "FORBIDDEN", message: "لا تملك صلاحية لتنفيذ هذه العملية" });
+      return sendErrorResponse(res, 403, "FORBIDDEN", "لا تملك صلاحية لتنفيذ هذه العملية");
     }
     return next();
   };

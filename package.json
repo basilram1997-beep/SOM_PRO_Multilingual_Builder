@@ -180,7 +180,7 @@
     "mobile:open:ios": "node -r ./scripts/runtime/capacitor-userinfo-shim.cjs ./node_modules/@capacitor/cli/bin/capacitor open ios",
     "mobile:doctor": "node -r ./scripts/runtime/capacitor-userinfo-shim.cjs ./node_modules/@capacitor/cli/bin/capacitor doctor"
   },
-  "version": "0.9.0-rc.1",
+  "version": "0.9.0",
   "engines": {
     "node": ">=22.12.0"
   },

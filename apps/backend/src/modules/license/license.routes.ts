@@ -10,6 +10,7 @@ import { getPersistedLicenseSetup, savePersistedLicenseSetup } from "../../servi
 import { getRequestDeviceInfo } from "../../services/deviceContext";
 import { recordAuditLog } from "../../services/auditLog";
 import { logSafeError } from "../../lib/safeLog";
+import { sendErrorResponse } from "../../lib/httpResponses";
 import { resolveAuthenticatedUserFromToken } from "../../middleware/auth";
 import { z } from "zod";
 
@@ -117,10 +118,7 @@ licenseRouter.put(
       res.json({ data: setup });
     } catch (error: unknown) {
       logSafeError("license.setup.save", error);
-      res.status(400).json({
-        error: "LICENSE_SETUP_SAVE_FAILED",
-        message: "تعذر حفظ إعدادات الترخيص"
-      });
+      sendErrorResponse(res, 400, "LICENSE_SETUP_SAVE_FAILED", "تعذر حفظ إعدادات الترخيص");
     }
   }
 );
@@ -149,10 +147,7 @@ licenseRouter.post(
       res.status(201).json({ data: license });
     } catch (error: unknown) {
       logSafeError("license.activate", error);
-      res.status(400).json({
-        error: "LICENSE_ACTIVATION_FAILED",
-        message: "تعذر تفعيل الترخيص"
-      });
+      sendErrorResponse(res, 400, "LICENSE_ACTIVATION_FAILED", "تعذر تفعيل الترخيص");
     }
   }
 );

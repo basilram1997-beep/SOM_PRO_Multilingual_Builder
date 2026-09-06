@@ -3,6 +3,7 @@ import { HomeroomAssignmentSchema } from "@som/shared";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { validateBody } from "../../middleware/validate";
+import { sendErrorResponse } from "../../lib/httpResponses";
 import { getRequestSchoolId } from "../../services/schoolContext";
 import { assertValidDayAndPeriod } from "../../services/schoolSettings";
 import {
@@ -47,7 +48,7 @@ homeroomRouter.post("/", validateBody(HomeroomAssignmentSchema), async (req, res
 homeroomRouter.delete("/:id", async (req, res) => {
   const schoolId = await getRequestSchoolId(req);
   const row = await prisma.homeroomAssignment.findFirst({ where: { id: req.params.id, schoolId } });
-  if (!row) return res.status(404).json({ error: "NOT_FOUND" });
+  if (!row) return sendErrorResponse(res, 404, "NOT_FOUND", "لم يتم العثور على المربي");
   const result = await removeHomeroomFromSchedulesFromRules(schoolId, row.classId);
   res.json(result);
 });

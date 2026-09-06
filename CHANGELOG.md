@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.0-rc.1
+## 0.9.0
 
 Release Candidate for staging and controlled validation. This is not the final production sales release.
 
@@ -17,7 +17,7 @@ Release Candidate for staging and controlled validation. This is not the final p
 - Phase 9: release candidate packaging, versioning, and release checklist.
 - Phase 10: external-review readiness for privacy, retention, deletion, DPA, and decision logging.
 
-## v0.9.0-rc.1 notes
+## v0.9.0 notes
 
 - The project is ready for staging and controlled pilot validation.
 - The compliance bundle is ready for external review and approval.

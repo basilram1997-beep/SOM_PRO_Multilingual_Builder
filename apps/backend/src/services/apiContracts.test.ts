@@ -484,7 +484,11 @@ test("API route contracts expose stable error codes for failure responses", () =
 
   for (const file of routeFiles) {
     const source = readFileSync(file, "utf8");
-    assert.match(source, /error\s*:/, `${file} should return machine-readable error codes when failing`);
+    assert.match(
+      source,
+      /error\s*:|sendErrorResponse\(/,
+      `${file} should return machine-readable error codes when failing`
+    );
   }
 
   const schedulesSource = readFileSync("src/modules/schedules/schedules.routes.ts", "utf8");
