@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node src/server.js",
     "start": "node src/server.js",
+    "pretest": "node ../../scripts/runtime/prepare-test-database.js",
     "test": "node --test src/server.security.test.js src/requestProtectionStore.test.js"
   },
   "dependencies": {
