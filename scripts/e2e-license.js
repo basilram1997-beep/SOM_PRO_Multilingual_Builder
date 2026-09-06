@@ -1,7 +1,6 @@
 const crypto = require("node:crypto");
 
 function generateE2ELicenseCode({
-  days = 365,
   institutionCode = "E2E-4100",
   secret = process.env.SOM_PRO_LICENSE_SECRET || "change-this-secret-before-selling"
 } = {}) {

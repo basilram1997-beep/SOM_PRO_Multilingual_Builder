@@ -26,59 +26,6 @@ async function deleteMany(modelName, where) {
   await prisma[modelName].deleteMany({ where }).catch(() => null);
 }
 
-async function cleanupSchool(schoolId) {
-  const deleteOrder = [
-    "rolePermission",
-    "userRoleAssignment",
-    "parentStudentLink",
-    "reportExport",
-    "backupJob",
-    "securityIncident",
-    "auditLog",
-    "studentNotification",
-    "studentCertificate",
-    "studentGradeEntry",
-    "studentGradeScheme",
-    "studentAttendance",
-    "studentBehaviorRecord",
-    "studentAcademicRecord",
-    "teacherHomeworkSubmission",
-    "teacherHomework",
-    "teacherExam",
-    "teacherLessonToday",
-    "dailyEvent",
-    "substitution",
-    "dailyTeacherStatus",
-    "dailySchedule",
-    "lesson",
-    "attendanceRecord",
-    "gradeRecord",
-    "classroomLog",
-    "teacherAssignment",
-    "teacherSubject",
-    "baseScheduleSlot",
-    "homeroomAssignment",
-    "dutyAssignment",
-    "schoolClass",
-    "student",
-    "teacher",
-    "subject",
-    "periodDefinition",
-    "schoolSettings",
-    "user",
-    "role",
-    "licenseActivation"
-  ];
-
-  for (let pass = 0; pass < 3; pass += 1) {
-    for (const modelName of deleteOrder) {
-      await deleteMany(modelName, { schoolId });
-    }
-  }
-
-  await prisma.school.deleteMany({ where: { id: schoolId } });
-}
-
 async function main() {
   assertLocalDatabase();
 

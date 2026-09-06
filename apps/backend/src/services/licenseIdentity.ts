@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import os from "node:os";
-import { LicenseStatus, UserRole } from "@prisma/client";
+import { UserRole } from "@prisma/client";
 
 const DEFAULT_LICENSE_SECRET = "change-this-secret-before-selling";
 const OWNER_SECRET = process.env.SOM_PRO_LICENSE_SECRET || DEFAULT_LICENSE_SECRET;

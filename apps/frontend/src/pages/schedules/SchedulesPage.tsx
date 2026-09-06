@@ -410,31 +410,6 @@ export function SchedulesPage({ currentUser }: { currentUser: AuthUser }) {
     }
   }
 
-  function openRoomEditor(slot: {
-    day?: string;
-    period: number;
-    classId: string;
-    class?: { name?: string };
-    subject?: { id?: string | null } | null;
-    subjectId?: string;
-    teacher?: { id?: string | null } | null;
-    teacherId?: string;
-    room?: string | null;
-    updatedAt?: string;
-  }) {
-    setRoomEditor({
-      day: slot.day || schedules.day,
-      period: slot.period,
-      classId: slot.classId,
-      className: slot.class?.name || "",
-      subjectId: slot.subjectId || slot.subject?.id || "",
-      teacherId: slot.teacherId || slot.teacher?.id || "",
-      room: typeof slot.room === "string" ? slot.room : "",
-      updatedAt: slot.updatedAt
-    });
-    setRoomDraft(typeof slot.room === "string" ? slot.room : "");
-  }
-
   async function handleSaveRoom() {
     if (!roomEditor || !roomEditor.subjectId || !roomEditor.teacherId) {
       setOperationError(

@@ -18,12 +18,6 @@ function normalizeLicenseText(value) {
 }
 
 function makeLicenseKey(payload) {
-  const plan = String(payload.plan || "PAID")
-    .trim()
-    .toUpperCase()
-    .startsWith("T")
-    ? "T"
-    : "P";
   const institutionCode =
     repairMojibakeText(payload.institutionCode || "")
       .trim()

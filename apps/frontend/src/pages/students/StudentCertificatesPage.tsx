@@ -994,7 +994,7 @@ export function StudentCertificatesPage({ currentUser, canEditCertificates = fal
     };
 
     const student = students.find((item) => item.id === studentId) || null;
-    const studentName = student?.name?.trim() || t("common.none");
+    const studentName = student?.name?.trim() || (studentId === selectedStudentId ? selectedStudentName : t("common.none"));
     const studentNationalId = student?.nationalId?.trim() || "-";
     const printableRows = buildPrintableRowsForStudent(studentId);
     const studentAverage = printableRowsAverage(printableRows);

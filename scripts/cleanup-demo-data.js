@@ -20,10 +20,6 @@ function assertLocalDatabase() {
   }
 }
 
-async function deleteMany(modelName, where) {
-  await prisma[modelName].deleteMany({ where }).catch(() => null);
-}
-
 async function cleanupSchool(schoolId) {
   const before = {
     school: await prisma.school.count({ where: { id: schoolId } }),

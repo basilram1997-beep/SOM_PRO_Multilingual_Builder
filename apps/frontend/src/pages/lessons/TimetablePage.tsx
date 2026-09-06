@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { sortSchoolClasses } from "@som/shared";
 import { Card } from "../../components/ui/Card";
 import { somApi } from "../../api/somApi";
 import { ALL_WEEK_DAYS } from "@som/shared";

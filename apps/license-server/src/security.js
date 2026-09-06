@@ -1,5 +1,4 @@
-const { Prisma } = require("@prisma/client");
-const { ADMIN_TOKEN, clientAddress, timingSafeTextEquals } = require("./runtime");
+const { ADMIN_TOKEN, timingSafeTextEquals } = require("./runtime");
 
 const sensitiveKeys = new Set([
   "password",

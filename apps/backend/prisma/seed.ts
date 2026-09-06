@@ -456,7 +456,6 @@ async function main() {
   }
 
   const demoDate = "2026-08-29";
-  const previousDay = "2026-08-28";
   const academicYear = "2026/2027";
   const demoClass = classByName.get("الصف التاسع أ");
   const demoStudents = (studentsByClass.get("الصف التاسع أ") || []).slice(0, 4);
@@ -1101,7 +1100,7 @@ async function main() {
     }
   });
 
-  const studentUser = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: studentAccountEmail },
     update: {
       schoolId: school.id,
