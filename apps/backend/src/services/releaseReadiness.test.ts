@@ -93,6 +93,8 @@ function assertCommercialInstallDependencies() {
   assertEnvEquals(productionEnv, "REDIS_PASSWORD", "change-me-strong-redis-password");
   assertEnvEquals(productionEnv, "REDIS_URL", "redis://:change-me-strong-redis-password@redis:6379");
   assertEnvEquals(backendProductionEnv, "REDIS_URL", "redis://:change-me-strong-redis-password@redis:6379");
+  assertEnvEquals(productionEnv, "SOM_PRO_RATE_LIMIT_BACKING", "redis");
+  assertEnvEquals(backendProductionEnv, "SOM_PRO_RATE_LIMIT_BACKING", "redis");
   assert.match(productionGuide, /لا تضف `ports: 5432:5432`/);
   assert.match(productionGuide, /127\.0\.0\.1:5432:5432/);
   assert.match(productionGuide, /docker compose --env-file \.env\.production -f docker-compose\.production\.yml/);
@@ -118,11 +120,13 @@ function assertCommercialInstallDependencies() {
   assert.match(retentionPolicy, /explicit, logged, school-scoped/i);
   assert.match(decisionLog, /compliance, security, or release readiness/i);
   assertEnvEquals(stagingEnv, "VITE_SOM_SHOW_OPERATOR_HEALTH", "true");
+  assertEnvEquals(stagingEnv, "SOM_PRO_RATE_LIMIT_BACKING", "redis");
   assertEnvEquals(stagingEnv, "SOM_ENABLE_OPERATOR_HEALTH", "true");
   assertEnvEquals(stagingEnv, "SOM_AUTO_BACKUP_INTERVAL_HOURS", "24");
   assertEnvEquals(stagingEnv, "SOM_REDUNDANCY_MODE", "single-region");
   assertEnvMatches(stagingEnv, "SOM_REPLICA_DATABASE_URL", /^postgresql:\/\/replica_user/);
   assertEnvEquals(backendStagingEnv, "SOM_ENABLE_OPERATOR_HEALTH", "true");
+  assertEnvEquals(backendStagingEnv, "SOM_PRO_RATE_LIMIT_BACKING", "redis");
   assertEnvEquals(backendStagingEnv, "SOM_REDUNDANCY_MODE", "single-region");
   assertEnvEquals(frontendStagingEnv, "VITE_SOM_SHOW_OPERATOR_HEALTH", "true");
   assert.match(operatorHealthTypes, /backupPolicy/);

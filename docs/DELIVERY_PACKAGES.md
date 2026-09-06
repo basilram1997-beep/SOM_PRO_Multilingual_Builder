@@ -29,11 +29,13 @@
 - database dumps مثل `*.sql`, `*.dump`, `*.sqlite`, `*.sqlite3`.
 - installers أو package archives generated مثل `site-package.tgz`.
 - مجلد `deliverables/` نفسه لأنه output وليس source baseline.
+- أي حزمة تفشل في `npm run security:secrets:handoff`.
 
 طريقة التحقق:
 
 ```powershell
 npm run delivery:verify
+npm run security:secrets:handoff
 ```
 
 ## Publishing Package
@@ -60,11 +62,13 @@ npm run delivery:verify
 - `node_modules`.
 - debug logs أو temporary artifacts.
 - artifacts غير مطلوبة لمنصة النشر نفسها.
+- أي output يحتوي `.env` حقيقيًا أو database dump.
 
 طريقة البناء:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/runtime/build-delivery-packages.ps1
+npm run security:secrets:handoff
 ```
 
 ## Database Verification

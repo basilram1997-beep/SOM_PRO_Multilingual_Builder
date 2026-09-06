@@ -23,6 +23,7 @@ This is the canonical handoff reference for SOM PRO runtime, deployment, securit
 | `PORT` | Optional | Backend default port | Yes | Backend HTTP port, usually behind Nginx. |
 | `DATABASE_URL` | Required | Local default: `postgresql://som_user:som_password@127.0.0.1:5432/som?schema=public` | No, if local/default or contains committed credentials | Required by Prisma, migrations, backend, and license server DB flow. |
 | `REDIS_URL` | Required for multi-instance production | Local default: `redis://127.0.0.1:6379` | No, if unauthenticated in production | Required for distributed request protections and shared runtime state. |
+| `SOM_PRO_RATE_LIMIT_BACKING` | Required in staging/production | `redis` in production/staging examples | No, if `memory` outside local development/tests | Controls backend request protection storage. Use `redis` for multi-instance deployments. |
 | `CORS_ORIGIN` | Required when API is cross-origin | Deployment origin | Yes | Prefer same-origin `/api` routing when possible. |
 | `SOM_RUNTIME_MODE` | Optional | App-specific default | Yes | Use to distinguish trial/SaaS/local modes when configured. |
 | `SOM_API_URL` | Optional | Same-origin or deployment-specific | Yes | Runtime API URL for desktop/mobile flows. |

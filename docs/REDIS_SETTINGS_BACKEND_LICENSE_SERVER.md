@@ -23,9 +23,10 @@ Set:
 
 ```env
 REDIS_URL=redis://:change-me-strong-redis-password@redis:6379
+SOM_PRO_RATE_LIMIT_BACKING=redis
 ```
 
-The backend already uses `REDIS_URL` for request protections and other shared runtime behavior.
+The backend uses `SOM_PRO_RATE_LIMIT_BACKING=redis` with `REDIS_URL` for distributed request protections. Do not omit `SOM_PRO_RATE_LIMIT_BACKING` in staging or production; leaving it implicit makes the environment harder to audit and can hide an accidental local-memory configuration.
 
 ### License Server
 

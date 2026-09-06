@@ -37,6 +37,7 @@ Real values must never be committed to Git, pasted into issue trackers, included
 | Capability                                | Status  | Evidence                                                                                                         |
 | ----------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
 | Real `.env` files ignored                 | Exists  | `.gitignore`, `scripts/security-secrets-check.js`                                                                |
+| Local handoff secret gate                 | Exists  | `npm run security:secrets:handoff` checks local `.env` files and delivery outputs before external handoff        |
 | Production examples use placeholders      | Exists  | `.env.production.example`, `apps/backend/.env.production.example`, `apps/license-server/.env.production.example` |
 | Backup passphrase file reference          | Exists  | `SOM_BACKUP_PASSPHRASE_FILE=/run/secrets/som_backup_passphrase`                                                  |
 | Strict staging secret placeholder check   | Exists  | `scripts/staging-check.js`                                                                                       |
@@ -52,9 +53,26 @@ Before a staging or production environment is accepted:
 2. Set production/staging env from the secret store, not from local `.env`.
 3. Rotate `SOM_PRO_AUTH_SECRET`, `SOM_PRO_LICENSE_SECRET`, `LICENSE_ADMIN_TOKEN`, database passwords, Redis passwords, and backup passphrase.
 4. Configure backup passphrase via `SOM_BACKUP_PASSPHRASE_FILE` or equivalent KMS materialization.
-5. Run `npm run security:secrets`.
-6. Run `node scripts/staging-check.js` or strict staging evidence after `STAGING_URL` exists.
-7. Archive evidence with secret values masked.
+5. Run `npm run security:secrets` for committed files.
+6. Run `npm run security:secrets:handoff` on the machine preparing the delivery package.
+7. Run `node scripts/staging-check.js` or strict staging evidence after `STAGING_URL` exists.
+8. Archive evidence with secret values masked.
+
+## Local Handoff Gate
+
+`npm run security:secrets` is safe for CI because it checks tracked source files. Before sending a package to developers, customers, or reviewers, run:
+
+```powershell
+npm run security:secrets:handoff
+```
+
+This stronger local gate fails when:
+
+- A real local `.env`, `.env.production`, or app-level `.env` contains non-placeholder secret-like values.
+- Delivery outputs contain `.env` files.
+- Delivery outputs contain database dump files such as `.sql`, `.dump`, `.sqlite`, or `.sqlite3`.
+
+If this gate fails, rotate the listed secrets in the real provider, regenerate the delivery package, and rerun the gate. Do not copy local `.env` files into any handoff archive.
 
 ## Rotation Checklist
 

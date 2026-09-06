@@ -45,10 +45,12 @@ test("secrets and KMS readiness runbook defines inventory, rotation, and evidenc
   }
 
   assert.match(doc, /Do not copy local `\.env` values to staging or production/);
+  assert.match(doc, /npm run security:secrets:handoff/);
+  assert.match(doc, /Local Handoff Gate/);
   assert.match(doc, /Rotation Checklist/);
   assert.match(doc, /Evidence must not show secret values/);
-  assert.match(doc, /Final provider\/KMS proof \| Pending/);
-  assert.match(doc, /App-wide `_FILE` support for every secret \| Pending/);
+  assert.match(doc, /Final provider\/KMS proof\s+\|\s+Pending/);
+  assert.match(doc, /App-wide `_FILE` support for every secret\s+\|\s+Pending/);
   assert.match(doc, /security readiness only/);
 });
 
@@ -84,8 +86,14 @@ test("production and staging examples keep secrets as placeholders or secret-fil
 
   const rootProduction = parseEnv(read("../../.env.production.example"));
   const backendProduction = parseEnv(read(".env.production.example"));
+  const rootStaging = parseEnv(read("../../.env.staging.example"));
+  const backendStaging = parseEnv(read(".env.staging.example"));
   assert.equal(rootProduction.SOM_BACKUP_PASSPHRASE_FILE, "/run/secrets/som_backup_passphrase");
   assert.equal(backendProduction.SOM_BACKUP_PASSPHRASE_FILE, "/run/secrets/som_backup_passphrase");
+  assert.equal(rootProduction.SOM_PRO_RATE_LIMIT_BACKING, "redis");
+  assert.equal(backendProduction.SOM_PRO_RATE_LIMIT_BACKING, "redis");
+  assert.equal(rootStaging.SOM_PRO_RATE_LIMIT_BACKING, "redis");
+  assert.equal(backendStaging.SOM_PRO_RATE_LIMIT_BACKING, "redis");
 });
 
 test("Ministry evidence docs link secrets/KMS readiness without claiming final KMS completion", () => {

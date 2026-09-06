@@ -44,6 +44,7 @@
     "lint": "eslint \"apps/**/*.{js,cjs,mjs,ts,tsx}\" \"packages/**/*.{js,cjs,mjs,ts,tsx}\" \"scripts/**/*.{js,cjs,mjs,ts}\" \"*.{js,cjs,mjs,ts}\" \"eslint.config.mjs\"",
     "i18n:audit": "node --import tsx scripts/i18n-audit.mjs",
     "security:secrets": "node scripts/security-secrets-check.js",
+    "security:secrets:handoff": "node scripts/security-secrets-check.js --handoff",
     "security:audit": "node scripts/runtime/audit-baseline.js",
     "security:outdated": "npm outdated",
     "security:deps": "node scripts/runtime/audit-baseline.js",
